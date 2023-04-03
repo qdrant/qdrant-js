@@ -1,0 +1,47 @@
+{
+    "name": "qdrant-js",
+    "version": "0.0.x",
+    "private": true,
+    "engines": {
+        "node": ">=18.0.0",
+        "pnpm": ">=3"
+    },
+    "packageManager": "pnpm@8.1.0",
+    "type": "module",
+    "scripts": {
+        "start": "ts-node-esm -r dotenv/config src/index.ts",
+        "tsc:check": "tsc --noEmit",
+        "openapi-mock-server": "docker run -p 6333:6333 -e \"OPENAPI_MOCK_DEBUG=1\" -e \"OPENAPI_MOCK_LOG_LEVEL=debug\" -e \"OPENAPI_MOCK_PORT=6333\" -e \"OPENAPI_MOCK_SPECIFICATION_URL=$npm_package_config_openapi_schema_remote\" --rm muonsoft/openapi-mock",
+        "codegen:openapi-typescript": "openapi-typescript $npm_package_config_openapi_schema_remote --output src/openapi/generated_schema.ts",
+        "codegen:buf": "buf generate proto"
+    },
+    "config": {
+        "openapi_schema_remote": "https://raw.githubusercontent.com/qdrant/qdrant/master/docs/redoc/master/openapi.json"
+    },
+    "devDependencies": {
+        "@bufbuild/buf": "1.15.0-1",
+        "@bufbuild/protoc-gen-connect-es": "0.8.4",
+        "@bufbuild/protoc-gen-es": "1.2.0",
+        "@total-typescript/ts-reset": "0.4.2",
+        "@types/node": "18.15.11",
+        "@typescript-eslint/eslint-plugin": "5.57.0",
+        "@typescript-eslint/parser": "5.57.0",
+        "dotenv": "16.0.3",
+        "grpc-tools": "1.12.4",
+        "grpc_tools_node_protoc_ts": "5.3.3",
+        "openapi-typescript": "6.2.0",
+        "prettier": "2.8.7",
+        "ts-node": "10.9.1",
+        "typescript": "5.0.2",
+        "vitest": "0.29.8"
+    },
+    "dependencies": {
+        "@bufbuild/connect": "0.8.4",
+        "@bufbuild/connect-node": "0.8.4",
+        "@bufbuild/protobuf": "1.2.0",
+        "openapi-typescript-fetch": "Rendez/openapi-typescript-fetch"
+    },
+    "peerDependencies": {
+        "typescript": ">=4.1"
+    }
+}

@@ -1,0 +1,81 @@
+{
+    "root": true,
+    "env": {
+        "node": true
+    },
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": ["./tsconfig.json"]
+    },
+    "plugins": ["@typescript-eslint"],
+    "overrides": [
+        {
+            "files": ["src/**/*.ts"],
+            "extends": [
+                "eslint:recommended",
+                "plugin:@typescript-eslint/eslint-recommended",
+                "plugin:@typescript-eslint/recommended-requiring-type-checking",
+                "plugin:@typescript-eslint/strict"
+            ],
+            "rules": {
+                "object-shorthand": "warn",
+                // "no-unused-vars": "error",
+                "@typescript-eslint/no-unused-vars": [
+                    "error",
+                    {
+                        "args": "all",
+                        "argsIgnorePattern": "^_",
+                        "ignoreRestSiblings": true
+                    }
+                ],
+                "@typescript-eslint/consistent-type-definitions": "off"
+            }
+        }
+    ]
+    // "rules": {
+    //     // Already handled by TS
+    //     "no-dupe-class-members": "off",
+    //     "no-undef": "off",
+
+    //     // Add TypeScript specific rules (and turn off ESLint equivalents)
+    //     "@typescript-eslint/consistent-type-assertions": "warn",
+    //     "no-array-constructor": "off",
+    //     "@typescript-eslint/no-array-constructor": "warn",
+    //     "@typescript-eslint/no-namespace": "error",
+    //     "no-use-before-define": "off",
+    //     "@typescript-eslint/no-use-before-define": [
+    //         "warn",
+    //         {
+    //             "functions": true,
+    //             "classes": true,
+    //             "variables": true,
+    //             "enums": true,
+    //             "typedefs": true
+    //         }
+    //     ],
+    //     "no-unused-vars": "off",
+    //     "@typescript-eslint/no-unused-vars": [
+    //         "warn",
+    //         {
+    //             "args": "all",
+    //             "argsIgnorePattern": "^_",
+    //             "ignoreRestSiblings": true
+    //         }
+    //     ],
+    //     "no-unused-expressions": "off",
+    //     "@typescript-eslint/no-unused-expressions": [
+    //         "error",
+    //         {
+    //             "allowShortCircuit": true,
+    //             "allowTernary": true,
+    //             "allowTaggedTemplates": true
+    //         }
+    //     ],
+    //     "no-useless-constructor": "off",
+    //     "@typescript-eslint/no-useless-constructor": "warn",
+    //     "@typescript-eslint/prefer-literal-enum-member": "error",
+    //     "@typescript-eslint/prefer-namespace-keyword": "error",
+    //     "@typescript-eslint/prefer-as-const": "warn",
+    //     "@typescript-eslint/no-redeclare": ["warn", {"builtinGlobals": false, "ignoreDeclarationMerge": true}]
+    // }
+}

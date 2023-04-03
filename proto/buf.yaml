@@ -1,0 +1,11 @@
+version: v1beta1
+deps: []
+build:
+  roots:
+    - .
+breaking:
+  use:
+    - FILE
+lint:
+  use:
+    - DEFAULT

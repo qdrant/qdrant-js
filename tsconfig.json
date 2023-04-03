@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es2017",
+        "module": "esnext",
+        "lib": ["es2017", "dom"],
+        "noEmit": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "moduleResolution": "nodenext",
+        "baseUrl": ".",
+        "types": ["node", "@total-typescript/ts-reset", "./src/types/openapi.d.ts"],
+        "strict": true
+    },
+    "include": ["src", "src/invariant.ts"]
+}
