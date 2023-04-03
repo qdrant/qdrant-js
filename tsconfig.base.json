@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "target": "ES2021",
+        "module": "esnext",
+        "lib": ["ES2021", "dom"],
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "moduleResolution": "nodenext",
+        "strict": true
+    }
+}

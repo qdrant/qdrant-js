@@ -1,0 +1,38 @@
+{
+    "private": true,
+    "name": "@qdrant/js-client-grpc",
+    "version": "0.0.0",
+    "engines": {
+        "node": ">=18.0.0",
+        "pnpm": ">=8"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/qdrant/qrant-js"
+    },
+    "bugs": {
+        "url": "https://github.com/qdrant/qrant-js/issues"
+    },
+    "homepage": "https://github.com/qdrant/qrant-js#readme",
+    "license": "Apache-2.0",
+    "type": "module",
+    "scripts": {
+        "codegen:buf": "buf generate proto"
+    },
+    "dependencies": {
+        "@bufbuild/connect": "0.8.4",
+        "@bufbuild/connect-node": "0.8.4",
+        "@bufbuild/protobuf": "1.2.0",
+        "@sevinf/maybe": "0.5.0"
+    },
+    "devDependencies": {
+        "@bufbuild/buf": "1.15.0-1",
+        "@bufbuild/protoc-gen-connect-es": "0.8.4",
+        "@bufbuild/protoc-gen-es": "1.2.0",
+        "ts-node": "10.9.1",
+        "typescript": "5.0.4"
+    },
+    "peerDependencies": {
+        "typescript": ">=4.1"
+    }
+}

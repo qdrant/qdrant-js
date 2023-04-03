@@ -1,0 +1,32 @@
+{
+    "root": true,
+    "env": {
+        "node": true
+    },
+    "ignorePatterns": "generated_schema.ts",
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": ["./tsconfig.json"]
+    },
+    "plugins": ["@typescript-eslint"],
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "plugin:@typescript-eslint/strict"
+    ],
+    "rules": {
+        "object-shorthand": "warn",
+        "arrow-body-style": "warn",
+        // "no-unused-vars": "error",
+        "@typescript-eslint/no-unused-vars": [
+            "error",
+            {
+                "args": "all",
+                "argsIgnorePattern": "^_",
+                "ignoreRestSiblings": true
+            }
+        ],
+        "@typescript-eslint/consistent-type-definitions": "off"
+    }
+}

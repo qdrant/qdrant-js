@@ -1,0 +1,312 @@
+syntax = "proto3";
+package qdrant;
+
+message VectorParams {
+  uint64 size = 1; // Size of the vectors
+  Distance distance = 2; // Distance function used for comparing vectors
+}
+
+message VectorParamsMap {
+  map<string, VectorParams> map = 1;
+}
+
+message VectorsConfig {
+  oneof config {
+    VectorParams params = 1;
+    VectorParamsMap params_map = 2;
+  }
+}
+
+message GetCollectionInfoRequest {
+  string collection_name = 1; // Name of the collection
+}
+
+message ListCollectionsRequest {
+}
+
+message CollectionDescription {
+  string name = 1; // Name of the collection
+}
+
+message GetCollectionInfoResponse {
+  CollectionInfo result = 1;
+  double time = 2; // Time spent to process
+}
+
+message ListCollectionsResponse {
+  repeated CollectionDescription collections = 1;
+  double time = 2; // Time spent to process
+}
+
+enum Distance {
+  UnknownDistance = 0;
+  Cosine = 1;
+  Euclid = 2;
+  Dot = 3;
+}
+
+enum CollectionStatus {
+  UnknownCollectionStatus = 0;
+  Green = 1; // All segments are ready
+  Yellow = 2; // Optimization in process
+  Red = 3; // Something went wrong
+}
+
+enum PayloadSchemaType {
+  UnknownType = 0;
+  Keyword = 1;
+  Integer = 2;
+  Float = 3;
+  Geo = 4;
+  Text = 5;
+}
+
+enum QuantizationType {
+  UnknownQuantization = 0;
+  Int8 = 1;
+}
+
+message OptimizerStatus {
+  bool ok = 1;
+  string error = 2;
+}
+
+message HnswConfigDiff {
+  /*
+  Number of edges per node in the index graph. Larger the value - more accurate the search, more space required.
+   */
+  optional uint64 m = 1;
+  /*
+  Number of neighbours to consider during the index building. Larger the value - more accurate the search, more time required to build index.
+  */
+  optional uint64 ef_construct = 2;
+  /*
+  Minimal size (in KiloBytes) of vectors for additional payload-based indexing.
+  If payload chunk is smaller than `full_scan_threshold` additional indexing won't be used -
+  in this case full-scan search should be preferred by query planner and additional indexing is not required.
+  Note: 1Kb = 1 vector of size 256
+  */
+  optional uint64 full_scan_threshold = 3;
+  /*
+  Number of parallel threads used for background index building. If 0 - auto selection.
+   */
+  optional uint64 max_indexing_threads = 4;
+  /*
+  Store HNSW index on disk. If set to false, index will be stored in RAM.
+   */
+  optional bool on_disk = 5;
+  /*
+   Number of additional payload-aware links per node in the index graph. If not set - regular M parameter will be used.
+   */
+  optional uint64 payload_m = 6;
+}
+
+message WalConfigDiff {
+  optional uint64 wal_capacity_mb = 1; // Size of a single WAL block file
+  optional uint64 wal_segments_ahead = 2; // Number of segments to create in advance
+}
+
+message OptimizersConfigDiff {
+  /*
+  The minimal fraction of deleted vectors in a segment, required to perform segment optimization
+   */
+  optional double deleted_threshold = 1;
+  /*
+  The minimal number of vectors in a segment, required to perform segment optimization
+   */
+  optional uint64 vacuum_min_vector_number = 2;
+  /*
+  Target amount of segments optimizer will try to keep.
+  Real amount of segments may vary depending on multiple parameters:
+
+   - Amount of stored points.
+   - Current write RPS.
+
+  It is recommended to select default number of segments as a factor of the number of search threads,
+  so that each segment would be handled evenly by one of the threads.
+  */
+  optional uint64 default_segment_number = 3;
+  /*
+  Do not create segments larger this size (in KiloBytes).
+  Large segments might require disproportionately long indexation times,
+  therefore it makes sense to limit the size of segments.
+
+  If indexation speed have more priority for your - make this parameter lower.
+  If search speed is more important - make this parameter higher.
+  Note: 1Kb = 1 vector of size 256
+  */
+  optional uint64 max_segment_size = 4;
+  /*
+  Maximum size (in KiloBytes) of vectors to store in-memory per segment.
+  Segments larger than this threshold will be stored as read-only memmaped file.
+  To enable memmap storage, lower the threshold
+  Note: 1Kb = 1 vector of size 256
+  */
+  optional uint64 memmap_threshold = 5;
+  /*
+  Maximum size (in KiloBytes) of vectors allowed for plain index.
+  Default value based on https://github.com/google-research/google-research/blob/master/scann/docs/algorithms.md
+  Note: 1Kb = 1 vector of size 256
+  */
+  optional uint64 indexing_threshold = 6;
+  /*
+  Interval between forced flushes.
+  */
+  optional uint64 flush_interval_sec = 7;
+  /*
+  Max number of threads, which can be used for optimization. If 0 - `NUM_CPU - 1` will be used
+  */
+  optional uint64 max_optimization_threads = 8;
+}
+
+message ScalarQuantization {
+  QuantizationType type = 1; // Type of quantization
+  optional float quantile = 2; // Number of bits to use for quantization
+  optional bool always_ram = 3; // If true - quantized vectors always will be stored in RAM, ignoring the config of main storage
+}
+
+message QuantizationConfig {
+  oneof quantization {
+    ScalarQuantization scalar = 1;
+  }
+}
+
+message CreateCollection {
+  string collection_name = 1; // Name of the collection
+  reserved 2; // Deprecated
+  reserved 3; // Deprecated
+  optional HnswConfigDiff hnsw_config = 4; // Configuration of vector index
+  optional WalConfigDiff wal_config = 5; // Configuration of the Write-Ahead-Log
+  optional OptimizersConfigDiff optimizers_config = 6; // Configuration of the optimizers
+  optional uint32 shard_number = 7; // Number of shards in the collection, default = 1
+  optional bool on_disk_payload = 8; // If true - point's payload will not be stored in memory
+  optional uint64 timeout = 9; // Wait timeout for operation commit in seconds, if not specified - default value will be supplied
+  optional VectorsConfig vectors_config = 10; // Configuration for vectors
+  optional uint32 replication_factor = 11; // Number of replicas of each shard that network tries to maintain, default = 1
+  optional uint32 write_consistency_factor = 12; // How many replicas should apply the operation for us to consider it successful, default = 1
+  optional string init_from_collection = 13; // Specify name of the other collection to copy data from
+  optional QuantizationConfig quantization_config = 14;
+}
+
+message UpdateCollection {
+  string collection_name = 1; // Name of the collection
+  optional OptimizersConfigDiff optimizers_config = 2; // New configuration parameters for the collection
+  optional uint64 timeout = 3; // Wait timeout for operation commit in seconds, if not specified - default value will be supplied
+  optional CollectionParamsDiff params = 4; // New configuration parameters for the collection
+}
+
+message DeleteCollection {
+  string collection_name = 1; // Name of the collection
+  optional uint64 timeout = 2; // Wait timeout for operation commit in seconds, if not specified - default value will be supplied
+}
+
+message CollectionOperationResponse {
+  bool result = 1; // if operation made changes
+  double time = 2; // Time spent to process
+}
+
+message CollectionParams {
+  reserved 1; // Deprecated
+  reserved 2; // Deprecated
+  uint32 shard_number = 3; // Number of shards in collection
+  bool on_disk_payload = 4; // If true - point's payload will not be stored in memory
+  optional VectorsConfig vectors_config = 5; // Configuration for vectors
+  optional uint32 replication_factor = 6; // Number of replicas of each shard that network tries to maintain
+  optional uint32 write_consistency_factor = 7; // How many replicas should apply the operation for us to consider it successful
+}
+
+message CollectionParamsDiff {
+  optional uint32 replication_factor = 1; // Number of replicas of each shard that network tries to maintain
+  optional uint32 write_consistency_factor = 2; // How many replicas should apply the operation for us to consider it successful
+}
+
+message CollectionConfig {
+  CollectionParams params = 1; // Collection parameters
+  HnswConfigDiff hnsw_config = 2; // Configuration of vector index
+  OptimizersConfigDiff optimizer_config = 3; // Configuration of the optimizers
+  WalConfigDiff wal_config = 4; // Configuration of the Write-Ahead-Log
+  optional QuantizationConfig quantization_config = 5; // Configuration of the vector quantization
+}
+
+enum TokenizerType {
+  Unknown = 0;
+  Prefix = 1;
+  Whitespace = 2;
+  Word = 3;
+}
+
+message TextIndexParams {
+  TokenizerType tokenizer = 1; // Tokenizer type
+  optional bool lowercase = 2; // If true - all tokens will be lowercased
+  optional uint64 min_token_len = 3; // Minimal token length
+  optional uint64 max_token_len = 4; // Maximal token length
+}
+
+message PayloadIndexParams {
+  oneof index_params {
+    TextIndexParams text_index_params = 1; // Parameters for text index
+  }
+}
+
+message PayloadSchemaInfo {
+  PayloadSchemaType data_type = 1; // Field data type
+  optional PayloadIndexParams params = 2; // Field index parameters
+  optional uint64 points = 3; // Number of points indexed within this field indexed
+}
+
+message CollectionInfo {
+  CollectionStatus status = 1; // operating condition of the collection
+  OptimizerStatus optimizer_status = 2; // status of collection optimizers
+  uint64 vectors_count = 3; // number of vectors in the collection
+  uint64 segments_count = 4; // Number of independent segments
+  reserved 5; // Deprecated
+  reserved 6; // Deprecated
+  CollectionConfig config = 7; // Configuration
+  map<string, PayloadSchemaInfo> payload_schema = 8; // Collection data types
+  uint64 points_count = 9; // number of points in the collection
+  optional uint64 indexed_vectors_count = 10; // number of indexed vectors in the collection.
+}
+
+message ChangeAliases {
+  repeated AliasOperations actions = 1; // List of actions
+  optional uint64 timeout = 2; // Wait timeout for operation commit in seconds, if not specified - default value will be supplied
+}
+
+message AliasOperations {
+  oneof action {
+    CreateAlias create_alias = 1;
+    RenameAlias rename_alias = 2;
+    DeleteAlias delete_alias = 3;
+  }
+}
+
+message CreateAlias {
+  string collection_name = 1; // Name of the collection
+  string alias_name = 2; // New name of the alias
+}
+
+message RenameAlias {
+  string old_alias_name = 1; // Name of the alias to rename
+  string new_alias_name = 2; // Name of the alias
+}
+
+message DeleteAlias {
+  string alias_name = 1; // Name of the alias
+}
+
+message ListAliasesRequest {
+}
+
+message ListCollectionAliasesRequest {
+  string collection_name = 1; // Name of the collection
+}
+
+message AliasDescription {
+  string alias_name = 1; // Name of the alias
+  string collection_name = 2; // Name of the collection
+}
+
+message ListAliasesResponse {
+  repeated AliasDescription aliases = 1;
+  double time = 2; // Time spent to process
+}

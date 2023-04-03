@@ -1,0 +1,86 @@
+{
+    "name": "@qdrant/js-client-rest",
+    "version": "1.1.1",
+    "engines": {
+        "node": ">=18.0.0",
+        "pnpm": ">=8"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/qdrant/qrant-js"
+    },
+    "bugs": {
+        "url": "https://github.com/qdrant/qrant-js/issues"
+    },
+    "homepage": "https://github.com/qdrant/qrant-js#readme",
+    "license": "Apache-2.0",
+    "type": "module",
+    "main": "./dist/cjs/index.js",
+    "module": "./dist/esm/index.js",
+    "browser": "./dist/browser/index.js",
+    "types": "./dist/types/index.d.ts",
+    "exports": {
+        ".": {
+            "require": "./dist/cjs/index.js",
+            "default": "./dist/esm/index.js",
+            "browser": "./dist/browser/index.js",
+            "types": "./dist/types/index.d.ts"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "prepublishOnly": "pnpm pre-check && pnpm tsc:build && pnpm build",
+        "test": "vitest run",
+        "test:watch": "vitest watch",
+        "test:integration": "vitest run --config vite.integration.config.ts",
+        "pre-check": "pnpm tsc:check && pnpm tsc:deadcode && pnpm lint && pnpm test",
+        "pre-commit": "pnpm tsc:check && pnpm tsc:deadcode && pnpm lint-staged && pnpm test",
+        "tsc:deadcode": "ts-prune -e -i 'src/proto|src/openapi|src/index.ts|vite.config.ts|vite.integration.config.ts'",
+        "tsc:check": "tsc --noEmit",
+        "tsc:build": "pnpm clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
+        "build": "rollup -c rollup.config.js",
+        "lint": "eslint src",
+        "clean": "rimraf ./dist",
+        "codegen:openapi-typescript": "openapi-typescript $npm_package_config_openapi_schema_remote --output src/openapi/generated_schema.ts",
+        "qdrant-server": "docker run -d --rm -p 6333:6333 --name qdrant-server qdrant/qdrant:v$npm_package_version"
+    },
+    "config": {
+        "openapi_schema_remote": "https://raw.githubusercontent.com/qdrant/qdrant/master/docs/redoc/master/openapi.json"
+    },
+    "lint-staged": {
+        "*.ts": [
+            "prettier --list-different",
+            "eslint"
+        ],
+        "*.{md,yaml}": "prettier --list-different"
+    },
+    "dependencies": {
+        "@sevinf/maybe": "0.5.0",
+        "openapi-typescript-fetch": "Rendez/openapi-typescript-fetch#ea89f6480e498ec022e2f2f67f85004eb54e6f54"
+    },
+    "devDependencies": {
+        "@rollup/plugin-node-resolve": "15.0.2",
+        "@rollup/plugin-replace": "5.0.2",
+        "@rollup/plugin-terser": "0.4.0",
+        "@total-typescript/ts-reset": "0.4.2",
+        "@types/node": "18.15.11",
+        "@typescript-eslint/eslint-plugin": "5.57.0",
+        "@typescript-eslint/parser": "5.57.0",
+        "lint-staged": "13.2.1",
+        "openapi-typescript": "6.2.0",
+        "rimraf": "5.0.0",
+        "rollup": "3.20.2",
+        "ts-node": "10.9.1",
+        "ts-prune": "0.10.3",
+        "typescript": "5.0.2",
+        "vitest": "0.29.8"
+    },
+    "peerDependencies": {
+        "typescript": ">=4.1"
+    }
+}

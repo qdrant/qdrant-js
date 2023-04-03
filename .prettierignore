@@ -1,0 +1,5 @@
+**/node_modules/
+**/dist/
+**/src/openapi/
+**/src/proto/
+**/pnpm-lock.yaml

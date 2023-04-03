@@ -1,0 +1,51 @@
+name: Pull request
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  precheck:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v2
+        with:
+          run_install: false
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+
+      - name: Node packages audit
+        run: pnpm audit
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          CI: 1
+
+      - name: Check PR contains changeset
+        run: pnpm changeset status --since=origin/master
+
+      - name: Open API schema changes
+        run: |
+          pnpm --filter "@qdrant/js-client-rest" codegen:openapi-typescript
+          if ( git diff-index HEAD | grep -q README.md || exit ) then
+            echo "Generated schema changed. Please update with pnpm -r codegen:openapi-typescript.";
+            exit 1
+          fi
+
+      - name: Run checks
+        run: pnpm -r pre-check
+
+      - name: Open API integration tests
+        run: cd packages/js-client-rest && ./tests/integration-tests.sh

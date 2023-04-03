@@ -1,0 +1,56 @@
+{
+    "name": "@qdrant/qdrant-js",
+    "version": "1.1.1",
+    "engines": {
+        "node": ">=18.0.0",
+        "pnpm": ">=8"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/qdrant/qrant-js"
+    },
+    "bugs": {
+        "url": "https://github.com/qdrant/qrant-js/issues"
+    },
+    "homepage": "https://github.com/qdrant/qrant-js#readme",
+    "license": "Apache-2.0",
+    "type": "module",
+    "module": "./dist/esm/index.js",
+    "browser": "./dist/browser/index.js",
+    "types": "./dist/types/index.d.ts",
+    "exports": {
+        ".": {
+            "require": "./dist/cjs/index.js",
+            "default": "./dist/esm/index.js",
+            "browser": "./dist/browser/index.js",
+            "types": "./dist/types/index.d.ts"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "prepublishOnly": "pnpm tsc:build && pnpm build",
+        "pre-commit": "pnpm tsc:check",
+        "tsc:check": "tsc --noEmit",
+        "tsc:build": "pnpm clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
+        "build": "rollup -c rollup.config.js",
+        "clean": "rimraf ./dist"
+    },
+    "dependencies": {
+        "@qdrant/js-client-rest": "workspace:1.1.1"
+    },
+    "devDependencies": {
+        "@rollup/plugin-node-resolve": "15.0.2",
+        "@rollup/plugin-terser": "0.4.0",
+        "rimraf": "5.0.0",
+        "rollup": "3.20.2",
+        "typescript": "5.0.4"
+    },
+    "peerDependencies": {
+        "typescript": ">=4.1"
+    }
+}

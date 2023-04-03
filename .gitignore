@@ -1,0 +1,12 @@
+**/yarn.lock
+**/package-lock.json
+**/node_modules/
+**/.pnpm-store/
+**/*.env
+**/*.log
+**/.DS_Store
+**/.idea
+**/.vscode/*
+!.vscode/settings.json
+**/*.tsbuildinfo
+**/dist
