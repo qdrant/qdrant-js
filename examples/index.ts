@@ -27,7 +27,7 @@ async function main(): Promise<number> {
         url,
         apiKey,
     });
-    const result = await client.api('service').telemetry({});
+    const result = await client.api('service').telemetry({anonymize: true});
 
     console.log(result);
 
