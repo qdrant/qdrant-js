@@ -16,20 +16,20 @@ declare global {
 }
 
 export class QdrantClient {
-    readonly #https: boolean;
-    readonly #scheme: string;
-    readonly #port: number;
-    readonly #prefix: string;
-    readonly #host: string;
-    readonly #openApiClient: OpenApiClient;
+    private _https: boolean;
+    private _scheme: string;
+    private _port: number;
+    private _prefix: string;
+    private _host: string;
+    private _openApiClient: OpenApiClient;
 
     constructor({url, host, apiKey, https, prefix, port = 6333, timeout = 300_000, ...args}: QdrantClientParams) {
-        this.#https = https ?? typeof apiKey === 'string';
-        this.#scheme = this.#https ? 'https' : 'http';
-        this.#prefix = prefix ?? '';
+        this._https = https ?? typeof apiKey === 'string';
+        this._scheme = this._https ? 'https' : 'http';
+        this._prefix = prefix ?? '';
 
-        if (this.#prefix.length > 0 && !this.#prefix.startsWith('/')) {
-            this.#prefix = `/${this.#prefix}`;
+        if (this._prefix.length > 0 && !this._prefix.startsWith('/')) {
+            this._prefix = `/${this._prefix}`;
         }
 
         if (url && host) {
@@ -44,19 +44,19 @@ export class QdrantClient {
             );
         } else if (url) {
             const parsedUrl = new URL(url);
-            this.#host = parsedUrl.hostname;
-            this.#port = parsedUrl.port ? Number(parsedUrl.port) : port;
-            this.#scheme = parsedUrl.protocol.replace(':', '');
+            this._host = parsedUrl.hostname;
+            this._port = parsedUrl.port ? Number(parsedUrl.port) : port;
+            this._scheme = parsedUrl.protocol.replace(':', '');
 
-            if (this.#prefix.length > 0 && parsedUrl.pathname !== '/') {
+            if (this._prefix.length > 0 && parsedUrl.pathname !== '/') {
                 throw new QdrantClientConfigError(
                     'Prefix can be set either in `url` or in `prefix`.\n' +
                         `url is ${url}, prefix is ${parsedUrl.pathname}`,
                 );
             }
         } else {
-            this.#port = port;
-            this.#host = host ?? 'localhost';
+            this._port = port;
+            this._host = host ?? 'localhost';
         }
 
         let http2 = args.http2 ?? false;
@@ -70,17 +70,17 @@ export class QdrantClient {
         });
 
         if (typeof apiKey === 'string') {
-            if (this.#scheme === 'http') {
+            if (this._scheme === 'http') {
                 console.warn('Api key is used with unsecure connection.');
             }
             http2 = true;
             headers.set('api-key', apiKey);
         }
 
-        const restUri = `${this.#scheme}://${this.#host}:${this.#port}${this.#prefix}`;
+        const restUri = `${this._scheme}://${this._host}:${this._port}${this._prefix}`;
         const restArgs: RestArgs = {headers, http2, timeout};
 
-        this.#openApiClient = createApis(restUri, restArgs);
+        this._openApiClient = createApis(restUri, restArgs);
     }
 
     /**
@@ -90,7 +90,7 @@ export class QdrantClient {
      * @returns {OpenApiClient} An instance of raw REST API client, generated from OpenAPI schema
      */
     api<T extends keyof OpenApiClient>(name: T): OpenApiClient[T] {
-        return this.#openApiClient[name];
+        return this._openApiClient[name];
     }
 
     /**
@@ -100,7 +100,7 @@ export class QdrantClient {
     async getCollections() {
         // const getCollections = this.http.collectionsApi.getCollections;
         // try {
-        const response = await this.#openApiClient.collections.getCollections({});
+        const response = await this._openApiClient.collections.getCollections({});
         invariant(/* @todo None */ response.data.result != null, 'Get collections returned None');
         return response.data.result;
         // } catch (e) {
@@ -120,7 +120,7 @@ export class QdrantClient {
      * @returns Detailed information about the collection
      */
     async getCollection(collection_name: string) {
-        const response = await this.#openApiClient.collections.getCollection({collection_name});
+        const response = await this._openApiClient.collections.getCollection({collection_name});
         invariant(/* @todo None */ response.data.result != null, 'Get collection returned None');
         return response.data.result;
     }
@@ -142,7 +142,7 @@ export class QdrantClient {
             timeout?: number;
         } & SchemaFor<'UpdateCollection'>,
     ) {
-        const response = await this.#openApiClient.collections.updateCollection({
+        const response = await this._openApiClient.collections.updateCollection({
             collection_name,
             ...args,
         });

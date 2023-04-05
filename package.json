@@ -7,24 +7,42 @@
         "pnpm": ">=8"
     },
     "packageManager": "pnpm@8.1.1",
+    "license": "Apache-2.0",
     "type": "module",
     "main": "./dist/cjs/index.js",
     "module": "./dist/esm/index.js",
+    "browser": "./dist/qdrant.js",
     "types": "./dist/types/index.d.ts",
     "exports": {
         "import": "./dist/esm/index.js",
         "require": "./dist/cjs/index.js",
+        "browser": "./dist/qdrant.js",
         "types": "./dist/types/index.d.ts"
     },
+    "files": [
+        "dist"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/qdrant/qrant-js"
+    },
+    "bugs": {
+        "url": "https://github.com/qdrant/qrant-js/issues"
+    },
+    "homepage": "https://github.com/qdrant/qrant-js#readme",
     "scripts": {
         "start": "ts-node-esm -r dotenv/config examples/index.ts",
-        "prepare": "pnpm tsc:build",
+        "prepare": "pnpm tsc:build && pnpm build:esm && pnpm build:esm:min && pnpm build:cjs && pnpm build:cjs:min",
         "tsc:check": "tsc --noEmit",
         "tsc:build": "pnpm clean && tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
+        "build:esm": "rollup -i dist/esm/index.js -o dist/qdrant.js -p @rollup/plugin-node-resolve",
+        "build:esm:min": "rollup -i dist/esm/index.js -o dist/qdrant.min.js -p @rollup/plugin-node-resolve -p terser",
+        "build:cjs": "rollup -i dist/esm/index.js -o dist/qdrant.cjs.js -f cjs -p @rollup/plugin-node-resolve",
+        "build:cjs:min": "rollup -i dist/esm/index.js -o dist/qdrant.min.cjs.js -f cjs -p @rollup/plugin-node-resolve -p terser",
         "clean": "rm -rf ./dist",
-        "openapi-mock-server": "docker run -p 6333:6333 -e \"OPENAPI_MOCK_DEBUG=1\" -e \"OPENAPI_MOCK_LOG_LEVEL=debug\" -e \"OPENAPI_MOCK_PORT=6333\" -e \"OPENAPI_MOCK_SPECIFICATION_URL=$npm_package_config_openapi_schema_remote\" --rm muonsoft/openapi-mock",
         "codegen:openapi-typescript": "openapi-typescript $npm_package_config_openapi_schema_remote --output src/openapi/generated_schema.ts",
-        "codegen:buf": "buf generate proto"
+        "codegen:buf": "buf generate proto",
+        "openapi-mock-server": "docker run -p 6333:6333 -e \"OPENAPI_MOCK_DEBUG=1\" -e \"OPENAPI_MOCK_LOG_LEVEL=debug\" -e \"OPENAPI_MOCK_PORT=6333\" -e \"OPENAPI_MOCK_SPECIFICATION_URL=$npm_package_config_openapi_schema_remote\" --rm muonsoft/openapi-mock"
     },
     "config": {
         "openapi_schema_remote": "https://raw.githubusercontent.com/qdrant/qdrant/master/docs/redoc/master/openapi.json"
@@ -33,15 +51,16 @@
         "@bufbuild/buf": "1.15.0-1",
         "@bufbuild/protoc-gen-connect-es": "0.8.4",
         "@bufbuild/protoc-gen-es": "1.2.0",
+        "@rollup/plugin-node-resolve": "15.0.2",
+        "@rollup/plugin-terser": "0.4.0",
         "@total-typescript/ts-reset": "0.4.2",
         "@types/node": "18.15.11",
         "@typescript-eslint/eslint-plugin": "5.57.0",
         "@typescript-eslint/parser": "5.57.0",
         "dotenv": "16.0.3",
-        "grpc-tools": "1.12.4",
-        "grpc_tools_node_protoc_ts": "5.3.3",
         "openapi-typescript": "6.2.0",
         "prettier": "2.8.7",
+        "rollup": "3.20.2",
         "ts-node": "10.9.1",
         "typescript": "5.0.2",
         "vitest": "0.29.8"

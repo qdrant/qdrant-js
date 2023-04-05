@@ -1,8 +1,8 @@
 {
     "compilerOptions": {
-        "target": "es2017",
-        "module": "esnext",
-        "lib": ["es2017", "dom"],
+        "target": "ES2021",
+        "module": "ESNext",
+        "lib": ["ES2021", "dom"],
         "declaration": true,
         "declarationDir": "./dist/types",
         "outDir": "./dist/esm",
