@@ -3,7 +3,9 @@
         "target": "es2017",
         "module": "esnext",
         "lib": ["es2017", "dom"],
-        "noEmit": true,
+        "declaration": true,
+        "declarationDir": "./dist/types",
+        "outDir": "./dist/esm",
         "skipLibCheck": true,
         "esModuleInterop": true,
         "moduleResolution": "nodenext",
@@ -11,5 +13,5 @@
         "types": ["node", "@total-typescript/ts-reset", "./src/types/openapi.d.ts"],
         "strict": true
     },
-    "include": ["src", "src/invariant.ts"]
+    "include": ["src"]
 }

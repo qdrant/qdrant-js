@@ -4,13 +4,24 @@
     "private": true,
     "engines": {
         "node": ">=18.0.0",
-        "pnpm": ">=3"
+        "pnpm": ">=8"
     },
-    "packageManager": "pnpm@8.1.0",
+    "packageManager": "pnpm@8.1.1",
     "type": "module",
+    "main": "./dist/cjs/index.js",
+    "module": "./dist/esm/index.js",
+    "types": "./dist/types/index.d.ts",
+    "exports": {
+        "import": "./dist/esm/index.js",
+        "require": "./dist/cjs/index.js",
+        "types": "./dist/types/index.d.ts"
+    },
     "scripts": {
-        "start": "ts-node-esm -r dotenv/config src/index.ts",
+        "start": "ts-node-esm -r dotenv/config examples/index.ts",
+        "prepare": "pnpm tsc:build",
         "tsc:check": "tsc --noEmit",
+        "tsc:build": "pnpm clean && tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
+        "clean": "rm -rf ./dist",
         "openapi-mock-server": "docker run -p 6333:6333 -e \"OPENAPI_MOCK_DEBUG=1\" -e \"OPENAPI_MOCK_LOG_LEVEL=debug\" -e \"OPENAPI_MOCK_PORT=6333\" -e \"OPENAPI_MOCK_SPECIFICATION_URL=$npm_package_config_openapi_schema_remote\" --rm muonsoft/openapi-mock",
         "codegen:openapi-typescript": "openapi-typescript $npm_package_config_openapi_schema_remote --output src/openapi/generated_schema.ts",
         "codegen:buf": "buf generate proto"

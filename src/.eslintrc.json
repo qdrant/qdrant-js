@@ -8,30 +8,26 @@
         "project": ["./tsconfig.json"]
     },
     "plugins": ["@typescript-eslint"],
-    "overrides": [
-        {
-            "files": ["src/**/*.ts"],
-            "extends": [
-                "eslint:recommended",
-                "plugin:@typescript-eslint/eslint-recommended",
-                "plugin:@typescript-eslint/recommended-requiring-type-checking",
-                "plugin:@typescript-eslint/strict"
-            ],
-            "rules": {
-                "object-shorthand": "warn",
-                // "no-unused-vars": "error",
-                "@typescript-eslint/no-unused-vars": [
-                    "error",
-                    {
-                        "args": "all",
-                        "argsIgnorePattern": "^_",
-                        "ignoreRestSiblings": true
-                    }
-                ],
-                "@typescript-eslint/consistent-type-definitions": "off"
+
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "plugin:@typescript-eslint/strict"
+    ],
+    "rules": {
+        "object-shorthand": "warn",
+        // "no-unused-vars": "error",
+        "@typescript-eslint/no-unused-vars": [
+            "error",
+            {
+                "args": "all",
+                "argsIgnorePattern": "^_",
+                "ignoreRestSiblings": true
             }
-        }
-    ]
+        ],
+        "@typescript-eslint/consistent-type-definitions": "off"
+    }
     // "rules": {
     //     // Already handled by TS
     //     "no-dupe-class-members": "off",

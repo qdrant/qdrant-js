@@ -1,7 +1,8 @@
 node_modules
-.pnpm-store/
+dist
 yarn.lock
 package-lock.json
+.pnpm-store/
 *.log
 .DS_Store
 **/.idea
