@@ -12,6 +12,13 @@ yarn add npm install qdrant-js
 pnpm i qdrant-js
 ```
 
+## Private distribution
+
+1. Check out this repo: `git clone --depth 1 https://github.com/qdrant/qdrant-js.git`
+2. Go to the directory: `cd qdrant-js`
+3. Use NPM to obtain a tarball from this package: `npm pack # outputs qdrant-js-0.0.x.tgz`
+4. Send it to the tester, they will be able to install it with: `npm install qdrant-js-0.0.x.tgz`
+
 ## Examples
 
 Instance a client
