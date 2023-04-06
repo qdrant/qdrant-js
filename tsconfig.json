@@ -10,7 +10,7 @@
         "esModuleInterop": true,
         "moduleResolution": "nodenext",
         "baseUrl": ".",
-        "types": ["node", "@total-typescript/ts-reset", "./src/types/openapi.d.ts"],
+        "types": ["node", "@total-typescript/ts-reset"],
         "strict": true
     },
     "include": ["src"]

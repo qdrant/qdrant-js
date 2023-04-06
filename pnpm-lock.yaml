@@ -1,6 +1,14 @@
 lockfileVersion: '6.0'
 
 dependencies:
+  '@sevinf/maybe':
+    specifier: 0.5.0
+    version: 0.5.0
+  openapi-typescript-fetch:
+    specifier: Rendez/openapi-typescript-fetch
+    version: github.com/Rendez/openapi-typescript-fetch/d13805c0d1f775c3795fdce1062e2e13d749fd33
+
+optionalDependencies:
   '@bufbuild/connect':
     specifier: 0.8.4
     version: 0.8.4(@bufbuild/protobuf@1.2.0)
@@ -10,9 +18,6 @@ dependencies:
   '@bufbuild/protobuf':
     specifier: 1.2.0
     version: 1.2.0
-  openapi-typescript-fetch:
-    specifier: Rendez/openapi-typescript-fetch
-    version: github.com/Rendez/openapi-typescript-fetch/d13805c0d1f775c3795fdce1062e2e13d749fd33
 
 devDependencies:
   '@bufbuild/buf':
@@ -137,6 +142,7 @@ packages:
   /@bufbuild/connect-node@0.8.4(@bufbuild/protobuf@1.2.0):
     resolution: {integrity: sha512-i2C5Q/BiVA29Uj9msn7hiFvlzPp0jiU+P+MBfZVf3vg2PmklnAoA9UETt3MNjpOHd54fvJkAK964koc7iVyCKA==}
     engines: {node: '>=16.0.0'}
+    requiresBuild: true
     peerDependencies:
       '@bufbuild/protobuf': ^1.0.0
     dependencies:
@@ -144,6 +150,7 @@ packages:
       '@bufbuild/protobuf': 1.2.0
       headers-polyfill: 3.1.2
     dev: false
+    optional: true
 
   /@bufbuild/connect@0.8.4(@bufbuild/protobuf@1.2.0):
     resolution: {integrity: sha512-99FwsvhEDTUJAXLJEyqdKhAle/MuFrRtkRBdRFLH2oNdI5Tv0Qaa7oMcQXKPFPQDfRdJEZe+dt8scmRVN55njA==}
@@ -569,6 +576,10 @@ packages:
       picomatch: 2.3.1
       rollup: 3.20.2
     dev: true
+
+  /@sevinf/maybe@0.5.0:
+    resolution: {integrity: sha512-ARhyoYDnY1LES3vYI0fiG6e9esWfTNcXcO6+MPJJXcnyMV3bim4lnFt45VXouV7y82F4x3YH8nOQ6VztuvUiWg==}
+    dev: false
 
   /@total-typescript/ts-reset@0.4.2:
     resolution: {integrity: sha512-vqd7ZUDSrXFVT1n8b2kc3LnklncDQFPvR58yUS1kEP23/nHPAO9l1lMjUfnPrXYYk4Hj54rrLKMW5ipwk7k09A==}
@@ -1333,6 +1344,7 @@ packages:
   /headers-polyfill@3.1.2:
     resolution: {integrity: sha512-tWCK4biJ6hcLqTviLXVR9DTRfYGQMXEIUj3gwJ2rZ5wO/at3XtkI4g8mCvFdUF9l1KMBNCfmNAdnahm1cgavQA==}
     dev: false
+    optional: true
 
   /ignore@5.2.4:
     resolution: {integrity: sha512-MAb38BcSbH0eHNBxn7ql2NH/kX33OkB3lZ1BNdh7ENeRChHTYsTvWrMubiIAMNS2llXEEgZ1MUOBtXChP3kaFQ==}

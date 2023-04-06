@@ -5,7 +5,7 @@ import {createPointsApi} from './api/points-api.js';
 import {createServiceApi} from './api/service-api.js';
 import {createSnapshotsApi} from './api/snapshots-api.js';
 import {QdrantClientTimeoutError, QdrantClientUnexpectedResponseError} from './errors.js';
-import {RestArgs} from './types/global.js';
+import {RestArgs} from './types.js';
 import {Fetcher, Middleware} from 'openapi-typescript-fetch';
 
 export type Client = ReturnType<typeof Fetcher.for<paths>>;

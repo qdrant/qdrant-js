@@ -1,3 +1,4 @@
+import {maybe} from '@sevinf/maybe';
 import {QdrantClient} from '../src/qdrant-client.js';
 import {Transport, createPromiseClient} from '@bufbuild/connect';
 import {createGrpcTransport} from '@bufbuild/connect-node';
@@ -17,11 +18,8 @@ process.once('SIGINT', () => {
 });
 
 async function main(): Promise<number> {
-    const apiKey = process.env.API_KEY;
-    const url = process.env.URL;
-    if (typeof apiKey !== 'string' || typeof url !== 'string') {
-        throw new Error('Please specify env API_KEY and URL');
-    }
+    const apiKey = maybe(process.env.API_KEY).orThrow();
+    const url = maybe(process.env.URL).orThrow();
 
     const client = new QdrantClient({
         url,
