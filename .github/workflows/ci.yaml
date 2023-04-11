@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+jobs:
+  precheck:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: pnpm/action-setup@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --strict-peer-dependencies
+
+      - name: Open API Schema Changes
+        run: |
+          pnpm codegen:openapi-typescript
+          if ( git diff-index HEAD | grep generated_schema.ts ) then
+            echo "Generated schema changed. Please update with pnpm codegen:openapi-typescript.";
+            exit 1
+          fi
+
+      - name: Code Checks
+        run: |
+          pnpm tsc:check
+          pnpm lint
+          pnpm test

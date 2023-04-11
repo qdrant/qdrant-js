@@ -31,14 +31,15 @@
     },
     "homepage": "https://github.com/qdrant/qrant-js#readme",
     "scripts": {
-        "test": "echo 'test'",
         "start": "ts-node-esm -r dotenv/config examples/index.ts",
-        "prepare": "pnpm tsc:build && pnpm build",
+        "test": "echo 'test'",
+        "lint": "eslint src",
+        "prepare": "pnpm tsc:build && pnpm build # ONLY WHILE THIS PACKAGE ISN'T RELEASED",
         "tsc:check": "tsc --noEmit",
         "tsc:build": "pnpm clean && tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
         "build": "rollup -c rollup.config.js",
         "clean": "rm -rf ./dist",
-        "prerelease": "pnpm test && pnpm tsc:build && pnpm build",
+        "prerelease": "pnpm lint && pnpm test && pnpm tsc:build && pnpm build",
         "codegen:openapi-typescript": "openapi-typescript $npm_package_config_openapi_schema_remote --output src/openapi/generated_schema.ts",
         "codegen:buf": "buf generate proto",
         "openapi-mock-server": "docker run -p 6333:6333 -e \"OPENAPI_MOCK_DEBUG=1\" -e \"OPENAPI_MOCK_LOG_LEVEL=debug\" -e \"OPENAPI_MOCK_PORT=6333\" -e \"OPENAPI_MOCK_SPECIFICATION_URL=$npm_package_config_openapi_schema_remote\" --rm muonsoft/openapi-mock"
