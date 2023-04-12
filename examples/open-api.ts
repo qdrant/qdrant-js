@@ -18,9 +18,10 @@ process.once('SIGINT', () => {
 });
 
 async function main(): Promise<number> {
-    const apiKey = maybe(process.env.API_KEY).orThrow();
-    const url = maybe(process.env.URL).orThrow();
+    const apiKey = maybe(process.env.QDRANT_API_KEY).orThrow();
+    const url = maybe(process.env.QDRANT_URL).orThrow();
 
+    // An instance of the client to issue requests to Open API endpoints
     const client = new QdrantClient({
         url,
         apiKey,
@@ -28,27 +29,6 @@ async function main(): Promise<number> {
     const result = await client.api('service').telemetry({anonymize: true});
 
     console.log(result);
-
-    const headers = new Headers();
-    headers.set('api-key', apiKey);
-    // A transport for clients using the gRPC protocol with Node.js `http2` module
-    const transport: Transport = createGrpcTransport({
-        baseUrl: url,
-        httpVersion: '2',
-        nodeOptions: {
-            port: 6334,
-        },
-    });
-
-    const grpcClient1 = createPromiseClient(Qdrant, transport);
-    const res1 = await grpcClient1.healthCheck({}, {headers});
-
-    console.log(res1);
-
-    const grpcClient2 = createPromiseClient(Collections, transport);
-    const res2 = await grpcClient2.list(new ListCollectionsRequest(), {headers});
-
-    console.log(res2);
 
     return 0;
 }
