@@ -1,10 +1,6 @@
 name: CI
 
-on:
-  pull_request:
-    branches: [master]
-  push:
-    branches: [master]
+on: [push, pull_request]
 
 jobs:
   precheck:
@@ -12,9 +8,17 @@ jobs:
     strategy:
       matrix:
         node-version: [18]
-
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout (push)
+        uses: actions/checkout@v3
+        if: github.event_name == 'push'
+
+      - name: Checkout (PR)
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+        if: github.event_name == 'pull_request'
 
       - uses: pnpm/action-setup@v2
 
@@ -24,8 +28,14 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
 
+      - name: Package audit
+        run: pnpm audit
+        if: github.event_name == 'pull_request'
+
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile --strict-peer-dependencies
+        run: pnpm install --ignore-scripts
+        env:
+          CI: 1
 
       - name: Open API Schema Changes
         run: |
@@ -35,8 +45,13 @@ jobs:
             exit 1
           fi
 
-      - name: Code Checks
-        run: |
-          pnpm tsc:check
-          pnpm lint
-          pnpm test
+      - name: Run Checks
+        run: pnpm pre-check
+
+      - name: Validate push commit msg
+        if: github.event_name == 'push'
+        run: pnpm exec commitlint --from HEAD~1 --to HEAD --verbose
+
+      - name: Validate PR commit msg(s)
+        if: github.event_name == 'pull_request'
+        run: pnpm exec commitlint --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose

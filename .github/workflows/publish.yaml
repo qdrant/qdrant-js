@@ -1,0 +1,36 @@
+name: Publish Packages to npmjs
+
+on:
+  release:
+    types: [published]
+
+env:
+  USE_NODE_VERSION: 18
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: pnpm/action-setup@v2
+
+      # Setup .npmrc file to publish to npm
+      - name: Use Node.js ${{ USE_NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          scope: "@qdrant"
+          node-version: ${{ USE_NODE_VERSION }}
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install Dependencies
+        run: |
+          cat .npmrc # Only to run test to check how setup-node (over)writes the file
+          pnpm install --ignore-scripts --prod
+        env:
+          CI: 1
+
+      - name: Publish Node Packages
+        run: npm publish --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

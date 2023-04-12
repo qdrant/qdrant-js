@@ -32,19 +32,31 @@
     "homepage": "https://github.com/qdrant/qrant-js#readme",
     "scripts": {
         "test": "echo 'test'",
-        "lint": "eslint src",
-        "prepare": "pnpm tsc:build && pnpm build # ONLY WHILE THIS PACKAGE ISN'T RELEASED",
+        "prepare": "pnpm husky install",
+        "prerelease": "pnpm pre-commit && pnpm tsc:build && pnpm build",
+        "pre-check": "pnpm tsc:check && pnpm lint && pnpm test",
+        "pre-commit": "pnpm tsc:check && pnpm lint-staged && pnpm test",
         "tsc:check": "tsc --noEmit",
         "tsc:build": "pnpm clean && tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
         "build": "rollup -c rollup.config.js",
+        "lint": "eslint src",
         "clean": "rm -rf ./dist",
-        "prerelease": "pnpm lint && pnpm test && pnpm tsc:build && pnpm build",
         "codegen:openapi-typescript": "openapi-typescript $npm_package_config_openapi_schema_remote --output src/openapi/generated_schema.ts",
         "codegen:buf": "buf generate proto",
         "openapi-mock-server": "docker run -p 6333:6333 -e \"OPENAPI_MOCK_DEBUG=1\" -e \"OPENAPI_MOCK_LOG_LEVEL=debug\" -e \"OPENAPI_MOCK_PORT=6333\" -e \"OPENAPI_MOCK_SPECIFICATION_URL=$npm_package_config_openapi_schema_remote\" --rm muonsoft/openapi-mock"
     },
     "config": {
         "openapi_schema_remote": "https://raw.githubusercontent.com/qdrant/qdrant/master/docs/redoc/master/openapi.json"
+    },
+    "publishConfig": {
+        "access": "restricted"
+    },
+    "lint-staged": {
+        "*.ts": [
+            "prettier --list-different",
+            "eslint"
+        ],
+        "*.{md,yaml}": "prettier --list-different"
     },
     "devDependencies": {
         "@bufbuild/buf": "1.15.0-1",
@@ -58,6 +70,8 @@
         "@types/node": "18.15.11",
         "@typescript-eslint/eslint-plugin": "5.57.0",
         "@typescript-eslint/parser": "5.57.0",
+        "husky": "8.0.3",
+        "lint-staged": "13.2.1",
         "openapi-typescript": "6.2.0",
         "prettier": "2.8.7",
         "rollup": "3.20.2",
