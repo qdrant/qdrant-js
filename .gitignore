@@ -3,6 +3,7 @@ dist
 yarn.lock
 package-lock.json
 .pnpm-store/
+*.env
 *.log
 .DS_Store
 **/.idea
