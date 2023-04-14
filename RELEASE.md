@@ -1,4 +1,4 @@
-# Public release guidelines
+# Release guidelines
 
 ## Dictionary
 
@@ -9,8 +9,10 @@
 
 ### Manual steps
 
-1. Add new changeset to describe the changes `pnpm changeset` (AC)
-2. Decide on a semver release, bump version in package.json file(s) and update the changelog: `pnpm changeset version` (RC)
+1. Add new changeset to describe the changes `pnpm changeset` (**AC**)
+2. Decide on a semver release, bump version in package.json file(s) and update the changelog: `pnpm changeset version` (**RC**)
+
+> In some cases, you may want to merge a change without doing any releases (such as when you only change tests or build tools). In this case, you can run `pnpm changeset --empty`. This will add a special changeset that does not release anything.
 
 ### Automated steps
 

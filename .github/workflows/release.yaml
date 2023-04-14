@@ -26,7 +26,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pnpm install --ignore-scripts --prod
+          pnpm install --ignore-scripts
         env:
           CI: 1
 
