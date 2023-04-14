@@ -1,7 +1,6 @@
 {
-    "private": true,
     "name": "@qdrant/js-client-rest",
-    "version": "1.1.1",
+    "version": "0.0.0-dev.0",
     "engines": {
         "node": ">=18.0.0",
         "pnpm": ">=8"
@@ -30,10 +29,10 @@
         "dist"
     ],
     "scripts": {
+        "prepublishOnly": "pnpm pre-check && pnpm tsc:build && pnpm build",
         "test": "vitest run",
         "test:watch": "vitest watch",
         "test:integration": "vitest run tests/integration",
-        "prerelease": "pnpm pre-commit && pnpm tsc:build && pnpm build",
         "pre-check": "pnpm tsc:check && pnpm tsc:deadcode && pnpm lint && pnpm test",
         "pre-commit": "pnpm tsc:check && pnpm tsc:deadcode && pnpm lint-staged && pnpm test",
         "tsc:deadcode": "ts-prune -e -i 'src/proto|src/openapi|src/index.ts|vite.config.ts'",
@@ -43,8 +42,7 @@
         "lint": "eslint src",
         "clean": "rimraf ./dist",
         "codegen:openapi-typescript": "openapi-typescript $npm_package_config_openapi_schema_remote --output src/openapi/generated_schema.ts",
-        "codegen:buf": "buf generate proto",
-        "openapi-mock-server": "docker run -p 6333:6333 -e \"OPENAPI_MOCK_DEBUG=1\" -e \"OPENAPI_MOCK_LOG_LEVEL=debug\" -e \"OPENAPI_MOCK_PORT=6333\" -e \"OPENAPI_MOCK_SPECIFICATION_URL=$npm_package_config_openapi_schema_remote\" --rm muonsoft/openapi-mock"
+        "qdrant-server": "docker run -d --rm -p 6333:6333 --name qdrant-server qdrant/qdrant:v$npm_package_version"
     },
     "config": {
         "openapi_schema_remote": "https://raw.githubusercontent.com/qdrant/qdrant/master/docs/redoc/master/openapi.json"
@@ -66,7 +64,6 @@
         "@typescript-eslint/parser": "5.57.0",
         "lint-staged": "13.2.1",
         "openapi-typescript": "6.2.0",
-        "prettier": "2.8.7",
         "rimraf": "5.0.0",
         "rollup": "3.20.2",
         "ts-node": "10.9.1",

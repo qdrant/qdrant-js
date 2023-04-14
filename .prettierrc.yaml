@@ -4,7 +4,7 @@ printWidth: 120
 trailingComma: all
 bracketSpacing: false
 overrides:
-  - files: '*.yaml'
+  - files: "*.yaml"
     options:
       tabWidth: 2
       singleQuote: false

@@ -2,4 +2,3 @@
 **/dist/
 **/src/openapi/
 **/pnpm-lock.yaml
-**/.prettierrc.yaml

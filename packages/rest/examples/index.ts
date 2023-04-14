@@ -1,10 +1,5 @@
 import {maybe} from '@sevinf/maybe';
 import {QdrantClient} from '../src/qdrant-client.js';
-import {Transport, createPromiseClient} from '@bufbuild/connect';
-import {createGrpcTransport} from '@bufbuild/connect-node';
-import {Qdrant} from '../src/proto/qdrant_connect.js';
-import {Collections} from '../src/proto/collections_service_connect.js';
-import {ListCollectionsRequest} from '../src/proto/collections_pb.js';
 
 process.on('uncaughtException', (e) => {
     console.log(e);

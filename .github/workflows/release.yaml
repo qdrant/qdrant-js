@@ -1,36 +1,45 @@
-name: Publish Packages to npmjs
+name: Release
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [main]
 
-env:
-  USE_NODE_VERSION: 18
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18]
     steps:
       - uses: actions/checkout@v3
 
       - uses: pnpm/action-setup@v2
 
-      # Setup .npmrc file to publish to npm
-      - name: Use Node.js ${{ USE_NODE_VERSION }}
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           scope: "@qdrant"
-          node-version: ${{ USE_NODE_VERSION }}
-          registry-url: "https://registry.npmjs.org"
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: |
-          cat .npmrc # Only to run test to check how setup-node (over)writes the file
           pnpm install --ignore-scripts --prod
         env:
           CI: 1
 
-      - name: Publish Node Packages
-        run: pnpm -r publish --no-git-checks --access=restricted --dry-run
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: pnpm publish -r --no-git-checks --dry-run
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # - name: Publish Node Packages
+      #   run: pnpm publish -r --no-git-checks --dry-run
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

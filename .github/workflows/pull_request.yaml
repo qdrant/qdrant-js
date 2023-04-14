@@ -1,6 +1,8 @@
-name: CI
+name: Pull request
 
-on: [push, pull_request]
+on:
+  pull_request:
+    branches: [master]
 
 jobs:
   precheck:
@@ -9,16 +11,10 @@ jobs:
       matrix:
         node-version: [18]
     steps:
-      - name: Checkout (push)
-        uses: actions/checkout@v3
-        if: github.event_name == 'push'
-
-      - name: Checkout (PR)
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
-        if: github.event_name == 'pull_request'
 
       - uses: pnpm/action-setup@v2
 
@@ -28,9 +24,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
 
-      - name: Package audit
+      - name: Node packages audit
         run: pnpm audit
-        if: github.event_name == 'pull_request'
 
       - name: Install dependencies
         run: pnpm install --ignore-scripts
@@ -39,7 +34,7 @@ jobs:
 
       - name: Open API schema changes
         run: |
-          pnpm -r codegen:openapi-typescript
+          pnpm --filter "@qdrant/js-client-rest" codegen:openapi-typescript
           if ( git diff-index HEAD | grep -q README.md || exit ) then
             echo "Generated schema changed. Please update with pnpm -r codegen:openapi-typescript.";
             exit 1
@@ -48,13 +43,5 @@ jobs:
       - name: Run checks
         run: pnpm -r pre-check
 
-      - name: Validate push commit msg
-        if: github.event_name == 'push'
-        run: pnpm -r exec commitlint --from HEAD~1 --to HEAD --verbose
-
-      - name: Validate PR commit msg(s)
-        if: github.event_name == 'pull_request'
-        run: pnpm -r exec commitlint --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose
-
-      - name: Integration tests
+      - name: Open API integration tests
         run: cd packages/rest && ./tests/integration-tests.sh

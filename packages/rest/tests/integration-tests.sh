@@ -22,7 +22,7 @@ fi
 docker run -d --rm \
            $([[ "$HOST_NETWORK" = true ]] && echo "--network=host" || echo "-p 6333:6333") \
            -e QDRANT__SERVICE__GRPC_PORT="6334" \
-           --name qdrant_test qdrant/qdrant:${QDRANT_VERSION}
+           --name qdrant-test qdrant/qdrant:${QDRANT_VERSION}
 
 trap stop_docker SIGINT
 trap stop_docker ERR
