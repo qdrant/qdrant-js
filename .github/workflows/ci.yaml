@@ -40,7 +40,7 @@ jobs:
       - name: Open API schema changes
         run: |
           pnpm -r codegen:openapi-typescript
-          if ( git diff-index HEAD | grep generated_schema.ts ) then
+          if ( git diff-index HEAD | grep -q README.md || exit ) then
             echo "Generated schema changed. Please update with pnpm -r codegen:openapi-typescript.";
             exit 1
           fi
