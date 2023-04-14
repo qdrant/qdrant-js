@@ -23,7 +23,7 @@ export function createCollectionsApi(client: Client) {
         /**
          * Create new snapshot for a collection
          */
-        createSnapshot: client.path('/collections/{collection_name}/snapshots').method('post').create(),
+        createSnapshot: client.path('/collections/{collection_name}/snapshots').method('post').create({wait: true}),
 
         /**
          * Drop collection and all associated data
@@ -44,7 +44,7 @@ export function createCollectionsApi(client: Client) {
         deleteSnapshots: client
             .path('/collections/{collection_name}/snapshots/{snapshot_name}')
             .method('delete')
-            .create(),
+            .create({wait: true}),
 
         /**
          * Get detailed information about specified existing collection

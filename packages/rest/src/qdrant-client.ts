@@ -1072,8 +1072,8 @@ export class QdrantClient {
      * @param collection_name Name of the collection
      * @returns Snapshot description
      */
-    async createSnapshot(collection_name: string) {
-        const response = await this._openApiClient.snapshots.createSnapshot({collection_name});
+    async createSnapshot(collection_name: string, args?: {wait?: boolean}) {
+        const response = await this._openApiClient.snapshots.createSnapshot({collection_name, ...args});
         return maybe(response.data.result).orNull();
     }
 
@@ -1083,8 +1083,8 @@ export class QdrantClient {
      * @param snapshot_name Snapshot id
      * @returns True if snapshot was deleted
      */
-    async deleteSnapshot(collection_name: string, snapshot_name: string) {
-        const response = await this._openApiClient.snapshots.deleteSnapshot({collection_name, snapshot_name});
+    async deleteSnapshot(collection_name: string, snapshot_name: string, args?: {wait?: boolean}) {
+        const response = await this._openApiClient.snapshots.deleteSnapshot({collection_name, snapshot_name, ...args});
         return maybe(response.data.result).orThrow('Delete snapshot API returned empty');
     }
 
@@ -1101,8 +1101,8 @@ export class QdrantClient {
      * Create snapshot for a whole storage
      * @returns Snapshot description
      */
-    async createFullSnapshot() {
-        const response = await this._openApiClient.snapshots.createFullSnapshot({});
+    async createFullSnapshot(args?: {wait?: boolean}) {
+        const response = await this._openApiClient.snapshots.createFullSnapshot({...args});
         return maybe(response.data.result).orThrow('Create full snapshot API returned empty');
     }
 
@@ -1111,8 +1111,8 @@ export class QdrantClient {
      * @param snapshot_name Snapshot name
      * @returns True if the snapshot was deleted
      */
-    async deleteFullSnapshot(snapshot_name: string) {
-        const response = await this._openApiClient.snapshots.deleteFullSnapshot({snapshot_name});
+    async deleteFullSnapshot(snapshot_name: string, args?: {wait?: boolean}) {
+        const response = await this._openApiClient.snapshots.deleteFullSnapshot({snapshot_name, ...args});
         return maybe(response.data.result).orThrow('Delete full snapshot API returned empty');
     }
 

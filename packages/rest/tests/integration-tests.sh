@@ -8,7 +8,7 @@ function stop_docker()
   docker stop qdrant_test
 }
 
-QDRANT_LATEST="v1.1.0"
+QDRANT_LATEST="v1.1.1"
 QDRANT_VERSION=${QDRANT_VERSION:-"$QDRANT_LATEST"}
 
 QDRANT_HOST='localhost:6333'

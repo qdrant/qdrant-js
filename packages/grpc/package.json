@@ -1,7 +1,7 @@
 {
     "private": true,
     "name": "@qdrant/js-client-grpc",
-    "version": "1.1.0",
+    "version": "0.0.x",
     "engines": {
         "node": ">=18.0.0",
         "pnpm": ">=8"

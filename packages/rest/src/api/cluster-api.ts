@@ -19,6 +19,9 @@ export function createClusterApi(client: Client) {
          */
         removePeer: client.path('/cluster/peer/{peer_id}').method('delete').create({force: true}),
 
-        updateCollectionCluster: client.path('/collections/{collection_name}/cluster').method('post').create({}),
+        updateCollectionCluster: client
+            .path('/collections/{collection_name}/cluster')
+            .method('post')
+            .create({timeout: true}),
     } as const;
 }

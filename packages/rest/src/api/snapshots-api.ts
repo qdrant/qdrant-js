@@ -5,17 +5,17 @@ export function createSnapshotsApi(client: Client) {
         /**
          * Create new snapshot of the whole storage
          */
-        createFullSnapshot: client.path('/snapshots').method('post').create(),
+        createFullSnapshot: client.path('/snapshots').method('post').create({wait: true}),
 
         /**
          * Create new snapshot for a collection
          */
-        createSnapshot: client.path('/collections/{collection_name}/snapshots').method('post').create(),
+        createSnapshot: client.path('/collections/{collection_name}/snapshots').method('post').create({wait: true}),
 
         /**
          * Delete snapshot of the whole storage
          */
-        deleteFullSnapshot: client.path('/snapshots/{snapshot_name}').method('delete').create(),
+        deleteFullSnapshot: client.path('/snapshots/{snapshot_name}').method('delete').create({wait: true}),
 
         /**
          * Delete snapshot for a collection
@@ -23,7 +23,7 @@ export function createSnapshotsApi(client: Client) {
         deleteSnapshot: client
             .path('/collections/{collection_name}/snapshots/{snapshot_name}')
             .method('delete')
-            .create(),
+            .create({wait: true}),
 
         /**
          * Download specified snapshot of the whole storage as a file
