@@ -1,38 +1,50 @@
-# JS Qdrant client library
+# JavaScript Qdrant SDK
 
-Fully-typed openAPI-based client library for the [Qdrant](https://github.com/qdrant/qdrant) vector search engine.
+This repository contains the REST and ~~gRPC~~ clients packages for the [Qdrant](https://github.com/qdrant/qdrant) vector search engine.
 
 ## Installation
 
 ```shell
-npm install qdrant-js
+npm install @qdrant/js-client-rest
 # or
-yarn add npm install qdrant-js
+yarn add @qdrant/js-client-rest
 # or
-pnpm i qdrant-js
+pnpm i @qdrant/js-client-rest
 ```
 
-## Private distribution
+## Usage
 
-1. Check out this repo: `git clone --depth 1 https://github.com/qdrant/qdrant-js.git`
-2. Go to the directory: `cd qdrant-js`
-3. Use NPM to obtain a tarball from this package: `npm pack # outputs qdrant-js-0.0.x.tgz`
-4. Send it to the tester, they will be able to install it with: `npm install qdrant-js-0.0.x.tgz`
+Run the Qdrant Docker container:
 
-## Examples
+```shell
+docker run -p 6333:6333 qdrant/qdrant
+```
 
-Instance a client
+## Instantiate a client
 
 ```ts
-import {QdrantClient} from 'qdrant-js';
+import {QdrantClient} from '@qdrant/js-client-rest';
 
-const client = new QdrantClient({host: 'localhost', port: 6333, apiKey: '<token>'});
+const client = new QdrantClient({host: 'localhost', port: 6333});
 // or
-const client = new QdrantClient({url: 'http://localhost:6333', apiKey: '<token>'});
+const client = new QdrantClient({url: 'http://localhost:6333'});
 ```
 
-Call an endpoint via its API
+## Make requests
+
+Using one of the available facade methods:
 
 ```ts
-const result = await client.api('service').telemetry({anonymize: true});
+try {
+    const result = await client.getCollections();
+    console.log('List of collections:', result.collections);
+} catch (err) {
+    console.error('Could not get collections:', err);
+}
+```
+
+Or directly using an endpoint from the API:
+
+```ts
+await client.api('collections').getCollections();
 ```

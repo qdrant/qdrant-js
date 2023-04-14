@@ -1,5 +1,6 @@
 import terser from '@rollup/plugin-terser';
 import nodeResolve from '@rollup/plugin-node-resolve';
+import replace from '@rollup/plugin-replace';
 
 export default {
     input: 'dist/esm/index.js',
@@ -23,5 +24,10 @@ export default {
             plugins: [terser()],
         },
     ],
-    plugins: [nodeResolve()],
+    plugins: [
+        nodeResolve(),
+        replace({
+            'import.meta.vitest': 'undefined',
+        }),
+    ],
 };

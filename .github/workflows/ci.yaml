@@ -32,26 +32,29 @@ jobs:
         run: pnpm audit
         if: github.event_name == 'pull_request'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pnpm install --ignore-scripts
         env:
           CI: 1
 
-      - name: Open API Schema Changes
+      - name: Open API schema changes
         run: |
-          pnpm codegen:openapi-typescript
+          pnpm -r codegen:openapi-typescript
           if ( git diff-index HEAD | grep generated_schema.ts ) then
-            echo "Generated schema changed. Please update with pnpm codegen:openapi-typescript.";
+            echo "Generated schema changed. Please update with pnpm -r codegen:openapi-typescript.";
             exit 1
           fi
 
-      - name: Run Checks
-        run: pnpm pre-check
+      - name: Run checks
+        run: pnpm -r pre-check
 
       - name: Validate push commit msg
         if: github.event_name == 'push'
-        run: pnpm exec commitlint --from HEAD~1 --to HEAD --verbose
+        run: pnpm -r exec commitlint --from HEAD~1 --to HEAD --verbose
 
       - name: Validate PR commit msg(s)
         if: github.event_name == 'pull_request'
-        run: pnpm exec commitlint --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose
+        run: pnpm -r exec commitlint --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
+      - name: Integration tests
+        run: cd packages/rest && ./tests/integration-tests.sh

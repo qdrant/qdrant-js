@@ -17,6 +17,7 @@
     ],
     "rules": {
         "object-shorthand": "warn",
+        "arrow-body-style": "warn",
         // "no-unused-vars": "error",
         "@typescript-eslint/no-unused-vars": [
             "error",

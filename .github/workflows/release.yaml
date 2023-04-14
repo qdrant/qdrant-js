@@ -31,6 +31,6 @@ jobs:
           CI: 1
 
       - name: Publish Node Packages
-        run: npm publish --dry-run
+        run: pnpm -r publish --no-git-checks --access=restricted --dry-run
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

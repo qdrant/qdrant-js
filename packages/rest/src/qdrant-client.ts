@@ -3,26 +3,27 @@ import {OpenApiClient, createApis} from './api-client.js';
 import {QdrantClientNotImplementedError, QdrantClientConfigError} from './errors.js';
 import {RestArgs, SchemaFor} from './types.js';
 
-export interface QdrantClientParams {
-    port?: number;
+export type QdrantClientParams = {
+    port?: number | null;
     apiKey?: string;
     https?: boolean;
     prefix?: string;
     url?: string;
     host?: string;
     timeout?: number;
-    metadata?: Record<string, number | string | string[] | undefined>;
-}
+    headers?: Record<string, number | string | string[] | undefined>;
+};
 
 export class QdrantClient {
     private _https: boolean;
     private _scheme: string;
-    private _port: number;
+    private _port: number | null;
     private _prefix: string;
     private _host: string;
     private _openApiClient: OpenApiClient;
+    private _restUri: string;
 
-    constructor({url, host, apiKey, https, prefix, port = 6333, timeout = 300_000, ...args}: QdrantClientParams) {
+    constructor({url, host, apiKey, https, prefix, port = 6333, timeout = 300_000, ...args}: QdrantClientParams = {}) {
         this._https = https ?? typeof apiKey === 'string';
         this._scheme = this._https ? 'https' : 'http';
         this._prefix = prefix ?? '';
@@ -36,12 +37,17 @@ export class QdrantClient {
                 `Only one of \`url\`, \`host\` params can be set. Url is ${url}, host is ${host}`,
             );
         }
-        if (host && (host.startsWith('http://') || host.startsWith('https://'))) {
+        if (host && (host.startsWith('http://') || host.startsWith('https://') || /:\d+$/.test(host))) {
             throw new QdrantClientConfigError(
-                'The `host` param is not expected to contain protocol (http:// or https://).\n' +
+                'The `host` param is not expected to contain neither protocol (http:// or https://) nor port (:6333).\n' +
                     'Try to use the `url` parameter instead.',
             );
         } else if (url) {
+            if (!(url.startsWith('http://') || url.startsWith('https://'))) {
+                throw new QdrantClientConfigError(
+                    'The `url` param expected to contain a valid URL starting with a protocol (http:// or https://).',
+                );
+            }
             const parsedUrl = new URL(url);
             this._host = parsedUrl.hostname;
             this._port = parsedUrl.port ? Number(parsedUrl.port) : port;
@@ -60,7 +66,7 @@ export class QdrantClient {
 
         const headers = new Headers();
 
-        const metadata = args.metadata ?? {};
+        const metadata = args.headers ?? {};
         Object.keys(metadata).forEach((field) => {
             if (metadata[field]) {
                 headers.set(field, String(metadata[field]));
@@ -74,10 +80,11 @@ export class QdrantClient {
             headers.set('api-key', apiKey);
         }
 
-        const restUri = `${this._scheme}://${this._host}:${this._port}${this._prefix}`;
+        const address = this._port ? `${this._host}:${this._port}` : this._host;
+        this._restUri = `${this._scheme}://${address}${this._prefix}`;
         const restArgs: RestArgs = {headers, timeout};
 
-        this._openApiClient = createApis(restUri, restArgs);
+        this._openApiClient = createApis(this._restUri, restArgs);
     }
 
     /**
@@ -95,7 +102,7 @@ export class QdrantClient {
      *
      * @param collection_name Name of the collection
      * @param {object} args -
-     *     - requests: List of search requests
+     *     - searches: List of search requests
      *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
      *         Values:
      *             number - number of replicas to query, values should present in all queried replicas
@@ -109,7 +116,7 @@ export class QdrantClient {
         {
             searches,
             consistency,
-        }: {searches: SchemaFor<'SearchRequestBatch'>['searches']; consistency?: SchemaFor<'ReadConsistency'>},
+        }: Pick<SchemaFor<'SearchRequestBatch'>, 'searches'> & {consistency?: SchemaFor<'ReadConsistency'>},
     ) {
         const response = await this._openApiClient.points.searchBatchPoints({
             collection_name,
@@ -182,15 +189,16 @@ export class QdrantClient {
         collection_name: string,
         {
             vector,
-            limit,
-            offset,
+            limit = 10,
+            offset = 0,
             filter,
             params,
-            with_payload,
-            with_vector,
+            with_payload = true,
+            with_vector = false,
             score_threshold,
             consistency,
-        }: SchemaFor<'SearchRequest'> & {consistency?: SchemaFor<'ReadConsistency'>},
+        }: Omit<SchemaFor<'SearchRequest'>, 'limit'> &
+            Partial<Pick<SchemaFor<'SearchRequest'>, 'limit'>> & {consistency?: SchemaFor<'ReadConsistency'>},
     ) {
         const response = await this._openApiClient.points.searchPoints({
             collection_name,
@@ -294,11 +302,11 @@ export class QdrantClient {
     async recommend(
         collection_name: string,
         {
-            limit = 10,
             positive,
             negative,
             filter,
             params,
+            limit = 10,
             offset = 0,
             with_payload = true,
             with_vector = false,
@@ -306,7 +314,8 @@ export class QdrantClient {
             using,
             lookup_from,
             consistency,
-        }: SchemaFor<'RecommendRequest'> & {consistency?: SchemaFor<'ReadConsistency'>},
+        }: Omit<SchemaFor<'RecommendRequest'>, 'limit'> &
+            Partial<Pick<SchemaFor<'RecommendRequest'>, 'limit'>> & {consistency?: SchemaFor<'ReadConsistency'>},
     ) {
         const response = await this._openApiClient.points.recommendPoints({
             collection_name,
@@ -359,12 +368,12 @@ export class QdrantClient {
     async scroll(
         collection_name: string,
         {
-            limit,
             filter,
+            consistency,
+            limit = 10,
             with_payload = true,
             with_vector = false,
-            consistency,
-        }: SchemaFor<'ScrollRequest'> & {consistency?: SchemaFor<'ReadConsistency'>},
+        }: SchemaFor<'ScrollRequest'> & {consistency?: SchemaFor<'ReadConsistency'>} = {},
     ) {
         const response = await this._openApiClient.points.scrollPoints({
             collection_name,
@@ -389,7 +398,7 @@ export class QdrantClient {
      *         Default: `true`
      * @returns Amount of points in the collection matching the filter.
      */
-    async count(collection_name: string, {filter, exact = true}: SchemaFor<'CountRequest'>) {
+    async count(collection_name: string, {filter, exact = true}: SchemaFor<'CountRequest'> = {}) {
         const response = await this._openApiClient.points.countPoints({
             collection_name,
             filter,
@@ -560,11 +569,11 @@ export class QdrantClient {
     async setPayload(
         collection_name: string,
         {
-            wait,
-            ordering,
             payload,
             points,
             filter,
+            ordering,
+            wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'SetPayload'>,
     ) {
         const response = await this._openApiClient.points.setPayload({
@@ -614,11 +623,11 @@ export class QdrantClient {
     async overwritePayload(
         collection_name: string,
         {
-            wait,
             ordering,
             payload,
             points,
             filter,
+            wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'SetPayload'>,
     ) {
         const response = await this._openApiClient.points.overwritePayload({
@@ -666,11 +675,11 @@ export class QdrantClient {
     async deletePayload(
         collection_name: string,
         {
-            wait,
             ordering,
             keys,
             points,
             filter,
+            wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'> &
             SchemaFor<'DeletePayload'>,
     ) {
@@ -718,8 +727,8 @@ export class QdrantClient {
     async clearPayload(
         collection_name: string,
         {
-            wait,
             ordering,
+            wait = true,
             ...points_selector
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'>,
     ) {
@@ -769,18 +778,8 @@ export class QdrantClient {
      * @returns List of the collections
      */
     async getCollections() {
-        // const getCollections = this.http.collectionsApi.getCollections;
-        // try {
         const response = await this._openApiClient.collections.getCollections({});
         return maybe(response.data.result).orThrow('Get collections returned empty');
-        // } catch (e) {
-        //     if (e instanceof getCollections.Error) {
-        //         const error = e.getActualType();
-        //         if (error.status === '4XX') {
-        //             return error.data;
-        //         }
-        //     }
-        // }
     }
 
     /**
@@ -804,21 +803,10 @@ export class QdrantClient {
      *     - timeout: Wait for operation commit timeout in seconds. If timeout is reached, request will return with service error.
      * @returns Operation result
      */
-    async updateCollection(
-        collection_name: string,
-        {
-            timeout,
-            optimizers_config,
-            params,
-        }: {
-            timeout?: number;
-        } & SchemaFor<'UpdateCollection'>,
-    ) {
+    async updateCollection(collection_name: string, args?: SchemaFor<'UpdateCollection'> & {timeout?: number}) {
         const response = await this._openApiClient.collections.updateCollection({
             collection_name,
-            timeout,
-            optimizers_config,
-            params,
+            ...args,
         });
         return maybe(response.data.result).orThrow('Update collection returned empty');
     }
@@ -832,8 +820,8 @@ export class QdrantClient {
      *         If timeout is reached, request will return with service error.
      * @returns Operation result
      */
-    async deleteCollection(collection_name: string, {timeout}: {timeout?: number}) {
-        const response = await this._openApiClient.collections.deleteCollection({collection_name, timeout});
+    async deleteCollection(collection_name: string, args?: {timeout?: number}) {
+        const response = await this._openApiClient.collections.deleteCollection({collection_name, ...args});
         return maybe(response.data.result).orThrow('Delete collection returned empty');
     }
 
@@ -903,7 +891,7 @@ export class QdrantClient {
             write_consistency_factor,
         });
 
-        return maybe(response).orThrow('Create collection returned empty');
+        return maybe(response.data.result).orThrow('Create collection returned empty');
     }
 
     /**
@@ -1058,7 +1046,7 @@ export class QdrantClient {
     async deletePayloadIndex(
         collection_name: string,
         field_name: string,
-        {wait, ordering}: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>},
+        {wait = true, ordering}: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} = {},
     ) {
         const response = await this._openApiClient.collections.deleteFieldIndex({
             collection_name,
@@ -1160,8 +1148,8 @@ export class QdrantClient {
     /**
      * Unlock storage for writing.
      */
-    async unlockStorage(reason: string) {
-        const response = await this._openApiClient.service.postLocks({write: false, error_message: reason});
+    async unlockStorage() {
+        const response = await this._openApiClient.service.postLocks({write: false});
         return maybe(response.data.result).orThrow('Post locks returned empty');
     }
 
