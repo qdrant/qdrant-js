@@ -17,6 +17,8 @@ jobs:
           fetch-depth: 0
 
       - uses: pnpm/action-setup@v2
+        with:
+          run_install: false
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
@@ -28,7 +30,7 @@ jobs:
         run: pnpm audit
 
       - name: Install dependencies
-        run: pnpm install --ignore-scripts
+        run: pnpm install --frozen-lockfile
         env:
           CI: 1
 
