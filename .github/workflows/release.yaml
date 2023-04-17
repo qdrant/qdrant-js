@@ -47,18 +47,6 @@ jobs:
       - name: Create release pull request or publish to npm
         id: changesets
         uses: changesets/action@v1
-        with:
-          createGithubReleases: true
-          publish: pnpm publish -r --no-git-checks --verbose
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: hasChangesets = false
-        if: steps.changesets.outputs.hasChangesets == 'false'
-        run: echo "hasChangesets = false"
-
-      - name: Send a Slack notification if a publish happens
-        if: steps.changesets.outputs.published == 'true'
-        # You can do something when a publish happens.
-        run: echo "${{ steps.changesets.outputs.publishedPackages }}"
