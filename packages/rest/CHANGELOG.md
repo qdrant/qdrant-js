@@ -1,5 +1,11 @@
 # @qdrant/js-client-rest
 
+## 0.1.5
+
+### Patch Changes
+
+-   7a8715c: Test release 0.1.5
+
 ## 0.1.4
 
 ### Patch Changes
