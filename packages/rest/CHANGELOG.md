@@ -1,5 +1,11 @@
 # @qdrant/js-client-rest
 
+## 0.1.2
+
+### Patch Changes
+
+-   Some summary for testing
+
 ## 0.1.1
 
 ### Patch Changes
