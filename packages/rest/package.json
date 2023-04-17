@@ -30,6 +30,9 @@
     "files": [
         "dist"
     ],
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
         "prepublishOnly": "pnpm pre-check && pnpm tsc:build && pnpm build",
         "test": "vitest run",
