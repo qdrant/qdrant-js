@@ -6,5 +6,5 @@
         "outDir": "./dist/esm",
         "types": ["node", "vitest/importMeta", "@total-typescript/ts-reset"]
     },
-    "include": ["src", "tests", "examples", "vite.config.ts", "rollup.config.js"]
+    "include": ["src", "tests", "examples", "vite.config.ts", "vite.integration.config.ts", "rollup.config.js"]
 }
