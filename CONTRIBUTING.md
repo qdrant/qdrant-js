@@ -18,10 +18,11 @@ Pull requests are the best way to propose changes to the codebase (we use [Githu
 1. Fork the repo and create your branch from `master`.
 2. If you've added code that should be tested, add tests.
 3. If the Qdrant Open API has changed, update it with: `codegen:openapi-typescript`.
-4. Make sure your code lints: `pnpm pre-check`. The root pacakge installs a `pre-commit` hook with [husky](https://github.com/typicode/husky/) to automate this check.
+4. Make sure your code lints: `pnpm pre-check`. The root package installs a `pre-commit` hook with [husky](https://github.com/typicode/husky/) to automate this check.
 5. Ensure the test suite passes: `pnpm test`.
-6. When ready, use [Changesets](https://github.com/changesets/changesets): `pnpm changeset` to describe the change(s). The generated markdown files in the `.changeset` directory should be committed to the repository.
-7. Issue that pull request!
+6. Ensure the integration test suite passes: `pnpm test:integration`.
+7. When ready, use [Changesets](https://github.com/changesets/changesets): `pnpm changeset` to describe the change(s). The generated markdown files in the `.changeset` directory should be committed to the repository.
+8. Issue that pull request!
 
 ## Any contributions you make will be under the Apache License 2.0
 
