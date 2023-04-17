@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          # ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - uses: pnpm/action-setup@v2
@@ -35,7 +35,7 @@ jobs:
           CI: 1
 
       - name: Check PR contains changeset
-        run: pnpm changeset status --since=master
+        run: pnpm changeset status --since=origin/master
 
       - name: Open API schema changes
         run: |

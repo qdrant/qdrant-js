@@ -13,16 +13,10 @@ QDRANT_VERSION=${QDRANT_VERSION:-"$QDRANT_LATEST"}
 
 QDRANT_HOST='localhost:6333'
 
-OS_NAME=$(uname -s)
-HOST_NETWORK=false
-if [[ $OS_NAME == Linux* ]]; then
-  HOST_NETWORK=true
-fi
-
 docker run -d --rm \
-           $([[ "$HOST_NETWORK" = true ]] && echo "--network=host" || echo "-p 6333:6333") \
+           -p 6333:6333 \
            -e QDRANT__SERVICE__GRPC_PORT="6334" \
-           --name qdrant-test qdrant/qdrant:${QDRANT_VERSION}
+           --name qdrant_test qdrant/qdrant:${QDRANT_VERSION}
 
 trap stop_docker SIGINT
 trap stop_docker ERR
