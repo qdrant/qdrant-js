@@ -7,12 +7,12 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/qdrant/qrant-js"
+        "url": "https://github.com/qdrant/qdrant-js"
     },
     "bugs": {
-        "url": "https://github.com/qdrant/qrant-js/issues"
+        "url": "https://github.com/qdrant/qdrant-js/issues"
     },
-    "homepage": "https://github.com/qdrant/qrant-js#readme",
+    "homepage": "https://github.com/qdrant/qdrant-js#readme",
     "license": "Apache-2.0",
     "type": "module",
     "module": "./dist/esm/index.js",
