@@ -4,5 +4,5 @@ This package represents the JS SDK for the [Qdrant](https://github.com/qdrant/qd
 
 The next packages are re-exported from it:
 
--   [JS Client REST](../packages/js-client-rest)
--   [JS Client gRPC](../packages/js-client-grpc) (coming soon)
+-   [JS Client REST](../js-client-rest)
+-   [JS Client gRPC](../js-client-grpc) (coming soon)
