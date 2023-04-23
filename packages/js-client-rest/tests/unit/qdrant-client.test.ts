@@ -5,15 +5,15 @@ import {QdrantClientConfigError} from '../../src/errors.js';
 test('QdrantClient()', () => {
     let client = new QdrantClient();
     // @ts-expect-error ts(2341)
-    expect(client._restUri).toBe('http://localhost:6333');
+    expect(client._restUri).toBe('http://127.0.0.1:6333');
 
     client = new QdrantClient({https: true});
     // @ts-expect-error ts(2341)
-    expect(client._restUri).toBe('https://localhost:6333');
+    expect(client._restUri).toBe('https://127.0.0.1:6333');
 
     client = new QdrantClient({https: true, port: 7333});
     // @ts-expect-error ts(2341)
-    expect(client._restUri).toBe('https://localhost:7333');
+    expect(client._restUri).toBe('https://127.0.0.1:7333');
 
     expect(() => new QdrantClient({host: 'localhost:6333'})).toThrow(QdrantClientConfigError);
 

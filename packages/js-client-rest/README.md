@@ -25,9 +25,9 @@ docker run -p 6333:6333 qdrant/qdrant
 ```ts
 import {QdrantClient} from '@qdrant/js-client-rest';
 
-const client = new QdrantClient({host: 'localhost', port: 6333});
+const client = new QdrantClient({host: '127.0.0.1', port: 6333});
 // or
-const client = new QdrantClient({url: 'http://localhost:6333'});
+const client = new QdrantClient({url: 'http://127.0.0.1:6333'});
 ```
 
 ## Make requests
