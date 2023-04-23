@@ -61,7 +61,7 @@ export class QdrantClient {
             }
         } else {
             this._port = port;
-            this._host = host ?? 'localhost';
+            this._host = host ?? '127.0.0.1';
         }
 
         const headers = new Headers();
