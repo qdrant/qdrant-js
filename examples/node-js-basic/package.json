@@ -1,0 +1,19 @@
+{
+  "name": "qdrant-node-js-basic-example",
+  "version": "1.0.0",
+  "description": "Basic example of how to use qdrant JS client with Node",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "qdrant",
+    "vector",
+    "search"
+  ],
+  "author": "Qdrant Team",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@qdrant/js-client-rest": "^1.1.1"
+  }
+}
