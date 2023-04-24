@@ -33,7 +33,8 @@
         "access": "public"
     },
     "scripts": {
-        "prepublishOnly": "pnpm tsc:build && pnpm build",
+        "prepare": "pnpm tsc:build && pnpm build",
+        "pre-check": "pnpm tsc:check",
         "pre-commit": "pnpm tsc:check",
         "tsc:check": "tsc --noEmit",
         "tsc:build": "pnpm clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",

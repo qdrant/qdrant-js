@@ -34,7 +34,7 @@
         "access": "public"
     },
     "scripts": {
-        "prepublishOnly": "pnpm pre-check && pnpm tsc:build && pnpm build",
+        "prepare": "pnpm tsc:build && pnpm build",
         "test": "vitest run",
         "test:watch": "vitest watch",
         "test:integration": "vitest run --config vite.integration.config.ts",

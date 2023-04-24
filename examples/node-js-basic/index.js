@@ -1,10 +1,7 @@
 import { QdrantClient } from '@qdrant/js-client-rest';
-// or, if you use CommonJS:
-// const { QdrantClient } = require('@qdrant/js-client-rest');
-
+import assert from 'assert';
 
 async function main() {
-
     let collectionName = 'test_collection';
 
     let client = new QdrantClient({ url: 'http://127.0.0.1:6333' });
