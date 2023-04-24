@@ -1,5 +1,4 @@
 let { QdrantClient } = require('@qdrant/js-client-rest');
-const assert = require('assert');
 
 
 async function main() {
@@ -80,30 +79,31 @@ async function main() {
     );
 
     let collectionInfo = await client.getCollection(collectionName);
-
-    assert(collectionInfo.points_count === 6);
+    console.log(collectionInfo.points_count)
+    // prints: 6
 
     let points = await client.retrieve(collectionName, {
         ids: [1, 2]
     });
 
 
-    // Convert into map
-    let idToPoints = points.reduce((acc, point) => {
-        acc[point.id] = point;
-        return acc;
-    }, {});
+    console.log("points: ", points);
+    // prints:
+    // points:  [
+    //     {
+    //       id: 1,
+    //       payload: {
+    //         city: 'Berlin',
+    //         coords: [Object],
+    //         count: 1000000,
+    //         country: 'Germany',
+    //         square: 12.5
+    //       },
+    //       vector: null
+    //     },
+    //     { id: 2, payload: { city: [Array] }, vector: null }
+    //   ]
 
-
-    assert(idToPoints[1].id === 1);
-    assert(idToPoints[1].payload.city === "Berlin");
-    assert(idToPoints[1].payload.count === 1000000);
-    assert(idToPoints[1].payload.coords.lat === 1.0);
-    assert(idToPoints[1].payload.coords.lon === 2.0);
-
-    assert(idToPoints[2].id === 2);
-    assert(idToPoints[2].payload.city[0] === "Berlin");
-    assert(idToPoints[2].payload.city[1] === "London");
 
 
     // -------- Search ----------------
@@ -115,24 +115,84 @@ async function main() {
         limit: 3,
     });
 
-    assert(res1.length === 3);
+    console.log("search result: ", res1);
+    // prints:
+    // search result:  [
+    // {
+    //     id: 4,
+    //     version: 3,
+    //     score: 0.99248314,
+    //     payload: { city: [Array] },
+    //     vector: null
+    // },
+    // {
+    //     id: 1,
+    //     version: 3,
+    //     score: 0.89463294,
+    //     payload: {
+    //         city: 'Berlin',
+    //         coords: [Object],
+    //         count: 1000000,
+    //         country: 'Germany',
+    //         square: 12.5
+    //     },
+    //     vector: null
+    // },
+    // {
+    //     id: '98a9a4b1-4ef2-46fb-8315-a97d874fe1d7',
+    //     version: 3,
+    //     score: 0.8543979,
+    //     payload: { count: [Array] },
+    //     vector: null
+    // }
+    // ]
+
+
 
     let resBatch = await client.searchBatch(collectionName, {
         searches: [
             {
                 vector: query_vector,
-                limit: 3,
+                limit: 1,
             },
             {
                 vector: query_vector,
-                limit: 3,
+                limit: 2,
             }
         ]
     });
 
-    assert(resBatch.length === 2);
-    assert(resBatch[0].length === 3);
-    assert(resBatch[1].length === 3);
+    console.log("search batch result: ", resBatch);
+
+    // prints:
+    // search batch result:  [
+    //     [
+    //         {
+    //             id: 4,
+    //             version: 3,
+    //             score: 0.99248314,
+    //             payload: null,
+    //             vector: null
+    //         }
+    //     ],
+    //     [
+    //         {
+    //             id: 4,
+    //             version: 3,
+    //             score: 0.99248314,
+    //             payload: null,
+    //             vector: null
+    //         },
+    //         {
+    //             id: 1,
+    //             version: 3,
+    //             score: 0.89463294,
+    //             payload: null,
+    //             vector: null
+    //         }
+    //     ]
+    // ]
+
 
 
     // -------- Search filters ----------------
@@ -152,14 +212,37 @@ async function main() {
         }
     });
 
-
-    let res1Ids = res1.map((point) => point.id);
-    let res2Ids = res2.map((point) => point.id);
-
-    assert(res1Ids.length === 3);
-    assert(res2Ids.length === 3);
-
-    assert(res1Ids[0] != res2Ids[0]);
+    console.log("search result with filter: ", res2);
+    // prints:
+    // search result with filter:  [
+    //     {
+    //       id: 1,
+    //       version: 3,
+    //       score: 0.89463294,
+    //       payload: {
+    //         city: 'Berlin',
+    //         coords: [Object],
+    //         count: 1000000,
+    //         country: 'Germany',
+    //         square: 12.5
+    //       },
+    //       vector: null
+    //     },
+    //     {
+    //       id: 3,
+    //       version: 3,
+    //       score: 0.83872515,
+    //       payload: { city: [Array] },
+    //       vector: null
+    //     },
+    //     {
+    //       id: 2,
+    //       version: 3,
+    //       score: 0.66603535,
+    //       payload: { city: [Array] },
+    //       vector: null
+    //     }
+    // ]
 }
 
 main()
