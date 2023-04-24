@@ -1,6 +1,7 @@
 {
   "name": "qdrant-node-js-basic-example",
   "version": "1.0.0",
+  "type": "module",
   "description": "Basic example of how to use qdrant JS client with Node",
   "main": "index.js",
   "scripts": {

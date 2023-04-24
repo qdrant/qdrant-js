@@ -1,4 +1,6 @@
-let { QdrantClient } = require('@qdrant/js-client-rest');
+import { QdrantClient } from '@qdrant/js-client-rest';
+// or, if you use CommonJS:
+// const { QdrantClient } = require('@qdrant/js-client-rest');
 
 
 async function main() {
