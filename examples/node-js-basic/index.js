@@ -2,11 +2,11 @@ let { QdrantClient } = require('@qdrant/js-client-rest');
 const assert = require('assert');
 
 
-let client = new QdrantClient({ url: 'http://127.0.0.1:6333' });
+async function main() {
 
-let collectionName = 'test_collection';
+    let collectionName = 'test_collection';
 
-const run = async () => {
+    let client = new QdrantClient({ url: 'http://127.0.0.1:6333' });
 
     let response = await client.getCollections();
 
@@ -162,8 +162,9 @@ const run = async () => {
     assert(res1Ids[0] != res2Ids[0]);
 }
 
-run().then(() => {
-    console.log('done');
-}).catch((err) => {
-    console.error(err);
-});
+main()
+    .then(() => {
+        console.log('done');
+    }).catch((err) => {
+        console.error(err);
+    });
