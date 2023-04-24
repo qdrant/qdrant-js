@@ -1,5 +1,5 @@
 ---
-'@qdrant/js-client-rest': major
+'@qdrant/js-client-rest': patch
 ---
 
-Move examples into another folder
+Move examples into another folder and expanded documentation
