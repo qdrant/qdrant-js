@@ -18,5 +18,10 @@
         "is-ci": "3.0.1",
         "prettier": "2.8.7",
         "typescript": "5.0.4"
+    },
+    "pnpm": {
+        "overrides": {
+            "yaml@1.x || 2.x": "^2.2.2"
+        }
     }
 }
