@@ -73,6 +73,9 @@ const result = await client.getCollections();
 console.log('List of collections:', result.collections);
 ```
 
+More examples can be found in the [`examples`](./examples) folder.
+
+
 
 ## Releases
 
