@@ -1,8 +1,78 @@
+
+<p align="center">
+  <img height="100" src="https://github.com/qdrant/qdrant/raw/master/docs/logo.svg" alt="Qdrant"> 
+  &nbsp;
+  <img height="80" src="./docs/ts-logo-256.svg" alt="Qdrant">
+</p>
+
+<p align="center">
+    <b>JavaScript/TypeScript library for the <a href="https://github.com/qdrant/qdrant">Qdrant</a> vector search engine.</b>
+</p>
+
+
+<p align=center>
+    <a href="https://www.npmjs.com/package/@qdrant/qdrant-js"><img src="https://badge.fury.io/js/@qdrant%2Fqdrant-js.svg" alt="npm version" height="18"></a>
+    <a href="https://qdrant.github.io/qdrant/redoc/index.html"><img src="https://img.shields.io/badge/Docs-OpenAPI%203.0-success" alt="OpenAPI Docs"></a>
+    <a href="https://github.com/qdrant/qdrant-client/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-success" alt="Apache 2.0 License"></a>
+    <a href="https://qdrant.to/discord"><img src="https://img.shields.io/badge/Discord-Qdrant-5865F2.svg?logo=discord" alt="Discord"></a>
+    <a href="https://qdrant.to/roadmap"><img src="https://img.shields.io/badge/Roadmap-2023-bc1439.svg" alt="Roadmap 2023"></a>
+</p>
+
 # JavaScript Qdrant SDK
 
 This repository contains packages of the JS SDK for the [Qdrant](https://github.com/qdrant/qdrant) vector search engine.
 
-The SDK package can be found under [packages/qdrant-js](./packages/qdrant-js).
+There are 3 packages:
+
+* [`@qdrant/qdrant-js`](./packages/qdrant-js) - the main package with the SDK itself.
+* [`@qdrant/js-client-rest`](./packages/js-client-rest) - leightweight REST client for Qdrant.
+* [`@qdrant/js-client-grpc`](./packages/js-client-grpc) - WIP gRPC client for Qdrant.
+
+
+## JS/TS Examples
+
+### Installation
+
+```shell
+npm install @qdrant/js-client-rest
+# or
+yarn add @qdrant/js-client-rest
+# or
+pnpm i @qdrant/js-client-rest
+```
+
+### Usage
+
+Run the Qdrant Docker container:
+
+```shell
+docker run -p 6333:6333 qdrant/qdrant
+```
+
+### Instantiate a client
+
+```ts
+import {QdrantClient} from '@qdrant/js-client-rest';
+
+// TO connect to Qdrant running locally
+const client = new QdrantClient({url: 'http://127.0.0.1:6333'});
+
+// or connect to Qdrant Cloud
+const client = new QdrantClient({
+    url: 'https://xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.us-east-0-1.aws.cloud.qdrant.io',
+    apiKey: '<your-api-key>',
+});
+```
+
+### Make requests
+
+Using one of the available facade methods:
+
+```ts
+const result = await client.getCollections();
+console.log('List of collections:', result.collections);
+```
+
 
 ## Releases
 
