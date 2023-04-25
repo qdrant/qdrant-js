@@ -31,8 +31,7 @@ jobs:
         run: pnpm audit
 
       - name: Install Dependencies
-        run: |
-          pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
         env:
           CI: 1
 
@@ -48,7 +47,7 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: pnpm release
+          publish: pnpm ci:release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

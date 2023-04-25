@@ -1,4 +1,4 @@
-packages/**/package-lock.json
+**/package-lock.json
 **/yarn.lock
 **/node_modules/
 **/.pnpm-store/

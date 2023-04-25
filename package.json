@@ -9,8 +9,8 @@
     "packageManager": "pnpm@8.3.0",
     "scripts": {
         "prepare": "node ./prepare.cjs && pnpm -r build",
-        "release": "pnpm -r build && pnpm changeset publish",
-        "version": "pnpm changeset version && pnpm install --lockfile-only"
+        "version": "pnpm changeset version && pnpm install --lockfile-only",
+        "ci:release": "pnpm changeset publish"
     },
     "devDependencies": {
         "@changesets/changelog-github": "0.4.8",

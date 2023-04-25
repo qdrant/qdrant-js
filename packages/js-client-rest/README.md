@@ -52,3 +52,14 @@ await client.api('collections').getCollections();
 ## Releases
 
 Major and minor versions align with Qdrant's engine releases, whilst patch are reserved for fixes regarding the current minor release. Check out [RELEASE.md](../../RELEASE.md) for more info on release guidelines.
+
+## Contributing
+
+These are the most relevant scripts for development:
+
+-   `pnpm build`: builds and bundles from TypeScript sources
+-   `pnpm pre-check`: type-checks sources
+-   `pnpm pre-commit`: same as pre-check, but for git hooks (husky)
+-   `pnpm test`: run unit tests
+-   `./tests/integration-tests.sh`: starts local docker container and runs integration tests with: `pnpm test:integration`
+-   `pnpm codegen:openapi-typescript`: updates generated TS schema from the latest openapi.json remote
