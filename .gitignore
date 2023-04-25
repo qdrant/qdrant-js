@@ -1,5 +1,5 @@
+packages/**/package-lock.json
 **/yarn.lock
-**/package-lock.json
 **/node_modules/
 **/.pnpm-store/
 **/*.env

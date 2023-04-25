@@ -11,7 +11,7 @@ function stop_docker()
 QDRANT_LATEST="v1.1.1"
 QDRANT_VERSION=${QDRANT_VERSION:-"$QDRANT_LATEST"}
 
-QDRANT_HOST='localhost:6333'
+QDRANT_HOST='127.0.0.1:6333'
 
 docker run -d --rm \
            -p 6333:6333 \
