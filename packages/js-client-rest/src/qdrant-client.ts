@@ -339,7 +339,7 @@ export class QdrantClient {
      * Scroll over all (matching) points in the collection.
      * @param collection_name Name of the collection
      * @param {object} args
-     *     - scroll_filter: If provided - only returns points matching filtering conditions
+     *     - filter: If provided - only returns points matching filtering conditions
      *     - limit: How many points to return
      *     - offset: If provided - skip points with ids less than given `offset`
      *     - with_payload:
@@ -371,6 +371,7 @@ export class QdrantClient {
             filter,
             consistency,
             limit = 10,
+            offset,
             with_payload = true,
             with_vector = false,
         }: SchemaFor<'ScrollRequest'> & {consistency?: SchemaFor<'ReadConsistency'>} = {},
@@ -378,6 +379,7 @@ export class QdrantClient {
         const response = await this._openApiClient.points.scrollPoints({
             collection_name,
             limit,
+            offset,
             filter,
             with_payload,
             with_vector,
