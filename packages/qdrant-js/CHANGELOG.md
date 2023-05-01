@@ -1,5 +1,14 @@
 # @qdrant/qdrant-js
 
+## 1.1.4
+
+### Patch Changes
+
+-   [#10](https://github.com/qdrant/qdrant-js/pull/10) [`cbc27fa`](https://github.com/qdrant/qdrant-js/commit/cbc27fa3b75b5ff81effa8e0170e4ecc76fa5ea6) Thanks [@generall](https://github.com/generall)! - Add missing offset param in scroll
+
+-   Updated dependencies [[`cbc27fa`](https://github.com/qdrant/qdrant-js/commit/cbc27fa3b75b5ff81effa8e0170e4ecc76fa5ea6)]:
+    -   @qdrant/js-client-rest@1.1.4
+
 ## 1.1.2
 
 ### Patch Changes
