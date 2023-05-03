@@ -1,5 +1,11 @@
 # @qdrant/js-client-rest
 
+## 1.1.5
+
+### Patch Changes
+
+-   [#13](https://github.com/qdrant/qdrant-js/pull/13) [`a483121`](https://github.com/qdrant/qdrant-js/commit/a483121091a36bffa9b5b894a7e7aa0c2ad66e0b) Thanks [@Rendez](https://github.com/Rendez)! - Fix npm install script of dependency for Windows envs
+
 ## 1.1.4
 
 ### Patch Changes

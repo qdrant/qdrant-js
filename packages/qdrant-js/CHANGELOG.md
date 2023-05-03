@@ -1,5 +1,12 @@
 # @qdrant/qdrant-js
 
+## 1.1.5
+
+### Patch Changes
+
+-   Updated dependencies [[`a483121`](https://github.com/qdrant/qdrant-js/commit/a483121091a36bffa9b5b894a7e7aa0c2ad66e0b)]:
+    -   @qdrant/js-client-rest@1.1.5
+
 ## 1.1.4
 
 ### Patch Changes
