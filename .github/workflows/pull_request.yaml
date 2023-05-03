@@ -10,6 +10,9 @@ jobs:
     strategy:
       matrix:
         node-version: [18]
+      os:
+        - ubuntu-latest
+        - windows-latest
     steps:
       - uses: actions/checkout@v3
         with:
@@ -40,9 +43,11 @@ jobs:
             echo "Generated schema changed. Please update with pnpm -r codegen:openapi-typescript.";
             exit 1
           fi
+        shell: bash
 
       - name: Run checks
         run: pnpm -r pre-check
 
       - name: Open API integration tests
         run: cd packages/js-client-rest && ./tests/integration-tests.sh
+        shell: bash
