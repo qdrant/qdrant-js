@@ -1,4 +1,4 @@
 {
     "typescript.tsdk": "node_modules/typescript/lib",
-    "eslint.workingDirectories": ["packages/js-client-rest", "packages/js-client-grpc"]
+    "eslint.workingDirectories": ["packages/qdrant-js", "packages/js-client-rest", "packages/js-client-grpc"]
 }

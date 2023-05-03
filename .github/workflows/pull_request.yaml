@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - uses: pnpm/action-setup@v2
         with:
@@ -36,18 +36,21 @@ jobs:
         env:
           CI: 1
 
-      - name: Open API schema changes
+      - name: Generated OpenAPI update check
         run: |
           pnpm --filter "@qdrant/js-client-rest" codegen:openapi-typescript
-          if ( git diff-index HEAD | grep -q README.md || exit ) then
-            echo "Generated schema changed. Please update with pnpm -r codegen:openapi-typescript.";
+          if ( git diff --name-only | grep -q packages/js-client-rest/src/openapi/ || exit ) then
+            echo "Generated schema changed. Please update with: 'pnpm -r codegen:openapi-typescript'.";
             exit 1
           fi
         shell: bash
 
-      - name: Run checks
+      - name: Project checks
         run: pnpm -r pre-check
 
-      - name: Open API integration tests
-        run: cd packages/js-client-rest && ./tests/integration-tests.sh
+      - name: Integration tests
+        run: packages/qdrant-js/scripts/integration-tests.sh
         shell: bash
+        env:
+          QDRANT_URL: ${{ secrets.QDRANT_URL }}
+          QDRANT_API_KEY: ${{ secrets.QDRANT_API_KEY }}

@@ -29,5 +29,3 @@ export class QdrantClientUnexpectedResponseError extends CustomError {
 export class QdrantClientConfigError extends CustomError {}
 
 export class QdrantClientTimeoutError extends CustomError {}
-
-export class QdrantClientNotImplementedError extends CustomError {}

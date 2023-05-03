@@ -4,7 +4,7 @@ import {writeFile} from 'fs/promises';
 
 const createCommonJsPackage = () => ({
     name: 'cjs-package',
-    buildEnd: () => writeFile('dist/cjs/package.json', JSON.stringify({type: 'commonjs'}, null, 4)),
+    buildEnd: () => writeFile('dist/cjs/package.json', '{"type":"commonjs"}'),
 });
 
 export default {
@@ -29,5 +29,5 @@ export default {
             plugins: [terser()],
         },
     ],
-    plugins: [createCommonJsPackage(), nodeResolve()],
+    plugins: [createCommonJsPackage(), nodeResolve({browser: true})],
 };

@@ -13,7 +13,7 @@ New releases are made from the `master` branch following semver. Major and minor
 
 2. (**AC**) Then open a pull request.
 
-3. (**RC**) verifies the **semver** version commitment and turns it into a bump wtih `pnpm run version` on the root directory. This updates the versions on package.json files and updates the CHANGELOG.md files.
+3. (**RC**) verifies the **semver** version commitment and turns it into a bump with `pnpm ci:version` on the root directory. This updates the versions on package.json files and updates the CHANGELOG.md files.
 
 > This last step if skipped could result in an outdated pnpm lock file, and if so, update it manually with: `pnpm install --lockfile-only`.
 

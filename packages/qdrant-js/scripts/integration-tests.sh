@@ -8,13 +8,14 @@ function stop_docker()
   docker stop qdrant_test
 }
 
-QDRANT_LATEST="v1.1.1"
+QDRANT_LATEST="v1.2.2"
 QDRANT_VERSION=${QDRANT_VERSION:-"$QDRANT_LATEST"}
 
 QDRANT_HOST='127.0.0.1:6333'
 
 docker run -d --rm \
            -p 6333:6333 \
+           -p 6334:6334 \
            -e QDRANT__SERVICE__GRPC_PORT="6334" \
            --name qdrant_test qdrant/qdrant:${QDRANT_VERSION}
 
@@ -26,7 +27,8 @@ until $(curl --output /dev/null --silent --get --fail http://$QDRANT_HOST/collec
   sleep 5
 done
 
-pnpm test:integration
+pnpm --filter "@qdrant/js-client-rest" test:integration
+pnpm --filter "@qdrant/js-client-grpc" test:integration
 
 echo "Ok, that is enough"
 

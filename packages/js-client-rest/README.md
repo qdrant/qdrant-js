@@ -49,6 +49,10 @@ Or directly using an endpoint from the API:
 await client.api('collections').getCollections();
 ```
 
+## Support
+
+The REST implementation relies on the native [fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), which is available in Deno and Node.js (starting on v18.0.0 without experimental flag). The Deno implementation [supports HTTP/2](https://deno.com/blog/every-web-api-in-deno#fetch-request-response-and-headers) whereas Node.js is still lagging on the spec and provide only HTTP 1.1 support (this is due to the fact that under the hood Node.js still relies on [undici](https://github.com/nodejs/undici)).
+
 ## Releases
 
 Major and minor versions align with Qdrant's engine releases, whilst patch are reserved for fixes regarding the current minor release. Check out [RELEASE.md](../../RELEASE.md) for more info on release guidelines.
@@ -61,5 +65,5 @@ These are the most relevant scripts for development:
 -   `pnpm pre-check`: type-checks sources
 -   `pnpm pre-commit`: same as pre-check, but for git hooks (husky)
 -   `pnpm test`: run unit tests
--   `./tests/integration-tests.sh`: starts local docker container and runs integration tests with: `pnpm test:integration`
+-   `pnpm test:integration`: runs integration tests against a locally running Qdrant docker container
 -   `pnpm codegen:openapi-typescript`: updates generated TS schema from the latest openapi.json remote

@@ -1,4 +1,3 @@
-
 <p align="center">
   <img height="100" src="https://github.com/qdrant/qdrant/raw/master/docs/logo.svg" alt="Qdrant"> 
   &nbsp;
@@ -9,8 +8,7 @@
     <b>JavaScript/TypeScript library for the <a href="https://github.com/qdrant/qdrant">Qdrant</a> vector search engine.</b>
 </p>
 
-
-<p align=center>
+<p align="center">
     <a href="https://www.npmjs.com/package/@qdrant/qdrant-js"><img src="https://badge.fury.io/js/@qdrant%2Fqdrant-js.svg" alt="npm version" height="18"></a>
     <a href="https://qdrant.github.io/qdrant/redoc/index.html"><img src="https://img.shields.io/badge/Docs-OpenAPI%203.0-success" alt="OpenAPI Docs"></a>
     <a href="https://github.com/qdrant/qdrant-client/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-success" alt="Apache 2.0 License"></a>
@@ -22,23 +20,22 @@
 
 This repository contains packages of the JS SDK for the [Qdrant](https://github.com/qdrant/qdrant) vector search engine.
 
-There are 3 packages:
+There are published 3 packages:
 
-* [`@qdrant/qdrant-js`](./packages/qdrant-js) - the main package with the SDK itself.
-* [`@qdrant/js-client-rest`](./packages/js-client-rest) - leightweight REST client for Qdrant.
-* [`@qdrant/js-client-grpc`](./packages/js-client-grpc) - WIP gRPC client for Qdrant.
-
+-   [`@qdrant/qdrant-js`](./packages/qdrant-js) - the main package with the SDK itself.
+-   [`@qdrant/js-client-rest`](./packages/js-client-rest) - lightweight REST client for Qdrant.
+-   [`@qdrant/js-client-grpc`](./packages/js-client-grpc) - gRPC client for Qdrant.
 
 ## JS/TS Examples
 
 ### Installation
 
 ```shell
+pnpm i @qdrant/js-client-rest
+# or
 npm install @qdrant/js-client-rest
 # or
 yarn add @qdrant/js-client-rest
-# or
-pnpm i @qdrant/js-client-rest
 ```
 
 ### Usage
@@ -75,7 +72,14 @@ console.log('List of collections:', result.collections);
 
 More examples can be found in the [`examples`](./examples) folder.
 
+## Support
 
+TypeScript types are provided alongside JavaScript sources to be used in:
+
+-   Node.js (ESM and CJS) - `>= 18.0.0`
+-   Deno
+-   Browser (fetch API)
+-   Cloudflare Workers (OpenAPI only)
 
 ## Releases
 
@@ -83,11 +87,9 @@ Major and minor versions align with Qdrant's engine releases, whilst patch are r
 
 For release automation we use [`changesets`](https://github.com/changesets/changesets) both for pull requests and pushes to the master branch, and their [Github Action](https://github.com/changesets/action) to automate changeset steps.
 
-## Contributions
+## Contributing
 
-In order to contribute there are a couple of things you may need to do.
-
-We make use of [`pnpm`](https://pnpm.io/) instead of `npm` or `yarn` to manage and install packages in this monorepo, make sure it's installed on your local environment.
+In order to [contribute](./CONTRIBUTING.md) there are a couple of things you may need to setup. We make use of [`pnpm`](https://pnpm.io/) instead of `npm` or `yarn` to manage and install packages in this monorepo, make sure it's installed on your local environment.
 
 After checking out the repository and desired branch, run `pnpm install` to install all package's dependencies and run the compilation steps. This will work for the monorepo.
 

@@ -7,7 +7,8 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/qdrant/qdrant-js"
+        "url": "https://github.com/qdrant/qdrant-js.git",
+        "directory": "packages/qdrant-js"
     },
     "bugs": {
         "url": "https://github.com/qdrant/qdrant-js/issues"
@@ -15,17 +16,30 @@
     "homepage": "https://github.com/qdrant/qdrant-js#readme",
     "license": "Apache-2.0",
     "type": "module",
-    "module": "./dist/esm/index.js",
-    "browser": "./dist/browser/index.js",
-    "types": "./dist/types/index.d.ts",
     "exports": {
         ".": {
-            "require": "./dist/cjs/index.js",
-            "browser": "./dist/browser/index.js",
             "types": "./dist/types/index.d.ts",
+            "browser": "./dist/browser/index.js",
+            "require": "./dist/cjs/index.js",
             "default": "./dist/esm/index.js"
+        },
+        "./grpc": {
+            "types": "./dist/types/grpc/index.d.ts",
+            "require": "./dist/cjs/grpc/index.js",
+            "default": "./dist/esm/grpc/index.js"
         }
     },
+    "types": "./dist/types/index.d.ts",
+    "typesVersions": {
+        "*": {
+            "grpc": [
+                "dist/types/grpc"
+            ]
+        }
+    },
+    "browser": "./dist/browser/index.js",
+    "main": "./dist/cjs/index.js",
+    "module": "./dist/esm/index.js",
     "files": [
         "dist"
     ],
@@ -34,22 +48,17 @@
     },
     "scripts": {
         "build": "pnpm tsc:build && pnpm bundle",
-        "pre-check": "pnpm tsc:check",
-        "pre-commit": "pnpm tsc:check",
+        "pre-check": "pnpm tsc:check && pnpm lint",
+        "pre-commit": "pnpm tsc:check && pnpm lint-staged",
         "tsc:check": "tsc --noEmit",
         "tsc:build": "pnpm clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
         "bundle": "rollup -c rollup.config.js",
+        "lint": "eslint src",
         "clean": "rimraf ./dist"
     },
     "dependencies": {
-        "@qdrant/js-client-rest": "workspace:1.2.0"
-    },
-    "devDependencies": {
-        "@rollup/plugin-node-resolve": "15.0.2",
-        "@rollup/plugin-terser": "0.4.0",
-        "rimraf": "5.0.0",
-        "rollup": "3.20.2",
-        "typescript": "5.0.4"
+        "@qdrant/js-client-rest": "workspace:1.2.0",
+        "@qdrant/js-client-grpc": "workspace:1.2.0"
     },
     "peerDependencies": {
         "typescript": ">=4.1"
