@@ -9,7 +9,7 @@
     "packageManager": "pnpm@8.3.0",
     "scripts": {
         "prepare": "node ./prepare.cjs && pnpm -r build",
-        "version": "pnpm changeset version && pnpm install --lockfile-only",
+        "ci:version": "pnpm changeset version && pnpm install --no-frozen-lockfile && git add .",
         "ci:release": "pnpm changeset publish"
     },
     "devDependencies": {
