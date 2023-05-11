@@ -1,5 +1,11 @@
 # @qdrant/js-client-rest
 
+## 1.1.6
+
+### Patch Changes
+
+-   [`1f0605a`](https://github.com/qdrant/qdrant-js/commit/1f0605ab455d4dadf5940dbe2760c5d4092fddd6) Thanks [@Rendez](https://github.com/Rendez)! - Use @qdrant/openapi-typescript-fetch as dependency
+
 ## 1.1.5
 
 ### Patch Changes
