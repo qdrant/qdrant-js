@@ -60,8 +60,8 @@
         "*.{md,yaml}": "prettier --list-different"
     },
     "dependencies": {
-        "@sevinf/maybe": "0.5.0",
-        "openapi-typescript-fetch": "Rendez/openapi-typescript-fetch#c114c381602b9b3891f0ec45dbc5409816743dad"
+        "@sevinf/maybe": "^0.5.0",
+        "@qdrant/openapi-typescript-fetch": "^1.2.0"
     },
     "devDependencies": {
         "@rollup/plugin-node-resolve": "15.0.2",

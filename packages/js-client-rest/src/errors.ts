@@ -1,4 +1,4 @@
-import {ApiResponse} from 'openapi-typescript-fetch';
+import {ApiResponse} from '@qdrant/openapi-typescript-fetch';
 
 const MAX_CONTENT = 200;
 
