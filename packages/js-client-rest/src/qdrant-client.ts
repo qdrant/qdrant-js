@@ -149,7 +149,7 @@ export class QdrantClient {
      *          - If `False` - do not attach any payload
      *          - If List of string - include only specified fields
      *          - If `PayloadSelector` - use explicit rules
-     *      - with_vectors:
+     *      - with_vector:
      *          - If `True` - Attach stored vector to the search result.
      *          - If `False` - Do not attach vector.
      *          - If List of string - include only specified fields
