@@ -410,6 +410,142 @@ export class QdrantClient {
     }
 
     /**
+     * Get cluster information for a collection.
+     * @param collection_name
+     * @returns Operation result
+     */
+    async collectionClusterInfo(collection_name: string) {
+        const response = await this._openApiClient.collections.collectionClusterInfo({collection_name});
+        return maybe(response.data.result).orThrow('Collection cluster info returned empty');
+    }
+
+    /*
+     * Update vectors 
+     * @param collection_name
+     * @returns Operation result
+     */
+    async updateVectors(
+        collection_name: string,
+        {
+            wait = true,
+            ordering,
+            points
+        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateVectors'>,
+    ) {
+        const response = await this._openApiClient.points.updateVectors({
+            collection_name,
+            wait,
+            ordering,
+            points,
+        });
+        return maybe(response.data.result).orThrow('Update vectors returned empty');
+    }
+
+    /**
+     * Delete vectors
+     * @param collection_name
+     * @returns Operation result
+     */
+    async deleteVectors(
+        collection_name: string,
+        {
+            wait = true,
+            ordering,
+            points,
+            filter,
+            vector,
+        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'DeleteVectors'>,
+    ) {
+        const response = await this._openApiClient.points.deleteVectors({
+            collection_name,
+            wait,
+            ordering,
+            points,
+            filter,
+            vector,
+        });
+        return maybe(response.data.result).orThrow('Delete vectors returned empty');
+    }
+
+    /**
+     * Search point groups
+     * @param collection_name
+     * @returns Operation result
+     */
+    async searchPointGroups(
+        collection_name: string,
+        {
+            consistency,
+            vector,
+            filter,
+            params,
+            with_payload,
+            with_vector,
+            score_threshold,
+            group_by,
+            group_size,
+            limit,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & SchemaFor<'SearchGroupsRequest'>,
+    ) {
+        const response = await this._openApiClient.points.searchPointGroups({
+            collection_name,
+            consistency,
+            vector,
+            filter,
+            params,
+            with_payload,
+            with_vector,
+            score_threshold,
+            group_by,
+            group_size,
+            limit,
+        });
+        return maybe(response.data.result).orThrow('Search point groups returned empty');
+    }
+
+    /**
+     * Recommend point groups
+     * @param collection_name
+     * @returns Operation result
+     */
+    async recommendPointGroups(
+        collection_name: string,
+        {
+            consistency,
+            positive,
+            negative,
+            filter,
+            params,
+            with_payload,
+            with_vector,
+            score_threshold,
+            using,
+            lookup_from,
+            group_by,
+            group_size,
+            limit,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & SchemaFor<'RecommendGroupsRequest'>,
+    ) {
+        const response = await this._openApiClient.points.recommendPointGroups({
+            collection_name,
+            consistency,
+            positive,
+            negative,
+            filter,
+            params,
+            with_payload,
+            with_vector,
+            score_threshold,
+            using,
+            lookup_from,
+            group_by,
+            group_size,
+            limit,
+        });
+        return maybe(response.data.result).orThrow('Recommend point groups API returned empty');
+    }
+
+    /**
      * Update or insert a new point into the collection.
      * @param collection_name
      * @param {object} args

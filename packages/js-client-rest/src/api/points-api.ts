@@ -32,6 +32,22 @@ export function createPointsApi(client: Client) {
             .create({wait: true, ordering: true}),
 
         /**
+         * Update vectors 
+         */
+        updateVectors: client
+            .path('/collections/{collection_name}/points/vectors')
+            .method('put')
+            .create({wait: true, ordering: true}),
+
+        /**
+         * Delete vectors
+         */
+        deleteVectors: client
+            .path('/collections/{collection_name}/points/vectors/delete')
+            .method('post')
+            .create({wait: true, ordering: true}),
+
+        /**
          * Retrieve full information of single point by id
          */
         getPoint: client.path('/collections/{collection_name}/points/{id}').method('get').create(),
@@ -62,6 +78,14 @@ export function createPointsApi(client: Client) {
          */
         recommendPoints: client
             .path('/collections/{collection_name}/points/recommend')
+            .method('post')
+            .create({consistency: true}),
+
+        /**
+         * Search point groups 
+         */
+        searchPointGroups: client
+            .path('/collections/{collection_name}/points/search/groups')
             .method('post')
             .create({consistency: true}),
 
@@ -104,5 +128,13 @@ export function createPointsApi(client: Client) {
             .path('/collections/{collection_name}/points')
             .method('put')
             .create({wait: true, ordering: true}),
+
+        /**
+         * Recommend point groups
+         */
+        recommendPointGroups: client
+            .path('/collections/{collection_name}/points/recommend/groups')
+            .method('post')
+            .create({consistency: true}),
     } as const;
 }
