@@ -17,6 +17,7 @@
         "@changesets/cli": "2.26.1",
         "husky": "8.0.3",
         "is-ci": "3.0.1",
+        "lint-staged": "13.2.1",
         "prettier": "2.8.7",
         "typescript": "5.0.4"
     },
