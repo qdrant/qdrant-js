@@ -737,7 +737,7 @@ export interface components {
       values_count?: components["schemas"]["ValuesCount"] | (Record<string, unknown> | null);
     };
     /** @description Match filter request */
-    Match: components["schemas"]["MatchValue"] | components["schemas"]["MatchText"] | components["schemas"]["MatchAny"];
+    Match: components["schemas"]["MatchValue"] | components["schemas"]["MatchText"] | components["schemas"]["MatchAny"] | components["schemas"]["MatchExcept"];
     /** @description Exact match of the given value */
     MatchValue: {
       value: components["schemas"]["ValueVariants"];
@@ -752,6 +752,10 @@ export interface components {
       any: components["schemas"]["AnyVariants"];
     };
     AnyVariants: (string)[] | (number)[];
+    /** @description Should have at least one value not matching the any given values */
+    MatchExcept: {
+      except: components["schemas"]["AnyVariants"];
+    };
     /** @description Range filter request */
     Range: {
       /**
