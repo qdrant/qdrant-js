@@ -212,6 +212,20 @@ export interface paths {
      */
     post: operations["delete_points"];
   };
+  "/collections/{collection_name}/points/vectors": {
+    /**
+     * Update vectors 
+     * @description Update specified named vectors on points, keep unspecified vectors intact.
+     */
+    put: operations["update_vectors"];
+  };
+  "/collections/{collection_name}/points/vectors/delete": {
+    /**
+     * Delete vectors 
+     * @description Delete named vectors from the given points.
+     */
+    post: operations["delete_vectors"];
+  };
   "/collections/{collection_name}/points/payload": {
     /**
      * Overwrite payload 
@@ -259,6 +273,13 @@ export interface paths {
      */
     post: operations["search_batch_points"];
   };
+  "/collections/{collection_name}/points/search/groups": {
+    /**
+     * Search point groups 
+     * @description Retrieve closest points based on vector similarity and given filtering conditions, grouped by a given payload field
+     */
+    post: operations["search_point_groups"];
+  };
   "/collections/{collection_name}/points/recommend": {
     /**
      * Recommend points 
@@ -272,6 +293,13 @@ export interface paths {
      * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples.
      */
     post: operations["recommend_batch_points"];
+  };
+  "/collections/{collection_name}/points/recommend/groups": {
+    /**
+     * Recommend point groups 
+     * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples, grouped by a given payload field.
+     */
+    post: operations["recommend_point_groups"];
   };
   "/collections/{collection_name}/points/count": {
     /**
@@ -401,6 +429,8 @@ export interface components {
       hnsw_config?: components["schemas"]["HnswConfigDiff"] | (Record<string, unknown> | null);
       /** @description Custom params for quantization. If none - values from collection configuration are used. */
       quantization_config?: components["schemas"]["QuantizationConfig"] | (Record<string, unknown> | null);
+      /** @description If true, vectors are served from disk, improving RAM usage at the cost of latency Default: false */
+      on_disk?: boolean | null;
     };
     /**
      * @description Type of internal tags, build from payload Distance function types used to compare vectors 
@@ -420,7 +450,7 @@ export interface components {
       ef_construct?: number | null;
       /**
        * Format: uint 
-       * @description Minimal size (in KiloBytes) of vectors for additional payload-based indexing. If payload chunk is smaller than `full_scan_threshold_kb` additional indexing won't be used - in this case full-scan search should be preferred by query planner and additional indexing is not required. Note: 1Kb = 1 vector of size 256
+       * @description Minimal size (in kilobytes) of vectors for additional payload-based indexing. If payload chunk is smaller than `full_scan_threshold_kb` additional indexing won't be used - in this case full-scan search should be preferred by query planner and additional indexing is not required. Note: 1Kb = 1 vector of size 256
        */
       full_scan_threshold?: number | null;
       /**
@@ -436,7 +466,7 @@ export interface components {
        */
       payload_m?: number | null;
     };
-    QuantizationConfig: components["schemas"]["ScalarQuantization"];
+    QuantizationConfig: components["schemas"]["ScalarQuantization"] | components["schemas"]["ProductQuantization"];
     ScalarQuantization: {
       scalar: components["schemas"]["ScalarQuantizationConfig"];
     };
@@ -452,6 +482,15 @@ export interface components {
     };
     /** @enum {string} */
     ScalarType: "int8";
+    ProductQuantization: {
+      product: components["schemas"]["ProductQuantizationConfig"];
+    };
+    ProductQuantizationConfig: {
+      compression: components["schemas"]["CompressionRatio"];
+      always_ram?: boolean | null;
+    };
+    /** @enum {string} */
+    CompressionRatio: "x4" | "x8" | "x16" | "x32" | "x64";
     /** @description Config of HNSW index */
     HnswConfig: {
       /**
@@ -503,23 +542,36 @@ export interface components {
       default_segment_number: number;
       /**
        * Format: uint 
-       * @description Do not create segments larger this size (in KiloBytes). Large segments might require disproportionately long indexation times, therefore it makes sense to limit the size of segments.
+       * @description Do not create segments larger this size (in kilobytes). Large segments might require disproportionately long indexation times, therefore it makes sense to limit the size of segments.
        * 
-       * If indexation speed have more priority for your - make this parameter lower. If search speed is more important - make this parameter higher. Note: 1Kb = 1 vector of size 256 If not set, will be automatically selected considering the number of available CPUs. 
+       * If indexing speed is more important - make this parameter lower. If search speed is more important - make this parameter higher. Note: 1Kb = 1 vector of size 256 If not set, will be automatically selected considering the number of available CPUs. 
        * @default null
        */
       max_segment_size?: number | null;
       /**
        * Format: uint 
-       * @description Maximum size (in KiloBytes) of vectors to store in-memory per segment. Segments larger than this threshold will be stored as read-only memmaped file. To enable memmap storage, lower the threshold Note: 1Kb = 1 vector of size 256 If not set, mmap will not be used. 
+       * @description Maximum size (in kilobytes) of vectors to store in-memory per segment. Segments larger than this threshold will be stored as read-only memmaped file.
+       * 
+       * Memmap storage is disabled by default, to enable it, set this threshold to a reasonable value.
+       * 
+       * To disable memmap storage, set this to `0`. Internally it will use the largest threshold possible.
+       * 
+       * Note: 1Kb = 1 vector of size 256 
        * @default null
        */
       memmap_threshold?: number | null;
       /**
        * Format: uint 
-       * @description Maximum size (in KiloBytes) of vectors allowed for plain index. Default value based on <https://github.com/google-research/google-research/blob/master/scann/docs/algorithms.md> Note: 1Kb = 1 vector of size 256
+       * @description Maximum size (in kilobytes) of vectors allowed for plain index, exceeding this threshold will enable vector indexing
+       * 
+       * Default value is 20,000, based on <https://github.com/google-research/google-research/blob/master/scann/docs/algorithms.md>.
+       * 
+       * To disable vector indexing, set to `0`.
+       * 
+       * Note: 1kB = 1 vector of size 256. 
+       * @default null
        */
-      indexing_threshold: number;
+      indexing_threshold?: number | null;
       /**
        * Format: uint64 
        * @description Minimum interval between forced flushes.
@@ -668,7 +720,7 @@ export interface components {
       /** @description All conditions must NOT match */
       must_not?: (components["schemas"]["Condition"])[] | null;
     };
-    Condition: components["schemas"]["FieldCondition"] | components["schemas"]["IsEmptyCondition"] | components["schemas"]["IsNullCondition"] | components["schemas"]["HasIdCondition"] | components["schemas"]["Filter"];
+    Condition: components["schemas"]["FieldCondition"] | components["schemas"]["IsEmptyCondition"] | components["schemas"]["IsNullCondition"] | components["schemas"]["HasIdCondition"] | components["schemas"]["NestedCondition"] | components["schemas"]["Filter"];
     /** @description All possible payload filtering conditions */
     FieldCondition: {
       /** @description Payload key */
@@ -685,7 +737,7 @@ export interface components {
       values_count?: components["schemas"]["ValuesCount"] | (Record<string, unknown> | null);
     };
     /** @description Match filter request */
-    Match: components["schemas"]["MatchValue"] | components["schemas"]["MatchText"] | components["schemas"]["MatchAny"];
+    Match: components["schemas"]["MatchValue"] | components["schemas"]["MatchText"] | components["schemas"]["MatchAny"] | components["schemas"]["MatchExcept"];
     /** @description Exact match of the given value */
     MatchValue: {
       value: components["schemas"]["ValueVariants"];
@@ -700,6 +752,10 @@ export interface components {
       any: components["schemas"]["AnyVariants"];
     };
     AnyVariants: (string)[] | (number)[];
+    /** @description Should have at least one value not matching the any given values */
+    MatchExcept: {
+      except: components["schemas"]["AnyVariants"];
+    };
     /** @description Range filter request */
     Range: {
       /**
@@ -791,6 +847,14 @@ export interface components {
     /** @description ID-based filtering condition */
     HasIdCondition: {
       has_id: (components["schemas"]["ExtendedPointId"])[];
+    };
+    NestedCondition: {
+      nested: components["schemas"]["Nested"];
+    };
+    /** @description Select points with payload for a specified nested field */
+    Nested: {
+      key: string;
+      filter: components["schemas"]["Filter"];
     };
     /** @description Additional parameters of the search */
     SearchParams: {
@@ -1013,19 +1077,31 @@ export interface components {
       default_segment_number?: number | null;
       /**
        * Format: uint 
-       * @description Do not create segments larger this size (in KiloBytes). Large segments might require disproportionately long indexation times, therefore it makes sense to limit the size of segments.
+       * @description Do not create segments larger this size (in kilobytes). Large segments might require disproportionately long indexation times, therefore it makes sense to limit the size of segments.
        * 
        * If indexation speed have more priority for your - make this parameter lower. If search speed is more important - make this parameter higher. Note: 1Kb = 1 vector of size 256
        */
       max_segment_size?: number | null;
       /**
        * Format: uint 
-       * @description Maximum size (in KiloBytes) of vectors to store in-memory per segment. Segments larger than this threshold will be stored as read-only memmaped file. To enable memmap storage, lower the threshold Note: 1Kb = 1 vector of size 256
+       * @description Maximum size (in kilobytes) of vectors to store in-memory per segment. Segments larger than this threshold will be stored as read-only memmaped file.
+       * 
+       * Memmap storage is disabled by default, to enable it, set this threshold to a reasonable value.
+       * 
+       * To disable memmap storage, set this to `0`.
+       * 
+       * Note: 1Kb = 1 vector of size 256
        */
       memmap_threshold?: number | null;
       /**
        * Format: uint 
-       * @description Maximum size (in KiloBytes) of vectors allowed for plain index. Default value based on <https://github.com/google-research/google-research/blob/master/scann/docs/algorithms.md> Note: 1Kb = 1 vector of size 256
+       * @description Maximum size (in kilobytes) of vectors allowed for plain index, exceeding this threshold will enable vector indexing
+       * 
+       * Default value is 20,000, based on <https://github.com/google-research/google-research/blob/master/scann/docs/algorithms.md>.
+       * 
+       * To disable vector indexing, set to `0`.
+       * 
+       * Note: 1kB = 1 vector of size 256.
        */
       indexing_threshold?: number | null;
       /**
@@ -1397,35 +1473,24 @@ export interface components {
       vector_data: {
         [key: string]: components["schemas"]["VectorDataConfig"] | undefined;
       };
-      index: components["schemas"]["Indexes"];
-      storage_type: components["schemas"]["StorageType"];
-      payload_storage_type?: components["schemas"]["PayloadStorageType"];
-      /**
-       * @description Quantization parameters. If none - quantization is disabled. 
-       * @default null
-       */
-      quantization_config?: components["schemas"]["QuantizationConfig"] | (Record<string, unknown> | null);
+      payload_storage_type: components["schemas"]["PayloadStorageType"];
     };
     /** @description Config of single vector data storage */
     VectorDataConfig: {
       /**
        * Format: uint 
-       * @description Size of a vectors used
+       * @description Size/dimensionality of the vectors used
        */
       size: number;
       distance: components["schemas"]["Distance"];
-      /**
-       * @description Vector specific HNSW config that overrides collection config 
-       * @default null
-       */
-      hnsw_config?: components["schemas"]["HnswConfig"] | (Record<string, unknown> | null);
-      /**
-       * @description Vector specific quantization config that overrides collection config 
-       * @default null
-       */
+      storage_type: components["schemas"]["VectorStorageType"];
+      index: components["schemas"]["Indexes"];
+      /** @description Vector specific quantization config that overrides collection config */
       quantization_config?: components["schemas"]["QuantizationConfig"] | (Record<string, unknown> | null);
     };
-    /** @description Vector index configuration of the segment */
+    /** @description Storage types for vectors */
+    VectorStorageType: "Memory" | "Mmap" | "ChunkedMmap";
+    /** @description Vector index configuration */
     Indexes: OneOf<[{
       /** @enum {string} */
       type: "plain";
@@ -1434,14 +1499,6 @@ export interface components {
       /** @enum {string} */
       type: "hnsw";
       options: components["schemas"]["HnswConfig"];
-    }]>;
-    /** @description Type of vector storage */
-    StorageType: OneOf<[{
-      /** @enum {string} */
-      type: "in_memory";
-    }, {
-      /** @enum {string} */
-      type: "mmap";
     }]>;
     /** @description Type of payload storage */
     PayloadStorageType: OneOf<[{
@@ -1653,6 +1710,109 @@ export interface components {
      * @enum {string}
      */
     ReadConsistencyType: "majority" | "quorum" | "all";
+    UpdateVectors: {
+      /** @description Points with named vectors */
+      points: (components["schemas"]["PointVectors"])[];
+    };
+    PointVectors: {
+      id: components["schemas"]["ExtendedPointId"];
+      vector: components["schemas"]["VectorStruct"];
+    };
+    DeleteVectors: {
+      /** @description Deletes values from each point in this list */
+      points?: (components["schemas"]["ExtendedPointId"])[] | null;
+      /** @description Deletes values from points that satisfy this filter condition */
+      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
+      /** @description Vector names */
+      vector: (string)[];
+    };
+    PointGroup: {
+      /** @description Scored points that have the same value of the group_by key */
+      hits: (components["schemas"]["ScoredPoint"])[];
+      id: components["schemas"]["GroupId"];
+    };
+    GroupId: string | number | number;
+    SearchGroupsRequest: {
+      vector: components["schemas"]["NamedVectorStruct"];
+      /** @description Look only for points which satisfies this conditions */
+      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
+      /** @description Additional search params */
+      params?: components["schemas"]["SearchParams"] | (Record<string, unknown> | null);
+      /** @description Select which payload to return with the response. Default: None */
+      with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
+      /**
+       * @description Whether to return the point vector with the result? 
+       * @default null
+       */
+      with_vector?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
+      /**
+       * Format: float 
+       * @description Define a minimal score threshold for the result. If defined, less similar results will not be returned. Score of the returned result might be higher or smaller than the threshold depending on the Distance function used. E.g. for cosine similarity only higher scores will be returned.
+       */
+      score_threshold?: number | null;
+      /** @description Payload field to group by, must be a string or number field. If the field contains more than 1 value, all values will be used for grouping. One point can be in multiple groups. */
+      group_by: string;
+      /**
+       * Format: uint32 
+       * @description Maximum amount of points to return per group
+       */
+      group_size: number;
+      /**
+       * Format: uint32 
+       * @description Maximum amount of groups to return
+       */
+      limit: number;
+    };
+    RecommendGroupsRequest: {
+      /** @description Look for vectors closest to those */
+      positive: (components["schemas"]["ExtendedPointId"])[];
+      /**
+       * @description Try to avoid vectors like this 
+       * @default []
+       */
+      negative?: (components["schemas"]["ExtendedPointId"])[];
+      /** @description Look only for points which satisfies this conditions */
+      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
+      /** @description Additional search params */
+      params?: components["schemas"]["SearchParams"] | (Record<string, unknown> | null);
+      /** @description Select which payload to return with the response. Default: None */
+      with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
+      /**
+       * @description Whether to return the point vector with the result? 
+       * @default null
+       */
+      with_vector?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
+      /**
+       * Format: float 
+       * @description Define a minimal score threshold for the result. If defined, less similar results will not be returned. Score of the returned result might be higher or smaller than the threshold depending on the Distance function used. E.g. for cosine similarity only higher scores will be returned.
+       */
+      score_threshold?: number | null;
+      /**
+       * @description Define which vector to use for recommendation, if not specified - try to use default vector 
+       * @default null
+       */
+      using?: components["schemas"]["UsingVector"] | (Record<string, unknown> | null);
+      /**
+       * @description The location used to lookup vectors. If not specified - use current collection. Note: the other collection should have the same vector size as the current collection 
+       * @default null
+       */
+      lookup_from?: components["schemas"]["LookupLocation"] | (Record<string, unknown> | null);
+      /** @description Payload field to group by, must be a string or number field. If the field contains more than 1 value, all values will be used for grouping. One point can be in multiple groups. */
+      group_by: string;
+      /**
+       * Format: uint32 
+       * @description Maximum amount of points to return per group
+       */
+      group_size: number;
+      /**
+       * Format: uint32 
+       * @description Maximum amount of groups to return
+       */
+      limit: number;
+    };
+    GroupsResult: {
+      groups: (components["schemas"]["PointGroup"])[];
+    };
   };
   responses: never;
   parameters: never;
@@ -3181,6 +3341,112 @@ export interface operations {
     };
   };
   /**
+   * Update vectors 
+   * @description Update specified named vectors on points, keep unspecified vectors intact.
+   */
+  update_vectors: {
+    parameters: {
+      query: {
+        /** @description If true, wait for changes to actually happen */
+        wait?: boolean;
+        /** @description define ordering guarantees for the operation */
+        ordering?: components["schemas"]["WriteOrdering"];
+      };
+      path: {
+        /** @description Name of the collection to update from */
+        collection_name: string;
+      };
+    };
+    /** @description Update named vectors on points */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["UpdateVectors"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            /** @enum {string} */
+            status?: "ok";
+            result?: components["schemas"]["UpdateResult"];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Delete vectors 
+   * @description Delete named vectors from the given points.
+   */
+  delete_vectors: {
+    parameters: {
+      query: {
+        /** @description If true, wait for changes to actually happen */
+        wait?: boolean;
+        /** @description define ordering guarantees for the operation */
+        ordering?: components["schemas"]["WriteOrdering"];
+      };
+      path: {
+        /** @description Name of the collection to delete from */
+        collection_name: string;
+      };
+    };
+    /** @description Delete named vectors from points */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["DeleteVectors"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            /** @enum {string} */
+            status?: "ok";
+            result?: components["schemas"]["UpdateResult"];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
    * Overwrite payload 
    * @description Replace full payload of points with new one
    */
@@ -3546,6 +3812,57 @@ export interface operations {
     };
   };
   /**
+   * Search point groups 
+   * @description Retrieve closest points based on vector similarity and given filtering conditions, grouped by a given payload field
+   */
+  search_point_groups: {
+    parameters: {
+      query: {
+        /** @description Define read consistency guarantees for the operation */
+        consistency?: components["schemas"]["ReadConsistency"];
+      };
+      path: {
+        /** @description Name of the collection to search in */
+        collection_name: string;
+      };
+    };
+    /** @description Search request with optional filtering, grouped by a given payload field */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["SearchGroupsRequest"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            /** @enum {string} */
+            status?: "ok";
+            result?: components["schemas"]["GroupsResult"];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
    * Recommend points 
    * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples.
    */
@@ -3630,6 +3947,57 @@ export interface operations {
             /** @enum {string} */
             status?: "ok";
             result?: ((components["schemas"]["ScoredPoint"])[])[];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Recommend point groups 
+   * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples, grouped by a given payload field.
+   */
+  recommend_point_groups: {
+    parameters: {
+      query: {
+        /** @description Define read consistency guarantees for the operation */
+        consistency?: components["schemas"]["ReadConsistency"];
+      };
+      path: {
+        /** @description Name of the collection to search in */
+        collection_name: string;
+      };
+    };
+    /** @description Request points based on positive and negative examples, grouped by a payload field. */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["RecommendGroupsRequest"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            /** @enum {string} */
+            status?: "ok";
+            result?: components["schemas"]["GroupsResult"];
           };
         };
       };

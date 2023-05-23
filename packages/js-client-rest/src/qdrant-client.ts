@@ -410,6 +410,203 @@ export class QdrantClient {
     }
 
     /**
+     * Get cluster information for a collection.
+     * @param collection_name
+     * @returns Operation result
+     */
+    async collectionClusterInfo(collection_name: string) {
+        const response = await this._openApiClient.collections.collectionClusterInfo({collection_name});
+        return maybe(response.data.result).orThrow('Collection cluster info returned empty');
+    }
+
+    /**
+     * Update vectors 
+     * @param collection_name
+     * @param {object} args
+     *     - wait: Await for the results to be processed.
+     *         - If `true`, result will be returned only when all changes are applied
+     *         - If `false`, result will be returned immediately after the confirmation of receiving.
+     *         - Default: `true`
+     *     - ordering: Define strategy for ordering of the points. Possible values:
+     *          - 'weak'   - write operations may be reordered, works faster, default
+     *          - 'medium' - write operations go through dynamically selected leader,
+     *                      may be inconsistent for a short period of time in case of leader change
+     *          - 'strong' - Write operations go through the permanent leader,
+     *                      consistent, but may be unavailable if leader is down
+     *     - points: Points with named vectors
+     * @returns Operation result
+     */
+    async updateVectors(
+        collection_name: string,
+        {
+            wait = true,
+            ordering,
+            points
+        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateVectors'>,
+    ) {
+        const response = await this._openApiClient.points.updateVectors({
+            collection_name,
+            wait,
+            ordering,
+            points,
+        });
+        return maybe(response.data.result).orThrow('Update vectors returned empty');
+    }
+
+    /**
+     * Delete vectors
+     * @param collection_name
+     * @param {object} args
+     *     - wait: Await for the results to be processed.
+     *         - If `true`, result will be returned only when all changes are applied
+     *         - If `false`, result will be returned immediately after the confirmation of receiving.
+     *         - Default: `true`
+     *     - ordering: Define strategy for ordering of the points. Possible values:
+     *          - 'weak'   - write operations may be reordered, works faster, default
+     *          - 'medium' - write operations go through dynamically selected leader,
+     *                      may be inconsistent for a short period of time in case of leader change
+     *          - 'strong' - Write operations go through the permanent leader,
+     *                      consistent, but may be unavailable if leader is down
+     *     - points: Deletes values from each point in this list
+     *     - filter: Deletes values from points that satisfy this filter condition
+     *     - vector: Vector names
+     * @returns Operation result
+     */
+    async deleteVectors(
+        collection_name: string,
+        {
+            wait = true,
+            ordering,
+            points,
+            filter,
+            vector,
+        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'DeleteVectors'>,
+    ) {
+        const response = await this._openApiClient.points.deleteVectors({
+            collection_name,
+            wait,
+            ordering,
+            points,
+            filter,
+            vector,
+        });
+        return maybe(response.data.result).orThrow('Delete vectors returned empty');
+    }
+
+    /**
+     * Search point groups
+     * @param collection_name
+     * @param {object} args -
+     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
+     *         Values:
+     *             number - number of replicas to query, values should present in all queried replicas
+     *             'majority' - query all replicas, but return values present in the majority of replicas
+     *             'quorum' - query the majority of replicas, return values present in all of them
+     *             'all' - query all replicas, and return values present in all replicas
+     *     - vector: 
+     *     - filter: Look only for points which satisfies this conditions
+     *     - params: Additional search params
+     *     - with_payload: Select which payload to return with the response
+     *     - with_vector: Whether to return the point vector with the result?
+     *     - score_threshold: Define a minimal score threshold for the result. If defined, less similar results will not be returned. Score of the returned result might be higher or smaller than the threshold depending on the Distance function used. E.g. for cosine similarity only higher scores will be returned.
+     *     - group_by: Payload field to group by, must be a string or number field. If the field contains more than 1 value, all values will be used for grouping. One point can be in multiple groups.
+     *     - group_size: Maximum amount of points to return per group
+     *     - limit: Maximum amount of groups to return
+     * @returns Operation result
+     */
+    async searchPointGroups(
+        collection_name: string,
+        {
+            consistency,
+            vector,
+            filter,
+            params,
+            with_payload = null,
+            with_vector = null,
+            score_threshold,
+            group_by,
+            group_size,
+            limit,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & SchemaFor<'SearchGroupsRequest'>,
+    ) {
+        const response = await this._openApiClient.points.searchPointGroups({
+            collection_name,
+            consistency,
+            vector,
+            filter,
+            params,
+            with_payload,
+            with_vector,
+            score_threshold,
+            group_by,
+            group_size,
+            limit,
+        });
+        return maybe(response.data.result).orThrow('Search point groups returned empty');
+    }
+
+    /**
+     * Recommend point groups
+     * @param collection_name
+     * @param {object} args -
+     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
+     *         Values:
+     *             number - number of replicas to query, values should present in all queried replicas
+     *             'majority' - query all replicas, but return values present in the majority of replicas
+     *             'quorum' - query the majority of replicas, return values present in all of them
+     *             'all' - query all replicas, and return values present in all replicas
+     *     - positive: Look for vectors closest to those
+     *     - negative: Try to avoid vectors like this 
+     *     - filter: Look only for points which satisfies this conditions
+     *     - params: Additional search params
+     *     - with_payload: Select which payload to return with the response
+     *     - with_vector: Whether to return the point vector with the result? 
+     *     - score_threshold: Define a minimal score threshold for the result. If defined, less similar results will not be returned. Score of the returned result might be higher or smaller than the threshold depending on the Distance function used. E.g. for cosine similarity only higher scores will be returned.
+     *     - using: Define which vector to use for recommendation, if not specified - try to use default vector
+     *     - lookup_from: The location used to lookup vectors. If not specified - use current collection. Note: the other collection should have the same vector size as the current collection
+     *     - group_by: Payload field to group by, must be a string or number field. If the field contains more than 1 value, all values will be used for grouping. One point can be in multiple groups.
+     *     - group_size: Maximum amount of points to return per group
+     *     - limit: Maximum amount of groups to return
+     * @returns Operation result
+     */
+    async recommendPointGroups(
+        collection_name: string,
+        {
+            consistency,
+            positive,
+            negative = [],
+            filter,
+            params,
+            with_payload = null,
+            with_vector = null,
+            score_threshold,
+            using = null,
+            lookup_from = null,
+            group_by,
+            group_size,
+            limit,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & SchemaFor<'RecommendGroupsRequest'>,
+    ) {
+        const response = await this._openApiClient.points.recommendPointGroups({
+            collection_name,
+            consistency,
+            positive,
+            negative,
+            filter,
+            params,
+            with_payload,
+            with_vector,
+            score_threshold,
+            using,
+            lookup_from,
+            group_by,
+            group_size,
+            limit,
+        });
+        return maybe(response.data.result).orThrow('Recommend point groups API returned empty');
+    }
+
+    /**
      * Update or insert a new point into the collection.
      * @param collection_name
      * @param {object} args

@@ -112,7 +112,7 @@ importers:
   packages/qdrant-js:
     dependencies:
       '@qdrant/js-client-rest':
-        specifier: workspace:1.1.6
+        specifier: workspace:1.2.0
         version: link:../js-client-rest
     devDependencies:
       '@rollup/plugin-node-resolve':
