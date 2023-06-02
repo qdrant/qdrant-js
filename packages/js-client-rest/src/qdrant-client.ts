@@ -1209,12 +1209,12 @@ export class QdrantClient {
      */
     async createPayloadIndex(
         collection_name: string,
-        field_name: string,
         {
             wait,
             ordering,
+            field_name,
             field_schema,
-        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & Omit<SchemaFor<'CreateFieldIndex'>, 'field_name'>,
+        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'CreateFieldIndex'>,
     ) {
         const response = await this._openApiClient.collections.createFieldIndex({
             collection_name,
