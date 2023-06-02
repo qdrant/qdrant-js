@@ -20,7 +20,7 @@ Run the Qdrant Docker container:
 docker run -p 6333:6333 qdrant/qdrant
 ```
 
-## Instantiate a client
+### Instantiate a client
 
 ```ts
 import {QdrantClient} from '@qdrant/js-client-rest';
@@ -30,7 +30,7 @@ const client = new QdrantClient({host: '127.0.0.1', port: 6333});
 const client = new QdrantClient({url: 'http://127.0.0.1:6333'});
 ```
 
-## Make requests
+### Make requests
 
 Using one of the available facade methods:
 
@@ -47,6 +47,39 @@ Or directly using an endpoint from the API:
 
 ```ts
 await client.api('collections').getCollections();
+```
+
+### Typed Error Handling
+
+A non-ok fetch response throws a generic `ApiError`
+
+But an Openapi document can declare a different response type for each status code, or a default error response type.
+
+These can be accessed via a discriminated union on status, as in code snippet below:
+
+```ts
+const findPetsByStatus = fetcher.path('/pet/findByStatus').method('get').create();
+const addPet = fetcher.path('/pet').method('post').create();
+
+try {
+    const collection = await client.getCollection('bom-ada-002');
+    // ...
+} catch (e) {
+    // check which operation threw the exception
+    if (e instanceof client.getCollection.Error) {
+        // get discriminated union error { status, data }
+        const error = e.getActualType();
+        // sort case's logic
+        if (error.status === 400) {
+            error.data.status.error; // only available for a 4xx responses
+        } else if (error.status === 500) {
+            error.data.status.error; // only available for a 500 response
+        } else {
+            error.data.result;
+            // ...
+        }
+    }
+}
 ```
 
 ## Support
