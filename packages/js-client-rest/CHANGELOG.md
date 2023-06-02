@@ -1,5 +1,13 @@
 # @qdrant/js-client-rest
 
+## 1.2.1
+
+### Patch Changes
+
+-   [#24](https://github.com/qdrant/qdrant-js/pull/24) [`fb009e1`](https://github.com/qdrant/qdrant-js/commit/fb009e1efec42b6383a6f0e764312a39808ee932) Thanks [@Rendez](https://github.com/Rendez)! - Added gRPC client
+
+-   [`38419ae`](https://github.com/qdrant/qdrant-js/commit/38419ae6b030f0535c74050cc73bd4a02f755028) Thanks [@Rendez](https://github.com/Rendez)! - Re-export custom errors on entry files
+
 ## 1.2.0
 
 ### Minor Changes

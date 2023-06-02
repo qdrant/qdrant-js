@@ -1,6 +1,6 @@
 {
     "name": "@qdrant/qdrant-js",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "engines": {
         "node": ">=18.0.0",
         "pnpm": ">=8"
@@ -57,8 +57,8 @@
         "clean": "rimraf ./dist"
     },
     "dependencies": {
-        "@qdrant/js-client-rest": "workspace:1.2.0",
-        "@qdrant/js-client-grpc": "workspace:1.2.0"
+        "@qdrant/js-client-rest": "workspace:1.2.1",
+        "@qdrant/js-client-grpc": "workspace:1.2.1"
     },
     "peerDependencies": {
         "typescript": ">=4.1"
