@@ -1,4 +1,5 @@
 export {QdrantClient, QdrantClientParams} from './qdrant-client.js';
+export * from './errors.js';
 export {ConnectError, Code as ConnectErrorCode} from '@bufbuild/connect';
 export {PlainMessage, PartialMessage, AnyMessage} from '@bufbuild/protobuf';
 export * from './proto/collections_pb.js';
