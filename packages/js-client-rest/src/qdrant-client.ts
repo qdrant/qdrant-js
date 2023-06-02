@@ -1,6 +1,6 @@
 import {maybe} from '@sevinf/maybe';
 import {OpenApiClient, createApis} from './api-client.js';
-import {QdrantClientNotImplementedError, QdrantClientConfigError} from './errors.js';
+import {QdrantClientConfigError} from './errors.js';
 import {RestArgs, SchemaFor} from './types.js';
 
 export type QdrantClientParams = {
@@ -10,8 +10,20 @@ export type QdrantClientParams = {
     prefix?: string;
     url?: string;
     host?: string;
+    /**
+     * Local timeout for requests (uses fetch's AbortSignal) - Default 300 seconds
+     */
     timeout?: number;
+    /**
+     * Additional HTTP Headers to send.
+     */
     headers?: Record<string, number | string | string[] | undefined>;
+    /**
+     * The Node.js fetch API (undici) uses HTTP/1.1 under the hood.
+     * This indicates the maximum number of keep-alive connections
+     * to open simultaneously while building a request pool in memory.
+     */
+    maxConnections?: number;
 };
 
 export class QdrantClient {
@@ -20,8 +32,8 @@ export class QdrantClient {
     private _port: number | null;
     private _prefix: string;
     private _host: string;
-    private _openApiClient: OpenApiClient;
     private _restUri: string;
+    private _openApiClient: OpenApiClient;
 
     constructor({url, host, apiKey, https, prefix, port = 6333, timeout = 300_000, ...args}: QdrantClientParams = {}) {
         this._https = https ?? typeof apiKey === 'string';
@@ -64,7 +76,7 @@ export class QdrantClient {
             this._host = host ?? '127.0.0.1';
         }
 
-        const headers = new Headers();
+        const headers = new Headers([['user-agent', 'qdrant-js']]);
 
         const metadata = args.headers ?? {};
         Object.keys(metadata).forEach((field) => {
@@ -82,7 +94,8 @@ export class QdrantClient {
 
         const address = this._port ? `${this._host}:${this._port}` : this._host;
         this._restUri = `${this._scheme}://${address}${this._prefix}`;
-        const restArgs: RestArgs = {headers, timeout};
+        const connections = args.maxConnections;
+        const restArgs: RestArgs = {headers, timeout, connections};
 
         this._openApiClient = createApis(this._restUri, restArgs);
     }
@@ -90,7 +103,7 @@ export class QdrantClient {
     /**
      * API getter
      *
-     * @param string Name of api
+     * @param name Name of api
      * @returns An instance of a namespaced API, generated from OpenAPI schema.
      */
     api<T extends keyof OpenApiClient>(name: T): OpenApiClient[T] {
@@ -100,7 +113,7 @@ export class QdrantClient {
     /**
      * Search for points in multiple collections
      *
-     * @param collection_name Name of the collection
+     * @param collectionName Name of the collection
      * @param {object} args -
      *     - searches: List of search requests
      *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
@@ -149,7 +162,7 @@ export class QdrantClient {
      *          - If `False` - do not attach any payload
      *          - If List of string - include only specified fields
      *          - If `PayloadSelector` - use explicit rules
-     *      - with_vectors:
+     *      - with_vector:
      *          - If `True` - Attach stored vector to the search result.
      *          - If `False` - Do not attach vector.
      *          - If List of string - include only specified fields
@@ -169,19 +182,21 @@ export class QdrantClient {
      *              - 'all' - query all replicas, and return values present in all replicas
      * @example
      *     // Search with filter
-     *     qdrant.search(
-     *         collection_name: "test_collection",
-     *         vector: [1.0, 0.1, 0.2, 0.7],
-     *         filter: {
-     *             must: [
-     *                 {
-     *                     key: 'color',
-     *                     range: {
-     *                         color: 'red'
+     *     client.search(
+     *         "test_collection",
+     *         {
+     *             vector: [1.0, 0.1, 0.2, 0.7],
+     *             filter: {
+     *                 must: [
+     *                     {
+     *                         key: 'color',
+     *                         range: {
+     *                             color: 'red'
+     *                         }
      *                     }
-     *                 }
-     *             ]
-     *         )
+     *                 ]
+     *             )
+     *         }
      *     )
      * @returns List of found close points with similarity scores.
      */
@@ -197,8 +212,10 @@ export class QdrantClient {
             with_vector = false,
             score_threshold,
             consistency,
-        }: Omit<SchemaFor<'SearchRequest'>, 'limit'> &
-            Partial<Pick<SchemaFor<'SearchRequest'>, 'limit'>> & {consistency?: SchemaFor<'ReadConsistency'>},
+        }: Partial<Pick<SchemaFor<'SearchRequest'>, 'limit'>> &
+            Omit<SchemaFor<'SearchRequest'>, 'limit'> & {
+                consistency?: SchemaFor<'ReadConsistency'>;
+            },
     ) {
         const response = await this._openApiClient.points.searchPoints({
             collection_name,
@@ -273,7 +290,7 @@ export class QdrantClient {
      *         - If List of string - include only specified fields
      *         - If `PayloadSelector` - use explicit rules
      *         - Default: `true`
-     *     - with_vectors:
+     *     - with_vector:
      *         - If `True` - Attach stored vector to the search result.
      *         - If `False` - Do not attach vector.
      *         - If List of string - include only specified fields
@@ -287,7 +304,7 @@ export class QdrantClient {
      *     - using:
      *         Name of the vectors to use for recommendations.
      *         If `None` - use default vectors.
-     *     - lookup_from:
+     *     - lookupFrom:
      *         Defines a location (collection and vector field name), used to lookup vectors for recommendations.
      *         If `None` - use current collection will be used.
      *     - consistency:
@@ -349,12 +366,12 @@ export class QdrantClient {
      *         - If List of string - include only specified fields
      *         - If `PayloadSelector` - use explicit rules
      *         - Default: `true`
-     *     with_vectors:
+     *     - with_vector:
      *         - If `True` - Attach stored vector to the search result.
      *         - If `False` - Do not attach vector.
      *         - If List of string - include only specified fields
      *         - Default: `false`
-     *     consistency:
+     *     - consistency:
      *         Read consistency of the search. Defines how many replicas should be queried before returning the result.
      *         Values:
      *         - int - number of replicas to query, values should present in all queried replicas
@@ -420,7 +437,7 @@ export class QdrantClient {
     }
 
     /**
-     * Update vectors 
+     * Update vectors
      * @param collection_name
      * @param {object} args
      *     - wait: Await for the results to be processed.
@@ -441,7 +458,7 @@ export class QdrantClient {
         {
             wait = true,
             ordering,
-            points
+            points,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateVectors'>,
     ) {
         const response = await this._openApiClient.points.updateVectors({
@@ -503,7 +520,7 @@ export class QdrantClient {
      *             'majority' - query all replicas, but return values present in the majority of replicas
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
-     *     - vector: 
+     *     - vector:
      *     - filter: Look only for points which satisfies this conditions
      *     - params: Additional search params
      *     - with_payload: Select which payload to return with the response
@@ -556,11 +573,11 @@ export class QdrantClient {
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
      *     - positive: Look for vectors closest to those
-     *     - negative: Try to avoid vectors like this 
+     *     - negative: Try to avoid vectors like this
      *     - filter: Look only for points which satisfies this conditions
      *     - params: Additional search params
      *     - with_payload: Select which payload to return with the response
-     *     - with_vector: Whether to return the point vector with the result? 
+     *     - with_vector: Whether to return the point vector with the result?
      *     - score_threshold: Define a minimal score threshold for the result. If defined, less similar results will not be returned. Score of the returned result might be higher or smaller than the threshold depending on the Distance function used. E.g. for cosine similarity only higher scores will be returned.
      *     - using: Define which vector to use for recommendation, if not specified - try to use default vector
      *     - lookup_from: The location used to lookup vectors. If not specified - use current collection. Note: the other collection should have the same vector size as the current collection
@@ -652,7 +669,7 @@ export class QdrantClient {
      *         - If List of string - include only specified fields
      *         - If `PayloadSelector` - use explicit rules
      *         - Default: `true`
-     *     - with_vectors:
+     *     - with_vector:
      *         - If `True` - Attach stored vector to the search result.
      *         - If `False` - Do not attach vector.
      *         - If List of string - Attach only specified vectors.
@@ -1027,7 +1044,7 @@ export class QdrantClient {
     /**
      * Create empty collection with given parameters
      * @returns Operation result
-     * @param collection_name Name of the collection to recreate
+     * @param collectionName Name of the collection to recreate
      * @param {object} args
      *     - vectors_config:
      *         Configuration of the vector storage. Vector params contains size and distance for the vector storage.
@@ -1096,34 +1113,34 @@ export class QdrantClient {
     /**
      * Delete and create empty collection with given parameters
      * @returns Operation result
-     * @param collection_name Name of the collection to recreate
+     * @param collectionName Name of the collection to recreate
      * @param {object} args
-     *     - vectors_config:
+     *     - vectorsConfig:
      *         Configuration of the vector storage. Vector params contains size and distance for the vector storage.
      *         If dict is passed, service will create a vector storage for each key in the dict.
      *         If single VectorParams is passed, service will create a single anonymous vector storage.
-     *     - shard_number: Number of shards in collection. Default is 1, minimum is 1.
-     *     - replication_factor:
+     *     - shardNumber: Number of shards in collection. Default is 1, minimum is 1.
+     *     - replicationFactor:
      *         Replication factor for collection. Default is 1, minimum is 1.
      *         Defines how many copies of each shard will be created.
      *         Have effect only in distributed mode.
-     *     - write_consistency_factor:
+     *     - writeConsistencyFactor:
      *         Write consistency factor for collection. Default is 1, minimum is 1.
      *         Defines how many replicas should apply the operation for us to consider it successful.
      *         Increasing this number will make the collection more resilient to inconsistencies, but will
      *         also make it fail if not enough replicas are available.
      *         Does not have any performance impact.
      *         Have effect only in distributed mode.
-     *     - on_disk_payload:
+     *     - onDiskPayload:
      *         If true - point`s payload will not be stored in memory.
      *         It will be read from the disk every time it is requested.
      *         This setting saves RAM by (slightly) increasing the response time.
      *         Note: those payload values that are involved in filtering and are indexed - remain in RAM.
-     *     - hnsw_config: Params for HNSW index
-     *     - optimizers_config: Params for optimizer
-     *     - wal_config: Params for Write-Ahead-Log
-     *     - quantization_config: Params for quantization, if None - quantization will be disabled
-     *     - init_from: Use data stored in another collection to initialize this collection
+     *     - hnswConfig: Params for HNSW index
+     *     - optimizersConfig: Params for optimizer
+     *     - walConfig: Params for Write-Ahead-Log
+     *     - quantizationConfig: Params for quantization, if None - quantization will be disabled
+     *     - initFrom: Use data stored in another collection to initialize this collection
      *     - timeout:
      *         Wait for operation commit timeout in seconds.
      *         If timeout is reached, request will return with service error.
@@ -1171,29 +1188,13 @@ export class QdrantClient {
         return maybe(response).orThrow('Create collection returned empty');
     }
 
-    async uploadRecords() {
-        return Promise.reject(new QdrantClientNotImplementedError('uploadRecords()'));
-    }
-
-    /**
-     * Upload vectors and payload to the collection.
-     * This method will perform automatic batching of the data.
-     * If you need to perform a single update, use `upsert` method.
-     * Note: use `upload_records` method if you want to upload multiple vectors with single payload.
-     * @param collection_name Name of the collection to upload to
-     */
-    async uploadCollection() {
-        return Promise.reject(new QdrantClientNotImplementedError('uploadCollection()'));
-    }
-
     /**
      * Creates index for a given payload field.
      * Indexed fields allow to perform filtered search operations faster.
-     * @param collection_name Name of the collection
-     * @param field_name Name of the payload field
+     * @param collectionName Name of the collection
      * @param {object} args
-     *     - field_name: Name of the payload field.
-     *     - field_schema: Type of data to index.
+     *     - fieldName: Name of the payload field.
+     *     - fieldSchema: Type of data to index.
      *     - wait: Await for the results to be processed.
      *         - If `true`, result will be returned only when all changes are applied
      *         - If `false`, result will be returned immediately after the confirmation of receiving.
@@ -1208,12 +1209,12 @@ export class QdrantClient {
      */
     async createPayloadIndex(
         collection_name: string,
+        field_name: string,
         {
             wait,
             ordering,
-            field_name,
             field_schema,
-        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'CreateFieldIndex'>,
+        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & Omit<SchemaFor<'CreateFieldIndex'>, 'field_name'>,
     ) {
         const response = await this._openApiClient.collections.createFieldIndex({
             collection_name,
@@ -1301,7 +1302,7 @@ export class QdrantClient {
      * @returns Snapshot description
      */
     async createFullSnapshot(args?: {wait?: boolean}) {
-        const response = await this._openApiClient.snapshots.createFullSnapshot({...args});
+        const response = await this._openApiClient.snapshots.createFullSnapshot(args ?? {});
         return maybe(response.data.result).orThrow('Create full snapshot API returned empty');
     }
 

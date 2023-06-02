@@ -1,2 +1,4 @@
 packages:
-  - "packages/*"
+  - "packages/js-client-rest"
+  - "packages/js-client-grpc"
+  - "packages/qdrant-js"

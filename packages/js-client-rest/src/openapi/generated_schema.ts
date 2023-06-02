@@ -658,7 +658,7 @@ export interface components {
       vector?: components["schemas"]["VectorStruct"] | (Record<string, unknown> | null);
     };
     Payload: {
-      [key: string]: unknown | undefined;
+      [key: string]: unknown;
     };
     /** @description Full vector data per point separator with single and multiple vector modes */
     VectorStruct: (number)[] | ({
@@ -1731,7 +1731,7 @@ export interface components {
       hits: (components["schemas"]["ScoredPoint"])[];
       id: components["schemas"]["GroupId"];
     };
-    GroupId: string | number | number;
+    GroupId: string | number;
     SearchGroupsRequest: {
       vector: components["schemas"]["NamedVectorStruct"];
       /** @description Look only for points which satisfies this conditions */
@@ -1831,7 +1831,7 @@ export interface operations {
    */
   telemetry: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, anonymize result */
         anonymize?: boolean;
       };
@@ -1872,7 +1872,7 @@ export interface operations {
    */
   metrics: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, anonymize result */
         anonymize?: boolean;
       };
@@ -2037,7 +2037,7 @@ export interface operations {
    */
   remove_peer: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true - removes peer even if it has shards/replicas on it. */
         force?: boolean;
       };
@@ -2158,7 +2158,7 @@ export interface operations {
    */
   create_collection: {
     parameters: {
-      query: {
+      query?: {
         /**
          * @description Wait for operation commit timeout in seconds. 
          * If timeout is reached - request will return with service error.
@@ -2212,7 +2212,7 @@ export interface operations {
    */
   delete_collection: {
     parameters: {
-      query: {
+      query?: {
         /**
          * @description Wait for operation commit timeout in seconds. 
          * If timeout is reached - request will return with service error.
@@ -2260,7 +2260,7 @@ export interface operations {
    */
   update_collection: {
     parameters: {
-      query: {
+      query?: {
         /**
          * @description Wait for operation commit timeout in seconds. 
          * If timeout is reached - request will return with service error.
@@ -2311,7 +2311,7 @@ export interface operations {
   /** Update aliases of the collections */
   update_aliases: {
     parameters: {
-      query: {
+      query?: {
         /**
          * @description Wait for operation commit timeout in seconds. 
          * If timeout is reached - request will return with service error.
@@ -2361,7 +2361,7 @@ export interface operations {
    */
   create_field_index: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, wait for changes to actually happen */
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
@@ -2414,7 +2414,7 @@ export interface operations {
    */
   delete_field_index: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, wait for changes to actually happen */
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
@@ -2501,7 +2501,7 @@ export interface operations {
   /** Update collection cluster setup */
   update_collection_cluster: {
     parameters: {
-      query: {
+      query?: {
         /**
          * @description Wait for operation commit timeout in seconds. 
          * If timeout is reached - request will return with service error.
@@ -2631,7 +2631,7 @@ export interface operations {
    */
   recover_from_uploaded_snapshot: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, wait for changes to actually happen. If false - let changes happen in background. Default is true. */
         wait?: boolean;
         /** @description Defines source of truth for snapshot recovery */
@@ -2701,7 +2701,7 @@ export interface operations {
    */
   recover_from_snapshot: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, wait for changes to actually happen. If false - let changes happen in background. Default is true. */
         wait?: boolean;
       };
@@ -2807,7 +2807,7 @@ export interface operations {
    */
   create_snapshot: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, wait for changes to actually happen. If false - let changes happen in background. Default is true. */
         wait?: boolean;
       };
@@ -2900,7 +2900,7 @@ export interface operations {
    */
   delete_snapshot: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, wait for changes to actually happen. If false - let changes happen in background. Default is true. */
         wait?: boolean;
       };
@@ -2996,7 +2996,7 @@ export interface operations {
    */
   create_full_snapshot: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, wait for changes to actually happen. If false - let changes happen in background. Default is true. */
         wait?: boolean;
       };
@@ -3083,7 +3083,7 @@ export interface operations {
    */
   delete_full_snapshot: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, wait for changes to actually happen. If false - let changes happen in background. Default is true. */
         wait?: boolean;
       };
@@ -3142,7 +3142,7 @@ export interface operations {
    */
   get_point: {
     parameters: {
-      query: {
+      query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
       };
@@ -3189,7 +3189,7 @@ export interface operations {
    */
   upsert_points: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, wait for changes to actually happen */
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
@@ -3242,7 +3242,7 @@ export interface operations {
    */
   get_points: {
     parameters: {
-      query: {
+      query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
       };
@@ -3293,7 +3293,7 @@ export interface operations {
    */
   delete_points: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, wait for changes to actually happen */
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
@@ -3346,7 +3346,7 @@ export interface operations {
    */
   update_vectors: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, wait for changes to actually happen */
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
@@ -3399,7 +3399,7 @@ export interface operations {
    */
   delete_vectors: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, wait for changes to actually happen */
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
@@ -3452,7 +3452,7 @@ export interface operations {
    */
   overwrite_payload: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, wait for changes to actually happen */
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
@@ -3505,7 +3505,7 @@ export interface operations {
    */
   set_payload: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, wait for changes to actually happen */
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
@@ -3558,7 +3558,7 @@ export interface operations {
    */
   delete_payload: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, wait for changes to actually happen */
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
@@ -3611,7 +3611,7 @@ export interface operations {
    */
   clear_payload: {
     parameters: {
-      query: {
+      query?: {
         /** @description If true, wait for changes to actually happen */
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
@@ -3664,7 +3664,7 @@ export interface operations {
    */
   scroll_points: {
     parameters: {
-      query: {
+      query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
       };
@@ -3715,7 +3715,7 @@ export interface operations {
    */
   search_points: {
     parameters: {
-      query: {
+      query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
       };
@@ -3766,7 +3766,7 @@ export interface operations {
    */
   search_batch_points: {
     parameters: {
-      query: {
+      query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
       };
@@ -3817,7 +3817,7 @@ export interface operations {
    */
   search_point_groups: {
     parameters: {
-      query: {
+      query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
       };
@@ -3868,7 +3868,7 @@ export interface operations {
    */
   recommend_points: {
     parameters: {
-      query: {
+      query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
       };
@@ -3919,7 +3919,7 @@ export interface operations {
    */
   recommend_batch_points: {
     parameters: {
-      query: {
+      query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
       };
@@ -3970,7 +3970,7 @@ export interface operations {
    */
   recommend_point_groups: {
     parameters: {
-      query: {
+      query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
       };

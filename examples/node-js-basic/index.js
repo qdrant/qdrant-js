@@ -1,4 +1,4 @@
-import {QdrantClient} from '@qdrant/js-client-rest';
+import {QdrantClient} from '@qdrant/qdrant-js';
 
 async function main() {
     const collectionName = 'test_collection';
@@ -69,8 +69,8 @@ async function main() {
     });
 
     const collectionInfo = await client.getCollection(collectionName);
-    console.log(collectionInfo.points_count);
-    // prints: 6
+    console.log('number of points:', collectionInfo.points_count);
+    // prints: number of points: 6
 
     const points = await client.retrieve(collectionName, {
         ids: [1, 2],
@@ -230,9 +230,7 @@ async function main() {
 
 main()
     .then((code) => {
-        if (code !== 0) {
-            process.exit(code);
-        }
+        process.exit(code);
     })
     .catch((err) => {
         console.error(err);

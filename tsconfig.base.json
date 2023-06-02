@@ -3,9 +3,21 @@
         "target": "ES2021",
         "module": "esnext",
         "lib": ["ES2021", "dom"],
+        "resolveJsonModule": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
         "moduleResolution": "nodenext",
-        "strict": true
+        "strict": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "strictBindCallApply": true,
+        "strictPropertyInitialization": true,
+        "useUnknownInCatchVariables": true,
+        "noUnusedLocals": true,
+        "noImplicitOverride": true,
+        "noFallthroughCasesInSwitch": true,
+        "forceConsistentCasingInFileNames": true
     }
 }

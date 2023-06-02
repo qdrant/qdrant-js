@@ -1,7 +1,10 @@
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
+        "declaration": true,
+        "declarationDir": "./dist/types",
+        "outDir": "./dist/esm",
         "types": ["node"]
     },
-    "include": ["src", "examples"]
+    "include": ["src", "tests", "*.ts", "rollup.config.js"]
 }

@@ -2,9 +2,30 @@ import {test, describe, expect} from 'vitest';
 import {QdrantClient} from '../../src/qdrant-client.js';
 
 describe('QdrantClient', () => {
+    const semverRegEx =
+        /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
     const DIM = 100;
     const client = new QdrantClient();
     const collectionName = 'test_collection';
+
+    test('Qdrant service check', async () => {
+        const {QDRANT_URL, QDRANT_API_KEY} = process.env;
+        const client = new QdrantClient({
+            url: QDRANT_URL,
+            apiKey: QDRANT_API_KEY,
+        });
+        const {data} = await client.api('service').telemetry({});
+        expect(data).toMatchObject({
+            time: expect.any(Number) as unknown,
+            status: 'ok',
+            result: {
+                app: {
+                    name: 'qdrant',
+                    version: expect.stringMatching(semverRegEx) as unknown,
+                },
+            },
+        });
+    });
 
     test('cleanup if collection exists', async () => {
         expect(await client.deleteCollection(collectionName)).toBeTypeOf('boolean');
@@ -20,21 +41,34 @@ describe('QdrantClient', () => {
         ).toBe(true);
     });
 
+    test('list collections', async () => {
+        expect(await client.getCollections()).toEqual({
+            collections: [{name: collectionName}],
+        });
+    });
+
+    test('create collection alias', async () => {
+        expect(
+            await client.updateCollectionAliases({
+                actions: [{create_alias: {alias_name: `${collectionName}_alias`, collection_name: collectionName}}],
+            }),
+        ).toBe(true);
+    });
+
     test('create indexes', async () => {
-        let result = await client.createPayloadIndex(collectionName, {field_name: 'city', field_schema: 'keyword'});
+        let result = await client.createPayloadIndex(collectionName, 'city', {field_schema: 'keyword'});
         expect(result).toMatchObject<typeof result>({
             operation_id: expect.any(Number) as number,
             status: 'acknowledged',
         });
 
-        result = await client.createPayloadIndex(collectionName, {field_name: 'count', field_schema: 'integer'});
+        result = await client.createPayloadIndex(collectionName, 'count', {field_schema: 'integer'});
         expect(result).toMatchObject<typeof result>({
             operation_id: expect.any(Number) as number,
             status: 'acknowledged',
         });
 
-        result = await client.createPayloadIndex(collectionName, {
-            field_name: 'coords',
+        result = await client.createPayloadIndex(collectionName, 'coords', {
             field_schema: 'geo',
             wait: true,
         });
@@ -71,8 +105,12 @@ describe('QdrantClient', () => {
     });
 
     test('retrieve point', async () => {
-        const result = await client.api('points').getPoint({collection_name: collectionName, id: 2});
-        expect(result.data.result).toBeDefined();
+        const result = (await client.api('points').getPoint({collection_name: collectionName, id: 2})).data.result!;
+        expect(result).toMatchObject<typeof result>({
+            id: 2,
+            payload: {city: ['Berlin', 'London']},
+            vector: [0.19, 0.81, 0.75, 0.11],
+        });
     });
 
     test('retrieve points', async () => {

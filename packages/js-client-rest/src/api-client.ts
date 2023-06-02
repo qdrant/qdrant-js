@@ -1,4 +1,6 @@
+import {Fetcher, Middleware} from '@qdrant/openapi-typescript-fetch';
 import {paths} from './openapi/generated_schema.js';
+import {createDispatcher} from './dispatcher.js';
 import {createClusterApi} from './api/cluster-api.js';
 import {createCollectionsApi} from './api/collections-api.js';
 import {createPointsApi} from './api/points-api.js';
@@ -6,7 +8,6 @@ import {createServiceApi} from './api/service-api.js';
 import {createSnapshotsApi} from './api/snapshots-api.js';
 import {QdrantClientTimeoutError, QdrantClientUnexpectedResponseError} from './errors.js';
 import {RestArgs} from './types.js';
-import {Fetcher, Middleware} from '@qdrant/openapi-typescript-fetch';
 
 export type Client = ReturnType<typeof Fetcher.for<paths>>;
 
@@ -24,14 +25,14 @@ export function createApis(baseUrl: string, args: RestArgs) {
 
 export type OpenApiClient = ReturnType<typeof createApis>;
 
-export function createClient(baseUrl: string, {headers, timeout}: RestArgs): Client {
+export function createClient(baseUrl: string, {headers, timeout, connections}: RestArgs): Client {
     const use: Middleware[] = [];
     if (Number.isFinite(timeout)) {
         use.push(async (url, init, next) => {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), timeout);
             try {
-                return await next(url, {...init, signal: controller.signal});
+                return await next(url, Object.assign(init, {signal: controller.signal}));
             } catch (e) {
                 if (e instanceof Error && e.name === 'AbortError') {
                     throw new QdrantClientTimeoutError(e.message);
@@ -42,6 +43,7 @@ export function createClient(baseUrl: string, {headers, timeout}: RestArgs): Cli
             }
         });
     }
+
     use.push(async (url, init, next) => {
         const response = await next(url, init);
         if (response.status === 200 || response.status === 201) {
@@ -51,7 +53,20 @@ export function createClient(baseUrl: string, {headers, timeout}: RestArgs): Cli
     });
 
     const client = Fetcher.for<paths>();
-    client.configure({baseUrl, init: {headers}, use});
+    // Configure client with 'undici' agent which is used in Node 18+
+    client.configure({
+        baseUrl,
+        init: {
+            headers,
+            dispatcher:
+                typeof process !== 'undefined' &&
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                process.versions?.node
+                    ? createDispatcher(connections)
+                    : undefined,
+        },
+        use,
+    });
 
     return client;
 }

@@ -1,11 +1,12 @@
 import terser from '@rollup/plugin-terser';
 import nodeResolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 import replace from '@rollup/plugin-replace';
 import {writeFile} from 'fs/promises';
 
 const createCommonJsPackage = () => ({
     name: 'cjs-package',
-    buildEnd: () => writeFile('dist/cjs/package.json', JSON.stringify({type: 'commonjs'}, null, 4)),
+    buildEnd: () => writeFile('dist/cjs/package.json', '{"type":"commonjs"}'),
 });
 
 export default {
@@ -33,9 +34,14 @@ export default {
     plugins: [
         createCommonJsPackage(),
         nodeResolve(),
+        commonjs(),
         replace({
-            'import.meta.vitest': 'undefined',
             preventAssignment: true,
+            values: {
+                // replace "process" with `undefined` since this is for browser only.
+                // Rollup's dead code elimination will remove any remaining deps.
+                process: 'undefined',
+            },
         }),
     ],
 };

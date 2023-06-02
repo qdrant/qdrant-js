@@ -32,7 +32,7 @@ export function createPointsApi(client: Client) {
             .create({wait: true, ordering: true}),
 
         /**
-         * Update vectors 
+         * Update vectors
          */
         updateVectors: client
             .path('/collections/{collection_name}/points/vectors')
@@ -82,7 +82,7 @@ export function createPointsApi(client: Client) {
             .create({consistency: true}),
 
         /**
-         * Search point groups 
+         * Search point groups
          */
         searchPointGroups: client
             .path('/collections/{collection_name}/points/search/groups')
