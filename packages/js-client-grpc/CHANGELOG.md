@@ -1,5 +1,11 @@
 # @qdrant/js-client-grpc
 
+## 1.2.2
+
+### Patch Changes
+
+-   [#27](https://github.com/qdrant/qdrant-js/pull/27) [`1e849ae`](https://github.com/qdrant/qdrant-js/commit/1e849aea8596c2f972ee602f604fe77adf136dbf) Thanks [@Rendez](https://github.com/Rendez)! - gRPC with direct NPM dependency to avoid local .tgz problems
+
 ## 1.2.1
 
 ### Patch Changes
