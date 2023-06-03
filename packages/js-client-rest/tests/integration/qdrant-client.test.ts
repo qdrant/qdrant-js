@@ -56,19 +56,20 @@ describe('QdrantClient', () => {
     });
 
     test('create indexes', async () => {
-        let result = await client.createPayloadIndex(collectionName, 'city', {field_schema: 'keyword'});
+        let result = await client.createPayloadIndex(collectionName, {field_name: 'city', field_schema: 'keyword'});
         expect(result).toMatchObject<typeof result>({
             operation_id: expect.any(Number) as number,
             status: 'acknowledged',
         });
 
-        result = await client.createPayloadIndex(collectionName, 'count', {field_schema: 'integer'});
+        result = await client.createPayloadIndex(collectionName, {field_name: 'count', field_schema: 'integer'});
         expect(result).toMatchObject<typeof result>({
             operation_id: expect.any(Number) as number,
             status: 'acknowledged',
         });
 
-        result = await client.createPayloadIndex(collectionName, 'coords', {
+        result = await client.createPayloadIndex(collectionName, {
+            field_name: 'coords',
             field_schema: 'geo',
             wait: true,
         });
