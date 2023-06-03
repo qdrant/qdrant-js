@@ -1,8 +1,5 @@
 lockfileVersion: '6.0'
 
-overrides:
-  '@bufbuild/protobuf@^1.2.0': file:./packages/js-client-grpc/includes/bufbuild-protobuf-1.2.1.tgz
-
 importers:
 
   .:
@@ -65,8 +62,8 @@ importers:
         specifier: ^0.9.1
         version: 0.9.1(@bufbuild/protobuf@1.2.1)
       '@bufbuild/protobuf':
-        specifier: ./includes/bufbuild-protobuf-1.2.1.tgz
-        version: file:packages/js-client-grpc/includes/bufbuild-protobuf-1.2.1.tgz
+        specifier: ^1.2.1
+        version: 1.2.1
       typescript:
         specifier: '>=4.1'
         version: 5.0.4
@@ -173,7 +170,7 @@ packages:
       '@bufbuild/protobuf': ^1.2.0
     dependencies:
       '@bufbuild/connect': 0.9.1(@bufbuild/protobuf@1.2.1)
-      '@bufbuild/protobuf': file:packages/js-client-grpc/includes/bufbuild-protobuf-1.2.1.tgz
+      '@bufbuild/protobuf': 1.2.1
       headers-polyfill: 3.1.2
     dev: false
 
@@ -182,7 +179,10 @@ packages:
     peerDependencies:
       '@bufbuild/protobuf': ^1.2.0
     dependencies:
-      '@bufbuild/protobuf': file:packages/js-client-grpc/includes/bufbuild-protobuf-1.2.1.tgz
+      '@bufbuild/protobuf': 1.2.1
+
+  /@bufbuild/protobuf@1.2.1:
+    resolution: {integrity: sha512-cwwGvLGqvoaOZmoP5+i4v/rbW+rHkguvTehuZyM2p/xpmaNSdT2h3B7kHw33aiffv35t1XrYHIkdJSEkSEMJuA==}
 
   /@bufbuild/protoc-gen-connect-es@0.9.1(@bufbuild/connect@0.9.1)(@bufbuild/protoc-gen-es@1.2.1):
     resolution: {integrity: sha512-Wtgtw4RpGAlEma7Z7hVUPra3BC/otWewFie1bgxejJr2BykqejzFN63iP4KF5fUUY38LBbtZE9IfnBfxQaNV/Q==}
@@ -198,7 +198,7 @@ packages:
         optional: true
     dependencies:
       '@bufbuild/connect': 0.9.1(@bufbuild/protobuf@1.2.1)
-      '@bufbuild/protobuf': file:packages/js-client-grpc/includes/bufbuild-protobuf-1.2.1.tgz
+      '@bufbuild/protobuf': 1.2.1
       '@bufbuild/protoc-gen-es': 1.2.1(@bufbuild/protobuf@1.2.1)
       '@bufbuild/protoplugin': 1.2.1
     transitivePeerDependencies:
@@ -215,7 +215,7 @@ packages:
       '@bufbuild/protobuf':
         optional: true
     dependencies:
-      '@bufbuild/protobuf': file:packages/js-client-grpc/includes/bufbuild-protobuf-1.2.1.tgz
+      '@bufbuild/protobuf': 1.2.1
       '@bufbuild/protoplugin': 1.2.1
     transitivePeerDependencies:
       - supports-color
@@ -224,7 +224,7 @@ packages:
   /@bufbuild/protoplugin@1.2.1:
     resolution: {integrity: sha512-7VtPgJGXcOszidMpQRQK9wm8QlKqC80Uc5XR9+Ej+DN4Ur64dAW1djZ7kLZ3ij6Z9IY4FteGQT+ubUNxzcW2NA==}
     dependencies:
-      '@bufbuild/protobuf': file:packages/js-client-grpc/includes/bufbuild-protobuf-1.2.1.tgz
+      '@bufbuild/protobuf': 1.2.1
       '@typescript/vfs': 1.4.0
       typescript: 4.5.2
     transitivePeerDependencies:
@@ -4258,8 +4258,3 @@ packages:
     resolution: {integrity: sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g==}
     engines: {node: '>=12.20'}
     dev: true
-
-  file:packages/js-client-grpc/includes/bufbuild-protobuf-1.2.1.tgz:
-    resolution: {integrity: sha512-bHM1jf6+CxQk11RD7Ub4TLF84Pg54FPBsbvZYFtrYW/ZMrWs9TZc0A4CuntZ/QLJxR3HUNlLlOFGdgrq4x5Gqg==, tarball: file:packages/js-client-grpc/includes/bufbuild-protobuf-1.2.1.tgz}
-    name: '@bufbuild/protobuf'
-    version: 1.2.1

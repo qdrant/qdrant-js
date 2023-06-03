@@ -36,10 +36,5 @@
         "rollup": "^3.21.6",
         "ts-node": "^10.9.1",
         "typescript": "^5.0.4"
-    },
-    "pnpm": {
-        "overrides": {
-            "@bufbuild/protobuf@^1.2.0": "file:./packages/js-client-grpc/includes/bufbuild-protobuf-1.2.1.tgz"
-        }
     }
 }

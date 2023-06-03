@@ -281,21 +281,21 @@ export class VectorParams extends Message<VectorParams> {
    *
    * @generated from field: optional qdrant.HnswConfigDiff hnsw_config = 3;
    */
-  hnsw_config?: HnswConfigDiff;
+  hnswConfig?: HnswConfigDiff;
 
   /**
    * Configuration of vector quantization config. If omitted - the collection configuration will be used
    *
    * @generated from field: optional qdrant.QuantizationConfig quantization_config = 4;
    */
-  quantization_config?: QuantizationConfig;
+  quantizationConfig?: QuantizationConfig;
 
   /**
    * If true - serve vectors from disk. If set to false, the vectors will be loaded in RAM.
    *
    * @generated from field: optional bool on_disk = 5;
    */
-  on_disk?: boolean;
+  onDisk?: boolean;
 
   constructor(data?: PartialMessage<VectorParams>) {
     super();
@@ -384,7 +384,7 @@ export class VectorsConfig extends Message<VectorsConfig> {
      * @generated from field: qdrant.VectorParamsMap params_map = 2;
      */
     value: VectorParamsMap;
-    case: "params_map";
+    case: "paramsMap";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<VectorsConfig>) {
@@ -425,7 +425,7 @@ export class GetCollectionInfoRequest extends Message<GetCollectionInfoRequest> 
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   constructor(data?: PartialMessage<GetCollectionInfoRequest>) {
     super();
@@ -676,7 +676,7 @@ export class HnswConfigDiff extends Message<HnswConfigDiff> {
    *
    * @generated from field: optional uint64 ef_construct = 2;
    */
-  ef_construct?: bigint;
+  efConstruct?: bigint;
 
   /**
    *
@@ -687,7 +687,7 @@ export class HnswConfigDiff extends Message<HnswConfigDiff> {
    *
    * @generated from field: optional uint64 full_scan_threshold = 3;
    */
-  full_scan_threshold?: bigint;
+  fullScanThreshold?: bigint;
 
   /**
    *
@@ -695,7 +695,7 @@ export class HnswConfigDiff extends Message<HnswConfigDiff> {
    *
    * @generated from field: optional uint64 max_indexing_threads = 4;
    */
-  max_indexing_threads?: bigint;
+  maxIndexingThreads?: bigint;
 
   /**
    *
@@ -703,7 +703,7 @@ export class HnswConfigDiff extends Message<HnswConfigDiff> {
    *
    * @generated from field: optional bool on_disk = 5;
    */
-  on_disk?: boolean;
+  onDisk?: boolean;
 
   /**
    *
@@ -711,7 +711,7 @@ export class HnswConfigDiff extends Message<HnswConfigDiff> {
    *
    * @generated from field: optional uint64 payload_m = 6;
    */
-  payload_m?: bigint;
+  payloadM?: bigint;
 
   constructor(data?: PartialMessage<HnswConfigDiff>) {
     super();
@@ -755,14 +755,14 @@ export class WalConfigDiff extends Message<WalConfigDiff> {
    *
    * @generated from field: optional uint64 wal_capacity_mb = 1;
    */
-  wal_capacity_mb?: bigint;
+  walCapacityMb?: bigint;
 
   /**
    * Number of segments to create in advance
    *
    * @generated from field: optional uint64 wal_segments_ahead = 2;
    */
-  wal_segments_ahead?: bigint;
+  walSegmentsAhead?: bigint;
 
   constructor(data?: PartialMessage<WalConfigDiff>) {
     super();
@@ -803,7 +803,7 @@ export class OptimizersConfigDiff extends Message<OptimizersConfigDiff> {
    *
    * @generated from field: optional double deleted_threshold = 1;
    */
-  deleted_threshold?: number;
+  deletedThreshold?: number;
 
   /**
    *
@@ -811,7 +811,7 @@ export class OptimizersConfigDiff extends Message<OptimizersConfigDiff> {
    *
    * @generated from field: optional uint64 vacuum_min_vector_number = 2;
    */
-  vacuum_min_vector_number?: bigint;
+  vacuumMinVectorNumber?: bigint;
 
   /**
    *
@@ -826,7 +826,7 @@ export class OptimizersConfigDiff extends Message<OptimizersConfigDiff> {
    *
    * @generated from field: optional uint64 default_segment_number = 3;
    */
-  default_segment_number?: bigint;
+  defaultSegmentNumber?: bigint;
 
   /**
    *
@@ -841,7 +841,7 @@ export class OptimizersConfigDiff extends Message<OptimizersConfigDiff> {
    *
    * @generated from field: optional uint64 max_segment_size = 4;
    */
-  max_segment_size?: bigint;
+  maxSegmentSize?: bigint;
 
   /**
    *
@@ -856,7 +856,7 @@ export class OptimizersConfigDiff extends Message<OptimizersConfigDiff> {
    *
    * @generated from field: optional uint64 memmap_threshold = 5;
    */
-  memmap_threshold?: bigint;
+  memmapThreshold?: bigint;
 
   /**
    *
@@ -870,7 +870,7 @@ export class OptimizersConfigDiff extends Message<OptimizersConfigDiff> {
    *
    * @generated from field: optional uint64 indexing_threshold = 6;
    */
-  indexing_threshold?: bigint;
+  indexingThreshold?: bigint;
 
   /**
    *
@@ -878,7 +878,7 @@ export class OptimizersConfigDiff extends Message<OptimizersConfigDiff> {
    *
    * @generated from field: optional uint64 flush_interval_sec = 7;
    */
-  flush_interval_sec?: bigint;
+  flushIntervalSec?: bigint;
 
   /**
    *
@@ -886,7 +886,7 @@ export class OptimizersConfigDiff extends Message<OptimizersConfigDiff> {
    *
    * @generated from field: optional uint64 max_optimization_threads = 8;
    */
-  max_optimization_threads?: bigint;
+  maxOptimizationThreads?: bigint;
 
   constructor(data?: PartialMessage<OptimizersConfigDiff>) {
     super();
@@ -946,7 +946,7 @@ export class ScalarQuantization extends Message<ScalarQuantization> {
    *
    * @generated from field: optional bool always_ram = 3;
    */
-  always_ram?: boolean;
+  alwaysRam?: boolean;
 
   constructor(data?: PartialMessage<ScalarQuantization>) {
     super();
@@ -994,7 +994,7 @@ export class ProductQuantization extends Message<ProductQuantization> {
    *
    * @generated from field: optional bool always_ram = 2;
    */
-  always_ram?: boolean;
+  alwaysRam?: boolean;
 
   constructor(data?: PartialMessage<ProductQuantization>) {
     super();
@@ -1084,42 +1084,42 @@ export class CreateCollection extends Message<CreateCollection> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Configuration of vector index
    *
    * @generated from field: optional qdrant.HnswConfigDiff hnsw_config = 4;
    */
-  hnsw_config?: HnswConfigDiff;
+  hnswConfig?: HnswConfigDiff;
 
   /**
    * Configuration of the Write-Ahead-Log
    *
    * @generated from field: optional qdrant.WalConfigDiff wal_config = 5;
    */
-  wal_config?: WalConfigDiff;
+  walConfig?: WalConfigDiff;
 
   /**
    * Configuration of the optimizers
    *
    * @generated from field: optional qdrant.OptimizersConfigDiff optimizers_config = 6;
    */
-  optimizers_config?: OptimizersConfigDiff;
+  optimizersConfig?: OptimizersConfigDiff;
 
   /**
    * Number of shards in the collection, default = 1
    *
    * @generated from field: optional uint32 shard_number = 7;
    */
-  shard_number?: number;
+  shardNumber?: number;
 
   /**
    * If true - point's payload will not be stored in memory
    *
    * @generated from field: optional bool on_disk_payload = 8;
    */
-  on_disk_payload?: boolean;
+  onDiskPayload?: boolean;
 
   /**
    * Wait timeout for operation commit in seconds, if not specified - default value will be supplied
@@ -1133,35 +1133,35 @@ export class CreateCollection extends Message<CreateCollection> {
    *
    * @generated from field: optional qdrant.VectorsConfig vectors_config = 10;
    */
-  vectors_config?: VectorsConfig;
+  vectorsConfig?: VectorsConfig;
 
   /**
    * Number of replicas of each shard that network tries to maintain, default = 1
    *
    * @generated from field: optional uint32 replication_factor = 11;
    */
-  replication_factor?: number;
+  replicationFactor?: number;
 
   /**
    * How many replicas should apply the operation for us to consider it successful, default = 1
    *
    * @generated from field: optional uint32 write_consistency_factor = 12;
    */
-  write_consistency_factor?: number;
+  writeConsistencyFactor?: number;
 
   /**
    * Specify name of the other collection to copy data from
    *
    * @generated from field: optional string init_from_collection = 13;
    */
-  init_from_collection?: string;
+  initFromCollection?: string;
 
   /**
    * Quantization configuration of vector
    *
    * @generated from field: optional qdrant.QuantizationConfig quantization_config = 14;
    */
-  quantization_config?: QuantizationConfig;
+  quantizationConfig?: QuantizationConfig;
 
   constructor(data?: PartialMessage<CreateCollection>) {
     super();
@@ -1211,14 +1211,14 @@ export class UpdateCollection extends Message<UpdateCollection> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * New configuration parameters for the collection
    *
    * @generated from field: optional qdrant.OptimizersConfigDiff optimizers_config = 2;
    */
-  optimizers_config?: OptimizersConfigDiff;
+  optimizersConfig?: OptimizersConfigDiff;
 
   /**
    * Wait timeout for operation commit in seconds, if not specified - default value will be supplied
@@ -1274,7 +1274,7 @@ export class DeleteCollection extends Message<DeleteCollection> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Wait timeout for operation commit in seconds, if not specified - default value will be supplied
@@ -1368,35 +1368,35 @@ export class CollectionParams extends Message<CollectionParams> {
    *
    * @generated from field: uint32 shard_number = 3;
    */
-  shard_number = 0;
+  shardNumber = 0;
 
   /**
    * If true - point's payload will not be stored in memory
    *
    * @generated from field: bool on_disk_payload = 4;
    */
-  on_disk_payload = false;
+  onDiskPayload = false;
 
   /**
    * Configuration for vectors
    *
    * @generated from field: optional qdrant.VectorsConfig vectors_config = 5;
    */
-  vectors_config?: VectorsConfig;
+  vectorsConfig?: VectorsConfig;
 
   /**
    * Number of replicas of each shard that network tries to maintain
    *
    * @generated from field: optional uint32 replication_factor = 6;
    */
-  replication_factor?: number;
+  replicationFactor?: number;
 
   /**
    * How many replicas should apply the operation for us to consider it successful
    *
    * @generated from field: optional uint32 write_consistency_factor = 7;
    */
-  write_consistency_factor?: number;
+  writeConsistencyFactor?: number;
 
   constructor(data?: PartialMessage<CollectionParams>) {
     super();
@@ -1439,14 +1439,14 @@ export class CollectionParamsDiff extends Message<CollectionParamsDiff> {
    *
    * @generated from field: optional uint32 replication_factor = 1;
    */
-  replication_factor?: number;
+  replicationFactor?: number;
 
   /**
    * How many replicas should apply the operation for us to consider it successful
    *
    * @generated from field: optional uint32 write_consistency_factor = 2;
    */
-  write_consistency_factor?: number;
+  writeConsistencyFactor?: number;
 
   constructor(data?: PartialMessage<CollectionParamsDiff>) {
     super();
@@ -1493,28 +1493,28 @@ export class CollectionConfig extends Message<CollectionConfig> {
    *
    * @generated from field: qdrant.HnswConfigDiff hnsw_config = 2;
    */
-  hnsw_config?: HnswConfigDiff;
+  hnswConfig?: HnswConfigDiff;
 
   /**
    * Configuration of the optimizers
    *
    * @generated from field: qdrant.OptimizersConfigDiff optimizer_config = 3;
    */
-  optimizer_config?: OptimizersConfigDiff;
+  optimizerConfig?: OptimizersConfigDiff;
 
   /**
    * Configuration of the Write-Ahead-Log
    *
    * @generated from field: qdrant.WalConfigDiff wal_config = 4;
    */
-  wal_config?: WalConfigDiff;
+  walConfig?: WalConfigDiff;
 
   /**
    * Configuration of the vector quantization
    *
    * @generated from field: optional qdrant.QuantizationConfig quantization_config = 5;
    */
-  quantization_config?: QuantizationConfig;
+  quantizationConfig?: QuantizationConfig;
 
   constructor(data?: PartialMessage<CollectionConfig>) {
     super();
@@ -1571,14 +1571,14 @@ export class TextIndexParams extends Message<TextIndexParams> {
    *
    * @generated from field: optional uint64 min_token_len = 3;
    */
-  min_token_len?: bigint;
+  minTokenLen?: bigint;
 
   /**
    * Maximal token length
    *
    * @generated from field: optional uint64 max_token_len = 4;
    */
-  max_token_len?: bigint;
+  maxTokenLen?: bigint;
 
   constructor(data?: PartialMessage<TextIndexParams>) {
     super();
@@ -1618,14 +1618,14 @@ export class PayloadIndexParams extends Message<PayloadIndexParams> {
   /**
    * @generated from oneof qdrant.PayloadIndexParams.index_params
    */
-  index_params: {
+  indexParams: {
     /**
      * Parameters for text index
      *
      * @generated from field: qdrant.TextIndexParams text_index_params = 1;
      */
     value: TextIndexParams;
-    case: "text_index_params";
+    case: "textIndexParams";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<PayloadIndexParams>) {
@@ -1665,7 +1665,7 @@ export class PayloadSchemaInfo extends Message<PayloadSchemaInfo> {
    *
    * @generated from field: qdrant.PayloadSchemaType data_type = 1;
    */
-  data_type = PayloadSchemaType.UnknownType;
+  dataType = PayloadSchemaType.UnknownType;
 
   /**
    * Field index parameters
@@ -1727,21 +1727,21 @@ export class CollectionInfo extends Message<CollectionInfo> {
    *
    * @generated from field: qdrant.OptimizerStatus optimizer_status = 2;
    */
-  optimizer_status?: OptimizerStatus;
+  optimizerStatus?: OptimizerStatus;
 
   /**
    * number of vectors in the collection
    *
    * @generated from field: uint64 vectors_count = 3;
    */
-  vectors_count = protoInt64.zero;
+  vectorsCount = protoInt64.zero;
 
   /**
    * Number of independent segments
    *
    * @generated from field: uint64 segments_count = 4;
    */
-  segments_count = protoInt64.zero;
+  segmentsCount = protoInt64.zero;
 
   /**
    * Configuration
@@ -1755,21 +1755,21 @@ export class CollectionInfo extends Message<CollectionInfo> {
    *
    * @generated from field: map<string, qdrant.PayloadSchemaInfo> payload_schema = 8;
    */
-  payload_schema: { [key: string]: PayloadSchemaInfo } = {};
+  payloadSchema: { [key: string]: PayloadSchemaInfo } = {};
 
   /**
    * number of points in the collection
    *
    * @generated from field: uint64 points_count = 9;
    */
-  points_count = protoInt64.zero;
+  pointsCount = protoInt64.zero;
 
   /**
    * number of indexed vectors in the collection.
    *
    * @generated from field: optional uint64 indexed_vectors_count = 10;
    */
-  indexed_vectors_count?: bigint;
+  indexedVectorsCount?: bigint;
 
   constructor(data?: PartialMessage<CollectionInfo>) {
     super();
@@ -1865,19 +1865,19 @@ export class AliasOperations extends Message<AliasOperations> {
      * @generated from field: qdrant.CreateAlias create_alias = 1;
      */
     value: CreateAlias;
-    case: "create_alias";
+    case: "createAlias";
   } | {
     /**
      * @generated from field: qdrant.RenameAlias rename_alias = 2;
      */
     value: RenameAlias;
-    case: "rename_alias";
+    case: "renameAlias";
   } | {
     /**
      * @generated from field: qdrant.DeleteAlias delete_alias = 3;
      */
     value: DeleteAlias;
-    case: "delete_alias";
+    case: "deleteAlias";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<AliasOperations>) {
@@ -1919,14 +1919,14 @@ export class CreateAlias extends Message<CreateAlias> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * New name of the alias
    *
    * @generated from field: string alias_name = 2;
    */
-  alias_name = "";
+  aliasName = "";
 
   constructor(data?: PartialMessage<CreateAlias>) {
     super();
@@ -1966,14 +1966,14 @@ export class RenameAlias extends Message<RenameAlias> {
    *
    * @generated from field: string old_alias_name = 1;
    */
-  old_alias_name = "";
+  oldAliasName = "";
 
   /**
    * Name of the alias
    *
    * @generated from field: string new_alias_name = 2;
    */
-  new_alias_name = "";
+  newAliasName = "";
 
   constructor(data?: PartialMessage<RenameAlias>) {
     super();
@@ -2013,7 +2013,7 @@ export class DeleteAlias extends Message<DeleteAlias> {
    *
    * @generated from field: string alias_name = 1;
    */
-  alias_name = "";
+  aliasName = "";
 
   constructor(data?: PartialMessage<DeleteAlias>) {
     super();
@@ -2083,7 +2083,7 @@ export class ListCollectionAliasesRequest extends Message<ListCollectionAliasesR
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   constructor(data?: PartialMessage<ListCollectionAliasesRequest>) {
     super();
@@ -2122,14 +2122,14 @@ export class AliasDescription extends Message<AliasDescription> {
    *
    * @generated from field: string alias_name = 1;
    */
-  alias_name = "";
+  aliasName = "";
 
   /**
    * Name of the collection
    *
    * @generated from field: string collection_name = 2;
    */
-  collection_name = "";
+  collectionName = "";
 
   constructor(data?: PartialMessage<AliasDescription>) {
     super();
@@ -2214,7 +2214,7 @@ export class CollectionClusterInfoRequest extends Message<CollectionClusterInfoR
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   constructor(data?: PartialMessage<CollectionClusterInfoRequest>) {
     super();
@@ -2253,14 +2253,14 @@ export class LocalShardInfo extends Message<LocalShardInfo> {
    *
    * @generated from field: uint32 shard_id = 1;
    */
-  shard_id = 0;
+  shardId = 0;
 
   /**
    * Number of points in the shard
    *
    * @generated from field: uint64 points_count = 2;
    */
-  points_count = protoInt64.zero;
+  pointsCount = protoInt64.zero;
 
   /**
    * Is replica active
@@ -2308,14 +2308,14 @@ export class RemoteShardInfo extends Message<RemoteShardInfo> {
    *
    * @generated from field: uint32 shard_id = 1;
    */
-  shard_id = 0;
+  shardId = 0;
 
   /**
    * Remote peer id
    *
    * @generated from field: uint64 peer_id = 2;
    */
-  peer_id = protoInt64.zero;
+  peerId = protoInt64.zero;
 
   /**
    * Is replica active
@@ -2363,7 +2363,7 @@ export class ShardTransferInfo extends Message<ShardTransferInfo> {
    *
    * @generated from field: uint32 shard_id = 1;
    */
-  shard_id = 0;
+  shardId = 0;
 
   /**
    * @generated from field: uint64 from = 2;
@@ -2422,35 +2422,35 @@ export class CollectionClusterInfoResponse extends Message<CollectionClusterInfo
    *
    * @generated from field: uint64 peer_id = 1;
    */
-  peer_id = protoInt64.zero;
+  peerId = protoInt64.zero;
 
   /**
    * Total number of shards
    *
    * @generated from field: uint64 shard_count = 2;
    */
-  shard_count = protoInt64.zero;
+  shardCount = protoInt64.zero;
 
   /**
    * Local shards
    *
    * @generated from field: repeated qdrant.LocalShardInfo local_shards = 3;
    */
-  local_shards: LocalShardInfo[] = [];
+  localShards: LocalShardInfo[] = [];
 
   /**
    * Remote shards
    *
    * @generated from field: repeated qdrant.RemoteShardInfo remote_shards = 4;
    */
-  remote_shards: RemoteShardInfo[] = [];
+  remoteShards: RemoteShardInfo[] = [];
 
   /**
    * Shard transfers
    *
    * @generated from field: repeated qdrant.ShardTransferInfo shard_transfers = 5;
    */
-  shard_transfers: ShardTransferInfo[] = [];
+  shardTransfers: ShardTransferInfo[] = [];
 
   constructor(data?: PartialMessage<CollectionClusterInfoResponse>) {
     super();
@@ -2493,17 +2493,17 @@ export class MoveShard extends Message<MoveShard> {
    *
    * @generated from field: uint32 shard_id = 1;
    */
-  shard_id = 0;
+  shardId = 0;
 
   /**
    * @generated from field: uint64 from_peer_id = 2;
    */
-  from_peer_id = protoInt64.zero;
+  fromPeerId = protoInt64.zero;
 
   /**
    * @generated from field: uint64 to_peer_id = 3;
    */
-  to_peer_id = protoInt64.zero;
+  toPeerId = protoInt64.zero;
 
   constructor(data?: PartialMessage<MoveShard>) {
     super();
@@ -2542,12 +2542,12 @@ export class Replica extends Message<Replica> {
   /**
    * @generated from field: uint32 shard_id = 1;
    */
-  shard_id = 0;
+  shardId = 0;
 
   /**
    * @generated from field: uint64 peer_id = 2;
    */
-  peer_id = protoInt64.zero;
+  peerId = protoInt64.zero;
 
   constructor(data?: PartialMessage<Replica>) {
     super();
@@ -2587,7 +2587,7 @@ export class UpdateCollectionClusterSetupRequest extends Message<UpdateCollectio
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * @generated from oneof qdrant.UpdateCollectionClusterSetupRequest.operation
@@ -2597,25 +2597,25 @@ export class UpdateCollectionClusterSetupRequest extends Message<UpdateCollectio
      * @generated from field: qdrant.MoveShard move_shard = 2;
      */
     value: MoveShard;
-    case: "move_shard";
+    case: "moveShard";
   } | {
     /**
      * @generated from field: qdrant.MoveShard replicate_shard = 3;
      */
     value: MoveShard;
-    case: "replicate_shard";
+    case: "replicateShard";
   } | {
     /**
      * @generated from field: qdrant.MoveShard abort_transfer = 4;
      */
     value: MoveShard;
-    case: "abort_transfer";
+    case: "abortTransfer";
   } | {
     /**
      * @generated from field: qdrant.Replica drop_replica = 5;
      */
     value: Replica;
-    case: "drop_replica";
+    case: "dropReplica";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   /**

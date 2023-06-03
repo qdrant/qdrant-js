@@ -77,7 +77,7 @@ export class DeleteFullSnapshotRequest extends Message<DeleteFullSnapshotRequest
    *
    * @generated from field: string snapshot_name = 1;
    */
-  snapshot_name = "";
+  snapshotName = "";
 
   constructor(data?: PartialMessage<DeleteFullSnapshotRequest>) {
     super();
@@ -116,7 +116,7 @@ export class CreateSnapshotRequest extends Message<CreateSnapshotRequest> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   constructor(data?: PartialMessage<CreateSnapshotRequest>) {
     super();
@@ -155,7 +155,7 @@ export class ListSnapshotsRequest extends Message<ListSnapshotsRequest> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   constructor(data?: PartialMessage<ListSnapshotsRequest>) {
     super();
@@ -194,14 +194,14 @@ export class DeleteSnapshotRequest extends Message<DeleteSnapshotRequest> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Name of the collection snapshot
    *
    * @generated from field: string snapshot_name = 2;
    */
-  snapshot_name = "";
+  snapshotName = "";
 
   constructor(data?: PartialMessage<DeleteSnapshotRequest>) {
     super();
@@ -248,7 +248,7 @@ export class SnapshotDescription extends Message<SnapshotDescription> {
    *
    * @generated from field: google.protobuf.Timestamp creation_time = 2;
    */
-  creation_time?: Timestamp;
+  creationTime?: Timestamp;
 
   /**
    * Size of the snapshot in bytes
@@ -294,7 +294,7 @@ export class CreateSnapshotResponse extends Message<CreateSnapshotResponse> {
   /**
    * @generated from field: qdrant.SnapshotDescription snapshot_description = 1;
    */
-  snapshot_description?: SnapshotDescription;
+  snapshotDescription?: SnapshotDescription;
 
   /**
    * Time spent to process
@@ -339,7 +339,7 @@ export class ListSnapshotsResponse extends Message<ListSnapshotsResponse> {
   /**
    * @generated from field: repeated qdrant.SnapshotDescription snapshot_descriptions = 1;
    */
-  snapshot_descriptions: SnapshotDescription[] = [];
+  snapshotDescriptions: SnapshotDescription[] = [];
 
   /**
    * Time spent to process

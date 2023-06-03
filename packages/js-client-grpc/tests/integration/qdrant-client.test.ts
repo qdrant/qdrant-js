@@ -40,16 +40,16 @@ describe('QdrantClient', () => {
     });
 
     test('cleanup if collection exists', async () => {
-        const response = await client.api('collections').delete({collection_name: collectionName});
+        const response = await client.api('collections').delete({collectionName});
         expect(response.result).toBeTypeOf('boolean');
     });
 
     test('create collection', async () => {
         const response = await client.api('collections').create({
-            collection_name: collectionName,
-            vectors_config: {config: {case: 'params', value: {size: 4n, distance: Distance.Dot}}},
-            optimizers_config: {default_segment_number: 2n},
-            replication_factor: 2,
+            collectionName,
+            vectorsConfig: {config: {case: 'params', value: {size: 4n, distance: Distance.Dot}}},
+            optimizersConfig: {defaultSegmentNumber: 2n},
+            replicationFactor: 2,
         });
         expect(response.result).toBe(true);
     });
@@ -65,8 +65,8 @@ describe('QdrantClient', () => {
             actions: [
                 {
                     action: {
-                        case: 'create_alias',
-                        value: {collection_name: collectionName, alias_name: `${collectionName}_alias`},
+                        case: 'createAlias',
+                        value: {collectionName, aliasName: `${collectionName}_alias`},
                     },
                 },
             ],
@@ -77,84 +77,82 @@ describe('QdrantClient', () => {
     test('create indexes', async () => {
         let updateResult = (
             await client.api('points').createFieldIndex({
-                collection_name: collectionName,
-                field_name: 'city',
-                field_type: FieldType.FieldTypeKeyword,
+                collectionName,
+                fieldName: 'city',
+                fieldType: FieldType.FieldTypeKeyword,
             })
         ).result!;
         expect(updateResult).toMatchObject<PlainMessage<typeof updateResult>>({
-            operation_id: expect.any(BigInt) as bigint,
+            operationId: expect.any(BigInt) as bigint,
             status: UpdateStatus.Acknowledged,
         });
 
         updateResult = (
             await client.api('points').createFieldIndex({
-                collection_name: collectionName,
-                field_name: 'count',
-                field_type: FieldType.FieldTypeInteger,
+                collectionName,
+                fieldName: 'count',
+                fieldType: FieldType.FieldTypeInteger,
             })
         ).result!;
         expect(updateResult).toMatchObject<PlainMessage<typeof updateResult>>({
-            operation_id: expect.any(BigInt) as bigint,
+            operationId: expect.any(BigInt) as bigint,
             status: UpdateStatus.Acknowledged,
         });
 
         updateResult = (
             await client.api('points').createFieldIndex({
-                collection_name: collectionName,
-                field_name: 'coords',
-                field_type: FieldType.FieldTypeGeo,
+                collectionName,
+                fieldName: 'coords',
+                fieldType: FieldType.FieldTypeGeo,
                 wait: true,
             })
         ).result!;
         expect(updateResult).toMatchObject<PlainMessage<typeof updateResult>>({
-            operation_id: expect.any(BigInt) as bigint,
+            operationId: expect.any(BigInt) as bigint,
             status: UpdateStatus.Completed,
         });
     });
 
     test('get collection', async () => {
-        await expect(client.api('collections').get({collection_name: collectionName})).resolves.toHaveProperty(
-            'result',
-        );
+        await expect(client.api('collections').get({collectionName})).resolves.toHaveProperty('result');
     });
 
     test('insert points', async () => {
         const updateResult = (
             await client.api('points').upsert({
-                collection_name: collectionName,
+                collectionName,
                 wait: true,
                 points: [
                     {
                         id: {
-                            point_id_options: {case: 'num', value: 1n},
+                            pointIdOptions: {case: 'num', value: 1n},
                         },
                         vectors: {
-                            vectors_options: {case: 'vector', value: {data: [0.05, 0.61, 0.76, 0.74]}},
+                            vectorsOptions: {case: 'vector', value: {data: [0.05, 0.61, 0.76, 0.74]}},
                         },
                         payload: {
                             city: {
-                                kind: {case: 'string_value', value: 'Berlin'},
+                                kind: {case: 'stringValue', value: 'Berlin'},
                             },
                             country: {
-                                kind: {case: 'string_value', value: 'Germany'},
+                                kind: {case: 'stringValue', value: 'Germany'},
                             },
                             count: {
-                                kind: {case: 'integer_value', value: 1000000n},
+                                kind: {case: 'integerValue', value: 1000000n},
                             },
                             square: {
-                                kind: {case: 'double_value', value: 12.5},
+                                kind: {case: 'doubleValue', value: 12.5},
                             },
                             coords: {
                                 kind: {
-                                    case: 'struct_value',
+                                    case: 'structValue',
                                     value: {
                                         fields: {
                                             lat: {
-                                                kind: {case: 'double_value', value: 1.0},
+                                                kind: {case: 'doubleValue', value: 1.0},
                                             },
                                             lon: {
-                                                kind: {case: 'double_value', value: 2.0},
+                                                kind: {case: 'doubleValue', value: 2.0},
                                             },
                                         },
                                     },
@@ -164,19 +162,19 @@ describe('QdrantClient', () => {
                     },
                     {
                         id: {
-                            point_id_options: {case: 'num', value: 2n},
+                            pointIdOptions: {case: 'num', value: 2n},
                         },
                         vectors: {
-                            vectors_options: {case: 'vector', value: {data: [0.19, 0.81, 0.75, 0.11]}},
+                            vectorsOptions: {case: 'vector', value: {data: [0.19, 0.81, 0.75, 0.11]}},
                         },
                         payload: {
                             city: {
                                 kind: {
-                                    case: 'list_value',
+                                    case: 'listValue',
                                     value: {
                                         values: [
-                                            {kind: {case: 'string_value', value: 'Berlin'}},
-                                            {kind: {case: 'string_value', value: 'London'}},
+                                            {kind: {case: 'stringValue', value: 'Berlin'}},
+                                            {kind: {case: 'stringValue', value: 'London'}},
                                         ],
                                     },
                                 },
@@ -185,19 +183,19 @@ describe('QdrantClient', () => {
                     },
                     {
                         id: {
-                            point_id_options: {case: 'num', value: 3n},
+                            pointIdOptions: {case: 'num', value: 3n},
                         },
                         vectors: {
-                            vectors_options: {case: 'vector', value: {data: [0.36, 0.55, 0.47, 0.94]}},
+                            vectorsOptions: {case: 'vector', value: {data: [0.36, 0.55, 0.47, 0.94]}},
                         },
                         payload: {
                             city: {
                                 kind: {
-                                    case: 'list_value',
+                                    case: 'listValue',
                                     value: {
                                         values: [
-                                            {kind: {case: 'string_value', value: 'Berlin'}},
-                                            {kind: {case: 'string_value', value: 'Moscow'}},
+                                            {kind: {case: 'stringValue', value: 'Berlin'}},
+                                            {kind: {case: 'stringValue', value: 'Moscow'}},
                                         ],
                                     },
                                 },
@@ -206,19 +204,19 @@ describe('QdrantClient', () => {
                     },
                     {
                         id: {
-                            point_id_options: {case: 'num', value: 4n},
+                            pointIdOptions: {case: 'num', value: 4n},
                         },
                         vectors: {
-                            vectors_options: {case: 'vector', value: {data: [0.18, 0.01, 0.85, 0.8]}},
+                            vectorsOptions: {case: 'vector', value: {data: [0.18, 0.01, 0.85, 0.8]}},
                         },
                         payload: {
                             city: {
                                 kind: {
-                                    case: 'list_value',
+                                    case: 'listValue',
                                     value: {
                                         values: [
-                                            {kind: {case: 'string_value', value: 'London'}},
-                                            {kind: {case: 'string_value', value: 'Moscow'}},
+                                            {kind: {case: 'stringValue', value: 'London'}},
+                                            {kind: {case: 'stringValue', value: 'Moscow'}},
                                         ],
                                     },
                                 },
@@ -227,17 +225,17 @@ describe('QdrantClient', () => {
                     },
                     {
                         id: {
-                            point_id_options: {case: 'uuid', value: '98a9a4b1-4ef2-46fb-8315-a97d874fe1d7'},
+                            pointIdOptions: {case: 'uuid', value: '98a9a4b1-4ef2-46fb-8315-a97d874fe1d7'},
                         },
                         vectors: {
-                            vectors_options: {case: 'vector', value: {data: [0.24, 0.18, 0.22, 0.44]}},
+                            vectorsOptions: {case: 'vector', value: {data: [0.24, 0.18, 0.22, 0.44]}},
                         },
                         payload: {
                             count: {
                                 kind: {
-                                    case: 'list_value',
+                                    case: 'listValue',
                                     value: {
-                                        values: [{kind: {case: 'integer_value', value: 0n}}],
+                                        values: [{kind: {case: 'integerValue', value: 0n}}],
                                     },
                                 },
                             },
@@ -245,17 +243,17 @@ describe('QdrantClient', () => {
                     },
                     {
                         id: {
-                            point_id_options: {case: 'uuid', value: '98a9a4b1-4ef2-46fb-8315-a97d874fe1d7'},
+                            pointIdOptions: {case: 'uuid', value: '98a9a4b1-4ef2-46fb-8315-a97d874fe1d7'},
                         },
                         vectors: {
-                            vectors_options: {case: 'vector', value: {data: [0.24, 0.18, 0.22, 0.44]}},
+                            vectorsOptions: {case: 'vector', value: {data: [0.24, 0.18, 0.22, 0.44]}},
                         },
                         payload: {
                             count: {
                                 kind: {
-                                    case: 'list_value',
+                                    case: 'listValue',
                                     value: {
-                                        values: [{kind: {case: 'integer_value', value: 0n}}],
+                                        values: [{kind: {case: 'integerValue', value: 0n}}],
                                     },
                                 },
                             },
@@ -263,17 +261,17 @@ describe('QdrantClient', () => {
                     },
                     {
                         id: {
-                            point_id_options: {case: 'uuid', value: 'f0e09527-b096-42a8-94e9-ea94d342b925'},
+                            pointIdOptions: {case: 'uuid', value: 'f0e09527-b096-42a8-94e9-ea94d342b925'},
                         },
                         vectors: {
-                            vectors_options: {case: 'vector', value: {data: [0.35, 0.08, 0.11, 0.44]}},
+                            vectorsOptions: {case: 'vector', value: {data: [0.35, 0.08, 0.11, 0.44]}},
                         },
                         payload: {
                             count: {
                                 kind: {
-                                    case: 'list_value',
+                                    case: 'listValue',
                                     value: {
-                                        values: [{kind: {case: 'integer_value', value: 0n}}],
+                                        values: [{kind: {case: 'integerValue', value: 0n}}],
                                     },
                                 },
                             },
@@ -283,7 +281,7 @@ describe('QdrantClient', () => {
             })
         ).result!;
         expect(updateResult).toMatchObject<PlainMessage<typeof updateResult>>({
-            operation_id: expect.any(BigInt) as bigint,
+            operationId: expect.any(BigInt) as bigint,
             status: UpdateStatus.Completed,
         });
     });
@@ -291,14 +289,14 @@ describe('QdrantClient', () => {
     test('retrieve point', async () => {
         const points = (
             await client.api('points').get({
-                collection_name: collectionName,
+                collectionName,
                 ids: [
                     {
-                        point_id_options: {case: 'num', value: 2n},
+                        pointIdOptions: {case: 'num', value: 2n},
                     },
                 ],
-                with_payload: {
-                    selector_options: {case: 'enable', value: true},
+                withPayload: {
+                    selectorOptions: {case: 'enable', value: true},
                 },
             })
         ).result;
@@ -308,13 +306,13 @@ describe('QdrantClient', () => {
             },
             payload: {
                 city: {
-                    list_value: {
+                    listValue: {
                         values: [
                             {
-                                string_value: 'Berlin',
+                                stringValue: 'Berlin',
                             },
                             {
-                                string_value: 'London',
+                                stringValue: 'London',
                             },
                         ],
                     },
@@ -326,13 +324,13 @@ describe('QdrantClient', () => {
     test('retrieve points', async () => {
         const points = (
             await client.api('points').get({
-                collection_name: collectionName,
+                collectionName,
                 ids: [
                     {
-                        point_id_options: {case: 'num', value: 1n},
+                        pointIdOptions: {case: 'num', value: 1n},
                     },
                     {
-                        point_id_options: {case: 'num', value: 2n},
+                        pointIdOptions: {case: 'num', value: 2n},
                     },
                 ],
             })
@@ -341,7 +339,7 @@ describe('QdrantClient', () => {
     });
 
     test('retrieve all points', async () => {
-        const result = (await client.api('collections').get({collection_name: collectionName})).result!;
+        const result = (await client.api('collections').get({collectionName})).result!;
         expect(result.toJson(), 'check failed - 6 points expected').toMatchObject({
             vectors_count: '6',
         });
@@ -351,9 +349,7 @@ describe('QdrantClient', () => {
         const result = (
             await client
                 .api('points')
-                .search(
-                    SearchPoints.fromJson({collection_name: collectionName, vector: [0.2, 0.1, 0.9, 0.7], limit: 3}),
-                )
+                .search(SearchPoints.fromJson({collectionName, vector: [0.2, 0.1, 0.9, 0.7], limit: 3}))
         ).result;
         expect(result).toHaveLength(3);
     });
@@ -361,16 +357,16 @@ describe('QdrantClient', () => {
     test('search points filter', async () => {
         const result = (
             await client.api('points').search({
-                collection_name: collectionName,
+                collectionName,
                 filter: {
                     should: [
                         {
-                            condition_one_of: {
+                            conditionOneOf: {
                                 case: 'field',
                                 value: {
                                     key: 'city',
                                     match: {
-                                        match_value: {case: 'keyword', value: 'London'},
+                                        matchValue: {case: 'keyword', value: 'London'},
                                     },
                                 },
                             },
@@ -387,19 +383,19 @@ describe('QdrantClient', () => {
     test('search points batch', async () => {
         const result = (
             await client.api('points').searchBatch({
-                collection_name: collectionName,
-                search_points: [
+                collectionName,
+                searchPoints: [
                     {
-                        collection_name: collectionName,
+                        collectionName,
                         vector: [0.2, 0.1, 0.9, 0.7],
                         limit: 3n,
-                        with_payload: {selector_options: {case: 'enable', value: true}},
+                        withPayload: {selectorOptions: {case: 'enable', value: true}},
                     },
                     {
-                        collection_name: collectionName,
+                        collectionName,
                         vector: [0.2, 0.1, 0.9, 0.7],
                         limit: 3n,
-                        with_payload: {selector_options: {case: 'enable', value: true}},
+                        withPayload: {selectorOptions: {case: 'enable', value: true}},
                     },
                 ],
             })

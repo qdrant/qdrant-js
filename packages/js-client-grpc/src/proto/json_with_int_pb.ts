@@ -100,7 +100,7 @@ export class Value extends Message<Value> {
      * @generated from field: qdrant.NullValue null_value = 1;
      */
     value: NullValue;
-    case: "null_value";
+    case: "nullValue";
   } | {
     /**
      * Represents a double value.
@@ -108,7 +108,7 @@ export class Value extends Message<Value> {
      * @generated from field: double double_value = 2;
      */
     value: number;
-    case: "double_value";
+    case: "doubleValue";
   } | {
     /**
      * Represents an integer value
@@ -116,7 +116,7 @@ export class Value extends Message<Value> {
      * @generated from field: int64 integer_value = 3;
      */
     value: bigint;
-    case: "integer_value";
+    case: "integerValue";
   } | {
     /**
      * Represents a string value.
@@ -124,7 +124,7 @@ export class Value extends Message<Value> {
      * @generated from field: string string_value = 4;
      */
     value: string;
-    case: "string_value";
+    case: "stringValue";
   } | {
     /**
      * Represents a boolean value.
@@ -132,7 +132,7 @@ export class Value extends Message<Value> {
      * @generated from field: bool bool_value = 5;
      */
     value: boolean;
-    case: "bool_value";
+    case: "boolValue";
   } | {
     /**
      * Represents a structured value.
@@ -140,7 +140,7 @@ export class Value extends Message<Value> {
      * @generated from field: qdrant.Struct struct_value = 6;
      */
     value: Struct;
-    case: "struct_value";
+    case: "structValue";
   } | {
     /**
      * Represents a repeated `Value`.
@@ -148,7 +148,7 @@ export class Value extends Message<Value> {
      * @generated from field: qdrant.ListValue list_value = 7;
      */
     value: ListValue;
-    case: "list_value";
+    case: "listValue";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<Value>) {

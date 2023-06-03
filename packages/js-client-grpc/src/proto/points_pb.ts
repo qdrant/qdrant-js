@@ -240,7 +240,7 @@ export class PointId extends Message<PointId> {
   /**
    * @generated from oneof qdrant.PointId.point_id_options
    */
-  point_id_options: {
+  pointIdOptions: {
     /**
      * Numerical ID of the point
      *
@@ -333,7 +333,7 @@ export class UpsertPoints extends Message<UpsertPoints> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Wait until the changes have been applied?
@@ -394,7 +394,7 @@ export class DeletePoints extends Message<DeletePoints> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Wait until the changes have been applied?
@@ -457,7 +457,7 @@ export class GetPoints extends Message<GetPoints> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * List of points to retrieve
@@ -471,21 +471,21 @@ export class GetPoints extends Message<GetPoints> {
    *
    * @generated from field: qdrant.WithPayloadSelector with_payload = 4;
    */
-  with_payload?: WithPayloadSelector;
+  withPayload?: WithPayloadSelector;
 
   /**
    * Options for specifying which vectors to include into response
    *
    * @generated from field: optional qdrant.WithVectorsSelector with_vectors = 5;
    */
-  with_vectors?: WithVectorsSelector;
+  withVectors?: WithVectorsSelector;
 
   /**
    * Options for specifying read consistency guarantees
    *
    * @generated from field: optional qdrant.ReadConsistency read_consistency = 6;
    */
-  read_consistency?: ReadConsistency;
+  readConsistency?: ReadConsistency;
 
   constructor(data?: PartialMessage<GetPoints>) {
     super();
@@ -528,7 +528,7 @@ export class UpdatePointVectors extends Message<UpdatePointVectors> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Wait until the changes have been applied?
@@ -638,7 +638,7 @@ export class DeletePointVectors extends Message<DeletePointVectors> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Wait until the changes have been applied?
@@ -652,7 +652,7 @@ export class DeletePointVectors extends Message<DeletePointVectors> {
    *
    * @generated from field: qdrant.PointsSelector points_selector = 3;
    */
-  points_selector?: PointsSelector;
+  pointsSelector?: PointsSelector;
 
   /**
    * List of vector names to delete
@@ -709,7 +709,7 @@ export class SetPayloadPoints extends Message<SetPayloadPoints> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Wait until the changes have been applied?
@@ -730,7 +730,7 @@ export class SetPayloadPoints extends Message<SetPayloadPoints> {
    *
    * @generated from field: optional qdrant.PointsSelector points_selector = 5;
    */
-  points_selector?: PointsSelector;
+  pointsSelector?: PointsSelector;
 
   /**
    * Write ordering guarantees
@@ -780,7 +780,7 @@ export class DeletePayloadPoints extends Message<DeletePayloadPoints> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Wait until the changes have been applied?
@@ -801,7 +801,7 @@ export class DeletePayloadPoints extends Message<DeletePayloadPoints> {
    *
    * @generated from field: optional qdrant.PointsSelector points_selector = 5;
    */
-  points_selector?: PointsSelector;
+  pointsSelector?: PointsSelector;
 
   /**
    * Write ordering guarantees
@@ -851,7 +851,7 @@ export class ClearPayloadPoints extends Message<ClearPayloadPoints> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Wait until the changes have been applied?
@@ -914,7 +914,7 @@ export class CreateFieldIndexCollection extends Message<CreateFieldIndexCollecti
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Wait until the changes have been applied?
@@ -928,21 +928,21 @@ export class CreateFieldIndexCollection extends Message<CreateFieldIndexCollecti
    *
    * @generated from field: string field_name = 3;
    */
-  field_name = "";
+  fieldName = "";
 
   /**
    * Field type.
    *
    * @generated from field: optional qdrant.FieldType field_type = 4;
    */
-  field_type?: FieldType;
+  fieldType?: FieldType;
 
   /**
    * Payload index params.
    *
    * @generated from field: optional qdrant.PayloadIndexParams field_index_params = 5;
    */
-  field_index_params?: PayloadIndexParams;
+  fieldIndexParams?: PayloadIndexParams;
 
   /**
    * Write ordering guarantees
@@ -993,7 +993,7 @@ export class DeleteFieldIndexCollection extends Message<DeleteFieldIndexCollecti
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Wait until the changes have been applied?
@@ -1007,7 +1007,7 @@ export class DeleteFieldIndexCollection extends Message<DeleteFieldIndexCollecti
    *
    * @generated from field: string field_name = 3;
    */
-  field_name = "";
+  fieldName = "";
 
   /**
    * Write ordering guarantees
@@ -1132,7 +1132,7 @@ export class WithPayloadSelector extends Message<WithPayloadSelector> {
   /**
    * @generated from oneof qdrant.WithPayloadSelector.selector_options
    */
-  selector_options: {
+  selectorOptions: {
     /**
      * If `true` - return all payload, if `false` - none
      *
@@ -1228,7 +1228,7 @@ export class Vectors extends Message<Vectors> {
   /**
    * @generated from oneof qdrant.Vectors.vectors_options
    */
-  vectors_options: {
+  vectorsOptions: {
     /**
      * @generated from field: qdrant.Vector vector = 1;
      */
@@ -1317,7 +1317,7 @@ export class WithVectorsSelector extends Message<WithVectorsSelector> {
   /**
    * @generated from oneof qdrant.WithVectorsSelector.selector_options
    */
-  selector_options: {
+  selectorOptions: {
     /**
      * If `true` - return all vectors, if `false` - none
      *
@@ -1424,7 +1424,7 @@ export class SearchParams extends Message<SearchParams> {
    *
    * @generated from field: optional uint64 hnsw_ef = 1;
    */
-  hnsw_ef?: bigint;
+  hnswEf?: bigint;
 
   /**
    *
@@ -1481,7 +1481,7 @@ export class SearchPoints extends Message<SearchPoints> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * vector
@@ -1509,7 +1509,7 @@ export class SearchPoints extends Message<SearchPoints> {
    *
    * @generated from field: qdrant.WithPayloadSelector with_payload = 6;
    */
-  with_payload?: WithPayloadSelector;
+  withPayload?: WithPayloadSelector;
 
   /**
    * Search config
@@ -1523,7 +1523,7 @@ export class SearchPoints extends Message<SearchPoints> {
    *
    * @generated from field: optional float score_threshold = 8;
    */
-  score_threshold?: number;
+  scoreThreshold?: number;
 
   /**
    * Offset of the result
@@ -1537,21 +1537,21 @@ export class SearchPoints extends Message<SearchPoints> {
    *
    * @generated from field: optional string vector_name = 10;
    */
-  vector_name?: string;
+  vectorName?: string;
 
   /**
    * Options for specifying which vectors to include into response
    *
    * @generated from field: optional qdrant.WithVectorsSelector with_vectors = 11;
    */
-  with_vectors?: WithVectorsSelector;
+  withVectors?: WithVectorsSelector;
 
   /**
    * Options for specifying read consistency guarantees
    *
    * @generated from field: optional qdrant.ReadConsistency read_consistency = 12;
    */
-  read_consistency?: ReadConsistency;
+  readConsistency?: ReadConsistency;
 
   constructor(data?: PartialMessage<SearchPoints>) {
     super();
@@ -1600,19 +1600,19 @@ export class SearchBatchPoints extends Message<SearchBatchPoints> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * @generated from field: repeated qdrant.SearchPoints search_points = 2;
    */
-  search_points: SearchPoints[] = [];
+  searchPoints: SearchPoints[] = [];
 
   /**
    * Options for specifying read consistency guarantees
    *
    * @generated from field: optional qdrant.ReadConsistency read_consistency = 3;
    */
-  read_consistency?: ReadConsistency;
+  readConsistency?: ReadConsistency;
 
   constructor(data?: PartialMessage<SearchBatchPoints>) {
     super();
@@ -1653,7 +1653,7 @@ export class SearchPointGroups extends Message<SearchPointGroups> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Vector to compare against
@@ -1681,7 +1681,7 @@ export class SearchPointGroups extends Message<SearchPointGroups> {
    *
    * @generated from field: qdrant.WithPayloadSelector with_payload = 5;
    */
-  with_payload?: WithPayloadSelector;
+  withPayload?: WithPayloadSelector;
 
   /**
    * Search config
@@ -1695,42 +1695,42 @@ export class SearchPointGroups extends Message<SearchPointGroups> {
    *
    * @generated from field: optional float score_threshold = 7;
    */
-  score_threshold?: number;
+  scoreThreshold?: number;
 
   /**
    * Which vector to use for search, if not specified - use default vector
    *
    * @generated from field: optional string vector_name = 8;
    */
-  vector_name?: string;
+  vectorName?: string;
 
   /**
    * Options for specifying which vectors to include into response
    *
    * @generated from field: optional qdrant.WithVectorsSelector with_vectors = 9;
    */
-  with_vectors?: WithVectorsSelector;
+  withVectors?: WithVectorsSelector;
 
   /**
    * Payload field to group by, must be a string or number field. If there are multiple values for the field, all of them will be used. One point can be in multiple groups.
    *
    * @generated from field: string group_by = 10;
    */
-  group_by = "";
+  groupBy = "";
 
   /**
    * Maximum amount of points to return per group
    *
    * @generated from field: uint32 group_size = 11;
    */
-  group_size = 0;
+  groupSize = 0;
 
   /**
    * Options for specifying read consistency guarantees
    *
    * @generated from field: optional qdrant.ReadConsistency read_consistency = 12;
    */
-  read_consistency?: ReadConsistency;
+  readConsistency?: ReadConsistency;
 
   constructor(data?: PartialMessage<SearchPointGroups>) {
     super();
@@ -1778,7 +1778,7 @@ export class ScrollPoints extends Message<ScrollPoints> {
   /**
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Filter conditions - return only those points that satisfy the specified conditions
@@ -1806,21 +1806,21 @@ export class ScrollPoints extends Message<ScrollPoints> {
    *
    * @generated from field: qdrant.WithPayloadSelector with_payload = 6;
    */
-  with_payload?: WithPayloadSelector;
+  withPayload?: WithPayloadSelector;
 
   /**
    * Options for specifying which vectors to include into response
    *
    * @generated from field: optional qdrant.WithVectorsSelector with_vectors = 7;
    */
-  with_vectors?: WithVectorsSelector;
+  withVectors?: WithVectorsSelector;
 
   /**
    * Options for specifying read consistency guarantees
    *
    * @generated from field: optional qdrant.ReadConsistency read_consistency = 8;
    */
-  read_consistency?: ReadConsistency;
+  readConsistency?: ReadConsistency;
 
   constructor(data?: PartialMessage<ScrollPoints>) {
     super();
@@ -1863,14 +1863,14 @@ export class LookupLocation extends Message<LookupLocation> {
   /**
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Which vector to use for search, if not specified - use default vector
    *
    * @generated from field: optional string vector_name = 2;
    */
-  vector_name?: string;
+  vectorName?: string;
 
   constructor(data?: PartialMessage<LookupLocation>) {
     super();
@@ -1910,7 +1910,7 @@ export class RecommendPoints extends Message<RecommendPoints> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Look for vectors closest to those
@@ -1945,7 +1945,7 @@ export class RecommendPoints extends Message<RecommendPoints> {
    *
    * @generated from field: qdrant.WithPayloadSelector with_payload = 7;
    */
-  with_payload?: WithPayloadSelector;
+  withPayload?: WithPayloadSelector;
 
   /**
    * Search config
@@ -1959,7 +1959,7 @@ export class RecommendPoints extends Message<RecommendPoints> {
    *
    * @generated from field: optional float score_threshold = 9;
    */
-  score_threshold?: number;
+  scoreThreshold?: number;
 
   /**
    * Offset of the result
@@ -1980,21 +1980,21 @@ export class RecommendPoints extends Message<RecommendPoints> {
    *
    * @generated from field: optional qdrant.WithVectorsSelector with_vectors = 12;
    */
-  with_vectors?: WithVectorsSelector;
+  withVectors?: WithVectorsSelector;
 
   /**
    * Name of the collection to use for points lookup, if not specified - use current collection
    *
    * @generated from field: optional qdrant.LookupLocation lookup_from = 13;
    */
-  lookup_from?: LookupLocation;
+  lookupFrom?: LookupLocation;
 
   /**
    * Options for specifying read consistency guarantees
    *
    * @generated from field: optional qdrant.ReadConsistency read_consistency = 14;
    */
-  read_consistency?: ReadConsistency;
+  readConsistency?: ReadConsistency;
 
   constructor(data?: PartialMessage<RecommendPoints>) {
     super();
@@ -2045,19 +2045,19 @@ export class RecommendBatchPoints extends Message<RecommendBatchPoints> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * @generated from field: repeated qdrant.RecommendPoints recommend_points = 2;
    */
-  recommend_points: RecommendPoints[] = [];
+  recommendPoints: RecommendPoints[] = [];
 
   /**
    * Options for specifying read consistency guarantees
    *
    * @generated from field: optional qdrant.ReadConsistency read_consistency = 3;
    */
-  read_consistency?: ReadConsistency;
+  readConsistency?: ReadConsistency;
 
   constructor(data?: PartialMessage<RecommendBatchPoints>) {
     super();
@@ -2098,7 +2098,7 @@ export class RecommendPointGroups extends Message<RecommendPointGroups> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Look for vectors closest to those
@@ -2133,7 +2133,7 @@ export class RecommendPointGroups extends Message<RecommendPointGroups> {
    *
    * @generated from field: qdrant.WithPayloadSelector with_payload = 6;
    */
-  with_payload?: WithPayloadSelector;
+  withPayload?: WithPayloadSelector;
 
   /**
    * Search config
@@ -2147,7 +2147,7 @@ export class RecommendPointGroups extends Message<RecommendPointGroups> {
    *
    * @generated from field: optional float score_threshold = 8;
    */
-  score_threshold?: number;
+  scoreThreshold?: number;
 
   /**
    * Define which vector to use for recommendation, if not specified - default vector
@@ -2161,35 +2161,35 @@ export class RecommendPointGroups extends Message<RecommendPointGroups> {
    *
    * @generated from field: optional qdrant.WithVectorsSelector with_vectors = 10;
    */
-  with_vectors?: WithVectorsSelector;
+  withVectors?: WithVectorsSelector;
 
   /**
    * Name of the collection to use for points lookup, if not specified - use current collection
    *
    * @generated from field: optional qdrant.LookupLocation lookup_from = 11;
    */
-  lookup_from?: LookupLocation;
+  lookupFrom?: LookupLocation;
 
   /**
    * Payload field to group by, must be a string or number field. If there are multiple values for the field, all of them will be used. One point can be in multiple groups.
    *
    * @generated from field: string group_by = 12;
    */
-  group_by = "";
+  groupBy = "";
 
   /**
    * Maximum amount of points to return per group
    *
    * @generated from field: uint32 group_size = 13;
    */
-  group_size = 0;
+  groupSize = 0;
 
   /**
    * Options for specifying read consistency guarantees
    *
    * @generated from field: optional qdrant.ReadConsistency read_consistency = 14;
    */
-  read_consistency?: ReadConsistency;
+  readConsistency?: ReadConsistency;
 
   constructor(data?: PartialMessage<RecommendPointGroups>) {
     super();
@@ -2241,7 +2241,7 @@ export class CountPoints extends Message<CountPoints> {
    *
    * @generated from field: string collection_name = 1;
    */
-  collection_name = "";
+  collectionName = "";
 
   /**
    * Filter conditions - return only those points that satisfy the specified conditions
@@ -2341,7 +2341,7 @@ export class UpdateResult extends Message<UpdateResult> {
    *
    * @generated from field: uint64 operation_id = 1;
    */
-  operation_id = protoInt64.zero;
+  operationId = protoInt64.zero;
 
   /**
    * Operation status
@@ -2464,7 +2464,7 @@ export class GroupId extends Message<GroupId> {
      * @generated from field: uint64 unsigned_value = 1;
      */
     value: bigint;
-    case: "unsigned_value";
+    case: "unsignedValue";
   } | {
     /**
      * Represents an integer value
@@ -2472,7 +2472,7 @@ export class GroupId extends Message<GroupId> {
      * @generated from field: int64 integer_value = 2;
      */
     value: bigint;
-    case: "integer_value";
+    case: "integerValue";
   } | {
     /**
      * Represents a string value.
@@ -2480,7 +2480,7 @@ export class GroupId extends Message<GroupId> {
      * @generated from field: string string_value = 3;
      */
     value: string;
-    case: "string_value";
+    case: "stringValue";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<GroupId>) {
@@ -2825,7 +2825,7 @@ export class ScrollResponse extends Message<ScrollResponse> {
    *
    * @generated from field: optional qdrant.PointId next_page_offset = 1;
    */
-  next_page_offset?: PointId;
+  nextPageOffset?: PointId;
 
   /**
    * @generated from field: repeated qdrant.RetrievedPoint result = 2;
@@ -3158,7 +3158,7 @@ export class Filter extends Message<Filter> {
    *
    * @generated from field: repeated qdrant.Condition must_not = 3;
    */
-  must_not: Condition[] = [];
+  mustNot: Condition[] = [];
 
   constructor(data?: PartialMessage<Filter>) {
     super();
@@ -3197,7 +3197,7 @@ export class Condition extends Message<Condition> {
   /**
    * @generated from oneof qdrant.Condition.condition_one_of
    */
-  condition_one_of: {
+  conditionOneOf: {
     /**
      * @generated from field: qdrant.FieldCondition field = 1;
      */
@@ -3208,13 +3208,13 @@ export class Condition extends Message<Condition> {
      * @generated from field: qdrant.IsEmptyCondition is_empty = 2;
      */
     value: IsEmptyCondition;
-    case: "is_empty";
+    case: "isEmpty";
   } | {
     /**
      * @generated from field: qdrant.HasIdCondition has_id = 3;
      */
     value: HasIdCondition;
-    case: "has_id";
+    case: "hasId";
   } | {
     /**
      * @generated from field: qdrant.Filter filter = 4;
@@ -3226,7 +3226,7 @@ export class Condition extends Message<Condition> {
      * @generated from field: qdrant.IsNullCondition is_null = 5;
      */
     value: IsNullCondition;
-    case: "is_null";
+    case: "isNull";
   } | {
     /**
      * @generated from field: qdrant.NestedCondition nested = 6;
@@ -3349,7 +3349,7 @@ export class HasIdCondition extends Message<HasIdCondition> {
   /**
    * @generated from field: repeated qdrant.PointId has_id = 1;
    */
-  has_id: PointId[] = [];
+  hasId: PointId[] = [];
 
   constructor(data?: PartialMessage<HasIdCondition>) {
     super();
@@ -3454,21 +3454,21 @@ export class FieldCondition extends Message<FieldCondition> {
    *
    * @generated from field: qdrant.GeoBoundingBox geo_bounding_box = 4;
    */
-  geo_bounding_box?: GeoBoundingBox;
+  geoBoundingBox?: GeoBoundingBox;
 
   /**
    * Check if geo point is within a given radius
    *
    * @generated from field: qdrant.GeoRadius geo_radius = 5;
    */
-  geo_radius?: GeoRadius;
+  geoRadius?: GeoRadius;
 
   /**
    * Check number of values for a specific field
    *
    * @generated from field: qdrant.ValuesCount values_count = 6;
    */
-  values_count?: ValuesCount;
+  valuesCount?: ValuesCount;
 
   constructor(data?: PartialMessage<FieldCondition>) {
     super();
@@ -3510,7 +3510,7 @@ export class Match extends Message<Match> {
   /**
    * @generated from oneof qdrant.Match.match_value
    */
-  match_value: {
+  matchValue: {
     /**
      * Match string keyword
      *
@@ -3565,7 +3565,7 @@ export class Match extends Message<Match> {
      * @generated from field: qdrant.RepeatedIntegers except_integers = 7;
      */
     value: RepeatedIntegers;
-    case: "except_integers";
+    case: "exceptIntegers";
   } | {
     /**
      * Match any other value except those keywords
@@ -3573,7 +3573,7 @@ export class Match extends Message<Match> {
      * @generated from field: qdrant.RepeatedStrings except_keywords = 8;
      */
     value: RepeatedStrings;
-    case: "except_keywords";
+    case: "exceptKeywords";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<Match>) {
@@ -3749,14 +3749,14 @@ export class GeoBoundingBox extends Message<GeoBoundingBox> {
    *
    * @generated from field: qdrant.GeoPoint top_left = 1;
    */
-  top_left?: GeoPoint;
+  topLeft?: GeoPoint;
 
   /**
    * south-east corner
    *
    * @generated from field: qdrant.GeoPoint bottom_right = 2;
    */
-  bottom_right?: GeoPoint;
+  bottomRight?: GeoPoint;
 
   constructor(data?: PartialMessage<GeoBoundingBox>) {
     super();
@@ -3896,7 +3896,7 @@ export class PointsSelector extends Message<PointsSelector> {
   /**
    * @generated from oneof qdrant.PointsSelector.points_selector_one_of
    */
-  points_selector_one_of: {
+  pointsSelectorOneOf: {
     /**
      * @generated from field: qdrant.PointsIdsList points = 1;
      */
