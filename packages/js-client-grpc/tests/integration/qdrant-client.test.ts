@@ -341,7 +341,7 @@ describe('QdrantClient', () => {
     test('retrieve all points', async () => {
         const result = (await client.api('collections').get({collectionName})).result!;
         expect(result.toJson(), 'check failed - 6 points expected').toMatchObject({
-            vectors_count: '6',
+            vectorsCount: '6',
         });
     });
 
