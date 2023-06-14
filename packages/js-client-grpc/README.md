@@ -60,4 +60,4 @@ These are the most relevant scripts for development:
 -   `pnpm pre-commit`: same as pre-check, but for git hooks (husky)
 -   `pnpm test`: run unit tests
 -   `pnpm test:integration`: runs integration tests against a locally running Qdrant docker container
--   `pnpm codegen:openapi-typescript`: updates generated TS schema from the latest openapi.json remote
+-   `pnpm codegen:grpc-typescript`: updates generated TS classes and types from the latest remote proto files
