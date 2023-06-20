@@ -22,7 +22,6 @@ docker run -d --rm \
 trap stop_docker SIGINT
 trap stop_docker ERR
 
-sleep 30
 until $(curl --output /dev/null --silent --get --fail http://$QDRANT_HOST/collections); do
   printf 'waiting for server to start...'
   sleep 5
