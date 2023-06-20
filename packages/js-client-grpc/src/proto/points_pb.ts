@@ -1384,6 +1384,20 @@ export class QuantizationSearchParams extends Message<QuantizationSearchParams> 
    */
   rescore?: boolean;
 
+  /**
+   *
+   * Oversampling factor for quantization.
+   *
+   * Defines how many extra vectors should be pre-selected using quantized index,
+   * and then re-scored using original vectors.
+   *
+   * For example, if `oversampling` is 2.4 and `limit` is 100, then 240 vectors will be pre-selected using quantized index,
+   * and then top-100 will be returned after re-scoring.
+   *
+   * @generated from field: optional double oversampling = 3;
+   */
+  oversampling?: number;
+
   constructor(data?: PartialMessage<QuantizationSearchParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1394,6 +1408,7 @@ export class QuantizationSearchParams extends Message<QuantizationSearchParams> 
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "ignore", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 2, name: "rescore", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 3, name: "oversampling", kind: "scalar", T: 1 /* ScalarType.DOUBLE */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QuantizationSearchParams {
@@ -1645,6 +1660,61 @@ export class SearchBatchPoints extends Message<SearchBatchPoints> {
 }
 
 /**
+ * @generated from message qdrant.WithLookup
+ */
+export class WithLookup extends Message<WithLookup> {
+  /**
+   * Name of the collection to use for points lookup
+   *
+   * @generated from field: string collection = 1;
+   */
+  collection = "";
+
+  /**
+   * Options for specifying which payload to include (or not)
+   *
+   * @generated from field: optional qdrant.WithPayloadSelector with_payload = 2;
+   */
+  withPayload?: WithPayloadSelector;
+
+  /**
+   * Options for specifying which vectors to include (or not)
+   *
+   * @generated from field: optional qdrant.WithVectorsSelector with_vectors = 3;
+   */
+  withVectors?: WithVectorsSelector;
+
+  constructor(data?: PartialMessage<WithLookup>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.WithLookup";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collection", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "with_payload", kind: "message", T: WithPayloadSelector, opt: true },
+    { no: 3, name: "with_vectors", kind: "message", T: WithVectorsSelector, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WithLookup {
+    return new WithLookup().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WithLookup {
+    return new WithLookup().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WithLookup {
+    return new WithLookup().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: WithLookup | PlainMessage<WithLookup> | undefined, b: WithLookup | PlainMessage<WithLookup> | undefined): boolean {
+    return proto3.util.equals(WithLookup, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.SearchPointGroups
  */
 export class SearchPointGroups extends Message<SearchPointGroups> {
@@ -1732,6 +1802,13 @@ export class SearchPointGroups extends Message<SearchPointGroups> {
    */
   readConsistency?: ReadConsistency;
 
+  /**
+   * Options for specifying how to use the group id to lookup points in another collection
+   *
+   * @generated from field: optional qdrant.WithLookup with_lookup = 13;
+   */
+  withLookup?: WithLookup;
+
   constructor(data?: PartialMessage<SearchPointGroups>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1752,6 +1829,7 @@ export class SearchPointGroups extends Message<SearchPointGroups> {
     { no: 10, name: "group_by", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 11, name: "group_size", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 12, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
+    { no: 13, name: "with_lookup", kind: "message", T: WithLookup, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchPointGroups {
@@ -2191,6 +2269,13 @@ export class RecommendPointGroups extends Message<RecommendPointGroups> {
    */
   readConsistency?: ReadConsistency;
 
+  /**
+   * Options for specifying how to use the group id to lookup points in another collection
+   *
+   * @generated from field: optional qdrant.WithLookup with_lookup = 15;
+   */
+  withLookup?: WithLookup;
+
   constructor(data?: PartialMessage<RecommendPointGroups>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2213,6 +2298,7 @@ export class RecommendPointGroups extends Message<RecommendPointGroups> {
     { no: 12, name: "group_by", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 13, name: "group_size", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 14, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
+    { no: 15, name: "with_lookup", kind: "message", T: WithLookup, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RecommendPointGroups {
@@ -2525,11 +2611,18 @@ export class PointGroup extends Message<PointGroup> {
   id?: GroupId;
 
   /**
-   * Points in the group
+   * Points in the group 
    *
    * @generated from field: repeated qdrant.ScoredPoint hits = 2;
    */
   hits: ScoredPoint[] = [];
+
+  /**
+   * Point(s) from the lookup collection that matches the group id
+   *
+   * @generated from field: qdrant.RetrievedPoint lookup = 3;
+   */
+  lookup?: RetrievedPoint;
 
   constructor(data?: PartialMessage<PointGroup>) {
     super();
@@ -2541,6 +2634,7 @@ export class PointGroup extends Message<PointGroup> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "id", kind: "message", T: GroupId },
     { no: 2, name: "hits", kind: "message", T: ScoredPoint, repeated: true },
+    { no: 3, name: "lookup", kind: "message", T: RetrievedPoint },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointGroup {

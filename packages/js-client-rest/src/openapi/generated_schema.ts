@@ -886,6 +886,16 @@ export interface components {
        * @default false
        */
       rescore?: boolean;
+      /**
+       * Format: double 
+       * @description Oversampling factor for quantization. Default is 1.0.
+       * 
+       * Defines how many extra vectors should be pre-selected using quantized index, and then re-scored using original vectors.
+       * 
+       * For example, if `oversampling` is 2.4 and `limit` is 100, then 240 vectors will be pre-selected using quantized index, and then top-100 will be returned after re-scoring. 
+       * @default null
+       */
+      oversampling?: number | null;
     };
     /** @description Search result */
     ScoredPoint: {
@@ -1399,6 +1409,7 @@ export interface components {
       debug: boolean;
       web_feature: boolean;
       service_debug_feature: boolean;
+      recovery_mode: boolean;
     };
     RunningEnvironmentTelemetry: {
       distribution?: string | null;
@@ -1730,7 +1741,10 @@ export interface components {
       /** @description Scored points that have the same value of the group_by key */
       hits: (components["schemas"]["ScoredPoint"])[];
       id: components["schemas"]["GroupId"];
+      /** @description Record that has been looked up using the group id */
+      lookup?: components["schemas"]["Record"] | (Record<string, unknown> | null);
     };
+    /** @description Value of the group_by key, shared across all the hits in the group */
     GroupId: string | number;
     SearchGroupsRequest: {
       vector: components["schemas"]["NamedVectorStruct"];
@@ -1762,6 +1776,23 @@ export interface components {
        * @description Maximum amount of groups to return
        */
       limit: number;
+      /** @description Look for points in another collection using the group ids */
+      with_lookup?: components["schemas"]["WithLookupInterface"] | (Record<string, unknown> | null);
+    };
+    WithLookupInterface: string | components["schemas"]["WithLookup"];
+    WithLookup: {
+      /** @description Name of the collection to use for points lookup */
+      collection: string;
+      /**
+       * @description Options for specifying which payload to include (or not) 
+       * @default true
+       */
+      with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
+      /**
+       * @description Options for specifying which vectors to include (or not) 
+       * @default null
+       */
+      with_vectors?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
     };
     RecommendGroupsRequest: {
       /** @description Look for vectors closest to those */
@@ -1809,6 +1840,8 @@ export interface components {
        * @description Maximum amount of groups to return
        */
       limit: number;
+      /** @description Look for points in another collection using the group ids */
+      with_lookup?: components["schemas"]["WithLookupInterface"] | (Record<string, unknown> | null);
     };
     GroupsResult: {
       groups: (components["schemas"]["PointGroup"])[];
