@@ -51,6 +51,3 @@ jobs:
       - name: Integration tests
         run: packages/qdrant-js/scripts/integration-tests.sh
         shell: bash
-        env:
-          QDRANT_URL: ${{ secrets.QDRANT_URL }}
-          QDRANT_API_KEY: ${{ secrets.QDRANT_API_KEY }}
