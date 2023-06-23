@@ -27,6 +27,12 @@ describe('QdrantClient', () => {
     });
 
     test('Qdrant service check', async () => {
+        const {QDRANT_URL, QDRANT_API_KEY} = process.env;
+        const client = new QdrantClient({
+            url: QDRANT_URL,
+            apiKey: QDRANT_API_KEY,
+        });
+
         await expect(client.api('service').healthCheck({})).resolves.toMatchObject({
             title: 'qdrant - vector search engine',
             version: expect.stringMatching(semverRegEx) as unknown,
