@@ -1,17 +1,5 @@
 # @qdrant/qdrant-js
 
-## 1.4.0
-
-### Minor Changes
-
--   [#29](https://github.com/qdrant/qdrant-js/pull/29) [`fdc4e85`](https://github.com/qdrant/qdrant-js/commit/fdc4e85a8f6f3ae9d496c444817f56e64eb9ed66) Thanks [@IvanPleshkov](https://github.com/IvanPleshkov)! - Qdrant API v1.3.0
-
-### Patch Changes
-
--   Updated dependencies [[`fdc4e85`](https://github.com/qdrant/qdrant-js/commit/fdc4e85a8f6f3ae9d496c444817f56e64eb9ed66)]:
-    -   @qdrant/js-client-grpc@1.4.0
-    -   @qdrant/js-client-rest@1.4.0
-
 ## 1.3.0
 
 ### Minor Changes

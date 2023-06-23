@@ -124,10 +124,10 @@ importers:
   packages/qdrant-js:
     dependencies:
       '@qdrant/js-client-grpc':
-        specifier: workspace:1.4.0
+        specifier: workspace:1.3.0
         version: link:../js-client-grpc
       '@qdrant/js-client-rest':
-        specifier: workspace:1.4.0
+        specifier: workspace:1.3.0
         version: link:../js-client-rest
       typescript:
         specifier: '>=4.1'
