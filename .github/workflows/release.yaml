@@ -28,7 +28,7 @@ jobs:
           cache-dependency-path: "pnpm-lock.yaml"
 
       - name: Node packages audit
-        run: pnpm audit
+        run: pnpm audit --prod
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
