@@ -1,5 +1,11 @@
 # @qdrant/js-client-rest
 
+## 1.3.0
+
+### Minor Changes
+
+-   Qdrant v1.3.0 API
+
 ## 1.2.2
 
 ### Patch Changes
