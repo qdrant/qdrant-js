@@ -1108,7 +1108,7 @@ export class CreateCollection extends Message<CreateCollection> {
   optimizersConfig?: OptimizersConfigDiff;
 
   /**
-   * Number of shards in the collection, default = 1
+   * Number of shards in the collection, default is 1 for standalone, otherwise equal to the number of nodes. Minimum is 1
    *
    * @generated from field: optional uint32 shard_number = 7;
    */
