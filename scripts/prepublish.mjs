@@ -23,7 +23,7 @@ async function main() {
     );
     if (restCheck === 'error') {
         throw new Error(
-            'Cannot publish gRPC client.\n' +
+            'Cannot publish REST client.\n' +
                 `Could not find a matching version ${restMinorVersion} on the docker registry for (${restClient.version}).`,
         );
     }
