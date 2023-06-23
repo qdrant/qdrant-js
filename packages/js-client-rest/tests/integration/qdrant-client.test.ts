@@ -9,6 +9,11 @@ describe('QdrantClient', () => {
     const collectionName = 'test_collection';
 
     test('Qdrant service check', async () => {
+        const {QDRANT_URL, QDRANT_API_KEY} = process.env;
+        const client = new QdrantClient({
+            url: QDRANT_URL,
+            apiKey: QDRANT_API_KEY,
+        });
         const {data} = await client.api('service').telemetry({});
         expect(data).toMatchObject({
             time: expect.any(Number) as unknown,
