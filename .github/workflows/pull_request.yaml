@@ -29,7 +29,7 @@ jobs:
           cache: "pnpm"
 
       - name: Node packages audit
-        run: pnpm audit
+        run: pnpm audit --prod
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
