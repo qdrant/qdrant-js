@@ -5,6 +5,7 @@ set -ex
 function stop_docker()
 {
   echo "stopping qdrant_test"
+  docker logs qdrant_test
   docker stop qdrant_test
 }
 
