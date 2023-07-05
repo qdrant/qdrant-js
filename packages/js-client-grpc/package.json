@@ -48,7 +48,7 @@
         "codegen:grpc-typescript": "./scripts/generate-grpc-sources.sh"
     },
     "dependencies": {
-        "@bufbuild/connect": "^0.9.1",
+        "@bufbuild/connect": "^0.10.0",
         "@bufbuild/connect-node": "^0.9.1",
         "@bufbuild/protobuf": "^1.2.1"
     },
