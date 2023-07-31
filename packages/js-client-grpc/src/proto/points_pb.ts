@@ -100,6 +100,11 @@ export enum FieldType {
    * @generated from enum value: FieldTypeText = 4;
    */
   FieldTypeText = 4,
+
+  /**
+   * @generated from enum value: FieldTypeBool = 5;
+   */
+  FieldTypeBool = 5,
 }
 // Retrieve enum metadata with: proto3.getEnumType(FieldType)
 proto3.util.setEnumType(FieldType, "qdrant.FieldType", [
@@ -108,6 +113,7 @@ proto3.util.setEnumType(FieldType, "qdrant.FieldType", [
   { no: 2, name: "FieldTypeFloat" },
   { no: 3, name: "FieldTypeGeo" },
   { no: 4, name: "FieldTypeText" },
+  { no: 5, name: "FieldTypeBool" },
 ]);
 
 /**
@@ -3925,6 +3931,47 @@ export class GeoRadius extends Message<GeoRadius> {
 
   static equals(a: GeoRadius | PlainMessage<GeoRadius> | undefined, b: GeoRadius | PlainMessage<GeoRadius> | undefined): boolean {
     return proto3.util.equals(GeoRadius, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.GeoPolygon
+ */
+export class GeoPolygon extends Message<GeoPolygon> {
+  /**
+   * Ordered list of coordinates representing the vertices of a polygon.
+   * The minimum size is 4, and the first coordinate and the last coordinate
+   * should be the same to form a closed polygon.
+   *
+   * @generated from field: repeated qdrant.GeoPoint points = 1;
+   */
+  points: GeoPoint[] = [];
+
+  constructor(data?: PartialMessage<GeoPolygon>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.GeoPolygon";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "points", kind: "message", T: GeoPoint, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GeoPolygon {
+    return new GeoPolygon().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GeoPolygon {
+    return new GeoPolygon().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GeoPolygon {
+    return new GeoPolygon().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GeoPolygon | PlainMessage<GeoPolygon> | undefined, b: GeoPolygon | PlainMessage<GeoPolygon> | undefined): boolean {
+    return proto3.util.equals(GeoPolygon, a, b);
   }
 }
 

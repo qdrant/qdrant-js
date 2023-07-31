@@ -109,6 +109,11 @@ export enum PayloadSchemaType {
    * @generated from enum value: Text = 5;
    */
   Text = 5,
+
+  /**
+   * @generated from enum value: Bool = 6;
+   */
+  Bool = 6,
 }
 // Retrieve enum metadata with: proto3.getEnumType(PayloadSchemaType)
 proto3.util.setEnumType(PayloadSchemaType, "qdrant.PayloadSchemaType", [
@@ -118,6 +123,7 @@ proto3.util.setEnumType(PayloadSchemaType, "qdrant.PayloadSchemaType", [
   { no: 3, name: "Float" },
   { no: 4, name: "Geo" },
   { no: 5, name: "Text" },
+  { no: 6, name: "Bool" },
 ]);
 
 /**
@@ -201,6 +207,11 @@ export enum TokenizerType {
    * @generated from enum value: Word = 3;
    */
   Word = 3,
+
+  /**
+   * @generated from enum value: Multilingual = 4;
+   */
+  Multilingual = 4,
 }
 // Retrieve enum metadata with: proto3.getEnumType(TokenizerType)
 proto3.util.setEnumType(TokenizerType, "qdrant.TokenizerType", [
@@ -208,6 +219,7 @@ proto3.util.setEnumType(TokenizerType, "qdrant.TokenizerType", [
   { no: 1, name: "Prefix" },
   { no: 2, name: "Whitespace" },
   { no: 3, name: "Word" },
+  { no: 4, name: "Multilingual" },
 ]);
 
 /**
@@ -330,6 +342,61 @@ export class VectorParams extends Message<VectorParams> {
 }
 
 /**
+ * @generated from message qdrant.VectorParamsDiff
+ */
+export class VectorParamsDiff extends Message<VectorParamsDiff> {
+  /**
+   * Update params for HNSW index. If empty object - it will be unset
+   *
+   * @generated from field: optional qdrant.HnswConfigDiff hnsw_config = 1;
+   */
+  hnswConfig?: HnswConfigDiff;
+
+  /**
+   * Update quantization params. If none - it is left unchanged.
+   *
+   * @generated from field: optional qdrant.QuantizationConfigDiff quantization_config = 2;
+   */
+  quantizationConfig?: QuantizationConfigDiff;
+
+  /**
+   * If true - serve vectors from disk. If set to false, the vectors will be loaded in RAM.
+   *
+   * @generated from field: optional bool on_disk = 3;
+   */
+  onDisk?: boolean;
+
+  constructor(data?: PartialMessage<VectorParamsDiff>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.VectorParamsDiff";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "hnsw_config", kind: "message", T: HnswConfigDiff, opt: true },
+    { no: 2, name: "quantization_config", kind: "message", T: QuantizationConfigDiff, opt: true },
+    { no: 3, name: "on_disk", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VectorParamsDiff {
+    return new VectorParamsDiff().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): VectorParamsDiff {
+    return new VectorParamsDiff().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): VectorParamsDiff {
+    return new VectorParamsDiff().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: VectorParamsDiff | PlainMessage<VectorParamsDiff> | undefined, b: VectorParamsDiff | PlainMessage<VectorParamsDiff> | undefined): boolean {
+    return proto3.util.equals(VectorParamsDiff, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.VectorParamsMap
  */
 export class VectorParamsMap extends Message<VectorParamsMap> {
@@ -363,6 +430,43 @@ export class VectorParamsMap extends Message<VectorParamsMap> {
 
   static equals(a: VectorParamsMap | PlainMessage<VectorParamsMap> | undefined, b: VectorParamsMap | PlainMessage<VectorParamsMap> | undefined): boolean {
     return proto3.util.equals(VectorParamsMap, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.VectorParamsDiffMap
+ */
+export class VectorParamsDiffMap extends Message<VectorParamsDiffMap> {
+  /**
+   * @generated from field: map<string, qdrant.VectorParamsDiff> map = 1;
+   */
+  map: { [key: string]: VectorParamsDiff } = {};
+
+  constructor(data?: PartialMessage<VectorParamsDiffMap>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.VectorParamsDiffMap";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "map", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: VectorParamsDiff} },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VectorParamsDiffMap {
+    return new VectorParamsDiffMap().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): VectorParamsDiffMap {
+    return new VectorParamsDiffMap().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): VectorParamsDiffMap {
+    return new VectorParamsDiffMap().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: VectorParamsDiffMap | PlainMessage<VectorParamsDiffMap> | undefined, b: VectorParamsDiffMap | PlainMessage<VectorParamsDiffMap> | undefined): boolean {
+    return proto3.util.equals(VectorParamsDiffMap, a, b);
   }
 }
 
@@ -413,6 +517,56 @@ export class VectorsConfig extends Message<VectorsConfig> {
 
   static equals(a: VectorsConfig | PlainMessage<VectorsConfig> | undefined, b: VectorsConfig | PlainMessage<VectorsConfig> | undefined): boolean {
     return proto3.util.equals(VectorsConfig, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.VectorsConfigDiff
+ */
+export class VectorsConfigDiff extends Message<VectorsConfigDiff> {
+  /**
+   * @generated from oneof qdrant.VectorsConfigDiff.config
+   */
+  config: {
+    /**
+     * @generated from field: qdrant.VectorParamsDiff params = 1;
+     */
+    value: VectorParamsDiff;
+    case: "params";
+  } | {
+    /**
+     * @generated from field: qdrant.VectorParamsDiffMap params_map = 2;
+     */
+    value: VectorParamsDiffMap;
+    case: "paramsMap";
+  } | { case: undefined; value?: undefined } = { case: undefined };
+
+  constructor(data?: PartialMessage<VectorsConfigDiff>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.VectorsConfigDiff";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "params", kind: "message", T: VectorParamsDiff, oneof: "config" },
+    { no: 2, name: "params_map", kind: "message", T: VectorParamsDiffMap, oneof: "config" },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VectorsConfigDiff {
+    return new VectorsConfigDiff().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): VectorsConfigDiff {
+    return new VectorsConfigDiff().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): VectorsConfigDiff {
+    return new VectorsConfigDiff().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: VectorsConfigDiff | PlainMessage<VectorsConfigDiff> | undefined, b: VectorsConfigDiff | PlainMessage<VectorsConfigDiff> | undefined): boolean {
+    return proto3.util.equals(VectorsConfigDiff, a, b);
   }
 }
 
@@ -1076,6 +1230,94 @@ export class QuantizationConfig extends Message<QuantizationConfig> {
 }
 
 /**
+ * @generated from message qdrant.Disabled
+ */
+export class Disabled extends Message<Disabled> {
+  constructor(data?: PartialMessage<Disabled>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.Disabled";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Disabled {
+    return new Disabled().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Disabled {
+    return new Disabled().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Disabled {
+    return new Disabled().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Disabled | PlainMessage<Disabled> | undefined, b: Disabled | PlainMessage<Disabled> | undefined): boolean {
+    return proto3.util.equals(Disabled, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.QuantizationConfigDiff
+ */
+export class QuantizationConfigDiff extends Message<QuantizationConfigDiff> {
+  /**
+   * @generated from oneof qdrant.QuantizationConfigDiff.quantization
+   */
+  quantization: {
+    /**
+     * @generated from field: qdrant.ScalarQuantization scalar = 1;
+     */
+    value: ScalarQuantization;
+    case: "scalar";
+  } | {
+    /**
+     * @generated from field: qdrant.ProductQuantization product = 2;
+     */
+    value: ProductQuantization;
+    case: "product";
+  } | {
+    /**
+     * @generated from field: qdrant.Disabled disabled = 3;
+     */
+    value: Disabled;
+    case: "disabled";
+  } | { case: undefined; value?: undefined } = { case: undefined };
+
+  constructor(data?: PartialMessage<QuantizationConfigDiff>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.QuantizationConfigDiff";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "scalar", kind: "message", T: ScalarQuantization, oneof: "quantization" },
+    { no: 2, name: "product", kind: "message", T: ProductQuantization, oneof: "quantization" },
+    { no: 3, name: "disabled", kind: "message", T: Disabled, oneof: "quantization" },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QuantizationConfigDiff {
+    return new QuantizationConfigDiff().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QuantizationConfigDiff {
+    return new QuantizationConfigDiff().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QuantizationConfigDiff {
+    return new QuantizationConfigDiff().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QuantizationConfigDiff | PlainMessage<QuantizationConfigDiff> | undefined, b: QuantizationConfigDiff | PlainMessage<QuantizationConfigDiff> | undefined): boolean {
+    return proto3.util.equals(QuantizationConfigDiff, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.CreateCollection
  */
 export class CreateCollection extends Message<CreateCollection> {
@@ -1214,14 +1456,14 @@ export class UpdateCollection extends Message<UpdateCollection> {
   collectionName = "";
 
   /**
-   * New configuration parameters for the collection
+   * New configuration parameters for the collection. This operation is blocking, it will only proceed once all current optimizations are complete
    *
    * @generated from field: optional qdrant.OptimizersConfigDiff optimizers_config = 2;
    */
   optimizersConfig?: OptimizersConfigDiff;
 
   /**
-   * Wait timeout for operation commit in seconds, if not specified - default value will be supplied
+   * Wait timeout for operation commit in seconds if blocking, if not specified - default value will be supplied
    *
    * @generated from field: optional uint64 timeout = 3;
    */
@@ -1233,6 +1475,27 @@ export class UpdateCollection extends Message<UpdateCollection> {
    * @generated from field: optional qdrant.CollectionParamsDiff params = 4;
    */
   params?: CollectionParamsDiff;
+
+  /**
+   * New HNSW parameters for the collection index
+   *
+   * @generated from field: optional qdrant.HnswConfigDiff hnsw_config = 5;
+   */
+  hnswConfig?: HnswConfigDiff;
+
+  /**
+   * New vector parameters
+   *
+   * @generated from field: optional qdrant.VectorsConfigDiff vectors_config = 6;
+   */
+  vectorsConfig?: VectorsConfigDiff;
+
+  /**
+   * Quantization configuration of vector
+   *
+   * @generated from field: optional qdrant.QuantizationConfigDiff quantization_config = 7;
+   */
+  quantizationConfig?: QuantizationConfigDiff;
 
   constructor(data?: PartialMessage<UpdateCollection>) {
     super();
@@ -1246,6 +1509,9 @@ export class UpdateCollection extends Message<UpdateCollection> {
     { no: 2, name: "optimizers_config", kind: "message", T: OptimizersConfigDiff, opt: true },
     { no: 3, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
     { no: 4, name: "params", kind: "message", T: CollectionParamsDiff, opt: true },
+    { no: 5, name: "hnsw_config", kind: "message", T: HnswConfigDiff, opt: true },
+    { no: 6, name: "vectors_config", kind: "message", T: VectorsConfigDiff, opt: true },
+    { no: 7, name: "quantization_config", kind: "message", T: QuantizationConfigDiff, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateCollection {
@@ -1448,6 +1714,13 @@ export class CollectionParamsDiff extends Message<CollectionParamsDiff> {
    */
   writeConsistencyFactor?: number;
 
+  /**
+   * If true - point's payload will not be stored in memory
+   *
+   * @generated from field: optional bool on_disk_payload = 3;
+   */
+  onDiskPayload?: boolean;
+
   constructor(data?: PartialMessage<CollectionParamsDiff>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1458,6 +1731,7 @@ export class CollectionParamsDiff extends Message<CollectionParamsDiff> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "replication_factor", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
     { no: 2, name: "write_consistency_factor", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
+    { no: 3, name: "on_disk_payload", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionParamsDiff {
