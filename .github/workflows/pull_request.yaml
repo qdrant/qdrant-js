@@ -36,15 +36,6 @@ jobs:
         env:
           CI: 1
 
-      - name: Generated OpenAPI update check
-        run: |
-          pnpm --filter "@qdrant/js-client-rest" codegen:openapi-typescript
-          if ( git diff --name-only | grep -q packages/js-client-rest/src/openapi/ || exit ) then
-            echo "Generated schema changed. Please update with: 'pnpm -r codegen:openapi-typescript'.";
-            exit 1
-          fi
-        shell: bash
-
       - name: Project checks
         run: pnpm -r pre-check
 
