@@ -1,8 +1,10 @@
 name: Release
 
 on:
+  workflow_dispatch:
   push:
-    branches: [master]
+    tags:
+      - '*'
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -43,15 +45,8 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Create release pull request or publish to npm
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          version: pnpm ci:version
-          publish: pnpm ci:release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: node scripts/prepublish.mjs
+      - run: pnpm publish --access public
 
       - name: Archive npm failure logs
         uses: actions/upload-artifact@v3
