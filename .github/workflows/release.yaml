@@ -46,7 +46,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - run: node scripts/prepublish.mjs
-      - run: pnpm publish --no-git-checks
+      - run: pnpm publish --no-git-checks --filter '!monorepo'
 
       - name: Archive npm failure logs
         uses: actions/upload-artifact@v3
