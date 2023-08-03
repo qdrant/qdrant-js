@@ -609,7 +609,7 @@ export interface components {
      * @description All possible names of payload types 
      * @enum {string}
      */
-    PayloadSchemaType: "keyword" | "integer" | "float" | "geo" | "text";
+    PayloadSchemaType: "keyword" | "integer" | "float" | "geo" | "text" | "bool";
     /** @description Payload type with parameters */
     PayloadSchemaParams: components["schemas"]["TextIndexParams"];
     TextIndexParams: {
@@ -625,7 +625,7 @@ export interface components {
     /** @enum {string} */
     TextIndexType: "text";
     /** @enum {string} */
-    TokenizerType: "prefix" | "whitespace" | "word";
+    TokenizerType: "prefix" | "whitespace" | "word" | "multilingual";
     PointRequest: {
       /** @description Look for points with ids */
       ids: (components["schemas"]["ExtendedPointId"])[];
@@ -860,7 +860,7 @@ export interface components {
     SearchParams: {
       /**
        * Format: uint 
-       * @description Params relevant to HNSW index /// Size of the beam in a beam-search. Larger the value - more accurate the result, more time required for search.
+       * @description Params relevant to HNSW index Size of the beam in a beam-search. Larger the value - more accurate the result, more time required for search.
        */
       hnsw_ef?: number | null;
       /**
@@ -1131,11 +1131,39 @@ export interface components {
     };
     /** @description Operation for updating parameters of the existing collection */
     UpdateCollection: {
-      /** @description Custom params for Optimizers.  If none - values from service configuration file are used. This operation is blocking, it will only proceed ones all current optimizations are complete */
+      /** @description Vector data parameters to update. It is possible to provide one config for single vector mode and list of configs for multiple vectors mode. */
+      vectors?: components["schemas"]["VectorsConfigDiff"] | (Record<string, unknown> | null);
+      /** @description Custom params for Optimizers.  If none - it is left unchanged. This operation is blocking, it will only proceed once all current optimizations are complete */
       optimizers_config?: components["schemas"]["OptimizersConfigDiff"] | (Record<string, unknown> | null);
-      /** @description Collection base params.  If none - values from service configuration file are used. */
+      /** @description Collection base params. If none - it is left unchanged. */
       params?: components["schemas"]["CollectionParamsDiff"] | (Record<string, unknown> | null);
+      /** @description HNSW parameters to update for the collection index. If none - it is left unchanged. */
+      hnsw_config?: components["schemas"]["HnswConfigDiff"] | (Record<string, unknown> | null);
+      /**
+       * @description Quantization parameters to update. If none - it is left unchanged. 
+       * @default null
+       */
+      quantization_config?: components["schemas"]["QuantizationConfigDiff"] | (Record<string, unknown> | null);
     };
+    /**
+     * @description Vector update params for multiple vectors
+     * 
+     * { "vector_name": { "hnsw_config": { "m": 8 } } }
+     */
+    VectorsConfigDiff: {
+      [key: string]: components["schemas"]["VectorParamsDiff"] | undefined;
+    };
+    VectorParamsDiff: {
+      /** @description Update params for HNSW index. If empty object - it will be unset. */
+      hnsw_config?: components["schemas"]["HnswConfigDiff"] | (Record<string, unknown> | null);
+      /** @description Update params for quantization. If none - it is left unchanged. */
+      quantization_config?: components["schemas"]["QuantizationConfigDiff"] | (Record<string, unknown> | null);
+      /** @description If true, vectors are served from disk, improving RAM usage at the cost of latency */
+      on_disk?: boolean | null;
+    };
+    QuantizationConfigDiff: components["schemas"]["ScalarQuantization"] | components["schemas"]["ProductQuantization"] | components["schemas"]["Disabled"];
+    /** @enum {string} */
+    Disabled: "Disabled";
     CollectionParamsDiff: {
       /**
        * Format: uint32 
@@ -1147,6 +1175,11 @@ export interface components {
        * @description Minimal number successful responses from replicas to consider operation successful
        */
       write_consistency_factor?: number | null;
+      /**
+       * @description If true - point's payload will not be stored in memory. It will be read from the disk every time it is requested. This setting saves RAM by (slightly) increasing the response time. Note: those payload values that are involved in filtering and are indexed - remain in RAM. 
+       * @default null
+       */
+      on_disk_payload?: boolean | null;
     };
     /** @description Operation for performing changes of collection aliases. Alias changes are atomic, meaning that no collection modifications can happen between alias operations. */
     ChangeAliasesOperation: {
