@@ -36,6 +36,27 @@ export interface paths {
      */
     post: operations["post_locks"];
   };
+  "/healthz": {
+    /**
+     * Kubernetes healthz endpoint 
+     * @description An endpoint for health checking used in Kubernetes.
+     */
+    get: operations["healthz"];
+  };
+  "/livez": {
+    /**
+     * Kubernetes livez endpoint 
+     * @description An endpoint for health checking used in Kubernetes.
+     */
+    get: operations["livez"];
+  };
+  "/readyz": {
+    /**
+     * Kubernetes readyz endpoint 
+     * @description An endpoint for health checking used in Kubernetes.
+     */
+    get: operations["readyz"];
+  };
   "/cluster": {
     /**
      * Get cluster status info 
@@ -186,6 +207,44 @@ export interface paths {
      */
     delete: operations["delete_full_snapshot"];
   };
+  "/collections/{collection_name}/shards/{shard_id}/snapshots/upload": {
+    /**
+     * Recover shard from an uploaded snapshot 
+     * @description Recover shard of a local collection from an uploaded snapshot. This will overwrite any data, stored on this node, for the collection shard.
+     */
+    post: operations["recover_shard_from_uploaded_snapshot"];
+  };
+  "/collections/{collection_name}/shards/{shard_id}/snapshots/recover": {
+    /**
+     * Recover from a snapshot 
+     * @description Recover shard of a local collection data from a snapshot. This will overwrite any data, stored in this shard, for the collection.
+     */
+    put: operations["recover_shard_from_snapshot"];
+  };
+  "/collections/{collection_name}/shards/{shard_id}/snapshots": {
+    /**
+     * List shards snapshots for a collection 
+     * @description Get list of snapshots for a shard of a collection
+     */
+    get: operations["list_shard_snapshots"];
+    /**
+     * Create shard snapshot 
+     * @description Create new snapshot of a shard for a collection
+     */
+    post: operations["create_shard_snapshot"];
+  };
+  "/collections/{collection_name}/shards/{shard_id}/snapshots/{snapshot_name}": {
+    /**
+     * Download collection snapshot 
+     * @description Download specified snapshot of a shard from a collection as a file
+     */
+    get: operations["get_shard_snapshot"];
+    /**
+     * Delete shard snapshot 
+     * @description Delete snapshot of a shard for a collection
+     */
+    delete: operations["delete_shard_snapshot"];
+  };
   "/collections/{collection_name}/points/{id}": {
     /**
      * Get point 
@@ -251,6 +310,13 @@ export interface paths {
      * @description Remove all payload for specified points
      */
     post: operations["clear_payload"];
+  };
+  "/collections/{collection_name}/points/batch": {
+    /**
+     * Batch update points 
+     * @description Apply a series of update operations for points, vectors and payloads
+     */
+    post: operations["batch_update"];
   };
   "/collections/{collection_name}/points/scroll": {
     /**
@@ -466,7 +532,7 @@ export interface components {
        */
       payload_m?: number | null;
     };
-    QuantizationConfig: components["schemas"]["ScalarQuantization"] | components["schemas"]["ProductQuantization"];
+    QuantizationConfig: components["schemas"]["ScalarQuantization"] | components["schemas"]["ProductQuantization"] | components["schemas"]["BinaryQuantization"];
     ScalarQuantization: {
       scalar: components["schemas"]["ScalarQuantizationConfig"];
     };
@@ -491,6 +557,12 @@ export interface components {
     };
     /** @enum {string} */
     CompressionRatio: "x4" | "x8" | "x16" | "x32" | "x64";
+    BinaryQuantization: {
+      binary: components["schemas"]["BinaryQuantizationConfig"];
+    };
+    BinaryQuantizationConfig: {
+      always_ram?: boolean | null;
+    };
     /** @description Config of HNSW index */
     HnswConfig: {
       /**
@@ -873,6 +945,11 @@ export interface components {
        * @default null
        */
       quantization?: components["schemas"]["QuantizationSearchParams"] | (Record<string, unknown> | null);
+      /**
+       * @description If enabled, the engine will only perform search among indexed or small segments. Using this option prevents slow searches in case of delayed index, but does not guarantee that all uploaded vectors will be included in search results 
+       * @default false
+       */
+      indexed_only?: boolean;
     };
     /** @description Additional parameters of the search */
     QuantizationSearchParams: {
@@ -1161,7 +1238,7 @@ export interface components {
       /** @description If true, vectors are served from disk, improving RAM usage at the cost of latency */
       on_disk?: boolean | null;
     };
-    QuantizationConfigDiff: components["schemas"]["ScalarQuantization"] | components["schemas"]["ProductQuantization"] | components["schemas"]["Disabled"];
+    QuantizationConfigDiff: components["schemas"]["ScalarQuantization"] | components["schemas"]["ProductQuantization"] | components["schemas"]["BinaryQuantization"] | components["schemas"]["Disabled"];
     /** @enum {string} */
     Disabled: "Disabled";
     CollectionParamsDiff: {
@@ -1498,6 +1575,8 @@ export interface components {
       /** Format: uint */
       num_points: number;
       /** Format: uint */
+      num_indexed_vectors: number;
+      /** Format: uint */
       num_deleted_vectors: number;
       /** Format: uint */
       ram_usage_bytes: number;
@@ -1507,12 +1586,23 @@ export interface components {
       index_schema: {
         [key: string]: components["schemas"]["PayloadIndexInfo"] | undefined;
       };
+      vector_data: {
+        [key: string]: components["schemas"]["VectorDataInfo"] | undefined;
+      };
     };
     /**
      * @description Type of segment 
      * @enum {string}
      */
     SegmentType: "plain" | "indexed" | "special";
+    VectorDataInfo: {
+      /** Format: uint */
+      num_vectors: number;
+      /** Format: uint */
+      num_indexed_vectors: number;
+      /** Format: uint */
+      num_deleted_vectors: number;
+    };
     SegmentConfig: {
       vector_data: {
         [key: string]: components["schemas"]["VectorDataConfig"] | undefined;
@@ -1588,7 +1678,32 @@ export interface components {
     OptimizerTelemetry: {
       status: components["schemas"]["OptimizersStatus"];
       optimizations: components["schemas"]["OperationDurationStatistics"];
+      log: (components["schemas"]["TrackerTelemetry"])[];
     };
+    /** @description Tracker object used in telemetry */
+    TrackerTelemetry: {
+      /** @description Name of the optimizer */
+      name: string;
+      /** @description Segment IDs being optimized */
+      segment_ids: (number)[];
+      status: components["schemas"]["TrackerStatus"];
+      /**
+       * Format: date-time 
+       * @description Start time of the optimizer
+       */
+      start_at: string;
+      /**
+       * Format: date-time 
+       * @description End time of the optimizer
+       */
+      end_at?: string | null;
+    };
+    /** @description Represents the current state of the optimizer being tracked */
+    TrackerStatus: OneOf<["optimizing" | "done", {
+      cancelled: string;
+    }, {
+      error: string;
+    }]>;
     RemoteShardTelemetry: {
       /** Format: uint32 */
       shard_id: number;
@@ -1707,10 +1822,10 @@ export interface components {
       priority?: components["schemas"]["SnapshotPriority"] | (Record<string, unknown> | null);
     };
     /**
-     * @description Defines source of truth for snapshot recovery `Snapshot` means - prefer snapshot data over the current state `Replica` means - prefer existing data over the snapshot 
+     * @description Defines source of truth for snapshot recovery: `NoSync` means - restore snapshot without *any* additional synchronization. `Snapshot` means - prefer snapshot data over the current state. `Replica` means - prefer existing data over the snapshot. 
      * @enum {string}
      */
-    SnapshotPriority: "snapshot" | "replica";
+    SnapshotPriority: "no_sync" | "snapshot" | "replica";
     CollectionsAliasesResponse: {
       aliases: (components["schemas"]["AliasDescription"])[];
     };
@@ -1879,6 +1994,37 @@ export interface components {
     GroupsResult: {
       groups: (components["schemas"]["PointGroup"])[];
     };
+    UpdateOperation: components["schemas"]["UpsertOperation"] | components["schemas"]["DeleteOperation"] | components["schemas"]["SetPayloadOperation"] | components["schemas"]["OverwritePayloadOperation"] | components["schemas"]["DeletePayloadOperation"] | components["schemas"]["ClearPayloadOperation"] | components["schemas"]["UpdateVectorsOperation"] | components["schemas"]["DeleteVectorsOperation"];
+    UpsertOperation: {
+      upsert: components["schemas"]["PointInsertOperations"];
+    };
+    DeleteOperation: {
+      delete: components["schemas"]["PointsSelector"];
+    };
+    SetPayloadOperation: {
+      set_payload: components["schemas"]["SetPayload"];
+    };
+    OverwritePayloadOperation: {
+      overwrite_payload: components["schemas"]["SetPayload"];
+    };
+    DeletePayloadOperation: {
+      delete_payload: components["schemas"]["DeletePayload"];
+    };
+    ClearPayloadOperation: {
+      clear_payload: components["schemas"]["PointsSelector"];
+    };
+    UpdateVectorsOperation: {
+      update_vectors: components["schemas"]["UpdateVectors"];
+    };
+    DeleteVectorsOperation: {
+      delete_vectors: components["schemas"]["DeleteVectors"];
+    };
+    ShardSnapshotRecover: {
+      location: components["schemas"]["ShardSnapshotLocation"];
+      /** @default null */
+      priority?: components["schemas"]["SnapshotPriority"] | (Record<string, unknown> | null);
+    };
+    ShardSnapshotLocation: string;
   };
   responses: never;
   parameters: never;
@@ -2028,6 +2174,54 @@ export interface operations {
           "application/json": components["schemas"]["ErrorResponse"];
         };
       };
+    };
+  };
+  /**
+   * Kubernetes healthz endpoint 
+   * @description An endpoint for health checking used in Kubernetes.
+   */
+  healthz: {
+    responses: {
+      /** @description Healthz response */
+      200: {
+        content: {
+          "text/plain": string;
+        };
+      };
+      /** @description error */
+      "4XX": never;
+    };
+  };
+  /**
+   * Kubernetes livez endpoint 
+   * @description An endpoint for health checking used in Kubernetes.
+   */
+  livez: {
+    responses: {
+      /** @description Healthz response */
+      200: {
+        content: {
+          "text/plain": string;
+        };
+      };
+      /** @description error */
+      "4XX": never;
+    };
+  };
+  /**
+   * Kubernetes readyz endpoint 
+   * @description An endpoint for health checking used in Kubernetes.
+   */
+  readyz: {
+    responses: {
+      /** @description Healthz response */
+      200: {
+        content: {
+          "text/plain": string;
+        };
+      };
+      /** @description error */
+      "4XX": never;
     };
   };
   /**
@@ -3203,6 +3397,348 @@ export interface operations {
     };
   };
   /**
+   * Recover shard from an uploaded snapshot 
+   * @description Recover shard of a local collection from an uploaded snapshot. This will overwrite any data, stored on this node, for the collection shard.
+   */
+  recover_shard_from_uploaded_snapshot: {
+    parameters: {
+      query?: {
+        /** @description If true, wait for changes to actually happen. If false - let changes happen in background. Default is true. */
+        wait?: boolean;
+        /** @description Defines source of truth for snapshot recovery */
+        priority?: components["schemas"]["SnapshotPriority"];
+      };
+      path: {
+        /** @description Name of the collection */
+        collection_name: string;
+        /** @description Id of the shard to recover */
+        shard_id: number;
+      };
+    };
+    /** @description Snapshot to recover from */
+    requestBody?: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          snapshot?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            /** @enum {string} */
+            status?: "ok";
+            result?: boolean;
+          };
+        };
+      };
+      /** @description operation is accepted */
+      202: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            /** @enum {string} */
+            status?: "accepted";
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Recover from a snapshot 
+   * @description Recover shard of a local collection data from a snapshot. This will overwrite any data, stored in this shard, for the collection.
+   */
+  recover_shard_from_snapshot: {
+    parameters: {
+      query?: {
+        /** @description If true, wait for changes to actually happen. If false - let changes happen in background. Default is true. */
+        wait?: boolean;
+      };
+      path: {
+        /** @description Name of the collection */
+        collection_name: string;
+        /** @description Id of the shard to recover */
+        shard_id: number;
+      };
+    };
+    /** @description Snapshot to recover from */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ShardSnapshotRecover"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            /** @enum {string} */
+            status?: "ok";
+            result?: boolean;
+          };
+        };
+      };
+      /** @description operation is accepted */
+      202: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            /** @enum {string} */
+            status?: "accepted";
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * List shards snapshots for a collection 
+   * @description Get list of snapshots for a shard of a collection
+   */
+  list_shard_snapshots: {
+    parameters: {
+      path: {
+        /** @description Name of the collection */
+        collection_name: string;
+        /** @description Id of the shard */
+        shard_id: number;
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            /** @enum {string} */
+            status?: "ok";
+            result?: (components["schemas"]["SnapshotDescription"])[];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Create shard snapshot 
+   * @description Create new snapshot of a shard for a collection
+   */
+  create_shard_snapshot: {
+    parameters: {
+      query?: {
+        /** @description If true, wait for changes to actually happen. If false - let changes happen in background. Default is true. */
+        wait?: boolean;
+      };
+      path: {
+        /** @description Name of the collection for which to create a snapshot */
+        collection_name: string;
+        /** @description Id of the shard */
+        shard_id: number;
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            /** @enum {string} */
+            status?: "ok";
+            result?: components["schemas"]["SnapshotDescription"];
+          };
+        };
+      };
+      /** @description operation is accepted */
+      202: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            /** @enum {string} */
+            status?: "accepted";
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Download collection snapshot 
+   * @description Download specified snapshot of a shard from a collection as a file
+   */
+  get_shard_snapshot: {
+    parameters: {
+      path: {
+        /** @description Name of the collection */
+        collection_name: string;
+        /** @description Id of the shard */
+        shard_id: number;
+        /** @description Name of the snapshot to download */
+        snapshot_name: string;
+      };
+    };
+    responses: {
+      /** @description Snapshot file */
+      200: {
+        content: {
+          "application/octet-stream": string;
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Delete shard snapshot 
+   * @description Delete snapshot of a shard for a collection
+   */
+  delete_shard_snapshot: {
+    parameters: {
+      query?: {
+        /** @description If true, wait for changes to actually happen. If false - let changes happen in background. Default is true. */
+        wait?: boolean;
+      };
+      path: {
+        /** @description Name of the collection for which to delete a snapshot */
+        collection_name: string;
+        /** @description Id of the shard */
+        shard_id: number;
+        /** @description Name of the snapshot to delete */
+        snapshot_name: string;
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            /** @enum {string} */
+            status?: "ok";
+            result?: boolean;
+          };
+        };
+      };
+      /** @description operation is accepted */
+      202: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            /** @enum {string} */
+            status?: "accepted";
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
    * Get point 
    * @description Retrieve full information of single point by id
    */
@@ -3707,6 +4243,59 @@ export interface operations {
             /** @enum {string} */
             status?: "ok";
             result?: components["schemas"]["UpdateResult"];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Batch update points 
+   * @description Apply a series of update operations for points, vectors and payloads
+   */
+  batch_update: {
+    parameters: {
+      query?: {
+        /** @description If true, wait for changes to actually happen */
+        wait?: boolean;
+        /** @description define ordering guarantees for the operation */
+        ordering?: components["schemas"]["WriteOrdering"];
+      };
+      path: {
+        /** @description Name of the collection to apply operations on */
+        collection_name: string;
+      };
+    };
+    /** @description update operations */
+    requestBody?: {
+      content: {
+        "application/json": (components["schemas"]["UpdateOperation"])[];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            /** @enum {string} */
+            status?: "ok";
+            result?: (components["schemas"]["UpdateResult"])[];
           };
         };
       };

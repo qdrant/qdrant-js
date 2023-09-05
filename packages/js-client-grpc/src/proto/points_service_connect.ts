@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ClearPayloadPoints, CountPoints, CountResponse, CreateFieldIndexCollection, DeleteFieldIndexCollection, DeletePayloadPoints, DeletePoints, DeletePointVectors, GetPoints, GetResponse, PointsOperationResponse, RecommendBatchPoints, RecommendBatchResponse, RecommendGroupsResponse, RecommendPointGroups, RecommendPoints, RecommendResponse, ScrollPoints, ScrollResponse, SearchBatchPoints, SearchBatchResponse, SearchGroupsResponse, SearchPointGroups, SearchPoints, SearchResponse, SetPayloadPoints, UpdatePointVectors, UpsertPoints } from "./points_pb.js";
+import { ClearPayloadPoints, CountPoints, CountResponse, CreateFieldIndexCollection, DeleteFieldIndexCollection, DeletePayloadPoints, DeletePoints, DeletePointVectors, GetPoints, GetResponse, PointsOperationResponse, RecommendBatchPoints, RecommendBatchResponse, RecommendGroupsResponse, RecommendPointGroups, RecommendPoints, RecommendResponse, ScrollPoints, ScrollResponse, SearchBatchPoints, SearchBatchResponse, SearchGroupsResponse, SearchPointGroups, SearchPoints, SearchResponse, SetPayloadPoints, UpdateBatchPoints, UpdateBatchResponse, UpdatePointVectors, UpsertPoints } from "./points_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -238,6 +238,18 @@ export const Points = {
       name: "Count",
       I: CountPoints,
       O: CountResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Perform multiple update operations in one request
+     *
+     * @generated from rpc qdrant.Points.UpdateBatch
+     */
+    updateBatch: {
+      name: "UpdateBatch",
+      I: UpdateBatchPoints,
+      O: UpdateBatchResponse,
       kind: MethodKind.Unary,
     },
   }

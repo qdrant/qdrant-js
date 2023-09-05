@@ -1180,6 +1180,45 @@ export class ProductQuantization extends Message<ProductQuantization> {
 }
 
 /**
+ * @generated from message qdrant.BinaryQuantization
+ */
+export class BinaryQuantization extends Message<BinaryQuantization> {
+  /**
+   * If true - quantized vectors always will be stored in RAM, ignoring the config of main storage
+   *
+   * @generated from field: optional bool always_ram = 1;
+   */
+  alwaysRam?: boolean;
+
+  constructor(data?: PartialMessage<BinaryQuantization>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.BinaryQuantization";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "always_ram", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BinaryQuantization {
+    return new BinaryQuantization().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BinaryQuantization {
+    return new BinaryQuantization().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BinaryQuantization {
+    return new BinaryQuantization().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: BinaryQuantization | PlainMessage<BinaryQuantization> | undefined, b: BinaryQuantization | PlainMessage<BinaryQuantization> | undefined): boolean {
+    return proto3.util.equals(BinaryQuantization, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.QuantizationConfig
  */
 export class QuantizationConfig extends Message<QuantizationConfig> {
@@ -1198,6 +1237,12 @@ export class QuantizationConfig extends Message<QuantizationConfig> {
      */
     value: ProductQuantization;
     case: "product";
+  } | {
+    /**
+     * @generated from field: qdrant.BinaryQuantization binary = 3;
+     */
+    value: BinaryQuantization;
+    case: "binary";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<QuantizationConfig>) {
@@ -1210,6 +1255,7 @@ export class QuantizationConfig extends Message<QuantizationConfig> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "scalar", kind: "message", T: ScalarQuantization, oneof: "quantization" },
     { no: 2, name: "product", kind: "message", T: ProductQuantization, oneof: "quantization" },
+    { no: 3, name: "binary", kind: "message", T: BinaryQuantization, oneof: "quantization" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QuantizationConfig {
@@ -1285,6 +1331,12 @@ export class QuantizationConfigDiff extends Message<QuantizationConfigDiff> {
      */
     value: Disabled;
     case: "disabled";
+  } | {
+    /**
+     * @generated from field: qdrant.BinaryQuantization binary = 4;
+     */
+    value: BinaryQuantization;
+    case: "binary";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<QuantizationConfigDiff>) {
@@ -1298,6 +1350,7 @@ export class QuantizationConfigDiff extends Message<QuantizationConfigDiff> {
     { no: 1, name: "scalar", kind: "message", T: ScalarQuantization, oneof: "quantization" },
     { no: 2, name: "product", kind: "message", T: ProductQuantization, oneof: "quantization" },
     { no: 3, name: "disabled", kind: "message", T: Disabled, oneof: "quantization" },
+    { no: 4, name: "binary", kind: "message", T: BinaryQuantization, oneof: "quantization" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QuantizationConfigDiff {
