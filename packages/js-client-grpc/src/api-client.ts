@@ -4,14 +4,12 @@ import {Collections} from './proto/collections_service_connect.js';
 import {Points} from './proto/points_service_connect.js';
 import {Snapshots} from './proto/snapshots_service_connect.js';
 import {Qdrant} from './proto/qdrant_connect.js';
-import {QdrantInternal} from './proto/qdrant_internal_service_connect.js';
 
 type Clients = {
     collections: PromiseClient<typeof Collections>;
     points: PromiseClient<typeof Points>;
     snapshots: PromiseClient<typeof Snapshots>;
     service: PromiseClient<typeof Qdrant>;
-    internal: PromiseClient<typeof QdrantInternal>;
 };
 
 export type GrpcClients = Readonly<Clients>;
@@ -21,7 +19,6 @@ function createClients(transport: Transport) {
     let points: Clients['points'] | undefined;
     let snapshots: Clients['snapshots'] | undefined;
     let service: Clients['service'] | undefined;
-    let internal: Clients['internal'] | undefined;
     return {
         get collections() {
             if (!collections) {
@@ -46,12 +43,6 @@ function createClients(transport: Transport) {
                 service = createPromiseClient(Qdrant, transport);
             }
             return service;
-        },
-        get internal() {
-            if (!internal) {
-                internal = createPromiseClient(QdrantInternal, transport);
-            }
-            return internal;
         },
     } satisfies Clients;
 }
