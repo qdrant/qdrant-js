@@ -768,7 +768,7 @@ export interface components {
       score_threshold?: number | null;
     };
     /**
-     * @description Vector data separator for named and unnamed modes Unanmed mode:
+     * @description Vector data separator for named and unnamed modes Unnamed mode:
      * 
      * { "vector": [1.0, 2.0, 3.0] }
      * 
@@ -1993,6 +1993,9 @@ export interface components {
     };
     GroupsResult: {
       groups: (components["schemas"]["PointGroup"])[];
+    };
+    UpdateOperations: {
+      operations: (components["schemas"]["UpdateOperation"])[];
     };
     UpdateOperation: components["schemas"]["UpsertOperation"] | components["schemas"]["DeleteOperation"] | components["schemas"]["SetPayloadOperation"] | components["schemas"]["OverwritePayloadOperation"] | components["schemas"]["DeletePayloadOperation"] | components["schemas"]["ClearPayloadOperation"] | components["schemas"]["UpdateVectorsOperation"] | components["schemas"]["DeleteVectorsOperation"];
     UpsertOperation: {
@@ -4280,7 +4283,7 @@ export interface operations {
     /** @description update operations */
     requestBody?: {
       content: {
-        "application/json": (components["schemas"]["UpdateOperation"])[];
+        "application/json": components["schemas"]["UpdateOperations"];
       };
     };
     responses: {
