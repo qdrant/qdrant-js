@@ -1360,4 +1360,28 @@ export class QdrantClient {
         const response = await this._openApiClient.service.getLocks({});
         return maybe(response.data.result).orThrow('Get locks returned empty');
     }
+
+    /**
+     * An endpoint for health checking used in Kubernetes.
+     */
+    async healthz(): Promise<boolean> {
+        const response = await this._openApiClient.service.healthz({});
+        return response.status == 200;
+    }
+
+    /**
+     * An endpoint for health checking used in Kubernetes.
+     */
+    async livez(): Promise<boolean> {
+        const response = await this._openApiClient.service.livez({});
+        return response.status == 200;
+    }
+
+    /**
+     * An endpoint for health checking used in Kubernetes.
+     */
+    async readyz(): Promise<boolean> {
+        const response = await this._openApiClient.service.readyz({});
+        return response.status == 200;
+    }
 }
