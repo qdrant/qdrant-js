@@ -1384,4 +1384,38 @@ export class QdrantClient {
         const response = await this._openApiClient.service.readyz({});
         return response.status == 200;
     }
+
+    /**
+     * Batch update points
+     * Apply a series of update operations for points, vectors and payloads.
+     * @param collection_name Name of the collection
+     * @param {object} args
+     *     - wait: Await for the results to be processed.
+     *         - If `true`, result will be returned only when all changes are applied
+     *         - If `false`, result will be returned immediately after the confirmation of receiving.
+     *      - ordering: Define strategy for ordering of the points. Possible values:
+     *          - 'weak'   - write operations may be reordered, works faster, default
+     *          - 'medium' - write operations go through dynamically selected leader,
+     *                      may be inconsistent for a short period of time in case of leader change
+     *          - 'strong' - Write operations go through the permanent leader,
+     *                      consistent, but may be unavailable if leader is down
+     *      - operations: List of operations to perform
+     * @returns Operation result
+     */
+    async batchUpdate(
+        collection_name: string,
+        {
+            wait = true,
+            ordering,
+            ...operations
+        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateOperations'>,
+    ) {
+        const response = await this._openApiClient.points.batchUpdate({
+            collection_name,
+            wait,
+            ordering,
+            ...operations,
+        });
+        return maybe(response.data.result).orThrow('Batch update returned empty');
+    }
 }
