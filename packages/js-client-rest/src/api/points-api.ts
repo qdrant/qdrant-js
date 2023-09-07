@@ -136,5 +136,13 @@ export function createPointsApi(client: Client) {
             .path('/collections/{collection_name}/points/recommend/groups')
             .method('post')
             .create({consistency: true}),
+
+        /**
+         * Apply a series of update operations for points, vectors and payloads
+         */
+        batchUpdate: client
+            .path('/collections/{collection_name}/points/batch')
+            .method('post')
+            .create({wait: true, ordering: true}),
     } as const;
 }

@@ -1360,4 +1360,109 @@ export class QdrantClient {
         const response = await this._openApiClient.service.getLocks({});
         return maybe(response.data.result).orThrow('Get locks returned empty');
     }
+
+    /**
+     * Batch update points
+     * Apply a series of update operations for points, vectors and payloads.
+     * @param collection_name Name of the collection
+     * @param {object} args
+     *     - wait: Await for the results to be processed.
+     *         - If `true`, result will be returned only when all changes are applied
+     *         - If `false`, result will be returned immediately after the confirmation of receiving.
+     *      - ordering: Define strategy for ordering of the points. Possible values:
+     *          - 'weak'   - write operations may be reordered, works faster, default
+     *          - 'medium' - write operations go through dynamically selected leader,
+     *                      may be inconsistent for a short period of time in case of leader change
+     *          - 'strong' - Write operations go through the permanent leader,
+     *                      consistent, but may be unavailable if leader is down
+     *      - operations: List of operations to perform
+     * @returns Operation result
+     */
+    async batchUpdate(
+        collection_name: string,
+        {
+            wait = true,
+            ordering,
+            ...operations
+        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateOperations'>,
+    ) {
+        const response = await this._openApiClient.points.batchUpdate({
+            collection_name,
+            wait,
+            ordering,
+            ...operations,
+        });
+        return maybe(response.data.result).orThrow('Batch update returned empty');
+    }
+
+    /**
+     * Recover from a snapshot
+     * @param collection_name Name of the collection
+     * @param shard_id Shard ID
+     * @returns Operation result
+     */
+    async recoverShardFromSnapshot(
+        collection_name: string,
+        shard_id: number,
+        {wait = true, ...shard_snapshot_recover}: {wait?: boolean} & SchemaFor<'ShardSnapshotRecover'>,
+    ) {
+        const response = await this._openApiClient.snapshots.recoverShardFromSnapshot({
+            collection_name,
+            shard_id,
+            wait,
+            ...shard_snapshot_recover,
+        });
+        return maybe(response.data.result).orThrow('Recover shard from snapshot returned empty');
+    }
+
+    /**
+     * Get list of snapshots for a shard of a collection
+     * @param collection_name Name of the collection
+     * @param shard_id Shard ID
+     * @returns Operation result
+     */
+    async listShardSnapshots(collection_name: string, shard_id: number) {
+        const response = await this._openApiClient.snapshots.listShardSnapshots({
+            collection_name,
+            shard_id,
+        });
+        return maybe(response.data.result).orThrow('List shard snapshots returned empty');
+    }
+
+    /**
+     * Create new snapshot of a shard for a collection
+     * @param collection_name Name of the collection
+     * @param shard_id Shard ID
+     * @returns Operation result
+     */
+    async createShardSnapshot(collection_name: string, shard_id: number, {wait = true}: {wait?: boolean}) {
+        const response = await this._openApiClient.snapshots.createShardSnapshot({
+            collection_name,
+            shard_id,
+            wait,
+        });
+        return maybe(response.data.result).orThrow('Create shard snapshot returned empty');
+    }
+
+    /**
+     * Delete snapshot of a shard for a collection
+     * @param collection_name Name of the collection
+     * @param shard_id Shard ID
+     * @param snapshot_name Snapshot name
+     * @returns Operation result
+     */
+    async deleteShardSnapshot(
+        collection_name: string,
+        shard_id: number,
+        snapshot_name: string,
+        {wait = true}: {wait?: boolean},
+    ) {
+        const response = await this._openApiClient.snapshots.deleteShardSnapshot({
+            collection_name,
+            shard_id,
+            snapshot_name,
+            wait,
+        });
+        return maybe(response.data.result).orThrow('Create shard snapshot returned empty');
+    }
 }

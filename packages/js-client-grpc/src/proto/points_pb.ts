@@ -1463,6 +1463,16 @@ export class SearchParams extends Message<SearchParams> {
    */
   quantization?: QuantizationSearchParams;
 
+  /**
+   *
+   * If enabled, the engine will only perform search among indexed or small segments.
+   * Using this option prevents slow searches in case of delayed index, but does not
+   * guarantee that all uploaded vectors will be included in search results
+   *
+   * @generated from field: optional bool indexed_only = 4;
+   */
+  indexedOnly?: boolean;
+
   constructor(data?: PartialMessage<SearchParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1474,6 +1484,7 @@ export class SearchParams extends Message<SearchParams> {
     { no: 1, name: "hnsw_ef", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
     { no: 2, name: "exact", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 3, name: "quantization", kind: "message", T: QuantizationSearchParams, opt: true },
+    { no: 4, name: "indexed_only", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchParams {
@@ -2380,6 +2391,372 @@ export class CountPoints extends Message<CountPoints> {
 }
 
 /**
+ * @generated from message qdrant.PointsUpdateOperation
+ */
+export class PointsUpdateOperation extends Message<PointsUpdateOperation> {
+  /**
+   * @generated from oneof qdrant.PointsUpdateOperation.operation
+   */
+  operation: {
+    /**
+     * @generated from field: qdrant.PointsUpdateOperation.PointStructList upsert = 1;
+     */
+    value: PointsUpdateOperation_PointStructList;
+    case: "upsert";
+  } | {
+    /**
+     * @generated from field: qdrant.PointsSelector delete = 2;
+     */
+    value: PointsSelector;
+    case: "delete";
+  } | {
+    /**
+     * @generated from field: qdrant.PointsUpdateOperation.SetPayload set_payload = 3;
+     */
+    value: PointsUpdateOperation_SetPayload;
+    case: "setPayload";
+  } | {
+    /**
+     * @generated from field: qdrant.PointsUpdateOperation.SetPayload overwrite_payload = 4;
+     */
+    value: PointsUpdateOperation_SetPayload;
+    case: "overwritePayload";
+  } | {
+    /**
+     * @generated from field: qdrant.PointsUpdateOperation.DeletePayload delete_payload = 5;
+     */
+    value: PointsUpdateOperation_DeletePayload;
+    case: "deletePayload";
+  } | {
+    /**
+     * @generated from field: qdrant.PointsSelector clear_payload = 6;
+     */
+    value: PointsSelector;
+    case: "clearPayload";
+  } | {
+    /**
+     * @generated from field: qdrant.PointsUpdateOperation.UpdateVectors update_vectors = 7;
+     */
+    value: PointsUpdateOperation_UpdateVectors;
+    case: "updateVectors";
+  } | {
+    /**
+     * @generated from field: qdrant.PointsUpdateOperation.DeleteVectors delete_vectors = 8;
+     */
+    value: PointsUpdateOperation_DeleteVectors;
+    case: "deleteVectors";
+  } | { case: undefined; value?: undefined } = { case: undefined };
+
+  constructor(data?: PartialMessage<PointsUpdateOperation>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.PointsUpdateOperation";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "upsert", kind: "message", T: PointsUpdateOperation_PointStructList, oneof: "operation" },
+    { no: 2, name: "delete", kind: "message", T: PointsSelector, oneof: "operation" },
+    { no: 3, name: "set_payload", kind: "message", T: PointsUpdateOperation_SetPayload, oneof: "operation" },
+    { no: 4, name: "overwrite_payload", kind: "message", T: PointsUpdateOperation_SetPayload, oneof: "operation" },
+    { no: 5, name: "delete_payload", kind: "message", T: PointsUpdateOperation_DeletePayload, oneof: "operation" },
+    { no: 6, name: "clear_payload", kind: "message", T: PointsSelector, oneof: "operation" },
+    { no: 7, name: "update_vectors", kind: "message", T: PointsUpdateOperation_UpdateVectors, oneof: "operation" },
+    { no: 8, name: "delete_vectors", kind: "message", T: PointsUpdateOperation_DeleteVectors, oneof: "operation" },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation {
+    return new PointsUpdateOperation().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PointsUpdateOperation {
+    return new PointsUpdateOperation().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PointsUpdateOperation {
+    return new PointsUpdateOperation().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PointsUpdateOperation | PlainMessage<PointsUpdateOperation> | undefined, b: PointsUpdateOperation | PlainMessage<PointsUpdateOperation> | undefined): boolean {
+    return proto3.util.equals(PointsUpdateOperation, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.PointsUpdateOperation.PointStructList
+ */
+export class PointsUpdateOperation_PointStructList extends Message<PointsUpdateOperation_PointStructList> {
+  /**
+   * @generated from field: repeated qdrant.PointStruct points = 1;
+   */
+  points: PointStruct[] = [];
+
+  constructor(data?: PartialMessage<PointsUpdateOperation_PointStructList>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.PointsUpdateOperation.PointStructList";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "points", kind: "message", T: PointStruct, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation_PointStructList {
+    return new PointsUpdateOperation_PointStructList().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PointsUpdateOperation_PointStructList {
+    return new PointsUpdateOperation_PointStructList().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PointsUpdateOperation_PointStructList {
+    return new PointsUpdateOperation_PointStructList().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PointsUpdateOperation_PointStructList | PlainMessage<PointsUpdateOperation_PointStructList> | undefined, b: PointsUpdateOperation_PointStructList | PlainMessage<PointsUpdateOperation_PointStructList> | undefined): boolean {
+    return proto3.util.equals(PointsUpdateOperation_PointStructList, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.PointsUpdateOperation.SetPayload
+ */
+export class PointsUpdateOperation_SetPayload extends Message<PointsUpdateOperation_SetPayload> {
+  /**
+   * @generated from field: map<string, qdrant.Value> payload = 1;
+   */
+  payload: { [key: string]: Value } = {};
+
+  /**
+   * Affected points
+   *
+   * @generated from field: optional qdrant.PointsSelector points_selector = 2;
+   */
+  pointsSelector?: PointsSelector;
+
+  constructor(data?: PartialMessage<PointsUpdateOperation_SetPayload>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.PointsUpdateOperation.SetPayload";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "payload", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: Value} },
+    { no: 2, name: "points_selector", kind: "message", T: PointsSelector, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation_SetPayload {
+    return new PointsUpdateOperation_SetPayload().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PointsUpdateOperation_SetPayload {
+    return new PointsUpdateOperation_SetPayload().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PointsUpdateOperation_SetPayload {
+    return new PointsUpdateOperation_SetPayload().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PointsUpdateOperation_SetPayload | PlainMessage<PointsUpdateOperation_SetPayload> | undefined, b: PointsUpdateOperation_SetPayload | PlainMessage<PointsUpdateOperation_SetPayload> | undefined): boolean {
+    return proto3.util.equals(PointsUpdateOperation_SetPayload, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.PointsUpdateOperation.DeletePayload
+ */
+export class PointsUpdateOperation_DeletePayload extends Message<PointsUpdateOperation_DeletePayload> {
+  /**
+   * @generated from field: repeated string keys = 1;
+   */
+  keys: string[] = [];
+
+  /**
+   * Affected points
+   *
+   * @generated from field: optional qdrant.PointsSelector points_selector = 2;
+   */
+  pointsSelector?: PointsSelector;
+
+  constructor(data?: PartialMessage<PointsUpdateOperation_DeletePayload>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.PointsUpdateOperation.DeletePayload";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "keys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 2, name: "points_selector", kind: "message", T: PointsSelector, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation_DeletePayload {
+    return new PointsUpdateOperation_DeletePayload().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PointsUpdateOperation_DeletePayload {
+    return new PointsUpdateOperation_DeletePayload().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PointsUpdateOperation_DeletePayload {
+    return new PointsUpdateOperation_DeletePayload().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PointsUpdateOperation_DeletePayload | PlainMessage<PointsUpdateOperation_DeletePayload> | undefined, b: PointsUpdateOperation_DeletePayload | PlainMessage<PointsUpdateOperation_DeletePayload> | undefined): boolean {
+    return proto3.util.equals(PointsUpdateOperation_DeletePayload, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.PointsUpdateOperation.UpdateVectors
+ */
+export class PointsUpdateOperation_UpdateVectors extends Message<PointsUpdateOperation_UpdateVectors> {
+  /**
+   * List of points and vectors to update
+   *
+   * @generated from field: repeated qdrant.PointVectors points = 1;
+   */
+  points: PointVectors[] = [];
+
+  constructor(data?: PartialMessage<PointsUpdateOperation_UpdateVectors>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.PointsUpdateOperation.UpdateVectors";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "points", kind: "message", T: PointVectors, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation_UpdateVectors {
+    return new PointsUpdateOperation_UpdateVectors().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PointsUpdateOperation_UpdateVectors {
+    return new PointsUpdateOperation_UpdateVectors().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PointsUpdateOperation_UpdateVectors {
+    return new PointsUpdateOperation_UpdateVectors().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PointsUpdateOperation_UpdateVectors | PlainMessage<PointsUpdateOperation_UpdateVectors> | undefined, b: PointsUpdateOperation_UpdateVectors | PlainMessage<PointsUpdateOperation_UpdateVectors> | undefined): boolean {
+    return proto3.util.equals(PointsUpdateOperation_UpdateVectors, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.PointsUpdateOperation.DeleteVectors
+ */
+export class PointsUpdateOperation_DeleteVectors extends Message<PointsUpdateOperation_DeleteVectors> {
+  /**
+   * Affected points
+   *
+   * @generated from field: qdrant.PointsSelector points_selector = 1;
+   */
+  pointsSelector?: PointsSelector;
+
+  /**
+   * List of vector names to delete
+   *
+   * @generated from field: qdrant.VectorsSelector vectors = 2;
+   */
+  vectors?: VectorsSelector;
+
+  constructor(data?: PartialMessage<PointsUpdateOperation_DeleteVectors>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.PointsUpdateOperation.DeleteVectors";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "points_selector", kind: "message", T: PointsSelector },
+    { no: 2, name: "vectors", kind: "message", T: VectorsSelector },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation_DeleteVectors {
+    return new PointsUpdateOperation_DeleteVectors().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PointsUpdateOperation_DeleteVectors {
+    return new PointsUpdateOperation_DeleteVectors().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PointsUpdateOperation_DeleteVectors {
+    return new PointsUpdateOperation_DeleteVectors().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PointsUpdateOperation_DeleteVectors | PlainMessage<PointsUpdateOperation_DeleteVectors> | undefined, b: PointsUpdateOperation_DeleteVectors | PlainMessage<PointsUpdateOperation_DeleteVectors> | undefined): boolean {
+    return proto3.util.equals(PointsUpdateOperation_DeleteVectors, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.UpdateBatchPoints
+ */
+export class UpdateBatchPoints extends Message<UpdateBatchPoints> {
+  /**
+   * name of the collection
+   *
+   * @generated from field: string collection_name = 1;
+   */
+  collectionName = "";
+
+  /**
+   * Wait until the changes have been applied?
+   *
+   * @generated from field: optional bool wait = 2;
+   */
+  wait?: boolean;
+
+  /**
+   * @generated from field: repeated qdrant.PointsUpdateOperation operations = 3;
+   */
+  operations: PointsUpdateOperation[] = [];
+
+  /**
+   * Write ordering guarantees
+   *
+   * @generated from field: optional qdrant.WriteOrdering ordering = 4;
+   */
+  ordering?: WriteOrdering;
+
+  constructor(data?: PartialMessage<UpdateBatchPoints>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.UpdateBatchPoints";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collection_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "wait", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 3, name: "operations", kind: "message", T: PointsUpdateOperation, repeated: true },
+    { no: 4, name: "ordering", kind: "message", T: WriteOrdering, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateBatchPoints {
+    return new UpdateBatchPoints().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateBatchPoints {
+    return new UpdateBatchPoints().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateBatchPoints {
+    return new UpdateBatchPoints().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: UpdateBatchPoints | PlainMessage<UpdateBatchPoints> | undefined, b: UpdateBatchPoints | PlainMessage<UpdateBatchPoints> | undefined): boolean {
+    return proto3.util.equals(UpdateBatchPoints, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.PointsOperationResponse
  */
 export class PointsOperationResponse extends Message<PointsOperationResponse> {
@@ -3232,6 +3609,51 @@ export class RecommendGroupsResponse extends Message<RecommendGroupsResponse> {
 
   static equals(a: RecommendGroupsResponse | PlainMessage<RecommendGroupsResponse> | undefined, b: RecommendGroupsResponse | PlainMessage<RecommendGroupsResponse> | undefined): boolean {
     return proto3.util.equals(RecommendGroupsResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.UpdateBatchResponse
+ */
+export class UpdateBatchResponse extends Message<UpdateBatchResponse> {
+  /**
+   * @generated from field: repeated qdrant.UpdateResult result = 1;
+   */
+  result: UpdateResult[] = [];
+
+  /**
+   * Time spent to process
+   *
+   * @generated from field: double time = 2;
+   */
+  time = 0;
+
+  constructor(data?: PartialMessage<UpdateBatchResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.UpdateBatchResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "result", kind: "message", T: UpdateResult, repeated: true },
+    { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateBatchResponse {
+    return new UpdateBatchResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateBatchResponse {
+    return new UpdateBatchResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateBatchResponse {
+    return new UpdateBatchResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: UpdateBatchResponse | PlainMessage<UpdateBatchResponse> | undefined, b: UpdateBatchResponse | PlainMessage<UpdateBatchResponse> | undefined): boolean {
+    return proto3.util.equals(UpdateBatchResponse, a, b);
   }
 }
 
