@@ -466,6 +466,11 @@ export interface components {
        */
       write_consistency_factor?: number;
       /**
+       * Format: uint32 
+       * @description Defines how many additional replicas should be processing read request at the same time. Default value is Auto, which means that fan-out will be determined automatically based on the busyness of the local replica. Having more than 0 might be useful to smooth latency spikes of individual nodes.
+       */
+      read_fan_out_factor?: number | null;
+      /**
        * @description If true - point's payload will not be stored in memory. It will be read from the disk every time it is requested. This setting saves RAM by (slightly) increasing the response time. Note: those payload values that are involved in filtering and are indexed - remain in RAM. 
        * @default false
        */
@@ -805,6 +810,8 @@ export interface components {
       geo_bounding_box?: components["schemas"]["GeoBoundingBox"] | (Record<string, unknown> | null);
       /** @description Check if geo point is within a given radius */
       geo_radius?: components["schemas"]["GeoRadius"] | (Record<string, unknown> | null);
+      /** @description Check if geo point is within a given polygon */
+      geo_polygon?: components["schemas"]["GeoPolygon"] | (Record<string, unknown> | null);
       /** @description Check number of values of the field */
       values_count?: components["schemas"]["ValuesCount"] | (Record<string, unknown> | null);
     };
@@ -879,6 +886,20 @@ export interface components {
        * @description Radius of the area in meters
        */
       radius: number;
+    };
+    /**
+     * @description Geo filter request
+     * 
+     * Matches coordinates inside the polygon, defined by `exterior` and `interiors`
+     */
+    GeoPolygon: {
+      exterior: components["schemas"]["GeoLineString"];
+      /** @description Interior lines (if present) bound holes within the surface each GeoLineString must consist of a minimum of 4 points, and the first and last points must be the same. */
+      interiors?: (components["schemas"]["GeoLineString"])[] | null;
+    };
+    /** @description Ordered sequence of GeoPoints representing the line */
+    GeoLineString: {
+      points: (components["schemas"]["GeoPoint"])[];
     };
     /** @description Values count filter request */
     ValuesCount: {
@@ -959,10 +980,10 @@ export interface components {
        */
       ignore?: boolean;
       /**
-       * @description If true, use original vectors to re-score top-k results. Might require more time in case if original vectors are stored on disk. Default is false. 
-       * @default false
+       * @description If true, use original vectors to re-score top-k results. Might require more time in case if original vectors are stored on disk. If not set, qdrant decides automatically apply rescoring or not. 
+       * @default null
        */
-      rescore?: boolean;
+      rescore?: boolean | null;
       /**
        * Format: double 
        * @description Oversampling factor for quantization. Default is 1.0.
@@ -1006,18 +1027,23 @@ export interface components {
      */
     UpdateStatus: "acknowledged" | "completed";
     /**
-     * @description Recommendation request. Provides positive and negative examples of the vectors, which are already stored in the collection.
+     * @description Recommendation request. Provides positive and negative examples of the vectors, which can be ids of points that are already stored in the collection, raw vectors, or even ids and vectors combined.
      * 
-     * Service should look for the points which are closer to positive examples and at the same time further to negative examples. The concrete way of how to compare negative and positive distances is up to implementation in `segment` crate.
+     * Service should look for the points which are closer to positive examples and at the same time further to negative examples. The concrete way of how to compare negative and positive distances is up to the `strategy` chosen.
      */
     RecommendRequest: {
-      /** @description Look for vectors closest to those */
-      positive: (components["schemas"]["ExtendedPointId"])[];
+      /**
+       * @description Look for vectors closest to those 
+       * @default []
+       */
+      positive?: (components["schemas"]["RecommendExample"])[];
       /**
        * @description Try to avoid vectors like this 
        * @default []
        */
-      negative?: (components["schemas"]["ExtendedPointId"])[];
+      negative?: (components["schemas"]["RecommendExample"])[];
+      /** @description How to use positive and negative examples to find the results */
+      strategy?: components["schemas"]["RecommendStrategy"] | (Record<string, unknown> | null);
       /** @description Look only for points which satisfies this conditions */
       filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
       /** @description Additional search params */
@@ -1056,6 +1082,16 @@ export interface components {
        */
       lookup_from?: components["schemas"]["LookupLocation"] | (Record<string, unknown> | null);
     };
+    RecommendExample: components["schemas"]["ExtendedPointId"] | (number)[];
+    /**
+     * @description How to use positive and negative examples to find the results, default is `average_vector`:
+     * 
+     * * `average_vector` - Average positive and negative vectors and create a single query with the formula `query = avg_pos + avg_pos - avg_neg`. Then performs normal search.
+     * 
+     * * `best_score` - Uses custom search objective. Each candidate is compared against all examples, its score is then chosen from the `max(max_pos_score, max_neg_score)`. If the `max_neg_score` is chosen then it is squared and negated, otherwise it is just the `max_pos_score`. 
+     * @enum {string}
+     */
+    RecommendStrategy: "average_vector" | "best_score";
     UsingVector: string;
     /** @description Defines a location to use for looking up the vector. Specifies collection and vector field name. */
     LookupLocation: {
@@ -1208,7 +1244,7 @@ export interface components {
     };
     /** @description Operation for updating parameters of the existing collection */
     UpdateCollection: {
-      /** @description Vector data parameters to update. It is possible to provide one config for single vector mode and list of configs for multiple vectors mode. */
+      /** @description Map of vector data parameters to update for each named vector. To update parameters in a collection having a single unnamed vector, use an empty string as name. */
       vectors?: components["schemas"]["VectorsConfigDiff"] | (Record<string, unknown> | null);
       /** @description Custom params for Optimizers.  If none - it is left unchanged. This operation is blocking, it will only proceed once all current optimizations are complete */
       optimizers_config?: components["schemas"]["OptimizersConfigDiff"] | (Record<string, unknown> | null);
@@ -1252,6 +1288,11 @@ export interface components {
        * @description Minimal number successful responses from replicas to consider operation successful
        */
       write_consistency_factor?: number | null;
+      /**
+       * Format: uint32 
+       * @description Fan-out every read request to these many additional remote nodes (and return first available response)
+       */
+      read_fan_out_factor?: number | null;
       /**
        * @description If true - point's payload will not be stored in memory. It will be read from the disk every time it is requested. This setting saves RAM by (slightly) increasing the response time. Note: those payload values that are involved in filtering and are indexed - remain in RAM. 
        * @default null
@@ -1943,13 +1984,21 @@ export interface components {
       with_vectors?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
     };
     RecommendGroupsRequest: {
-      /** @description Look for vectors closest to those */
-      positive: (components["schemas"]["ExtendedPointId"])[];
+      /**
+       * @description Look for vectors closest to those 
+       * @default []
+       */
+      positive?: (components["schemas"]["RecommendExample"])[];
       /**
        * @description Try to avoid vectors like this 
        * @default []
        */
-      negative?: (components["schemas"]["ExtendedPointId"])[];
+      negative?: (components["schemas"]["RecommendExample"])[];
+      /**
+       * @description How to use positive and negative examples to find the results 
+       * @default null
+       */
+      strategy?: components["schemas"]["RecommendStrategy"] | (Record<string, unknown> | null);
       /** @description Look only for points which satisfies this conditions */
       filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
       /** @description Additional search params */
