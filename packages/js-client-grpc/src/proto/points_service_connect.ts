@@ -182,7 +182,7 @@ export const Points = {
     },
     /**
      *
-     * Iterate over all or filtered points points
+     * Iterate over all or filtered points
      *
      * @generated from rpc qdrant.Points.Scroll
      */

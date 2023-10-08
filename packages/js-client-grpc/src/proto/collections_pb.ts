@@ -1717,6 +1717,13 @@ export class CollectionParams extends Message<CollectionParams> {
    */
   writeConsistencyFactor?: number;
 
+  /**
+   * Fan-out every read request to these many additional remote nodes (and return first available response)
+   *
+   * @generated from field: optional uint32 read_fan_out_factor = 8;
+   */
+  readFanOutFactor?: number;
+
   constructor(data?: PartialMessage<CollectionParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1730,6 +1737,7 @@ export class CollectionParams extends Message<CollectionParams> {
     { no: 5, name: "vectors_config", kind: "message", T: VectorsConfig, opt: true },
     { no: 6, name: "replication_factor", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
     { no: 7, name: "write_consistency_factor", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
+    { no: 8, name: "read_fan_out_factor", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionParams {
@@ -1774,6 +1782,13 @@ export class CollectionParamsDiff extends Message<CollectionParamsDiff> {
    */
   onDiskPayload?: boolean;
 
+  /**
+   * Fan-out every read request to these many additional remote nodes (and return first available response)
+   *
+   * @generated from field: optional uint32 read_fan_out_factor = 4;
+   */
+  readFanOutFactor?: number;
+
   constructor(data?: PartialMessage<CollectionParamsDiff>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1785,6 +1800,7 @@ export class CollectionParamsDiff extends Message<CollectionParamsDiff> {
     { no: 1, name: "replication_factor", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
     { no: 2, name: "write_consistency_factor", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
     { no: 3, name: "on_disk_payload", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 4, name: "read_fan_out_factor", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionParamsDiff {
