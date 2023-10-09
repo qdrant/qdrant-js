@@ -117,6 +117,35 @@ proto3.util.setEnumType(FieldType, "qdrant.FieldType", [
 ]);
 
 /**
+ * How to use positive and negative vectors to find the results, default is `AverageVector`:
+ *
+ * @generated from enum qdrant.RecommendStrategy
+ */
+export enum RecommendStrategy {
+  /**
+   * Average positive and negative vectors and create a single query with the formula 
+   * `query = avg_pos + avg_pos - avg_neg`. Then performs normal search.
+   *
+   * @generated from enum value: AverageVector = 0;
+   */
+  AverageVector = 0,
+
+  /**
+   * Uses custom search objective. Each candidate is compared against all 
+   * examples, its score is then chosen from the `max(max_pos_score, max_neg_score)`. 
+   * If the `max_neg_score` is chosen then it is squared and negated.
+   *
+   * @generated from enum value: BestScore = 1;
+   */
+  BestScore = 1,
+}
+// Retrieve enum metadata with: proto3.getEnumType(RecommendStrategy)
+proto3.util.setEnumType(RecommendStrategy, "qdrant.RecommendStrategy", [
+  { no: 0, name: "AverageVector" },
+  { no: 1, name: "BestScore" },
+]);
+
+/**
  * @generated from enum qdrant.UpdateStatus
  */
 export enum UpdateStatus {
@@ -1384,7 +1413,7 @@ export class QuantizationSearchParams extends Message<QuantizationSearchParams> 
 
   /**
    *
-   * If true, use original vectors to re-score top-k results. Default is true.
+   * If true, use original vectors to re-score top-k results. If ignored, qdrant decides automatically does rescore enabled or not.
    *
    * @generated from field: optional bool rescore = 2;
    */
@@ -2008,14 +2037,14 @@ export class RecommendPoints extends Message<RecommendPoints> {
   collectionName = "";
 
   /**
-   * Look for vectors closest to those
+   * Look for vectors closest to the vectors from these points
    *
    * @generated from field: repeated qdrant.PointId positive = 2;
    */
   positive: PointId[] = [];
 
   /**
-   * Try to avoid vectors like this
+   * Try to avoid vectors like the vector from these points
    *
    * @generated from field: repeated qdrant.PointId negative = 3;
    */
@@ -2091,6 +2120,27 @@ export class RecommendPoints extends Message<RecommendPoints> {
    */
   readConsistency?: ReadConsistency;
 
+  /**
+   * How to use the example vectors to find the results
+   *
+   * @generated from field: optional qdrant.RecommendStrategy strategy = 16;
+   */
+  strategy?: RecommendStrategy;
+
+  /**
+   * Look for vectors closest to those
+   *
+   * @generated from field: repeated qdrant.Vector positive_vectors = 17;
+   */
+  positiveVectors: Vector[] = [];
+
+  /**
+   * Try to avoid vectors like this
+   *
+   * @generated from field: repeated qdrant.Vector negative_vectors = 18;
+   */
+  negativeVectors: Vector[] = [];
+
   constructor(data?: PartialMessage<RecommendPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2112,6 +2162,9 @@ export class RecommendPoints extends Message<RecommendPoints> {
     { no: 12, name: "with_vectors", kind: "message", T: WithVectorsSelector, opt: true },
     { no: 13, name: "lookup_from", kind: "message", T: LookupLocation, opt: true },
     { no: 14, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
+    { no: 16, name: "strategy", kind: "enum", T: proto3.getEnumType(RecommendStrategy), opt: true },
+    { no: 17, name: "positive_vectors", kind: "message", T: Vector, repeated: true },
+    { no: 18, name: "negative_vectors", kind: "message", T: Vector, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RecommendPoints {
@@ -2196,14 +2249,14 @@ export class RecommendPointGroups extends Message<RecommendPointGroups> {
   collectionName = "";
 
   /**
-   * Look for vectors closest to those
+   * Look for vectors closest to the vectors from these points
    *
    * @generated from field: repeated qdrant.PointId positive = 2;
    */
   positive: PointId[] = [];
 
   /**
-   * Try to avoid vectors like this
+   * Try to avoid vectors like the vector from these points
    *
    * @generated from field: repeated qdrant.PointId negative = 3;
    */
@@ -2293,6 +2346,27 @@ export class RecommendPointGroups extends Message<RecommendPointGroups> {
    */
   withLookup?: WithLookup;
 
+  /**
+   * How to use the example vectors to find the results
+   *
+   * @generated from field: optional qdrant.RecommendStrategy strategy = 17;
+   */
+  strategy?: RecommendStrategy;
+
+  /**
+   * Look for vectors closest to those
+   *
+   * @generated from field: repeated qdrant.Vector positive_vectors = 18;
+   */
+  positiveVectors: Vector[] = [];
+
+  /**
+   * Try to avoid vectors like this
+   *
+   * @generated from field: repeated qdrant.Vector negative_vectors = 19;
+   */
+  negativeVectors: Vector[] = [];
+
   constructor(data?: PartialMessage<RecommendPointGroups>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2316,6 +2390,9 @@ export class RecommendPointGroups extends Message<RecommendPointGroups> {
     { no: 13, name: "group_size", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 14, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
     { no: 15, name: "with_lookup", kind: "message", T: WithLookup, opt: true },
+    { no: 17, name: "strategy", kind: "enum", T: proto3.getEnumType(RecommendStrategy), opt: true },
+    { no: 18, name: "positive_vectors", kind: "message", T: Vector, repeated: true },
+    { no: 19, name: "negative_vectors", kind: "message", T: Vector, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RecommendPointGroups {
@@ -3992,6 +4069,13 @@ export class FieldCondition extends Message<FieldCondition> {
    */
   valuesCount?: ValuesCount;
 
+  /**
+   * Check if geo point is within a given polygon
+   *
+   * @generated from field: qdrant.GeoPolygon geo_polygon = 7;
+   */
+  geoPolygon?: GeoPolygon;
+
   constructor(data?: PartialMessage<FieldCondition>) {
     super();
     proto3.util.initPartial(data, this);
@@ -4006,6 +4090,7 @@ export class FieldCondition extends Message<FieldCondition> {
     { no: 4, name: "geo_bounding_box", kind: "message", T: GeoBoundingBox },
     { no: 5, name: "geo_radius", kind: "message", T: GeoRadius },
     { no: 6, name: "values_count", kind: "message", T: ValuesCount },
+    { no: 7, name: "geo_polygon", kind: "message", T: GeoPolygon },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FieldCondition {
@@ -4357,17 +4442,64 @@ export class GeoRadius extends Message<GeoRadius> {
 }
 
 /**
- * @generated from message qdrant.GeoPolygon
+ * @generated from message qdrant.GeoLineString
  */
-export class GeoPolygon extends Message<GeoPolygon> {
+export class GeoLineString extends Message<GeoLineString> {
   /**
-   * Ordered list of coordinates representing the vertices of a polygon.
-   * The minimum size is 4, and the first coordinate and the last coordinate
-   * should be the same to form a closed polygon.
+   * Ordered sequence of GeoPoints representing the line
    *
    * @generated from field: repeated qdrant.GeoPoint points = 1;
    */
   points: GeoPoint[] = [];
+
+  constructor(data?: PartialMessage<GeoLineString>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.GeoLineString";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "points", kind: "message", T: GeoPoint, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GeoLineString {
+    return new GeoLineString().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GeoLineString {
+    return new GeoLineString().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GeoLineString {
+    return new GeoLineString().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GeoLineString | PlainMessage<GeoLineString> | undefined, b: GeoLineString | PlainMessage<GeoLineString> | undefined): boolean {
+    return proto3.util.equals(GeoLineString, a, b);
+  }
+}
+
+/**
+ * For a valid GeoPolygon, both the exterior and interior GeoLineStrings must consist of a minimum of 4 points.
+ * Additionally, the first and last points of each GeoLineString must be the same.
+ *
+ * @generated from message qdrant.GeoPolygon
+ */
+export class GeoPolygon extends Message<GeoPolygon> {
+  /**
+   * The exterior line bounds the surface
+   *
+   * @generated from field: qdrant.GeoLineString exterior = 1;
+   */
+  exterior?: GeoLineString;
+
+  /**
+   * Interior lines (if present) bound holes within the surface
+   *
+   * @generated from field: repeated qdrant.GeoLineString interiors = 2;
+   */
+  interiors: GeoLineString[] = [];
 
   constructor(data?: PartialMessage<GeoPolygon>) {
     super();
@@ -4377,7 +4509,8 @@ export class GeoPolygon extends Message<GeoPolygon> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "qdrant.GeoPolygon";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "points", kind: "message", T: GeoPoint, repeated: true },
+    { no: 1, name: "exterior", kind: "message", T: GeoLineString },
+    { no: 2, name: "interiors", kind: "message", T: GeoLineString, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GeoPolygon {
