@@ -259,9 +259,10 @@ export class QdrantClient {
     }
 
     /**
-     * Recommend points: search for similar points based on already stored in Qdrant examples.
-     * Provide IDs of the stored points, and Qdrant will perform search based on already existing vectors.
-     * This functionality is especially useful for recommendation over existing collection of points.
+     * Recommendation request. Provides positive and negative examples of the vectors,
+     * which can be ids of points that are already stored in the collection, raw vectors, or even ids and vectors combined.
+     * Service should look for the points which are closer to positive examples and at the same time further to negative examples.
+     * The concrete way of how to compare negative and positive distances is up to the `strategy` chosen.
      * @param collection_name Collection to search in
      * @param {object} args
      *     - positive:
@@ -272,6 +273,8 @@ export class QdrantClient {
      *     - negative:
      *         List of stored point IDs, which should be dissimilar to the search result.
      *         Negative examples is an experimental functionality. Its behaviour may change in the future.
+     *     - strategy:
+     *         How to use positive and negative examples to find the results.
      *     - query_filter:
      *         - Exclude vectors which doesn't fit given conditions.
      *         - If `None` - search among all vectors
@@ -321,6 +324,7 @@ export class QdrantClient {
         {
             positive,
             negative,
+            strategy,
             filter,
             params,
             limit = 10,
@@ -339,6 +343,7 @@ export class QdrantClient {
             limit,
             positive,
             negative,
+            strategy,
             filter,
             params,
             offset,
@@ -574,6 +579,7 @@ export class QdrantClient {
      *             'all' - query all replicas, and return values present in all replicas
      *     - positive: Look for vectors closest to those
      *     - negative: Try to avoid vectors like this
+     *     - strategy: How to use positive and negative examples to find the results
      *     - filter: Look only for points which satisfies this conditions
      *     - params: Additional search params
      *     - with_payload: Select which payload to return with the response
@@ -591,6 +597,7 @@ export class QdrantClient {
         {
             consistency,
             positive,
+            strategy,
             negative = [],
             filter,
             params,
@@ -609,6 +616,7 @@ export class QdrantClient {
             consistency,
             positive,
             negative,
+            strategy,
             filter,
             params,
             with_payload,
