@@ -246,7 +246,7 @@ export class QdrantClient {
      *             - 'all' - query all replicas, and return values present in all replicas
      * @returns List of recommend responses
      */
-    async recommend_batch(
+    async recommendBatch(
         collection_name: string,
         {searches, consistency}: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>},
     ) {
@@ -257,6 +257,11 @@ export class QdrantClient {
         });
         return maybe(response.data.result).orElse([]);
     }
+
+    /**
+     * @alias recommendBatch
+     */
+    recommend_batch = this.recommendBatch;
 
     /**
      * Recommendation request. Provides positive and negative examples of the vectors,
