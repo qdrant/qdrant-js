@@ -129,11 +129,15 @@ export class QdrantClient {
         {
             searches,
             consistency,
-        }: Pick<SchemaFor<'SearchRequestBatch'>, 'searches'> & {consistency?: SchemaFor<'ReadConsistency'>},
+            timeout,
+        }: Pick<SchemaFor<'SearchRequestBatch'>, 'searches'> & {consistency?: SchemaFor<'ReadConsistency'>} & {
+            timeout?: number;
+        },
     ) {
         const response = await this._openApiClient.points.searchBatchPoints({
             collection_name,
             consistency,
+            timeout,
             searches,
         });
         return maybe(response.data.result).orThrow('Search batch returned empty');
@@ -203,6 +207,7 @@ export class QdrantClient {
     async search(
         collection_name: string,
         {
+            shard_key,
             vector,
             limit = 10,
             offset = 0,
@@ -212,14 +217,17 @@ export class QdrantClient {
             with_vector = false,
             score_threshold,
             consistency,
+            timeout,
         }: Partial<Pick<SchemaFor<'SearchRequest'>, 'limit'>> &
             Omit<SchemaFor<'SearchRequest'>, 'limit'> & {
                 consistency?: SchemaFor<'ReadConsistency'>;
-            },
+            } & {timeout?: number},
     ) {
         const response = await this._openApiClient.points.searchPoints({
             collection_name,
             consistency,
+            timeout,
+            shard_key,
             vector,
             limit,
             offset,
@@ -248,12 +256,17 @@ export class QdrantClient {
      */
     async recommendBatch(
         collection_name: string,
-        {searches, consistency}: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>},
+        {
+            searches,
+            consistency,
+            timeout,
+        }: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
     ) {
         const response = await this._openApiClient.points.recommendBatchPoints({
             collection_name,
             searches,
             consistency,
+            timeout,
         });
         return maybe(response.data.result).orElse([]);
     }
@@ -327,6 +340,7 @@ export class QdrantClient {
     async recommend(
         collection_name: string,
         {
+            shard_key,
             positive,
             negative,
             strategy,
@@ -340,12 +354,16 @@ export class QdrantClient {
             using,
             lookup_from,
             consistency,
+            timeout,
         }: Omit<SchemaFor<'RecommendRequest'>, 'limit'> &
-            Partial<Pick<SchemaFor<'RecommendRequest'>, 'limit'>> & {consistency?: SchemaFor<'ReadConsistency'>},
+            Partial<Pick<SchemaFor<'RecommendRequest'>, 'limit'>> & {consistency?: SchemaFor<'ReadConsistency'>} & {
+                timeout?: number;
+            },
     ) {
         const response = await this._openApiClient.points.recommendPoints({
             collection_name,
             limit,
+            shard_key,
             positive,
             negative,
             strategy,
@@ -358,6 +376,7 @@ export class QdrantClient {
             using,
             lookup_from,
             consistency,
+            timeout,
         });
         return maybe(response.data.result).orThrow('Recommend points API returned empty');
     }
@@ -395,6 +414,7 @@ export class QdrantClient {
     async scroll(
         collection_name: string,
         {
+            shard_key,
             filter,
             consistency,
             limit = 10,
@@ -405,6 +425,7 @@ export class QdrantClient {
     ) {
         const response = await this._openApiClient.points.scrollPoints({
             collection_name,
+            shard_key,
             limit,
             offset,
             filter,
@@ -427,9 +448,10 @@ export class QdrantClient {
      *         Default: `true`
      * @returns Amount of points in the collection matching the filter.
      */
-    async count(collection_name: string, {filter, exact = true}: SchemaFor<'CountRequest'> = {}) {
+    async count(collection_name: string, {shard_key, filter, exact = true}: SchemaFor<'CountRequest'> = {}) {
         const response = await this._openApiClient.points.countPoints({
             collection_name,
+            shard_key,
             filter,
             exact,
         });
@@ -469,6 +491,7 @@ export class QdrantClient {
             wait = true,
             ordering,
             points,
+            shard_key,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateVectors'>,
     ) {
         const response = await this._openApiClient.points.updateVectors({
@@ -476,6 +499,7 @@ export class QdrantClient {
             wait,
             ordering,
             points,
+            shard_key,
         });
         return maybe(response.data.result).orThrow('Update vectors returned empty');
     }
@@ -507,6 +531,7 @@ export class QdrantClient {
             points,
             filter,
             vector,
+            shard_key,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'DeleteVectors'>,
     ) {
         const response = await this._openApiClient.points.deleteVectors({
@@ -516,6 +541,7 @@ export class QdrantClient {
             points,
             filter,
             vector,
+            shard_key,
         });
         return maybe(response.data.result).orThrow('Delete vectors returned empty');
     }
@@ -545,6 +571,8 @@ export class QdrantClient {
         collection_name: string,
         {
             consistency,
+            timeout,
+            shard_key,
             vector,
             filter,
             params,
@@ -554,11 +582,13 @@ export class QdrantClient {
             group_by,
             group_size,
             limit,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & SchemaFor<'SearchGroupsRequest'>,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchGroupsRequest'>,
     ) {
         const response = await this._openApiClient.points.searchPointGroups({
             collection_name,
             consistency,
+            timeout,
+            shard_key,
             vector,
             filter,
             params,
@@ -601,6 +631,8 @@ export class QdrantClient {
         collection_name: string,
         {
             consistency,
+            timeout,
+            shard_key,
             positive,
             strategy,
             negative = [],
@@ -614,11 +646,13 @@ export class QdrantClient {
             group_by,
             group_size,
             limit,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & SchemaFor<'RecommendGroupsRequest'>,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'RecommendGroupsRequest'>,
     ) {
         const response = await this._openApiClient.points.recommendPointGroups({
             collection_name,
             consistency,
+            timeout,
+            shard_key,
             positive,
             negative,
             strategy,
@@ -699,6 +733,7 @@ export class QdrantClient {
     async retrieve(
         collection_name: string,
         {
+            shard_key,
             ids,
             with_payload = true,
             with_vector,
@@ -707,6 +742,7 @@ export class QdrantClient {
     ) {
         const response = await this._openApiClient.points.getPoints({
             collection_name,
+            shard_key,
             ids,
             with_payload,
             with_vector,
@@ -801,6 +837,7 @@ export class QdrantClient {
             payload,
             points,
             filter,
+            shard_key,
             ordering,
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'SetPayload'>,
@@ -810,6 +847,7 @@ export class QdrantClient {
             payload,
             points,
             filter,
+            shard_key,
             wait,
             ordering,
         });
@@ -908,6 +946,7 @@ export class QdrantClient {
             keys,
             points,
             filter,
+            shard_key,
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'> &
             SchemaFor<'DeletePayload'>,
@@ -917,6 +956,7 @@ export class QdrantClient {
             keys,
             points,
             filter,
+            shard_key,
             wait,
             ordering,
         });
@@ -1101,8 +1141,10 @@ export class QdrantClient {
             quantization_config,
             replication_factor,
             shard_number,
+            sharding_method,
             wal_config,
             write_consistency_factor,
+            sparse_vectors,
         }: {timeout?: number} & SchemaFor<'CreateCollection'>,
     ) {
         const response = await this._openApiClient.collections.createCollection({
@@ -1116,8 +1158,10 @@ export class QdrantClient {
             quantization_config,
             replication_factor,
             shard_number,
+            sharding_method,
             wal_config,
             write_consistency_factor,
+            sparse_vectors,
         });
 
         return maybe(response.data.result).orThrow('Create collection returned empty');
@@ -1170,8 +1214,10 @@ export class QdrantClient {
             quantization_config,
             replication_factor,
             shard_number,
+            sharding_method,
             wal_config,
             write_consistency_factor,
+            sparse_vectors,
         }: {timeout?: number} & SchemaFor<'CreateCollection'>,
     ) {
         maybe(
@@ -1194,8 +1240,10 @@ export class QdrantClient {
             quantization_config,
             replication_factor,
             shard_number,
+            sharding_method,
             wal_config,
             write_consistency_factor,
+            sparse_vectors,
         });
 
         return maybe(response).orThrow('Create collection returned empty');
@@ -1477,5 +1525,90 @@ export class QdrantClient {
             wait,
         });
         return maybe(response.data.result).orThrow('Create shard snapshot returned empty');
+    }
+
+    async createShardKey(
+        collection_name: string,
+        {
+            shard_key,
+            shards_number,
+            replication_factor,
+            placement,
+            timeout,
+        }: {timeout?: number} & SchemaFor<'CreateShardingKey'>,
+    ) {
+        const response = await this._openApiClient.shards.createShardKey({
+            collection_name,
+            shard_key,
+            shards_number,
+            replication_factor,
+            placement,
+            timeout,
+        });
+        return maybe(response.data.result).orThrow('Create shard key returned empty');
+    }
+
+    async deleteShardKey(
+        collection_name: string,
+        {shard_key, timeout}: {timeout?: number} & SchemaFor<'DropShardingKey'>,
+    ) {
+        const response = await this._openApiClient.shards.deleteShardKey({
+            collection_name,
+            shard_key,
+            timeout,
+        });
+        return maybe(response.data.result).orThrow('Create shard key returned empty');
+    }
+
+    async discoverPoints(
+        collection_name: string,
+        {
+            consistency,
+            timeout,
+            shard_key,
+            target,
+            context,
+            params,
+            limit,
+            offset,
+            with_payload,
+            with_vector,
+            using,
+            lookup_from,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'DiscoverRequest'>,
+    ) {
+        const response = await this._openApiClient.points.discoverPoints({
+            collection_name,
+            consistency,
+            timeout,
+            shard_key,
+            target,
+            context,
+            params,
+            limit,
+            offset,
+            with_payload,
+            with_vector,
+            using,
+            lookup_from,
+        });
+        return maybe(response.data.result).orThrow('Discover points returned empty');
+    }
+
+    async discoverBatchPoints(
+        collection_name: string,
+        {
+            consistency,
+            timeout,
+            searches,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'DiscoverRequestBatch'>,
+    ) {
+        const response = await this._openApiClient.points.discoverBatchPoints({
+            collection_name,
+            consistency,
+            timeout,
+            searches,
+        });
+        return maybe(response.data.result).orThrow('Discover batch points returned empty');
     }
 }

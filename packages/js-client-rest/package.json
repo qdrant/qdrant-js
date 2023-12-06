@@ -1,6 +1,6 @@
 {
     "name": "@qdrant/js-client-rest",
-    "version": "1.6.0",
+    "version": "1.7.0",
     "engines": {
         "node": ">=18.0.0",
         "pnpm": ">=8"
@@ -55,7 +55,7 @@
     "dependencies": {
         "@sevinf/maybe": "^0.5.0",
         "@qdrant/openapi-typescript-fetch": "^1.2.1",
-        "undici": "^5.22.1"
+        "undici": "^5.26.2"
     },
     "devDependencies": {
         "@rollup/plugin-commonjs": "^24.1.0",
