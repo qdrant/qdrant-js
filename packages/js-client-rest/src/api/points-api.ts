@@ -71,7 +71,7 @@ export function createPointsApi(client: Client) {
         recommendBatchPoints: client
             .path('/collections/{collection_name}/points/recommend/batch')
             .method('post')
-            .create({consistency: true}),
+            .create({consistency: true, timeout: true}),
 
         /**
          * Look for the points which are closer to stored positive examples and at the same time further to negative examples.
@@ -79,7 +79,7 @@ export function createPointsApi(client: Client) {
         recommendPoints: client
             .path('/collections/{collection_name}/points/recommend')
             .method('post')
-            .create({consistency: true}),
+            .create({consistency: true, timeout: true}),
 
         /**
          * Search point groups
@@ -87,7 +87,7 @@ export function createPointsApi(client: Client) {
         searchPointGroups: client
             .path('/collections/{collection_name}/points/search/groups')
             .method('post')
-            .create({consistency: true}),
+            .create({consistency: true, timeout: true}),
 
         /**
          * Scroll request - paginate over all points which matches given filtering condition
@@ -103,7 +103,7 @@ export function createPointsApi(client: Client) {
         searchBatchPoints: client
             .path('/collections/{collection_name}/points/search/batch')
             .method('post')
-            .create({consistency: true}),
+            .create({consistency: true, timeout: true}),
 
         /**
          * Retrieve closest points based on vector similarity and given filtering conditions
@@ -111,7 +111,7 @@ export function createPointsApi(client: Client) {
         searchPoints: client
             .path('/collections/{collection_name}/points/search')
             .method('post')
-            .create({consistency: true}),
+            .create({consistency: true, timeout: true}),
 
         /**
          * Set payload values for points
@@ -135,7 +135,7 @@ export function createPointsApi(client: Client) {
         recommendPointGroups: client
             .path('/collections/{collection_name}/points/recommend/groups')
             .method('post')
-            .create({consistency: true}),
+            .create({consistency: true, timeout: true}),
 
         /**
          * Apply a series of update operations for points, vectors and payloads
