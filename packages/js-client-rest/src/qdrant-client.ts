@@ -129,11 +129,15 @@ export class QdrantClient {
         {
             searches,
             consistency,
-        }: Pick<SchemaFor<'SearchRequestBatch'>, 'searches'> & {consistency?: SchemaFor<'ReadConsistency'>},
+            timeout,
+        }: Pick<SchemaFor<'SearchRequestBatch'>, 'searches'> & {consistency?: SchemaFor<'ReadConsistency'>} & {
+            timeout?: number;
+        },
     ) {
         const response = await this._openApiClient.points.searchBatchPoints({
             collection_name,
             consistency,
+            timeout,
             searches,
         });
         return maybe(response.data.result).orThrow('Search batch returned empty');
@@ -212,14 +216,16 @@ export class QdrantClient {
             with_vector = false,
             score_threshold,
             consistency,
+            timeout,
         }: Partial<Pick<SchemaFor<'SearchRequest'>, 'limit'>> &
             Omit<SchemaFor<'SearchRequest'>, 'limit'> & {
                 consistency?: SchemaFor<'ReadConsistency'>;
-            },
+            } & {timeout?: number},
     ) {
         const response = await this._openApiClient.points.searchPoints({
             collection_name,
             consistency,
+            timeout,
             vector,
             limit,
             offset,
@@ -248,12 +254,17 @@ export class QdrantClient {
      */
     async recommend_batch(
         collection_name: string,
-        {searches, consistency}: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>},
+        {
+            searches,
+            consistency,
+            timeout,
+        }: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
     ) {
         const response = await this._openApiClient.points.recommendBatchPoints({
             collection_name,
             searches,
             consistency,
+            timeout,
         });
         return maybe(response.data.result).orElse([]);
     }
@@ -335,8 +346,11 @@ export class QdrantClient {
             using,
             lookup_from,
             consistency,
+            timeout,
         }: Omit<SchemaFor<'RecommendRequest'>, 'limit'> &
-            Partial<Pick<SchemaFor<'RecommendRequest'>, 'limit'>> & {consistency?: SchemaFor<'ReadConsistency'>},
+            Partial<Pick<SchemaFor<'RecommendRequest'>, 'limit'>> & {consistency?: SchemaFor<'ReadConsistency'>} & {
+                timeout?: number;
+            },
     ) {
         const response = await this._openApiClient.points.recommendPoints({
             collection_name,
@@ -353,6 +367,7 @@ export class QdrantClient {
             using,
             lookup_from,
             consistency,
+            timeout,
         });
         return maybe(response.data.result).orThrow('Recommend points API returned empty');
     }
@@ -540,6 +555,7 @@ export class QdrantClient {
         collection_name: string,
         {
             consistency,
+            timeout,
             vector,
             filter,
             params,
@@ -549,11 +565,12 @@ export class QdrantClient {
             group_by,
             group_size,
             limit,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & SchemaFor<'SearchGroupsRequest'>,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchGroupsRequest'>,
     ) {
         const response = await this._openApiClient.points.searchPointGroups({
             collection_name,
             consistency,
+            timeout,
             vector,
             filter,
             params,
@@ -596,6 +613,7 @@ export class QdrantClient {
         collection_name: string,
         {
             consistency,
+            timeout,
             positive,
             strategy,
             negative = [],
@@ -609,11 +627,12 @@ export class QdrantClient {
             group_by,
             group_size,
             limit,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & SchemaFor<'RecommendGroupsRequest'>,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'RecommendGroupsRequest'>,
     ) {
         const response = await this._openApiClient.points.recommendPointGroups({
             collection_name,
             consistency,
+            timeout,
             positive,
             negative,
             strategy,
