@@ -207,6 +207,7 @@ export class QdrantClient {
     async search(
         collection_name: string,
         {
+            shard_key,
             vector,
             limit = 10,
             offset = 0,
@@ -226,6 +227,7 @@ export class QdrantClient {
             collection_name,
             consistency,
             timeout,
+            shard_key,
             vector,
             limit,
             offset,
@@ -333,6 +335,7 @@ export class QdrantClient {
     async recommend(
         collection_name: string,
         {
+            shard_key,
             positive,
             negative,
             strategy,
@@ -355,6 +358,7 @@ export class QdrantClient {
         const response = await this._openApiClient.points.recommendPoints({
             collection_name,
             limit,
+            shard_key,
             positive,
             negative,
             strategy,
@@ -405,6 +409,7 @@ export class QdrantClient {
     async scroll(
         collection_name: string,
         {
+            shard_key,
             filter,
             consistency,
             limit = 10,
@@ -415,6 +420,7 @@ export class QdrantClient {
     ) {
         const response = await this._openApiClient.points.scrollPoints({
             collection_name,
+            shard_key,
             limit,
             offset,
             filter,
@@ -437,9 +443,10 @@ export class QdrantClient {
      *         Default: `true`
      * @returns Amount of points in the collection matching the filter.
      */
-    async count(collection_name: string, {filter, exact = true}: SchemaFor<'CountRequest'> = {}) {
+    async count(collection_name: string, {shard_key, filter, exact = true}: SchemaFor<'CountRequest'> = {}) {
         const response = await this._openApiClient.points.countPoints({
             collection_name,
+            shard_key,
             filter,
             exact,
         });
@@ -479,6 +486,7 @@ export class QdrantClient {
             wait = true,
             ordering,
             points,
+            shard_key,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateVectors'>,
     ) {
         const response = await this._openApiClient.points.updateVectors({
@@ -486,6 +494,7 @@ export class QdrantClient {
             wait,
             ordering,
             points,
+            shard_key,
         });
         return maybe(response.data.result).orThrow('Update vectors returned empty');
     }
@@ -517,6 +526,7 @@ export class QdrantClient {
             points,
             filter,
             vector,
+            shard_key,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'DeleteVectors'>,
     ) {
         const response = await this._openApiClient.points.deleteVectors({
@@ -526,6 +536,7 @@ export class QdrantClient {
             points,
             filter,
             vector,
+            shard_key,
         });
         return maybe(response.data.result).orThrow('Delete vectors returned empty');
     }
@@ -556,6 +567,7 @@ export class QdrantClient {
         {
             consistency,
             timeout,
+            shard_key,
             vector,
             filter,
             params,
@@ -571,6 +583,7 @@ export class QdrantClient {
             collection_name,
             consistency,
             timeout,
+            shard_key,
             vector,
             filter,
             params,
@@ -614,6 +627,7 @@ export class QdrantClient {
         {
             consistency,
             timeout,
+            shard_key,
             positive,
             strategy,
             negative = [],
@@ -633,6 +647,7 @@ export class QdrantClient {
             collection_name,
             consistency,
             timeout,
+            shard_key,
             positive,
             negative,
             strategy,
@@ -713,6 +728,7 @@ export class QdrantClient {
     async retrieve(
         collection_name: string,
         {
+            shard_key,
             ids,
             with_payload = true,
             with_vector,
@@ -721,6 +737,7 @@ export class QdrantClient {
     ) {
         const response = await this._openApiClient.points.getPoints({
             collection_name,
+            shard_key,
             ids,
             with_payload,
             with_vector,
@@ -815,6 +832,7 @@ export class QdrantClient {
             payload,
             points,
             filter,
+            shard_key,
             ordering,
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'SetPayload'>,
@@ -824,6 +842,7 @@ export class QdrantClient {
             payload,
             points,
             filter,
+            shard_key,
             wait,
             ordering,
         });
@@ -922,6 +941,7 @@ export class QdrantClient {
             keys,
             points,
             filter,
+            shard_key,
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'> &
             SchemaFor<'DeletePayload'>,
@@ -931,6 +951,7 @@ export class QdrantClient {
             keys,
             points,
             filter,
+            shard_key,
             wait,
             ordering,
         });
@@ -1115,8 +1136,10 @@ export class QdrantClient {
             quantization_config,
             replication_factor,
             shard_number,
+            sharding_method,
             wal_config,
             write_consistency_factor,
+            sparse_vectors,
         }: {timeout?: number} & SchemaFor<'CreateCollection'>,
     ) {
         const response = await this._openApiClient.collections.createCollection({
@@ -1130,8 +1153,10 @@ export class QdrantClient {
             quantization_config,
             replication_factor,
             shard_number,
+            sharding_method,
             wal_config,
             write_consistency_factor,
+            sparse_vectors,
         });
 
         return maybe(response.data.result).orThrow('Create collection returned empty');
@@ -1184,8 +1209,10 @@ export class QdrantClient {
             quantization_config,
             replication_factor,
             shard_number,
+            sharding_method,
             wal_config,
             write_consistency_factor,
+            sparse_vectors,
         }: {timeout?: number} & SchemaFor<'CreateCollection'>,
     ) {
         maybe(
@@ -1208,8 +1235,10 @@ export class QdrantClient {
             quantization_config,
             replication_factor,
             shard_number,
+            sharding_method,
             wal_config,
             write_consistency_factor,
+            sparse_vectors,
         });
 
         return maybe(response).orThrow('Create collection returned empty');
