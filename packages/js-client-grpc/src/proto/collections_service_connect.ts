@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ChangeAliases, CollectionClusterInfoRequest, CollectionClusterInfoResponse, CollectionOperationResponse, CreateCollection, DeleteCollection, GetCollectionInfoRequest, GetCollectionInfoResponse, ListAliasesRequest, ListAliasesResponse, ListCollectionAliasesRequest, ListCollectionsRequest, ListCollectionsResponse, UpdateCollection, UpdateCollectionClusterSetupRequest, UpdateCollectionClusterSetupResponse } from "./collections_pb.js";
+import { ChangeAliases, CollectionClusterInfoRequest, CollectionClusterInfoResponse, CollectionOperationResponse, CreateCollection, CreateShardKeyRequest, CreateShardKeyResponse, DeleteCollection, DeleteShardKeyRequest, DeleteShardKeyResponse, GetCollectionInfoRequest, GetCollectionInfoResponse, ListAliasesRequest, ListAliasesResponse, ListCollectionAliasesRequest, ListCollectionsRequest, ListCollectionsResponse, UpdateCollection, UpdateCollectionClusterSetupRequest, UpdateCollectionClusterSetupResponse } from "./collections_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -130,6 +130,30 @@ export const Collections = {
       name: "UpdateCollectionClusterSetup",
       I: UpdateCollectionClusterSetupRequest,
       O: UpdateCollectionClusterSetupResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Create shard key
+     *
+     * @generated from rpc qdrant.Collections.CreateShardKey
+     */
+    createShardKey: {
+      name: "CreateShardKey",
+      I: CreateShardKeyRequest,
+      O: CreateShardKeyResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Delete shard key
+     *
+     * @generated from rpc qdrant.Collections.DeleteShardKey
+     */
+    deleteShardKey: {
+      name: "DeleteShardKey",
+      I: DeleteShardKeyRequest,
+      O: DeleteShardKeyResponse,
       kind: MethodKind.Unary,
     },
   }

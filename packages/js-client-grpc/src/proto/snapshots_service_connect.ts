@@ -38,7 +38,7 @@ export const Snapshots = {
     },
     /**
      *
-     * Delete collection snapshots
+     * Delete collection snapshot
      *
      * @generated from rpc qdrant.Snapshots.Delete
      */
@@ -74,7 +74,7 @@ export const Snapshots = {
     },
     /**
      *
-     * List full storage snapshots
+     * Delete full storage snapshot
      *
      * @generated from rpc qdrant.Snapshots.DeleteFull
      */
