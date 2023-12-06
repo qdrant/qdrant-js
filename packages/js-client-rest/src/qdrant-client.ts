@@ -129,11 +129,15 @@ export class QdrantClient {
         {
             searches,
             consistency,
-        }: Pick<SchemaFor<'SearchRequestBatch'>, 'searches'> & {consistency?: SchemaFor<'ReadConsistency'>},
+            timeout,
+        }: Pick<SchemaFor<'SearchRequestBatch'>, 'searches'> & {consistency?: SchemaFor<'ReadConsistency'>} & {
+            timeout?: number;
+        },
     ) {
         const response = await this._openApiClient.points.searchBatchPoints({
             collection_name,
             consistency,
+            timeout,
             searches,
         });
         return maybe(response.data.result).orThrow('Search batch returned empty');
@@ -203,6 +207,7 @@ export class QdrantClient {
     async search(
         collection_name: string,
         {
+            shard_key,
             vector,
             limit = 10,
             offset = 0,
@@ -212,14 +217,17 @@ export class QdrantClient {
             with_vector = false,
             score_threshold,
             consistency,
+            timeout,
         }: Partial<Pick<SchemaFor<'SearchRequest'>, 'limit'>> &
             Omit<SchemaFor<'SearchRequest'>, 'limit'> & {
                 consistency?: SchemaFor<'ReadConsistency'>;
-            },
+            } & {timeout?: number},
     ) {
         const response = await this._openApiClient.points.searchPoints({
             collection_name,
             consistency,
+            timeout,
+            shard_key,
             vector,
             limit,
             offset,
@@ -248,20 +256,26 @@ export class QdrantClient {
      */
     async recommend_batch(
         collection_name: string,
-        {searches, consistency}: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>},
+        {
+            searches,
+            consistency,
+            timeout,
+        }: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
     ) {
         const response = await this._openApiClient.points.recommendBatchPoints({
             collection_name,
             searches,
             consistency,
+            timeout,
         });
         return maybe(response.data.result).orElse([]);
     }
 
     /**
-     * Recommend points: search for similar points based on already stored in Qdrant examples.
-     * Provide IDs of the stored points, and Qdrant will perform search based on already existing vectors.
-     * This functionality is especially useful for recommendation over existing collection of points.
+     * Recommendation request. Provides positive and negative examples of the vectors,
+     * which can be ids of points that are already stored in the collection, raw vectors, or even ids and vectors combined.
+     * Service should look for the points which are closer to positive examples and at the same time further to negative examples.
+     * The concrete way of how to compare negative and positive distances is up to the `strategy` chosen.
      * @param collection_name Collection to search in
      * @param {object} args
      *     - positive:
@@ -272,6 +286,8 @@ export class QdrantClient {
      *     - negative:
      *         List of stored point IDs, which should be dissimilar to the search result.
      *         Negative examples is an experimental functionality. Its behaviour may change in the future.
+     *     - strategy:
+     *         How to use positive and negative examples to find the results.
      *     - query_filter:
      *         - Exclude vectors which doesn't fit given conditions.
      *         - If `None` - search among all vectors
@@ -319,8 +335,10 @@ export class QdrantClient {
     async recommend(
         collection_name: string,
         {
+            shard_key,
             positive,
             negative,
+            strategy,
             filter,
             params,
             limit = 10,
@@ -331,14 +349,19 @@ export class QdrantClient {
             using,
             lookup_from,
             consistency,
+            timeout,
         }: Omit<SchemaFor<'RecommendRequest'>, 'limit'> &
-            Partial<Pick<SchemaFor<'RecommendRequest'>, 'limit'>> & {consistency?: SchemaFor<'ReadConsistency'>},
+            Partial<Pick<SchemaFor<'RecommendRequest'>, 'limit'>> & {consistency?: SchemaFor<'ReadConsistency'>} & {
+                timeout?: number;
+            },
     ) {
         const response = await this._openApiClient.points.recommendPoints({
             collection_name,
             limit,
+            shard_key,
             positive,
             negative,
+            strategy,
             filter,
             params,
             offset,
@@ -348,6 +371,7 @@ export class QdrantClient {
             using,
             lookup_from,
             consistency,
+            timeout,
         });
         return maybe(response.data.result).orThrow('Recommend points API returned empty');
     }
@@ -385,6 +409,7 @@ export class QdrantClient {
     async scroll(
         collection_name: string,
         {
+            shard_key,
             filter,
             consistency,
             limit = 10,
@@ -395,6 +420,7 @@ export class QdrantClient {
     ) {
         const response = await this._openApiClient.points.scrollPoints({
             collection_name,
+            shard_key,
             limit,
             offset,
             filter,
@@ -417,9 +443,10 @@ export class QdrantClient {
      *         Default: `true`
      * @returns Amount of points in the collection matching the filter.
      */
-    async count(collection_name: string, {filter, exact = true}: SchemaFor<'CountRequest'> = {}) {
+    async count(collection_name: string, {shard_key, filter, exact = true}: SchemaFor<'CountRequest'> = {}) {
         const response = await this._openApiClient.points.countPoints({
             collection_name,
+            shard_key,
             filter,
             exact,
         });
@@ -459,6 +486,7 @@ export class QdrantClient {
             wait = true,
             ordering,
             points,
+            shard_key,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateVectors'>,
     ) {
         const response = await this._openApiClient.points.updateVectors({
@@ -466,6 +494,7 @@ export class QdrantClient {
             wait,
             ordering,
             points,
+            shard_key,
         });
         return maybe(response.data.result).orThrow('Update vectors returned empty');
     }
@@ -497,6 +526,7 @@ export class QdrantClient {
             points,
             filter,
             vector,
+            shard_key,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'DeleteVectors'>,
     ) {
         const response = await this._openApiClient.points.deleteVectors({
@@ -506,6 +536,7 @@ export class QdrantClient {
             points,
             filter,
             vector,
+            shard_key,
         });
         return maybe(response.data.result).orThrow('Delete vectors returned empty');
     }
@@ -535,6 +566,8 @@ export class QdrantClient {
         collection_name: string,
         {
             consistency,
+            timeout,
+            shard_key,
             vector,
             filter,
             params,
@@ -544,11 +577,13 @@ export class QdrantClient {
             group_by,
             group_size,
             limit,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & SchemaFor<'SearchGroupsRequest'>,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchGroupsRequest'>,
     ) {
         const response = await this._openApiClient.points.searchPointGroups({
             collection_name,
             consistency,
+            timeout,
+            shard_key,
             vector,
             filter,
             params,
@@ -574,6 +609,7 @@ export class QdrantClient {
      *             'all' - query all replicas, and return values present in all replicas
      *     - positive: Look for vectors closest to those
      *     - negative: Try to avoid vectors like this
+     *     - strategy: How to use positive and negative examples to find the results
      *     - filter: Look only for points which satisfies this conditions
      *     - params: Additional search params
      *     - with_payload: Select which payload to return with the response
@@ -590,7 +626,10 @@ export class QdrantClient {
         collection_name: string,
         {
             consistency,
+            timeout,
+            shard_key,
             positive,
+            strategy,
             negative = [],
             filter,
             params,
@@ -602,13 +641,16 @@ export class QdrantClient {
             group_by,
             group_size,
             limit,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & SchemaFor<'RecommendGroupsRequest'>,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'RecommendGroupsRequest'>,
     ) {
         const response = await this._openApiClient.points.recommendPointGroups({
             collection_name,
             consistency,
+            timeout,
+            shard_key,
             positive,
             negative,
+            strategy,
             filter,
             params,
             with_payload,
@@ -686,6 +728,7 @@ export class QdrantClient {
     async retrieve(
         collection_name: string,
         {
+            shard_key,
             ids,
             with_payload = true,
             with_vector,
@@ -694,6 +737,7 @@ export class QdrantClient {
     ) {
         const response = await this._openApiClient.points.getPoints({
             collection_name,
+            shard_key,
             ids,
             with_payload,
             with_vector,
@@ -788,6 +832,7 @@ export class QdrantClient {
             payload,
             points,
             filter,
+            shard_key,
             ordering,
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'SetPayload'>,
@@ -797,6 +842,7 @@ export class QdrantClient {
             payload,
             points,
             filter,
+            shard_key,
             wait,
             ordering,
         });
@@ -895,6 +941,7 @@ export class QdrantClient {
             keys,
             points,
             filter,
+            shard_key,
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'> &
             SchemaFor<'DeletePayload'>,
@@ -904,6 +951,7 @@ export class QdrantClient {
             keys,
             points,
             filter,
+            shard_key,
             wait,
             ordering,
         });
@@ -1088,8 +1136,10 @@ export class QdrantClient {
             quantization_config,
             replication_factor,
             shard_number,
+            sharding_method,
             wal_config,
             write_consistency_factor,
+            sparse_vectors,
         }: {timeout?: number} & SchemaFor<'CreateCollection'>,
     ) {
         const response = await this._openApiClient.collections.createCollection({
@@ -1103,8 +1153,10 @@ export class QdrantClient {
             quantization_config,
             replication_factor,
             shard_number,
+            sharding_method,
             wal_config,
             write_consistency_factor,
+            sparse_vectors,
         });
 
         return maybe(response.data.result).orThrow('Create collection returned empty');
@@ -1157,8 +1209,10 @@ export class QdrantClient {
             quantization_config,
             replication_factor,
             shard_number,
+            sharding_method,
             wal_config,
             write_consistency_factor,
+            sparse_vectors,
         }: {timeout?: number} & SchemaFor<'CreateCollection'>,
     ) {
         maybe(
@@ -1181,8 +1235,10 @@ export class QdrantClient {
             quantization_config,
             replication_factor,
             shard_number,
+            sharding_method,
             wal_config,
             write_consistency_factor,
+            sparse_vectors,
         });
 
         return maybe(response).orThrow('Create collection returned empty');
@@ -1359,5 +1415,195 @@ export class QdrantClient {
     async getLocks() {
         const response = await this._openApiClient.service.getLocks({});
         return maybe(response.data.result).orThrow('Get locks returned empty');
+    }
+
+    /**
+     * Batch update points
+     * Apply a series of update operations for points, vectors and payloads.
+     * @param collection_name Name of the collection
+     * @param {object} args
+     *     - wait: Await for the results to be processed.
+     *         - If `true`, result will be returned only when all changes are applied
+     *         - If `false`, result will be returned immediately after the confirmation of receiving.
+     *      - ordering: Define strategy for ordering of the points. Possible values:
+     *          - 'weak'   - write operations may be reordered, works faster, default
+     *          - 'medium' - write operations go through dynamically selected leader,
+     *                      may be inconsistent for a short period of time in case of leader change
+     *          - 'strong' - Write operations go through the permanent leader,
+     *                      consistent, but may be unavailable if leader is down
+     *      - operations: List of operations to perform
+     * @returns Operation result
+     */
+    async batchUpdate(
+        collection_name: string,
+        {
+            wait = true,
+            ordering,
+            ...operations
+        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateOperations'>,
+    ) {
+        const response = await this._openApiClient.points.batchUpdate({
+            collection_name,
+            wait,
+            ordering,
+            ...operations,
+        });
+        return maybe(response.data.result).orThrow('Batch update returned empty');
+    }
+
+    /**
+     * Recover from a snapshot
+     * @param collection_name Name of the collection
+     * @param shard_id Shard ID
+     * @returns Operation result
+     */
+    async recoverShardFromSnapshot(
+        collection_name: string,
+        shard_id: number,
+        {wait = true, ...shard_snapshot_recover}: {wait?: boolean} & SchemaFor<'ShardSnapshotRecover'>,
+    ) {
+        const response = await this._openApiClient.snapshots.recoverShardFromSnapshot({
+            collection_name,
+            shard_id,
+            wait,
+            ...shard_snapshot_recover,
+        });
+        return maybe(response.data.result).orThrow('Recover shard from snapshot returned empty');
+    }
+
+    /**
+     * Get list of snapshots for a shard of a collection
+     * @param collection_name Name of the collection
+     * @param shard_id Shard ID
+     * @returns Operation result
+     */
+    async listShardSnapshots(collection_name: string, shard_id: number) {
+        const response = await this._openApiClient.snapshots.listShardSnapshots({
+            collection_name,
+            shard_id,
+        });
+        return maybe(response.data.result).orThrow('List shard snapshots returned empty');
+    }
+
+    /**
+     * Create new snapshot of a shard for a collection
+     * @param collection_name Name of the collection
+     * @param shard_id Shard ID
+     * @returns Operation result
+     */
+    async createShardSnapshot(collection_name: string, shard_id: number, {wait = true}: {wait?: boolean}) {
+        const response = await this._openApiClient.snapshots.createShardSnapshot({
+            collection_name,
+            shard_id,
+            wait,
+        });
+        return maybe(response.data.result).orThrow('Create shard snapshot returned empty');
+    }
+
+    /**
+     * Delete snapshot of a shard for a collection
+     * @param collection_name Name of the collection
+     * @param shard_id Shard ID
+     * @param snapshot_name Snapshot name
+     * @returns Operation result
+     */
+    async deleteShardSnapshot(
+        collection_name: string,
+        shard_id: number,
+        snapshot_name: string,
+        {wait = true}: {wait?: boolean},
+    ) {
+        const response = await this._openApiClient.snapshots.deleteShardSnapshot({
+            collection_name,
+            shard_id,
+            snapshot_name,
+            wait,
+        });
+        return maybe(response.data.result).orThrow('Create shard snapshot returned empty');
+    }
+
+    async createShardKey(
+        collection_name: string,
+        {
+            shard_key,
+            shards_number,
+            replication_factor,
+            placement,
+            timeout,
+        }: {timeout?: number} & SchemaFor<'CreateShardingKey'>,
+    ) {
+        const response = await this._openApiClient.shards.createShardKey({
+            collection_name,
+            shard_key,
+            shards_number,
+            replication_factor,
+            placement,
+            timeout,
+        });
+        return maybe(response.data.result).orThrow('Create shard key returned empty');
+    }
+
+    async deleteShardKey(
+        collection_name: string,
+        {shard_key, timeout}: {timeout?: number} & SchemaFor<'DropShardingKey'>,
+    ) {
+        const response = await this._openApiClient.shards.deleteShardKey({
+            collection_name,
+            shard_key,
+            timeout,
+        });
+        return maybe(response.data.result).orThrow('Create shard key returned empty');
+    }
+
+    async discoverPoints(
+        collection_name: string,
+        {
+            consistency,
+            timeout,
+            shard_key,
+            target,
+            context,
+            params,
+            limit,
+            offset,
+            with_payload,
+            with_vector,
+            using,
+            lookup_from,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'DiscoverRequest'>,
+    ) {
+        const response = await this._openApiClient.points.discoverPoints({
+            collection_name,
+            consistency,
+            timeout,
+            shard_key,
+            target,
+            context,
+            params,
+            limit,
+            offset,
+            with_payload,
+            with_vector,
+            using,
+            lookup_from,
+        });
+        return maybe(response.data.result).orThrow('Discover points returned empty');
+    }
+
+    async discoverBatchPoints(
+        collection_name: string,
+        {
+            consistency,
+            timeout,
+            searches,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'DiscoverRequestBatch'>,
+    ) {
+        const response = await this._openApiClient.points.discoverBatchPoints({
+            collection_name,
+            consistency,
+            timeout,
+            searches,
+        });
+        return maybe(response.data.result).orThrow('Discover batch points returned empty');
     }
 }

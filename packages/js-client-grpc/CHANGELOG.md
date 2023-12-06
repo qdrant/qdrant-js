@@ -1,5 +1,29 @@
 # @qdrant/js-client-grpc
 
+## 1.7.0
+
+### Minor Changes
+
+-   Qdrant v1.7.0 API
+
+## 1.6.0
+
+### Minor Changes
+
+-   Qdrant v1.6.0 API
+
+## 1.5.0
+
+### Minor Changes
+
+-   Qdrant v1.5.0 API
+
+## 1.4.0
+
+### Minor Changes
+
+-   Qdrant v1.4.0 API
+
 ## 1.3.0
 
 ### Minor Changes

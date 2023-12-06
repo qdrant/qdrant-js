@@ -6,7 +6,7 @@ PROJECT_ROOT="$(pwd)/$(dirname "$0")/../"
 
 cd $(mktemp -d)
 
-git clone --sparse --filter=blob:none --depth=1 git@github.com:qdrant/qdrant.git
+git clone --sparse --filter=blob:none --depth=1 https://github.com/qdrant/qdrant.git
 cd qdrant
 git sparse-checkout add lib/api/src/grpc/proto
 
@@ -23,10 +23,16 @@ cp $PROTO_DIR/*.proto $CLIENT_DIR/
 rm $CLIENT_DIR/points_internal_service.proto
 rm $CLIENT_DIR/collections_internal_service.proto
 rm $CLIENT_DIR/raft_service.proto
+rm $CLIENT_DIR/qdrant_internal_service.proto
+rm $CLIENT_DIR/health_check.proto
+rm $CLIENT_DIR/shard_snapshots_service.proto
 cat $CLIENT_DIR/qdrant.proto \
  | grep -v 'collections_internal_service.proto' \
  | grep -v 'points_internal_service.proto' \
  | grep -v 'raft_service.proto' \
+ | grep -v 'qdrant_internal_service.proto' \
+ | grep -v 'health_check.proto' \
+ | grep -v 'shard_snapshots_service.proto' \
   > $CLIENT_DIR/qdrant_tmp.proto
 mv $CLIENT_DIR/qdrant_tmp.proto $CLIENT_DIR/qdrant.proto
 

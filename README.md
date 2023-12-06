@@ -83,9 +83,7 @@ TypeScript types are provided alongside JavaScript sources to be used in:
 
 ## Releases
 
-Major and minor versions align with Qdrant's engine releases, whilst patch are reserved for fixes regarding the current minor release. Check out [RELEASE.md](./RELEASE.md) for more info on release guidelines.
-
-For release automation we use [`changesets`](https://github.com/changesets/changesets) both for pull requests and pushes to the master branch, and their [Github Action](https://github.com/changesets/action) to automate changeset steps.
+Major and minor versions align with Qdrant's engine releases, whilst patch are reserved for fixes regarding the current minor release. New releases are made from the `master` branch.
 
 ## Contributing
 

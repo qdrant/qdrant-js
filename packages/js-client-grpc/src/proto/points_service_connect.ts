@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ClearPayloadPoints, CountPoints, CountResponse, CreateFieldIndexCollection, DeleteFieldIndexCollection, DeletePayloadPoints, DeletePoints, DeletePointVectors, GetPoints, GetResponse, PointsOperationResponse, RecommendBatchPoints, RecommendBatchResponse, RecommendGroupsResponse, RecommendPointGroups, RecommendPoints, RecommendResponse, ScrollPoints, ScrollResponse, SearchBatchPoints, SearchBatchResponse, SearchGroupsResponse, SearchPointGroups, SearchPoints, SearchResponse, SetPayloadPoints, UpdatePointVectors, UpsertPoints } from "./points_pb.js";
+import { ClearPayloadPoints, CountPoints, CountResponse, CreateFieldIndexCollection, DeleteFieldIndexCollection, DeletePayloadPoints, DeletePoints, DeletePointVectors, DiscoverBatchPoints, DiscoverBatchResponse, DiscoverPoints, DiscoverResponse, GetPoints, GetResponse, PointsOperationResponse, RecommendBatchPoints, RecommendBatchResponse, RecommendGroupsResponse, RecommendPointGroups, RecommendPoints, RecommendResponse, ScrollPoints, ScrollResponse, SearchBatchPoints, SearchBatchResponse, SearchGroupsResponse, SearchPointGroups, SearchPoints, SearchResponse, SetPayloadPoints, UpdateBatchPoints, UpdateBatchResponse, UpdatePointVectors, UpsertPoints } from "./points_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -182,7 +182,7 @@ export const Points = {
     },
     /**
      *
-     * Iterate over all or filtered points points
+     * Iterate over all or filtered points
      *
      * @generated from rpc qdrant.Points.Scroll
      */
@@ -230,6 +230,44 @@ export const Points = {
     },
     /**
      *
+     * Use context and a target to find the most similar points to the target, constrained by the context.
+     *
+     * When using only the context (without a target), a special search - called context search - is performed where
+     * pairs of points are used to generate a loss that guides the search towards the zone where
+     * most positive examples overlap. This means that the score minimizes the scenario of
+     * finding a point closer to a negative than to a positive part of a pair.
+     *
+     * Since the score of a context relates to loss, the maximum score a point can get is 0.0,
+     * and it becomes normal that many points can have a score of 0.0.
+     *
+     * When using target (with or without context), the score behaves a little different: The 
+     * integer part of the score represents the rank with respect to the context, while the
+     * decimal part of the score relates to the distance to the target. The context part of the score for 
+     * each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, 
+     * and -1 otherwise.
+     *
+     * @generated from rpc qdrant.Points.Discover
+     */
+    discover: {
+      name: "Discover",
+      I: DiscoverPoints,
+      O: DiscoverResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Batch request points based on { positive, negative } pairs of examples, and/or a target
+     *
+     * @generated from rpc qdrant.Points.DiscoverBatch
+     */
+    discoverBatch: {
+      name: "DiscoverBatch",
+      I: DiscoverBatchPoints,
+      O: DiscoverBatchResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
      * Count points in collection with given filtering conditions
      *
      * @generated from rpc qdrant.Points.Count
@@ -238,6 +276,18 @@ export const Points = {
       name: "Count",
       I: CountPoints,
       O: CountResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Perform multiple update operations in one request
+     *
+     * @generated from rpc qdrant.Points.UpdateBatch
+     */
+    updateBatch: {
+      name: "UpdateBatch",
+      I: UpdateBatchPoints,
+      O: UpdateBatchResponse,
       kind: MethodKind.Unary,
     },
   }

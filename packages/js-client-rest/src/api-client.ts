@@ -6,6 +6,7 @@ import {createCollectionsApi} from './api/collections-api.js';
 import {createPointsApi} from './api/points-api.js';
 import {createServiceApi} from './api/service-api.js';
 import {createSnapshotsApi} from './api/snapshots-api.js';
+import {createShardsApi} from './api/shards-api.js';
 import {QdrantClientTimeoutError, QdrantClientUnexpectedResponseError} from './errors.js';
 import {RestArgs} from './types.js';
 
@@ -20,6 +21,7 @@ export function createApis(baseUrl: string, args: RestArgs) {
         points: createPointsApi(client),
         service: createServiceApi(client),
         snapshots: createSnapshotsApi(client),
+        shards: createShardsApi(client),
     } as const;
 }
 
