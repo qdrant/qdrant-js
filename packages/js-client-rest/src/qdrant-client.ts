@@ -1492,4 +1492,37 @@ export class QdrantClient {
         });
         return maybe(response.data.result).orThrow('Create shard snapshot returned empty');
     }
+
+    async createShardKey(
+        collection_name: string,
+        {
+            shard_key,
+            shards_number,
+            replication_factor,
+            placement,
+            timeout,
+        }: {timeout?: number} & SchemaFor<'CreateShardingKey'>,
+    ) {
+        const response = await this._openApiClient.shards.createShardKey({
+            collection_name,
+            shard_key,
+            shards_number,
+            replication_factor,
+            placement,
+            timeout,
+        });
+        return maybe(response.data.result).orThrow('Create shard key returned empty');
+    }
+
+    async deleteShardKey(
+        collection_name: string,
+        {shard_key, timeout}: {timeout?: number} & SchemaFor<'DropShardingKey'>,
+    ) {
+        const response = await this._openApiClient.shards.deleteShardKey({
+            collection_name,
+            shard_key,
+            timeout,
+        });
+        return maybe(response.data.result).orThrow('Create shard key returned empty');
+    }
 }
