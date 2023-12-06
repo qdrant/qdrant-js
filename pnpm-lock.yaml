@@ -50,11 +50,11 @@ importers:
   packages/js-client-grpc:
     dependencies:
       '@bufbuild/connect':
-        specifier: ^0.9.1
-        version: 0.9.1(@bufbuild/protobuf@1.2.1)
+        specifier: ^0.10.0
+        version: 0.10.0(@bufbuild/protobuf@1.2.1)
       '@bufbuild/connect-node':
-        specifier: ^0.9.1
-        version: 0.9.1(@bufbuild/protobuf@1.2.1)
+        specifier: ^0.10.0
+        version: 0.10.0(@bufbuild/protobuf@1.2.1)
       '@bufbuild/protobuf':
         specifier: ^1.2.1
         version: 1.2.1
@@ -63,8 +63,8 @@ importers:
         version: 5.0.4
     devDependencies:
       '@bufbuild/protoc-gen-connect-es':
-        specifier: ^0.9.1
-        version: 0.9.1(@bufbuild/connect@0.9.1)(@bufbuild/protoc-gen-es@1.2.1)
+        specifier: ^0.10.0
+        version: 0.10.0(@bufbuild/connect@0.10.0)(@bufbuild/protoc-gen-es@1.2.1)
       '@bufbuild/protoc-gen-es':
         specifier: ^1.2.1
         version: 1.2.1(@bufbuild/protobuf@1.2.1)
@@ -150,41 +150,41 @@ packages:
       js-tokens: 4.0.0
     dev: true
 
-  /@bufbuild/connect-node@0.9.1(@bufbuild/protobuf@1.2.1):
-    resolution: {integrity: sha512-kUMB6QQh8S19LsvweDg057WN3Gbg+zIqSHnRcXh9CBYSN7GWd9dgJPQSgalJFJngjFSW2qnnOmnUkxMyZiWBOw==}
+  /@bufbuild/connect-node@0.10.0(@bufbuild/protobuf@1.2.1):
+    resolution: {integrity: sha512-5n/dHbxjur6LA7aFZR9pcA9V3dErxxdfzK36UrHLfjCn+T9f8rMs60hYFabP5pja2gPSWmCewJbwgG5wT7sQpw==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
-      '@bufbuild/protobuf': ^1.2.0
+      '@bufbuild/protobuf': ^1.2.1
     dependencies:
-      '@bufbuild/connect': 0.9.1(@bufbuild/protobuf@1.2.1)
+      '@bufbuild/connect': 0.10.0(@bufbuild/protobuf@1.2.1)
       '@bufbuild/protobuf': 1.2.1
       headers-polyfill: 3.1.2
     dev: false
 
-  /@bufbuild/connect@0.9.1(@bufbuild/protobuf@1.2.1):
-    resolution: {integrity: sha512-4O/PSMLWd3oQkwBuJBGBzFtPsnFC5dTRPGHFNFODna9wZJ6r45ccsOWsA4qXBL7gW2EKw93zRa0KVuge2dCOQQ==}
+  /@bufbuild/connect@0.10.0(@bufbuild/protobuf@1.2.1):
+    resolution: {integrity: sha512-psNHc7R0DDZ2Dl/HVPw1MF5hGMTEjnRROPSqs9YPCjy+ztCNF97wPOUH3S4Qud2nNw9Hn+vqZd+Y4v9G5J+d1A==}
     peerDependencies:
-      '@bufbuild/protobuf': ^1.2.0
+      '@bufbuild/protobuf': ^1.2.1
     dependencies:
       '@bufbuild/protobuf': 1.2.1
 
   /@bufbuild/protobuf@1.2.1:
     resolution: {integrity: sha512-cwwGvLGqvoaOZmoP5+i4v/rbW+rHkguvTehuZyM2p/xpmaNSdT2h3B7kHw33aiffv35t1XrYHIkdJSEkSEMJuA==}
 
-  /@bufbuild/protoc-gen-connect-es@0.9.1(@bufbuild/connect@0.9.1)(@bufbuild/protoc-gen-es@1.2.1):
-    resolution: {integrity: sha512-Wtgtw4RpGAlEma7Z7hVUPra3BC/otWewFie1bgxejJr2BykqejzFN63iP4KF5fUUY38LBbtZE9IfnBfxQaNV/Q==}
+  /@bufbuild/protoc-gen-connect-es@0.10.0(@bufbuild/connect@0.10.0)(@bufbuild/protoc-gen-es@1.2.1):
+    resolution: {integrity: sha512-gtxe/W3pHz3qOreWn9THSwm3kxqsjmua2WahAY3Vws3GGbJx7p+U0AJ9TUXRoNuRmRyPF3TCQeUfQS0YiIKXKQ==}
     engines: {node: '>=16.0.0'}
     hasBin: true
     peerDependencies:
-      '@bufbuild/connect': 0.9.1
-      '@bufbuild/protoc-gen-es': ^1.2.0
+      '@bufbuild/connect': 0.10.0
+      '@bufbuild/protoc-gen-es': ^1.2.1
     peerDependenciesMeta:
       '@bufbuild/connect':
         optional: true
       '@bufbuild/protoc-gen-es':
         optional: true
     dependencies:
-      '@bufbuild/connect': 0.9.1(@bufbuild/protobuf@1.2.1)
+      '@bufbuild/connect': 0.10.0(@bufbuild/protobuf@1.2.1)
       '@bufbuild/protobuf': 1.2.1
       '@bufbuild/protoc-gen-es': 1.2.1(@bufbuild/protobuf@1.2.1)
       '@bufbuild/protoplugin': 1.2.1
