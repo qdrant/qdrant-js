@@ -1525,4 +1525,56 @@ export class QdrantClient {
         });
         return maybe(response.data.result).orThrow('Create shard key returned empty');
     }
+
+    async discoverPoints(
+        collection_name: string,
+        {
+            consistency,
+            timeout,
+            shard_key,
+            target,
+            context,
+            params,
+            limit,
+            offset,
+            with_payload,
+            with_vector,
+            using,
+            lookup_from,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'DiscoverRequest'>,
+    ) {
+        const response = await this._openApiClient.points.discoverPoints({
+            collection_name,
+            consistency,
+            timeout,
+            shard_key,
+            target,
+            context,
+            params,
+            limit,
+            offset,
+            with_payload,
+            with_vector,
+            using,
+            lookup_from,
+        });
+        return maybe(response.data.result).orThrow('Discover points returned empty');
+    }
+
+    async discoverBatchPoints(
+        collection_name: string,
+        {
+            consistency,
+            timeout,
+            searches,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'DiscoverRequestBatch'>,
+    ) {
+        const response = await this._openApiClient.points.discoverBatchPoints({
+            collection_name,
+            consistency,
+            timeout,
+            searches,
+        });
+        return maybe(response.data.result).orThrow('Discover batch points returned empty');
+    }
 }
