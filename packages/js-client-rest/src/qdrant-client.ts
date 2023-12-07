@@ -1136,6 +1136,7 @@ export class QdrantClient {
      *         If dict is passed, service will create a vector storage for each key in the dict.
      *         If single VectorParams is passed, service will create a single anonymous vector storage.
      *     - shard_number: Number of shards in collection. Default is 1, minimum is 1.
+     *     - sharding_method: Sharding method Default is Auto - points are distributed across all available shards Custom - points are distributed across shards according to shard key
      *     - replication_factor:
      *         Replication factor for collection. Default is 1, minimum is 1.
      *         Defines how many copies of each shard will be created.
@@ -1157,6 +1158,7 @@ export class QdrantClient {
      *     - wal_config: Params for Write-Ahead-Log
      *     - quantization_config: Params for quantization, if None - quantization will be disabled
      *     - init_from: Use data stored in another collection to initialize this collection
+     *     - sparse_vectors: Sparse vector data config
      *     - timeout:
      *         Wait for operation commit timeout in seconds.
      *         If timeout is reached, request will return with service error.
@@ -1209,6 +1211,7 @@ export class QdrantClient {
      *         If dict is passed, service will create a vector storage for each key in the dict.
      *         If single VectorParams is passed, service will create a single anonymous vector storage.
      *     - shardNumber: Number of shards in collection. Default is 1, minimum is 1.
+     *     - sharding_method: Sharding method Default is Auto - points are distributed across all available shards Custom - points are distributed across shards according to shard key
      *     - replicationFactor:
      *         Replication factor for collection. Default is 1, minimum is 1.
      *         Defines how many copies of each shard will be created.
@@ -1230,6 +1233,7 @@ export class QdrantClient {
      *     - walConfig: Params for Write-Ahead-Log
      *     - quantizationConfig: Params for quantization, if None - quantization will be disabled
      *     - initFrom: Use data stored in another collection to initialize this collection
+     *     - sparse_vectors: Sparse vector data config
      *     - timeout:
      *         Wait for operation commit timeout in seconds.
      *         If timeout is reached, request will return with service error.
