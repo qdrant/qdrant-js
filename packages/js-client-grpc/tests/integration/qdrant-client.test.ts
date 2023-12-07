@@ -77,6 +77,7 @@ describe('QdrantClient', () => {
             })
         ).result!;
         expect(updateResult).toMatchObject<PlainMessage<typeof updateResult>>({
+            operationId: expect.any(BigInt) as bigint,
             status: UpdateStatus.Acknowledged,
         });
 
@@ -88,6 +89,7 @@ describe('QdrantClient', () => {
             })
         ).result!;
         expect(updateResult).toMatchObject<PlainMessage<typeof updateResult>>({
+            operationId: expect.any(BigInt) as bigint,
             status: UpdateStatus.Acknowledged,
         });
 
@@ -100,6 +102,7 @@ describe('QdrantClient', () => {
             })
         ).result!;
         expect(updateResult).toMatchObject<PlainMessage<typeof updateResult>>({
+            operationId: expect.any(BigInt) as bigint,
             status: UpdateStatus.Completed,
         });
     });
@@ -272,6 +275,7 @@ describe('QdrantClient', () => {
             })
         ).result!;
         expect(updateResult).toMatchObject<PlainMessage<typeof updateResult>>({
+            operationId: expect.any(BigInt) as bigint,
             status: UpdateStatus.Completed,
         });
     });
