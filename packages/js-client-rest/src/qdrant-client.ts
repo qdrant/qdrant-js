@@ -122,6 +122,7 @@ export class QdrantClient {
      *             'majority' - query all replicas, but return values present in the majority of replicas
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
      * @returns List of search responses
      */
     async searchBatch(
@@ -184,6 +185,7 @@ export class QdrantClient {
      *              - 'majority' - query all replicas, but return values present in the majority of replicas
      *              - 'quorum' - query the majority of replicas, return values present in all of them
      *              - 'all' - query all replicas, and return values present in all replicas
+     *      - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
      * @example
      *     // Search with filter
      *     client.search(
@@ -252,6 +254,7 @@ export class QdrantClient {
      *             - 'majority' - query all replicas, but return values present in the majority of replicas
      *             - 'quorum' - query the majority of replicas, return values present in all of them
      *             - 'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
      * @returns List of recommend responses
      */
     async recommendBatch(
@@ -350,6 +353,7 @@ export class QdrantClient {
      *         - 'majority' - query all replicas, but return values present in the majority of replicas
      *         - 'quorum' - query the majority of replicas, return values present in all of them
      *         - 'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
      * @returns List of recommended points with similarity scores.
      */
     async recommend(
@@ -571,6 +575,7 @@ export class QdrantClient {
      *             'majority' - query all replicas, but return values present in the majority of replicas
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
      *     - vector:
      *     - filter: Look only for points which satisfies this conditions
      *     - params: Additional search params
@@ -627,6 +632,7 @@ export class QdrantClient {
      *             'majority' - query all replicas, but return values present in the majority of replicas
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
      *     - positive: Look for vectors closest to those
      *     - negative: Try to avoid vectors like this
      *     - strategy: How to use positive and negative examples to find the results
@@ -1542,6 +1548,17 @@ export class QdrantClient {
         return maybe(response.data.result).orThrow('Create shard snapshot returned empty');
     }
 
+    /**
+     * Create shard key
+     * @param collection_name Name of the collection
+     * @param {object} args -
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
+     *     - shards_number: How many shards to create for this key If not specified, will use the default value from config
+     *     - replication_factor: How many replicas to create for each shard If not specified, will use the default value from config
+     *     - placement: Placement of shards for this key List of peer ids, that can be used to place shards for this key If not specified, will be randomly placed among all peers
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     * @returns Operation result
+     */
     async createShardKey(
         collection_name: string,
         {
@@ -1563,6 +1580,14 @@ export class QdrantClient {
         return maybe(response.data.result).orThrow('Create shard key returned empty');
     }
 
+    /**
+     * Delete shard key
+     * @param collection_name Name of the collection
+     * @param {object} args -
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     * @returns Operation result
+     */
     async deleteShardKey(
         collection_name: string,
         {shard_key, timeout}: {timeout?: number} & SchemaFor<'DropShardingKey'>,
@@ -1575,6 +1600,34 @@ export class QdrantClient {
         return maybe(response.data.result).orThrow('Create shard key returned empty');
     }
 
+    /**
+     * Discover points
+     * @description Use context and a target to find the most similar points to the target, constrained by the context.
+     * When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair.
+     * Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0.
+     * When using target (with or without context), the score behaves a little different: The  integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target. The context part of the score for  each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair,  and -1 otherwise.
+     * @param collection_name Name of the collection
+     * @param {object} args -
+     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
+     *         Values:
+     *             number - number of replicas to query, values should present in all queried replicas
+     *             'majority' - query all replicas, but return values present in the majority of replicas
+     *             'quorum' - query the majority of replicas, return values present in all of them
+     *             'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
+     *     - target: Look for vectors closest to this. When using the target (with or without context), the integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target.
+     *     - context: Pairs of { positive, negative } examples to constrain the search. When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair. Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0. For discovery search (when including a target), the context part of the score for each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, and -1 otherwise.
+     *     - filter: Look only for points which satisfies this conditions
+     *     - params: Additional search params
+     *     - limit: Max number of result to return
+     *     - offset: Offset of the first result to return. May be used to paginate results. Note: large offset values may cause performance issues.
+     *     - with_payload: Select which payload to return with the response
+     *     - with_vector: Whether to return the point vector with the result?
+     *     - using: Define which vector to use for recommendation, if not specified - try to use default vector
+     *     - lookup_from The location used to lookup vectors. If not specified - use current collection. Note: the other collection should have the same vector size as the current collection
+     * @returns Operation result
+     */
     async discoverPoints(
         collection_name: string,
         {
@@ -1610,6 +1663,21 @@ export class QdrantClient {
         return maybe(response.data.result).orThrow('Discover points returned empty');
     }
 
+    /**
+     * Discover batch points
+     * @description Look for points based on target and/or positive and negative example pairs, in batch.
+     * @param collection_name Name of the collection
+     * @param {object} args -
+     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
+     *         Values:
+     *             number - number of replicas to query, values should present in all queried replicas
+     *             'majority' - query all replicas, but return values present in the majority of replicas
+     *             'quorum' - query the majority of replicas, return values present in all of them
+     *             'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - searches: List of searches
+     * @returns Operation result
+     */
     async discoverBatchPoints(
         collection_name: string,
         {
