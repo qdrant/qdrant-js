@@ -149,6 +149,7 @@ export class QdrantClient {
      *
      * @param collection_name Collection to search in
      * @param {object} args -
+     *      - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *      - vector:
      *          Search for vectors closest to this.
      *          Can be either a vector itself, or a named vector, or a tuple of vector name and vector itself
@@ -301,6 +302,7 @@ export class QdrantClient {
      * The concrete way of how to compare negative and positive distances is up to the `strategy` chosen.
      * @param collection_name Collection to search in
      * @param {object} args
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *     - positive:
      *         List of stored point IDs, which should be used as reference for similarity search.
      *         If there is only one ID provided - this request is equivalent to the regular search with vector of that point.
@@ -404,6 +406,7 @@ export class QdrantClient {
      * Scroll over all (matching) points in the collection.
      * @param collection_name Name of the collection
      * @param {object} args
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *     - filter: If provided - only returns points matching filtering conditions
      *     - limit: How many points to return
      *     - offset: If provided - skip points with ids less than given `offset`
@@ -460,7 +463,8 @@ export class QdrantClient {
      * Count points in the collection matching the given filter.
      * @param collection_name
      * @param {object} args
-     *     - count_filter: filtering conditions
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
+     *     - filter: filtering conditions
      *     - exact:
      *         If `True` - provide the exact count of points matching the filter.
      *         If `False` - provide the approximate count of points matching the filter. Works faster.
@@ -502,6 +506,7 @@ export class QdrantClient {
      *          - 'strong' - Write operations go through the permanent leader,
      *                      consistent, but may be unavailable if leader is down
      *     - points: Points with named vectors
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      * @returns Operation result
      */
     async updateVectors(
@@ -540,6 +545,7 @@ export class QdrantClient {
      *     - points: Deletes values from each point in this list
      *     - filter: Deletes values from points that satisfy this filter condition
      *     - vector: Vector names
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      * @returns Operation result
      */
     async deleteVectors(
@@ -576,7 +582,8 @@ export class QdrantClient {
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
      *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
-     *     - vector:
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
+     *     - vector: query search vector
      *     - filter: Look only for points which satisfies this conditions
      *     - params: Additional search params
      *     - with_payload: Select which payload to return with the response
@@ -633,6 +640,7 @@ export class QdrantClient {
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
      *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *     - positive: Look for vectors closest to those
      *     - negative: Try to avoid vectors like this
      *     - strategy: How to use positive and negative examples to find the results
@@ -729,6 +737,7 @@ export class QdrantClient {
      * Retrieve stored points by IDs
      * @param collection_name
      * @param {object} args
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *     - ids: list of IDs to lookup
      *     - with_payload:
      *         - Specify which stored payload should be attached to the result.
@@ -835,6 +844,7 @@ export class QdrantClient {
      *          - 'strong' - Write operations go through the permanent leader,
      *                      consistent, but may be unavailable if leader is down
      *     - payload: Key-value pairs of payload to assign
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *     - points|filter: List of affected points, filter or points selector.
      *         Example:
      *             - `points: [
@@ -943,6 +953,7 @@ export class QdrantClient {
      *          - 'strong' - Write operations go through the permanent leader,
      *                      consistent, but may be unavailable if leader is down
      *     - keys: List of payload keys to remove.
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *     - points|filter: List of affected points, filter or points selector.
      *         Example:
      *             - `points: [
