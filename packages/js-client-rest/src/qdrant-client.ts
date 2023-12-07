@@ -274,7 +274,22 @@ export class QdrantClient {
     /**
      * @alias recommendBatch
      */
-    recommend_batch = this.recommendBatch;
+    async recommend_batch(
+        collection_name: string,
+        {
+            searches,
+            consistency,
+            timeout,
+        }: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
+    ) {
+        const response = await this._openApiClient.points.recommendBatchPoints({
+            collection_name,
+            searches,
+            consistency,
+            timeout,
+        });
+        return maybe(response.data.result).orElse([]);
+    }
 
     /**
      * Recommendation request. Provides positive and negative examples of the vectors,
