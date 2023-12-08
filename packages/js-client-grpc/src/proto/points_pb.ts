@@ -5,8 +5,8 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
+import { PayloadIndexParams, ShardKey } from "./collections_pb.js";
 import { Value } from "./json_with_int_pb.js";
-import { PayloadIndexParams } from "./collections_pb.js";
 
 /**
  * @generated from enum qdrant.WriteOrderingType
@@ -323,6 +323,43 @@ export class PointId extends Message<PointId> {
 }
 
 /**
+ * @generated from message qdrant.SparseIndices
+ */
+export class SparseIndices extends Message<SparseIndices> {
+  /**
+   * @generated from field: repeated uint32 data = 1;
+   */
+  data: number[] = [];
+
+  constructor(data?: PartialMessage<SparseIndices>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.SparseIndices";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "data", kind: "scalar", T: 13 /* ScalarType.UINT32 */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SparseIndices {
+    return new SparseIndices().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SparseIndices {
+    return new SparseIndices().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SparseIndices {
+    return new SparseIndices().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SparseIndices | PlainMessage<SparseIndices> | undefined, b: SparseIndices | PlainMessage<SparseIndices> | undefined): boolean {
+    return proto3.util.equals(SparseIndices, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.Vector
  */
 export class Vector extends Message<Vector> {
@@ -330,6 +367,11 @@ export class Vector extends Message<Vector> {
    * @generated from field: repeated float data = 1;
    */
   data: number[] = [];
+
+  /**
+   * @generated from field: optional qdrant.SparseIndices indices = 2;
+   */
+  indices?: SparseIndices;
 
   constructor(data?: PartialMessage<Vector>) {
     super();
@@ -340,6 +382,7 @@ export class Vector extends Message<Vector> {
   static readonly typeName = "qdrant.Vector";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "data", kind: "scalar", T: 2 /* ScalarType.FLOAT */, repeated: true },
+    { no: 2, name: "indices", kind: "message", T: SparseIndices, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Vector {
@@ -356,6 +399,49 @@ export class Vector extends Message<Vector> {
 
   static equals(a: Vector | PlainMessage<Vector> | undefined, b: Vector | PlainMessage<Vector> | undefined): boolean {
     return proto3.util.equals(Vector, a, b);
+  }
+}
+
+/**
+ * ---------------------------------------------
+ * ----------------- ShardKeySelector ----------
+ * ---------------------------------------------
+ *
+ * @generated from message qdrant.ShardKeySelector
+ */
+export class ShardKeySelector extends Message<ShardKeySelector> {
+  /**
+   * List of shard keys which should be used in the request
+   *
+   * @generated from field: repeated qdrant.ShardKey shard_keys = 1;
+   */
+  shardKeys: ShardKey[] = [];
+
+  constructor(data?: PartialMessage<ShardKeySelector>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.ShardKeySelector";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "shard_keys", kind: "message", T: ShardKey, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ShardKeySelector {
+    return new ShardKeySelector().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ShardKeySelector {
+    return new ShardKeySelector().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ShardKeySelector {
+    return new ShardKeySelector().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ShardKeySelector | PlainMessage<ShardKeySelector> | undefined, b: ShardKeySelector | PlainMessage<ShardKeySelector> | undefined): boolean {
+    return proto3.util.equals(ShardKeySelector, a, b);
   }
 }
 
@@ -389,6 +475,13 @@ export class UpsertPoints extends Message<UpsertPoints> {
    */
   ordering?: WriteOrdering;
 
+  /**
+   * Option for custom sharding to specify used shard keys
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 5;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<UpsertPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -401,6 +494,7 @@ export class UpsertPoints extends Message<UpsertPoints> {
     { no: 2, name: "wait", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 3, name: "points", kind: "message", T: PointStruct, repeated: true },
     { no: 4, name: "ordering", kind: "message", T: WriteOrdering, opt: true },
+    { no: 5, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpsertPoints {
@@ -452,6 +546,13 @@ export class DeletePoints extends Message<DeletePoints> {
    */
   ordering?: WriteOrdering;
 
+  /**
+   * Option for custom sharding to specify used shard keys
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 5;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<DeletePoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -464,6 +565,7 @@ export class DeletePoints extends Message<DeletePoints> {
     { no: 2, name: "wait", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 3, name: "points", kind: "message", T: PointsSelector },
     { no: 4, name: "ordering", kind: "message", T: WriteOrdering, opt: true },
+    { no: 5, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeletePoints {
@@ -522,6 +624,13 @@ export class GetPoints extends Message<GetPoints> {
    */
   readConsistency?: ReadConsistency;
 
+  /**
+   * Specify in which shards to look for the points, if not specified - look in all shards
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 7;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<GetPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -535,6 +644,7 @@ export class GetPoints extends Message<GetPoints> {
     { no: 4, name: "with_payload", kind: "message", T: WithPayloadSelector },
     { no: 5, name: "with_vectors", kind: "message", T: WithVectorsSelector, opt: true },
     { no: 6, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
+    { no: 7, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetPoints {
@@ -586,6 +696,13 @@ export class UpdatePointVectors extends Message<UpdatePointVectors> {
    */
   ordering?: WriteOrdering;
 
+  /**
+   * Option for custom sharding to specify used shard keys
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 5;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<UpdatePointVectors>) {
     super();
     proto3.util.initPartial(data, this);
@@ -598,6 +715,7 @@ export class UpdatePointVectors extends Message<UpdatePointVectors> {
     { no: 2, name: "wait", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 3, name: "points", kind: "message", T: PointVectors, repeated: true },
     { no: 4, name: "ordering", kind: "message", T: WriteOrdering, opt: true },
+    { no: 5, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdatePointVectors {
@@ -703,6 +821,13 @@ export class DeletePointVectors extends Message<DeletePointVectors> {
    */
   ordering?: WriteOrdering;
 
+  /**
+   * Option for custom sharding to specify used shard keys
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 6;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<DeletePointVectors>) {
     super();
     proto3.util.initPartial(data, this);
@@ -716,6 +841,7 @@ export class DeletePointVectors extends Message<DeletePointVectors> {
     { no: 3, name: "points_selector", kind: "message", T: PointsSelector },
     { no: 4, name: "vectors", kind: "message", T: VectorsSelector },
     { no: 5, name: "ordering", kind: "message", T: WriteOrdering, opt: true },
+    { no: 6, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeletePointVectors {
@@ -774,6 +900,13 @@ export class SetPayloadPoints extends Message<SetPayloadPoints> {
    */
   ordering?: WriteOrdering;
 
+  /**
+   * Option for custom sharding to specify used shard keys
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 7;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<SetPayloadPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -787,6 +920,7 @@ export class SetPayloadPoints extends Message<SetPayloadPoints> {
     { no: 3, name: "payload", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: Value} },
     { no: 5, name: "points_selector", kind: "message", T: PointsSelector, opt: true },
     { no: 6, name: "ordering", kind: "message", T: WriteOrdering, opt: true },
+    { no: 7, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SetPayloadPoints {
@@ -845,6 +979,13 @@ export class DeletePayloadPoints extends Message<DeletePayloadPoints> {
    */
   ordering?: WriteOrdering;
 
+  /**
+   * Option for custom sharding to specify used shard keys
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 7;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<DeletePayloadPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -858,6 +999,7 @@ export class DeletePayloadPoints extends Message<DeletePayloadPoints> {
     { no: 3, name: "keys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
     { no: 5, name: "points_selector", kind: "message", T: PointsSelector, opt: true },
     { no: 6, name: "ordering", kind: "message", T: WriteOrdering, opt: true },
+    { no: 7, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeletePayloadPoints {
@@ -909,6 +1051,13 @@ export class ClearPayloadPoints extends Message<ClearPayloadPoints> {
    */
   ordering?: WriteOrdering;
 
+  /**
+   * Option for custom sharding to specify used shard keys
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 5;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<ClearPayloadPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -921,6 +1070,7 @@ export class ClearPayloadPoints extends Message<ClearPayloadPoints> {
     { no: 2, name: "wait", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 3, name: "points", kind: "message", T: PointsSelector },
     { no: 4, name: "ordering", kind: "message", T: WriteOrdering, opt: true },
+    { no: 5, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ClearPayloadPoints {
@@ -1614,6 +1764,25 @@ export class SearchPoints extends Message<SearchPoints> {
    */
   readConsistency?: ReadConsistency;
 
+  /**
+   * If set, overrides global timeout setting for this request. Unit is seconds.
+   *
+   * @generated from field: optional uint64 timeout = 13;
+   */
+  timeout?: bigint;
+
+  /**
+   * Specify in which shards to look for the points, if not specified - look in all shards
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 14;
+   */
+  shardKeySelector?: ShardKeySelector;
+
+  /**
+   * @generated from field: optional qdrant.SparseIndices sparse_indices = 15;
+   */
+  sparseIndices?: SparseIndices;
+
   constructor(data?: PartialMessage<SearchPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1633,6 +1802,9 @@ export class SearchPoints extends Message<SearchPoints> {
     { no: 10, name: "vector_name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 11, name: "with_vectors", kind: "message", T: WithVectorsSelector, opt: true },
     { no: 12, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
+    { no: 13, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 14, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+    { no: 15, name: "sparse_indices", kind: "message", T: SparseIndices, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchPoints {
@@ -1675,6 +1847,13 @@ export class SearchBatchPoints extends Message<SearchBatchPoints> {
    */
   readConsistency?: ReadConsistency;
 
+  /**
+   * If set, overrides global timeout setting for this request. Unit is seconds.
+   *
+   * @generated from field: optional uint64 timeout = 4;
+   */
+  timeout?: bigint;
+
   constructor(data?: PartialMessage<SearchBatchPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1686,6 +1865,7 @@ export class SearchBatchPoints extends Message<SearchBatchPoints> {
     { no: 1, name: "collection_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "search_points", kind: "message", T: SearchPoints, repeated: true },
     { no: 3, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
+    { no: 4, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchBatchPoints {
@@ -1855,6 +2035,25 @@ export class SearchPointGroups extends Message<SearchPointGroups> {
    */
   withLookup?: WithLookup;
 
+  /**
+   * If set, overrides global timeout setting for this request. Unit is seconds.
+   *
+   * @generated from field: optional uint64 timeout = 14;
+   */
+  timeout?: bigint;
+
+  /**
+   * Specify in which shards to look for the points, if not specified - look in all shards
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 15;
+   */
+  shardKeySelector?: ShardKeySelector;
+
+  /**
+   * @generated from field: optional qdrant.SparseIndices sparse_indices = 16;
+   */
+  sparseIndices?: SparseIndices;
+
   constructor(data?: PartialMessage<SearchPointGroups>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1876,6 +2075,9 @@ export class SearchPointGroups extends Message<SearchPointGroups> {
     { no: 11, name: "group_size", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 12, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
     { no: 13, name: "with_lookup", kind: "message", T: WithLookup, opt: true },
+    { no: 14, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 15, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+    { no: 16, name: "sparse_indices", kind: "message", T: SparseIndices, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchPointGroups {
@@ -1946,6 +2148,13 @@ export class ScrollPoints extends Message<ScrollPoints> {
    */
   readConsistency?: ReadConsistency;
 
+  /**
+   * Specify in which shards to look for the points, if not specified - look in all shards
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 9;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<ScrollPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1961,6 +2170,7 @@ export class ScrollPoints extends Message<ScrollPoints> {
     { no: 6, name: "with_payload", kind: "message", T: WithPayloadSelector },
     { no: 7, name: "with_vectors", kind: "message", T: WithVectorsSelector, opt: true },
     { no: 8, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
+    { no: 9, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ScrollPoints {
@@ -1996,6 +2206,13 @@ export class LookupLocation extends Message<LookupLocation> {
    */
   vectorName?: string;
 
+  /**
+   * Specify in which shards to look for the points, if not specified - look in all shards
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 3;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<LookupLocation>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2006,6 +2223,7 @@ export class LookupLocation extends Message<LookupLocation> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "collection_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "vector_name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 3, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): LookupLocation {
@@ -2141,6 +2359,20 @@ export class RecommendPoints extends Message<RecommendPoints> {
    */
   negativeVectors: Vector[] = [];
 
+  /**
+   * If set, overrides global timeout setting for this request. Unit is seconds.
+   *
+   * @generated from field: optional uint64 timeout = 19;
+   */
+  timeout?: bigint;
+
+  /**
+   * Specify in which shards to look for the points, if not specified - look in all shards
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 20;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<RecommendPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2165,6 +2397,8 @@ export class RecommendPoints extends Message<RecommendPoints> {
     { no: 16, name: "strategy", kind: "enum", T: proto3.getEnumType(RecommendStrategy), opt: true },
     { no: 17, name: "positive_vectors", kind: "message", T: Vector, repeated: true },
     { no: 18, name: "negative_vectors", kind: "message", T: Vector, repeated: true },
+    { no: 19, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 20, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RecommendPoints {
@@ -2207,6 +2441,13 @@ export class RecommendBatchPoints extends Message<RecommendBatchPoints> {
    */
   readConsistency?: ReadConsistency;
 
+  /**
+   * If set, overrides global timeout setting for this request. Unit is seconds.
+   *
+   * @generated from field: optional uint64 timeout = 4;
+   */
+  timeout?: bigint;
+
   constructor(data?: PartialMessage<RecommendBatchPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2218,6 +2459,7 @@ export class RecommendBatchPoints extends Message<RecommendBatchPoints> {
     { no: 1, name: "collection_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "recommend_points", kind: "message", T: RecommendPoints, repeated: true },
     { no: 3, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
+    { no: 4, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RecommendBatchPoints {
@@ -2367,6 +2609,20 @@ export class RecommendPointGroups extends Message<RecommendPointGroups> {
    */
   negativeVectors: Vector[] = [];
 
+  /**
+   * If set, overrides global timeout setting for this request. Unit is seconds.
+   *
+   * @generated from field: optional uint64 timeout = 20;
+   */
+  timeout?: bigint;
+
+  /**
+   * Specify in which shards to look for the points, if not specified - look in all shards
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 21;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<RecommendPointGroups>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2393,6 +2649,8 @@ export class RecommendPointGroups extends Message<RecommendPointGroups> {
     { no: 17, name: "strategy", kind: "enum", T: proto3.getEnumType(RecommendStrategy), opt: true },
     { no: 18, name: "positive_vectors", kind: "message", T: Vector, repeated: true },
     { no: 19, name: "negative_vectors", kind: "message", T: Vector, repeated: true },
+    { no: 20, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 21, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RecommendPointGroups {
@@ -2409,6 +2667,346 @@ export class RecommendPointGroups extends Message<RecommendPointGroups> {
 
   static equals(a: RecommendPointGroups | PlainMessage<RecommendPointGroups> | undefined, b: RecommendPointGroups | PlainMessage<RecommendPointGroups> | undefined): boolean {
     return proto3.util.equals(RecommendPointGroups, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.TargetVector
+ */
+export class TargetVector extends Message<TargetVector> {
+  /**
+   * @generated from oneof qdrant.TargetVector.target
+   */
+  target: {
+    /**
+     * @generated from field: qdrant.VectorExample single = 1;
+     */
+    value: VectorExample;
+    case: "single";
+  } | { case: undefined; value?: undefined } = { case: undefined };
+
+  constructor(data?: PartialMessage<TargetVector>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.TargetVector";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "single", kind: "message", T: VectorExample, oneof: "target" },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TargetVector {
+    return new TargetVector().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): TargetVector {
+    return new TargetVector().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): TargetVector {
+    return new TargetVector().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: TargetVector | PlainMessage<TargetVector> | undefined, b: TargetVector | PlainMessage<TargetVector> | undefined): boolean {
+    return proto3.util.equals(TargetVector, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.VectorExample
+ */
+export class VectorExample extends Message<VectorExample> {
+  /**
+   * @generated from oneof qdrant.VectorExample.example
+   */
+  example: {
+    /**
+     * @generated from field: qdrant.PointId id = 1;
+     */
+    value: PointId;
+    case: "id";
+  } | {
+    /**
+     * @generated from field: qdrant.Vector vector = 2;
+     */
+    value: Vector;
+    case: "vector";
+  } | { case: undefined; value?: undefined } = { case: undefined };
+
+  constructor(data?: PartialMessage<VectorExample>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.VectorExample";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "message", T: PointId, oneof: "example" },
+    { no: 2, name: "vector", kind: "message", T: Vector, oneof: "example" },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VectorExample {
+    return new VectorExample().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): VectorExample {
+    return new VectorExample().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): VectorExample {
+    return new VectorExample().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: VectorExample | PlainMessage<VectorExample> | undefined, b: VectorExample | PlainMessage<VectorExample> | undefined): boolean {
+    return proto3.util.equals(VectorExample, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.ContextExamplePair
+ */
+export class ContextExamplePair extends Message<ContextExamplePair> {
+  /**
+   * @generated from field: qdrant.VectorExample positive = 1;
+   */
+  positive?: VectorExample;
+
+  /**
+   * @generated from field: qdrant.VectorExample negative = 2;
+   */
+  negative?: VectorExample;
+
+  constructor(data?: PartialMessage<ContextExamplePair>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.ContextExamplePair";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "positive", kind: "message", T: VectorExample },
+    { no: 2, name: "negative", kind: "message", T: VectorExample },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ContextExamplePair {
+    return new ContextExamplePair().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ContextExamplePair {
+    return new ContextExamplePair().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ContextExamplePair {
+    return new ContextExamplePair().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ContextExamplePair | PlainMessage<ContextExamplePair> | undefined, b: ContextExamplePair | PlainMessage<ContextExamplePair> | undefined): boolean {
+    return proto3.util.equals(ContextExamplePair, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.DiscoverPoints
+ */
+export class DiscoverPoints extends Message<DiscoverPoints> {
+  /**
+   * name of the collection
+   *
+   * @generated from field: string collection_name = 1;
+   */
+  collectionName = "";
+
+  /**
+   * Use this as the primary search objective
+   *
+   * @generated from field: qdrant.TargetVector target = 2;
+   */
+  target?: TargetVector;
+
+  /**
+   * Search will be constrained by these pairs of examples
+   *
+   * @generated from field: repeated qdrant.ContextExamplePair context = 3;
+   */
+  context: ContextExamplePair[] = [];
+
+  /**
+   * Filter conditions - return only those points that satisfy the specified conditions
+   *
+   * @generated from field: qdrant.Filter filter = 4;
+   */
+  filter?: Filter;
+
+  /**
+   * Max number of result
+   *
+   * @generated from field: uint64 limit = 5;
+   */
+  limit = protoInt64.zero;
+
+  /**
+   * Options for specifying which payload to include or not
+   *
+   * @generated from field: qdrant.WithPayloadSelector with_payload = 6;
+   */
+  withPayload?: WithPayloadSelector;
+
+  /**
+   * Search config
+   *
+   * @generated from field: qdrant.SearchParams params = 7;
+   */
+  params?: SearchParams;
+
+  /**
+   * Offset of the result
+   *
+   * @generated from field: optional uint64 offset = 8;
+   */
+  offset?: bigint;
+
+  /**
+   * Define which vector to use for recommendation, if not specified - default vector
+   *
+   * @generated from field: optional string using = 9;
+   */
+  using?: string;
+
+  /**
+   * Options for specifying which vectors to include into response
+   *
+   * @generated from field: optional qdrant.WithVectorsSelector with_vectors = 10;
+   */
+  withVectors?: WithVectorsSelector;
+
+  /**
+   * Name of the collection to use for points lookup, if not specified - use current collection
+   *
+   * @generated from field: optional qdrant.LookupLocation lookup_from = 11;
+   */
+  lookupFrom?: LookupLocation;
+
+  /**
+   * Options for specifying read consistency guarantees
+   *
+   * @generated from field: optional qdrant.ReadConsistency read_consistency = 12;
+   */
+  readConsistency?: ReadConsistency;
+
+  /**
+   * If set, overrides global timeout setting for this request. Unit is seconds.
+   *
+   * @generated from field: optional uint64 timeout = 13;
+   */
+  timeout?: bigint;
+
+  /**
+   * Specify in which shards to look for the points, if not specified - look in all shards
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 14;
+   */
+  shardKeySelector?: ShardKeySelector;
+
+  constructor(data?: PartialMessage<DiscoverPoints>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.DiscoverPoints";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collection_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "target", kind: "message", T: TargetVector },
+    { no: 3, name: "context", kind: "message", T: ContextExamplePair, repeated: true },
+    { no: 4, name: "filter", kind: "message", T: Filter },
+    { no: 5, name: "limit", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 6, name: "with_payload", kind: "message", T: WithPayloadSelector },
+    { no: 7, name: "params", kind: "message", T: SearchParams },
+    { no: 8, name: "offset", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 9, name: "using", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 10, name: "with_vectors", kind: "message", T: WithVectorsSelector, opt: true },
+    { no: 11, name: "lookup_from", kind: "message", T: LookupLocation, opt: true },
+    { no: 12, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
+    { no: 13, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 14, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DiscoverPoints {
+    return new DiscoverPoints().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DiscoverPoints {
+    return new DiscoverPoints().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DiscoverPoints {
+    return new DiscoverPoints().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DiscoverPoints | PlainMessage<DiscoverPoints> | undefined, b: DiscoverPoints | PlainMessage<DiscoverPoints> | undefined): boolean {
+    return proto3.util.equals(DiscoverPoints, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.DiscoverBatchPoints
+ */
+export class DiscoverBatchPoints extends Message<DiscoverBatchPoints> {
+  /**
+   * Name of the collection
+   *
+   * @generated from field: string collection_name = 1;
+   */
+  collectionName = "";
+
+  /**
+   * @generated from field: repeated qdrant.DiscoverPoints discover_points = 2;
+   */
+  discoverPoints: DiscoverPoints[] = [];
+
+  /**
+   * Options for specifying read consistency guarantees
+   *
+   * @generated from field: optional qdrant.ReadConsistency read_consistency = 3;
+   */
+  readConsistency?: ReadConsistency;
+
+  /**
+   * If set, overrides global timeout setting for this request. Unit is seconds.
+   *
+   * @generated from field: optional uint64 timeout = 4;
+   */
+  timeout?: bigint;
+
+  constructor(data?: PartialMessage<DiscoverBatchPoints>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.DiscoverBatchPoints";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collection_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "discover_points", kind: "message", T: DiscoverPoints, repeated: true },
+    { no: 3, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
+    { no: 4, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DiscoverBatchPoints {
+    return new DiscoverBatchPoints().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DiscoverBatchPoints {
+    return new DiscoverBatchPoints().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DiscoverBatchPoints {
+    return new DiscoverBatchPoints().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DiscoverBatchPoints | PlainMessage<DiscoverBatchPoints> | undefined, b: DiscoverBatchPoints | PlainMessage<DiscoverBatchPoints> | undefined): boolean {
+    return proto3.util.equals(DiscoverBatchPoints, a, b);
   }
 }
 
@@ -2437,6 +3035,20 @@ export class CountPoints extends Message<CountPoints> {
    */
   exact?: boolean;
 
+  /**
+   * Options for specifying read consistency guarantees
+   *
+   * @generated from field: optional qdrant.ReadConsistency read_consistency = 4;
+   */
+  readConsistency?: ReadConsistency;
+
+  /**
+   * Specify in which shards to look for the points, if not specified - look in all shards
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 5;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<CountPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2448,6 +3060,8 @@ export class CountPoints extends Message<CountPoints> {
     { no: 1, name: "collection_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "filter", kind: "message", T: Filter },
     { no: 3, name: "exact", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 4, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
+    { no: 5, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CountPoints {
@@ -2482,10 +3096,11 @@ export class PointsUpdateOperation extends Message<PointsUpdateOperation> {
     case: "upsert";
   } | {
     /**
-     * @generated from field: qdrant.PointsSelector delete = 2;
+     * @generated from field: qdrant.PointsSelector delete_deprecated = 2 [deprecated = true];
+     * @deprecated
      */
     value: PointsSelector;
-    case: "delete";
+    case: "deleteDeprecated";
   } | {
     /**
      * @generated from field: qdrant.PointsUpdateOperation.SetPayload set_payload = 3;
@@ -2506,10 +3121,11 @@ export class PointsUpdateOperation extends Message<PointsUpdateOperation> {
     case: "deletePayload";
   } | {
     /**
-     * @generated from field: qdrant.PointsSelector clear_payload = 6;
+     * @generated from field: qdrant.PointsSelector clear_payload_deprecated = 6 [deprecated = true];
+     * @deprecated
      */
     value: PointsSelector;
-    case: "clearPayload";
+    case: "clearPayloadDeprecated";
   } | {
     /**
      * @generated from field: qdrant.PointsUpdateOperation.UpdateVectors update_vectors = 7;
@@ -2522,6 +3138,18 @@ export class PointsUpdateOperation extends Message<PointsUpdateOperation> {
      */
     value: PointsUpdateOperation_DeleteVectors;
     case: "deleteVectors";
+  } | {
+    /**
+     * @generated from field: qdrant.PointsUpdateOperation.DeletePoints delete_points = 9;
+     */
+    value: PointsUpdateOperation_DeletePoints;
+    case: "deletePoints";
+  } | {
+    /**
+     * @generated from field: qdrant.PointsUpdateOperation.ClearPayload clear_payload = 10;
+     */
+    value: PointsUpdateOperation_ClearPayload;
+    case: "clearPayload";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<PointsUpdateOperation>) {
@@ -2533,13 +3161,15 @@ export class PointsUpdateOperation extends Message<PointsUpdateOperation> {
   static readonly typeName = "qdrant.PointsUpdateOperation";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "upsert", kind: "message", T: PointsUpdateOperation_PointStructList, oneof: "operation" },
-    { no: 2, name: "delete", kind: "message", T: PointsSelector, oneof: "operation" },
+    { no: 2, name: "delete_deprecated", kind: "message", T: PointsSelector, oneof: "operation" },
     { no: 3, name: "set_payload", kind: "message", T: PointsUpdateOperation_SetPayload, oneof: "operation" },
     { no: 4, name: "overwrite_payload", kind: "message", T: PointsUpdateOperation_SetPayload, oneof: "operation" },
     { no: 5, name: "delete_payload", kind: "message", T: PointsUpdateOperation_DeletePayload, oneof: "operation" },
-    { no: 6, name: "clear_payload", kind: "message", T: PointsSelector, oneof: "operation" },
+    { no: 6, name: "clear_payload_deprecated", kind: "message", T: PointsSelector, oneof: "operation" },
     { no: 7, name: "update_vectors", kind: "message", T: PointsUpdateOperation_UpdateVectors, oneof: "operation" },
     { no: 8, name: "delete_vectors", kind: "message", T: PointsUpdateOperation_DeleteVectors, oneof: "operation" },
+    { no: 9, name: "delete_points", kind: "message", T: PointsUpdateOperation_DeletePoints, oneof: "operation" },
+    { no: 10, name: "clear_payload", kind: "message", T: PointsUpdateOperation_ClearPayload, oneof: "operation" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation {
@@ -2568,6 +3198,13 @@ export class PointsUpdateOperation_PointStructList extends Message<PointsUpdateO
    */
   points: PointStruct[] = [];
 
+  /**
+   * Option for custom sharding to specify used shard keys
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 2;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<PointsUpdateOperation_PointStructList>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2577,6 +3214,7 @@ export class PointsUpdateOperation_PointStructList extends Message<PointsUpdateO
   static readonly typeName = "qdrant.PointsUpdateOperation.PointStructList";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "points", kind: "message", T: PointStruct, repeated: true },
+    { no: 2, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation_PointStructList {
@@ -2612,6 +3250,13 @@ export class PointsUpdateOperation_SetPayload extends Message<PointsUpdateOperat
    */
   pointsSelector?: PointsSelector;
 
+  /**
+   * Option for custom sharding to specify used shard keys
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 3;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<PointsUpdateOperation_SetPayload>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2622,6 +3267,7 @@ export class PointsUpdateOperation_SetPayload extends Message<PointsUpdateOperat
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "payload", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: Value} },
     { no: 2, name: "points_selector", kind: "message", T: PointsSelector, opt: true },
+    { no: 3, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation_SetPayload {
@@ -2657,6 +3303,13 @@ export class PointsUpdateOperation_DeletePayload extends Message<PointsUpdateOpe
    */
   pointsSelector?: PointsSelector;
 
+  /**
+   * Option for custom sharding to specify used shard keys
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 3;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<PointsUpdateOperation_DeletePayload>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2667,6 +3320,7 @@ export class PointsUpdateOperation_DeletePayload extends Message<PointsUpdateOpe
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "keys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
     { no: 2, name: "points_selector", kind: "message", T: PointsSelector, opt: true },
+    { no: 3, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation_DeletePayload {
@@ -2697,6 +3351,13 @@ export class PointsUpdateOperation_UpdateVectors extends Message<PointsUpdateOpe
    */
   points: PointVectors[] = [];
 
+  /**
+   * Option for custom sharding to specify used shard keys
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 2;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<PointsUpdateOperation_UpdateVectors>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2706,6 +3367,7 @@ export class PointsUpdateOperation_UpdateVectors extends Message<PointsUpdateOpe
   static readonly typeName = "qdrant.PointsUpdateOperation.UpdateVectors";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "points", kind: "message", T: PointVectors, repeated: true },
+    { no: 2, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation_UpdateVectors {
@@ -2743,6 +3405,13 @@ export class PointsUpdateOperation_DeleteVectors extends Message<PointsUpdateOpe
    */
   vectors?: VectorsSelector;
 
+  /**
+   * Option for custom sharding to specify used shard keys
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 3;
+   */
+  shardKeySelector?: ShardKeySelector;
+
   constructor(data?: PartialMessage<PointsUpdateOperation_DeleteVectors>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2753,6 +3422,7 @@ export class PointsUpdateOperation_DeleteVectors extends Message<PointsUpdateOpe
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "points_selector", kind: "message", T: PointsSelector },
     { no: 2, name: "vectors", kind: "message", T: VectorsSelector },
+    { no: 3, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation_DeleteVectors {
@@ -2769,6 +3439,100 @@ export class PointsUpdateOperation_DeleteVectors extends Message<PointsUpdateOpe
 
   static equals(a: PointsUpdateOperation_DeleteVectors | PlainMessage<PointsUpdateOperation_DeleteVectors> | undefined, b: PointsUpdateOperation_DeleteVectors | PlainMessage<PointsUpdateOperation_DeleteVectors> | undefined): boolean {
     return proto3.util.equals(PointsUpdateOperation_DeleteVectors, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.PointsUpdateOperation.DeletePoints
+ */
+export class PointsUpdateOperation_DeletePoints extends Message<PointsUpdateOperation_DeletePoints> {
+  /**
+   * Affected points
+   *
+   * @generated from field: qdrant.PointsSelector points = 1;
+   */
+  points?: PointsSelector;
+
+  /**
+   * Option for custom sharding to specify used shard keys
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 2;
+   */
+  shardKeySelector?: ShardKeySelector;
+
+  constructor(data?: PartialMessage<PointsUpdateOperation_DeletePoints>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.PointsUpdateOperation.DeletePoints";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "points", kind: "message", T: PointsSelector },
+    { no: 2, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation_DeletePoints {
+    return new PointsUpdateOperation_DeletePoints().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PointsUpdateOperation_DeletePoints {
+    return new PointsUpdateOperation_DeletePoints().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PointsUpdateOperation_DeletePoints {
+    return new PointsUpdateOperation_DeletePoints().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PointsUpdateOperation_DeletePoints | PlainMessage<PointsUpdateOperation_DeletePoints> | undefined, b: PointsUpdateOperation_DeletePoints | PlainMessage<PointsUpdateOperation_DeletePoints> | undefined): boolean {
+    return proto3.util.equals(PointsUpdateOperation_DeletePoints, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.PointsUpdateOperation.ClearPayload
+ */
+export class PointsUpdateOperation_ClearPayload extends Message<PointsUpdateOperation_ClearPayload> {
+  /**
+   * Affected points
+   *
+   * @generated from field: qdrant.PointsSelector points = 1;
+   */
+  points?: PointsSelector;
+
+  /**
+   * Option for custom sharding to specify used shard keys
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 2;
+   */
+  shardKeySelector?: ShardKeySelector;
+
+  constructor(data?: PartialMessage<PointsUpdateOperation_ClearPayload>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.PointsUpdateOperation.ClearPayload";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "points", kind: "message", T: PointsSelector },
+    { no: 2, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation_ClearPayload {
+    return new PointsUpdateOperation_ClearPayload().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PointsUpdateOperation_ClearPayload {
+    return new PointsUpdateOperation_ClearPayload().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PointsUpdateOperation_ClearPayload {
+    return new PointsUpdateOperation_ClearPayload().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PointsUpdateOperation_ClearPayload | PlainMessage<PointsUpdateOperation_ClearPayload> | undefined, b: PointsUpdateOperation_ClearPayload | PlainMessage<PointsUpdateOperation_ClearPayload> | undefined): boolean {
+    return proto3.util.equals(PointsUpdateOperation_ClearPayload, a, b);
   }
 }
 
@@ -2885,9 +3649,9 @@ export class UpdateResult extends Message<UpdateResult> {
   /**
    * Number of operation
    *
-   * @generated from field: uint64 operation_id = 1;
+   * @generated from field: optional uint64 operation_id = 1;
    */
-  operationId = protoInt64.zero;
+  operationId?: bigint;
 
   /**
    * Operation status
@@ -2904,7 +3668,7 @@ export class UpdateResult extends Message<UpdateResult> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "qdrant.UpdateResult";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "operation_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 1, name: "operation_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
     { no: 2, name: "status", kind: "enum", T: proto3.getEnumType(UpdateStatus) },
   ]);
 
@@ -2964,6 +3728,13 @@ export class ScoredPoint extends Message<ScoredPoint> {
    */
   vectors?: Vectors;
 
+  /**
+   * Shard key
+   *
+   * @generated from field: optional qdrant.ShardKey shard_key = 7;
+   */
+  shardKey?: ShardKey;
+
   constructor(data?: PartialMessage<ScoredPoint>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2977,6 +3748,7 @@ export class ScoredPoint extends Message<ScoredPoint> {
     { no: 3, name: "score", kind: "scalar", T: 2 /* ScalarType.FLOAT */ },
     { no: 5, name: "version", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
     { no: 6, name: "vectors", kind: "message", T: Vectors, opt: true },
+    { no: 7, name: "shard_key", kind: "message", T: ShardKey, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ScoredPoint {
@@ -3479,6 +4251,13 @@ export class RetrievedPoint extends Message<RetrievedPoint> {
    */
   vectors?: Vectors;
 
+  /**
+   * Shard key
+   *
+   * @generated from field: optional qdrant.ShardKey shard_key = 5;
+   */
+  shardKey?: ShardKey;
+
   constructor(data?: PartialMessage<RetrievedPoint>) {
     super();
     proto3.util.initPartial(data, this);
@@ -3490,6 +4269,7 @@ export class RetrievedPoint extends Message<RetrievedPoint> {
     { no: 1, name: "id", kind: "message", T: PointId },
     { no: 2, name: "payload", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: Value} },
     { no: 4, name: "vectors", kind: "message", T: Vectors, opt: true },
+    { no: 5, name: "shard_key", kind: "message", T: ShardKey, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RetrievedPoint {
@@ -3641,6 +4421,96 @@ export class RecommendBatchResponse extends Message<RecommendBatchResponse> {
 
   static equals(a: RecommendBatchResponse | PlainMessage<RecommendBatchResponse> | undefined, b: RecommendBatchResponse | PlainMessage<RecommendBatchResponse> | undefined): boolean {
     return proto3.util.equals(RecommendBatchResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.DiscoverResponse
+ */
+export class DiscoverResponse extends Message<DiscoverResponse> {
+  /**
+   * @generated from field: repeated qdrant.ScoredPoint result = 1;
+   */
+  result: ScoredPoint[] = [];
+
+  /**
+   * Time spent to process
+   *
+   * @generated from field: double time = 2;
+   */
+  time = 0;
+
+  constructor(data?: PartialMessage<DiscoverResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.DiscoverResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "result", kind: "message", T: ScoredPoint, repeated: true },
+    { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DiscoverResponse {
+    return new DiscoverResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DiscoverResponse {
+    return new DiscoverResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DiscoverResponse {
+    return new DiscoverResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DiscoverResponse | PlainMessage<DiscoverResponse> | undefined, b: DiscoverResponse | PlainMessage<DiscoverResponse> | undefined): boolean {
+    return proto3.util.equals(DiscoverResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.DiscoverBatchResponse
+ */
+export class DiscoverBatchResponse extends Message<DiscoverBatchResponse> {
+  /**
+   * @generated from field: repeated qdrant.BatchResult result = 1;
+   */
+  result: BatchResult[] = [];
+
+  /**
+   * Time spent to process
+   *
+   * @generated from field: double time = 2;
+   */
+  time = 0;
+
+  constructor(data?: PartialMessage<DiscoverBatchResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.DiscoverBatchResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "result", kind: "message", T: BatchResult, repeated: true },
+    { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DiscoverBatchResponse {
+    return new DiscoverBatchResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DiscoverBatchResponse {
+    return new DiscoverBatchResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DiscoverBatchResponse {
+    return new DiscoverBatchResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DiscoverBatchResponse | PlainMessage<DiscoverBatchResponse> | undefined, b: DiscoverBatchResponse | PlainMessage<DiscoverBatchResponse> | undefined): boolean {
+    return proto3.util.equals(DiscoverBatchResponse, a, b);
   }
 }
 

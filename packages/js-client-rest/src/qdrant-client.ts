@@ -122,6 +122,7 @@ export class QdrantClient {
      *             'majority' - query all replicas, but return values present in the majority of replicas
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
      * @returns List of search responses
      */
     async searchBatch(
@@ -129,11 +130,15 @@ export class QdrantClient {
         {
             searches,
             consistency,
-        }: Pick<SchemaFor<'SearchRequestBatch'>, 'searches'> & {consistency?: SchemaFor<'ReadConsistency'>},
+            timeout,
+        }: Pick<SchemaFor<'SearchRequestBatch'>, 'searches'> & {consistency?: SchemaFor<'ReadConsistency'>} & {
+            timeout?: number;
+        },
     ) {
         const response = await this._openApiClient.points.searchBatchPoints({
             collection_name,
             consistency,
+            timeout,
             searches,
         });
         return maybe(response.data.result).orThrow('Search batch returned empty');
@@ -144,6 +149,7 @@ export class QdrantClient {
      *
      * @param collection_name Collection to search in
      * @param {object} args -
+     *      - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *      - vector:
      *          Search for vectors closest to this.
      *          Can be either a vector itself, or a named vector, or a tuple of vector name and vector itself
@@ -180,6 +186,7 @@ export class QdrantClient {
      *              - 'majority' - query all replicas, but return values present in the majority of replicas
      *              - 'quorum' - query the majority of replicas, return values present in all of them
      *              - 'all' - query all replicas, and return values present in all replicas
+     *      - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
      * @example
      *     // Search with filter
      *     client.search(
@@ -203,6 +210,7 @@ export class QdrantClient {
     async search(
         collection_name: string,
         {
+            shard_key,
             vector,
             limit = 10,
             offset = 0,
@@ -212,14 +220,17 @@ export class QdrantClient {
             with_vector = false,
             score_threshold,
             consistency,
+            timeout,
         }: Partial<Pick<SchemaFor<'SearchRequest'>, 'limit'>> &
             Omit<SchemaFor<'SearchRequest'>, 'limit'> & {
                 consistency?: SchemaFor<'ReadConsistency'>;
-            },
+            } & {timeout?: number},
     ) {
         const response = await this._openApiClient.points.searchPoints({
             collection_name,
             consistency,
+            timeout,
+            shard_key,
             vector,
             limit,
             offset,
@@ -244,16 +255,42 @@ export class QdrantClient {
      *             - 'majority' - query all replicas, but return values present in the majority of replicas
      *             - 'quorum' - query the majority of replicas, return values present in all of them
      *             - 'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
      * @returns List of recommend responses
      */
-    async recommend_batch(
+    async recommendBatch(
         collection_name: string,
-        {searches, consistency}: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>},
+        {
+            searches,
+            consistency,
+            timeout,
+        }: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
     ) {
         const response = await this._openApiClient.points.recommendBatchPoints({
             collection_name,
             searches,
             consistency,
+            timeout,
+        });
+        return maybe(response.data.result).orElse([]);
+    }
+
+    /**
+     * @alias recommendBatch
+     */
+    async recommend_batch(
+        collection_name: string,
+        {
+            searches,
+            consistency,
+            timeout,
+        }: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
+    ) {
+        const response = await this._openApiClient.points.recommendBatchPoints({
+            collection_name,
+            searches,
+            consistency,
+            timeout,
         });
         return maybe(response.data.result).orElse([]);
     }
@@ -265,6 +302,7 @@ export class QdrantClient {
      * The concrete way of how to compare negative and positive distances is up to the `strategy` chosen.
      * @param collection_name Collection to search in
      * @param {object} args
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *     - positive:
      *         List of stored point IDs, which should be used as reference for similarity search.
      *         If there is only one ID provided - this request is equivalent to the regular search with vector of that point.
@@ -317,11 +355,13 @@ export class QdrantClient {
      *         - 'majority' - query all replicas, but return values present in the majority of replicas
      *         - 'quorum' - query the majority of replicas, return values present in all of them
      *         - 'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
      * @returns List of recommended points with similarity scores.
      */
     async recommend(
         collection_name: string,
         {
+            shard_key,
             positive,
             negative,
             strategy,
@@ -335,12 +375,16 @@ export class QdrantClient {
             using,
             lookup_from,
             consistency,
+            timeout,
         }: Omit<SchemaFor<'RecommendRequest'>, 'limit'> &
-            Partial<Pick<SchemaFor<'RecommendRequest'>, 'limit'>> & {consistency?: SchemaFor<'ReadConsistency'>},
+            Partial<Pick<SchemaFor<'RecommendRequest'>, 'limit'>> & {consistency?: SchemaFor<'ReadConsistency'>} & {
+                timeout?: number;
+            },
     ) {
         const response = await this._openApiClient.points.recommendPoints({
             collection_name,
             limit,
+            shard_key,
             positive,
             negative,
             strategy,
@@ -353,6 +397,7 @@ export class QdrantClient {
             using,
             lookup_from,
             consistency,
+            timeout,
         });
         return maybe(response.data.result).orThrow('Recommend points API returned empty');
     }
@@ -361,6 +406,7 @@ export class QdrantClient {
      * Scroll over all (matching) points in the collection.
      * @param collection_name Name of the collection
      * @param {object} args
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *     - filter: If provided - only returns points matching filtering conditions
      *     - limit: How many points to return
      *     - offset: If provided - skip points with ids less than given `offset`
@@ -390,6 +436,7 @@ export class QdrantClient {
     async scroll(
         collection_name: string,
         {
+            shard_key,
             filter,
             consistency,
             limit = 10,
@@ -400,6 +447,7 @@ export class QdrantClient {
     ) {
         const response = await this._openApiClient.points.scrollPoints({
             collection_name,
+            shard_key,
             limit,
             offset,
             filter,
@@ -415,16 +463,18 @@ export class QdrantClient {
      * Count points in the collection matching the given filter.
      * @param collection_name
      * @param {object} args
-     *     - count_filter: filtering conditions
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
+     *     - filter: filtering conditions
      *     - exact:
      *         If `True` - provide the exact count of points matching the filter.
      *         If `False` - provide the approximate count of points matching the filter. Works faster.
      *         Default: `true`
      * @returns Amount of points in the collection matching the filter.
      */
-    async count(collection_name: string, {filter, exact = true}: SchemaFor<'CountRequest'> = {}) {
+    async count(collection_name: string, {shard_key, filter, exact = true}: SchemaFor<'CountRequest'> = {}) {
         const response = await this._openApiClient.points.countPoints({
             collection_name,
+            shard_key,
             filter,
             exact,
         });
@@ -456,6 +506,7 @@ export class QdrantClient {
      *          - 'strong' - Write operations go through the permanent leader,
      *                      consistent, but may be unavailable if leader is down
      *     - points: Points with named vectors
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      * @returns Operation result
      */
     async updateVectors(
@@ -464,6 +515,7 @@ export class QdrantClient {
             wait = true,
             ordering,
             points,
+            shard_key,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateVectors'>,
     ) {
         const response = await this._openApiClient.points.updateVectors({
@@ -471,6 +523,7 @@ export class QdrantClient {
             wait,
             ordering,
             points,
+            shard_key,
         });
         return maybe(response.data.result).orThrow('Update vectors returned empty');
     }
@@ -492,6 +545,7 @@ export class QdrantClient {
      *     - points: Deletes values from each point in this list
      *     - filter: Deletes values from points that satisfy this filter condition
      *     - vector: Vector names
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      * @returns Operation result
      */
     async deleteVectors(
@@ -502,6 +556,7 @@ export class QdrantClient {
             points,
             filter,
             vector,
+            shard_key,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'DeleteVectors'>,
     ) {
         const response = await this._openApiClient.points.deleteVectors({
@@ -511,6 +566,7 @@ export class QdrantClient {
             points,
             filter,
             vector,
+            shard_key,
         });
         return maybe(response.data.result).orThrow('Delete vectors returned empty');
     }
@@ -525,7 +581,9 @@ export class QdrantClient {
      *             'majority' - query all replicas, but return values present in the majority of replicas
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
-     *     - vector:
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
+     *     - vector: query search vector
      *     - filter: Look only for points which satisfies this conditions
      *     - params: Additional search params
      *     - with_payload: Select which payload to return with the response
@@ -540,6 +598,8 @@ export class QdrantClient {
         collection_name: string,
         {
             consistency,
+            timeout,
+            shard_key,
             vector,
             filter,
             params,
@@ -549,11 +609,13 @@ export class QdrantClient {
             group_by,
             group_size,
             limit,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & SchemaFor<'SearchGroupsRequest'>,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchGroupsRequest'>,
     ) {
         const response = await this._openApiClient.points.searchPointGroups({
             collection_name,
             consistency,
+            timeout,
+            shard_key,
             vector,
             filter,
             params,
@@ -577,6 +639,8 @@ export class QdrantClient {
      *             'majority' - query all replicas, but return values present in the majority of replicas
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *     - positive: Look for vectors closest to those
      *     - negative: Try to avoid vectors like this
      *     - strategy: How to use positive and negative examples to find the results
@@ -596,6 +660,8 @@ export class QdrantClient {
         collection_name: string,
         {
             consistency,
+            timeout,
+            shard_key,
             positive,
             strategy,
             negative = [],
@@ -609,11 +675,13 @@ export class QdrantClient {
             group_by,
             group_size,
             limit,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & SchemaFor<'RecommendGroupsRequest'>,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'RecommendGroupsRequest'>,
     ) {
         const response = await this._openApiClient.points.recommendPointGroups({
             collection_name,
             consistency,
+            timeout,
+            shard_key,
             positive,
             negative,
             strategy,
@@ -669,6 +737,7 @@ export class QdrantClient {
      * Retrieve stored points by IDs
      * @param collection_name
      * @param {object} args
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *     - ids: list of IDs to lookup
      *     - with_payload:
      *         - Specify which stored payload should be attached to the result.
@@ -694,6 +763,7 @@ export class QdrantClient {
     async retrieve(
         collection_name: string,
         {
+            shard_key,
             ids,
             with_payload = true,
             with_vector,
@@ -702,6 +772,7 @@ export class QdrantClient {
     ) {
         const response = await this._openApiClient.points.getPoints({
             collection_name,
+            shard_key,
             ids,
             with_payload,
             with_vector,
@@ -773,6 +844,7 @@ export class QdrantClient {
      *          - 'strong' - Write operations go through the permanent leader,
      *                      consistent, but may be unavailable if leader is down
      *     - payload: Key-value pairs of payload to assign
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *     - points|filter: List of affected points, filter or points selector.
      *         Example:
      *             - `points: [
@@ -796,6 +868,7 @@ export class QdrantClient {
             payload,
             points,
             filter,
+            shard_key,
             ordering,
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'SetPayload'>,
@@ -805,6 +878,7 @@ export class QdrantClient {
             payload,
             points,
             filter,
+            shard_key,
             wait,
             ordering,
         });
@@ -879,6 +953,7 @@ export class QdrantClient {
      *          - 'strong' - Write operations go through the permanent leader,
      *                      consistent, but may be unavailable if leader is down
      *     - keys: List of payload keys to remove.
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *     - points|filter: List of affected points, filter or points selector.
      *         Example:
      *             - `points: [
@@ -903,6 +978,7 @@ export class QdrantClient {
             keys,
             points,
             filter,
+            shard_key,
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'> &
             SchemaFor<'DeletePayload'>,
@@ -912,6 +988,7 @@ export class QdrantClient {
             keys,
             points,
             filter,
+            shard_key,
             wait,
             ordering,
         });
@@ -1059,6 +1136,7 @@ export class QdrantClient {
      *         If dict is passed, service will create a vector storage for each key in the dict.
      *         If single VectorParams is passed, service will create a single anonymous vector storage.
      *     - shard_number: Number of shards in collection. Default is 1, minimum is 1.
+     *     - sharding_method: Sharding method Default is Auto - points are distributed across all available shards Custom - points are distributed across shards according to shard key
      *     - replication_factor:
      *         Replication factor for collection. Default is 1, minimum is 1.
      *         Defines how many copies of each shard will be created.
@@ -1080,6 +1158,7 @@ export class QdrantClient {
      *     - wal_config: Params for Write-Ahead-Log
      *     - quantization_config: Params for quantization, if None - quantization will be disabled
      *     - init_from: Use data stored in another collection to initialize this collection
+     *     - sparse_vectors: Sparse vector data config
      *     - timeout:
      *         Wait for operation commit timeout in seconds.
      *         If timeout is reached, request will return with service error.
@@ -1096,8 +1175,10 @@ export class QdrantClient {
             quantization_config,
             replication_factor,
             shard_number,
+            sharding_method,
             wal_config,
             write_consistency_factor,
+            sparse_vectors,
         }: {timeout?: number} & SchemaFor<'CreateCollection'>,
     ) {
         const response = await this._openApiClient.collections.createCollection({
@@ -1111,8 +1192,10 @@ export class QdrantClient {
             quantization_config,
             replication_factor,
             shard_number,
+            sharding_method,
             wal_config,
             write_consistency_factor,
+            sparse_vectors,
         });
 
         return maybe(response.data.result).orThrow('Create collection returned empty');
@@ -1128,6 +1211,7 @@ export class QdrantClient {
      *         If dict is passed, service will create a vector storage for each key in the dict.
      *         If single VectorParams is passed, service will create a single anonymous vector storage.
      *     - shardNumber: Number of shards in collection. Default is 1, minimum is 1.
+     *     - sharding_method: Sharding method Default is Auto - points are distributed across all available shards Custom - points are distributed across shards according to shard key
      *     - replicationFactor:
      *         Replication factor for collection. Default is 1, minimum is 1.
      *         Defines how many copies of each shard will be created.
@@ -1149,6 +1233,7 @@ export class QdrantClient {
      *     - walConfig: Params for Write-Ahead-Log
      *     - quantizationConfig: Params for quantization, if None - quantization will be disabled
      *     - initFrom: Use data stored in another collection to initialize this collection
+     *     - sparse_vectors: Sparse vector data config
      *     - timeout:
      *         Wait for operation commit timeout in seconds.
      *         If timeout is reached, request will return with service error.
@@ -1165,8 +1250,10 @@ export class QdrantClient {
             quantization_config,
             replication_factor,
             shard_number,
+            sharding_method,
             wal_config,
             write_consistency_factor,
+            sparse_vectors,
         }: {timeout?: number} & SchemaFor<'CreateCollection'>,
     ) {
         maybe(
@@ -1189,8 +1276,10 @@ export class QdrantClient {
             quantization_config,
             replication_factor,
             shard_number,
+            sharding_method,
             wal_config,
             write_consistency_factor,
+            sparse_vectors,
         });
 
         return maybe(response).orThrow('Create collection returned empty');
@@ -1472,5 +1561,152 @@ export class QdrantClient {
             wait,
         });
         return maybe(response.data.result).orThrow('Create shard snapshot returned empty');
+    }
+
+    /**
+     * Create shard key
+     * @param collection_name Name of the collection
+     * @param {object} args -
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
+     *     - shards_number: How many shards to create for this key If not specified, will use the default value from config
+     *     - replication_factor: How many replicas to create for each shard If not specified, will use the default value from config
+     *     - placement: Placement of shards for this key List of peer ids, that can be used to place shards for this key If not specified, will be randomly placed among all peers
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     * @returns Operation result
+     */
+    async createShardKey(
+        collection_name: string,
+        {
+            shard_key,
+            shards_number,
+            replication_factor,
+            placement,
+            timeout,
+        }: {timeout?: number} & SchemaFor<'CreateShardingKey'>,
+    ) {
+        const response = await this._openApiClient.shards.createShardKey({
+            collection_name,
+            shard_key,
+            shards_number,
+            replication_factor,
+            placement,
+            timeout,
+        });
+        return maybe(response.data.result).orThrow('Create shard key returned empty');
+    }
+
+    /**
+     * Delete shard key
+     * @param collection_name Name of the collection
+     * @param {object} args -
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     * @returns Operation result
+     */
+    async deleteShardKey(
+        collection_name: string,
+        {shard_key, timeout}: {timeout?: number} & SchemaFor<'DropShardingKey'>,
+    ) {
+        const response = await this._openApiClient.shards.deleteShardKey({
+            collection_name,
+            shard_key,
+            timeout,
+        });
+        return maybe(response.data.result).orThrow('Create shard key returned empty');
+    }
+
+    /**
+     * Discover points
+     * @description Use context and a target to find the most similar points to the target, constrained by the context.
+     * When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair.
+     * Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0.
+     * When using target (with or without context), the score behaves a little different: The  integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target. The context part of the score for  each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair,  and -1 otherwise.
+     * @param collection_name Name of the collection
+     * @param {object} args -
+     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
+     *         Values:
+     *             number - number of replicas to query, values should present in all queried replicas
+     *             'majority' - query all replicas, but return values present in the majority of replicas
+     *             'quorum' - query the majority of replicas, return values present in all of them
+     *             'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
+     *     - target: Look for vectors closest to this. When using the target (with or without context), the integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target.
+     *     - context: Pairs of { positive, negative } examples to constrain the search. When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair. Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0. For discovery search (when including a target), the context part of the score for each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, and -1 otherwise.
+     *     - filter: Look only for points which satisfies this conditions
+     *     - params: Additional search params
+     *     - limit: Max number of result to return
+     *     - offset: Offset of the first result to return. May be used to paginate results. Note: large offset values may cause performance issues.
+     *     - with_payload: Select which payload to return with the response
+     *     - with_vector: Whether to return the point vector with the result?
+     *     - using: Define which vector to use for recommendation, if not specified - try to use default vector
+     *     - lookup_from The location used to lookup vectors. If not specified - use current collection. Note: the other collection should have the same vector size as the current collection
+     * @returns Operation result
+     */
+    async discoverPoints(
+        collection_name: string,
+        {
+            consistency,
+            timeout,
+            shard_key,
+            target,
+            context,
+            params,
+            limit,
+            offset,
+            with_payload,
+            with_vector,
+            using,
+            lookup_from,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'DiscoverRequest'>,
+    ) {
+        const response = await this._openApiClient.points.discoverPoints({
+            collection_name,
+            consistency,
+            timeout,
+            shard_key,
+            target,
+            context,
+            params,
+            limit,
+            offset,
+            with_payload,
+            with_vector,
+            using,
+            lookup_from,
+        });
+        return maybe(response.data.result).orThrow('Discover points returned empty');
+    }
+
+    /**
+     * Discover batch points
+     * @description Look for points based on target and/or positive and negative example pairs, in batch.
+     * @param collection_name Name of the collection
+     * @param {object} args -
+     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
+     *         Values:
+     *             number - number of replicas to query, values should present in all queried replicas
+     *             'majority' - query all replicas, but return values present in the majority of replicas
+     *             'quorum' - query the majority of replicas, return values present in all of them
+     *             'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - searches: List of searches
+     * @returns Operation result
+     */
+    async discoverBatchPoints(
+        collection_name: string,
+        {
+            consistency,
+            timeout,
+            searches,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'DiscoverRequestBatch'>,
+    ) {
+        const response = await this._openApiClient.points.discoverBatchPoints({
+            collection_name,
+            consistency,
+            timeout,
+            searches,
+        });
+        return maybe(response.data.result).orThrow('Discover batch points returned empty');
     }
 }

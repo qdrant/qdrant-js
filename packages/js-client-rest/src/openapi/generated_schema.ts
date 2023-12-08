@@ -10,6 +10,14 @@ type XOR<T, U> = (T | U) extends object ? (Without<T, U> & U) | (Without<U, T> &
 type OneOf<T extends any[]> = T extends [infer Only] ? Only : T extends [infer A, infer B, ...infer Rest] ? OneOf<[XOR<A, B>, ...Rest]> : never;
 
 export interface paths {
+  "/collections/{collection_name}/shards": {
+    /** Create shard key */
+    put: operations["create_shard_key"];
+  };
+  "/collections/{collection_name}/shards/delete": {
+    /** Delete shard key */
+    post: operations["delete_shard_key"];
+  };
   "/telemetry": {
     /**
      * Collect telemetry data 
@@ -367,6 +375,23 @@ export interface paths {
      */
     post: operations["recommend_point_groups"];
   };
+  "/collections/{collection_name}/points/discover": {
+    /**
+     * Discover points 
+     * @description Use context and a target to find the most similar points to the target, constrained by the context.
+     * When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair.
+     * Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0.
+     * When using target (with or without context), the score behaves a little different: The  integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target. The context part of the score for  each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair,  and -1 otherwise.
+     */
+    post: operations["discover_points"];
+  };
+  "/collections/{collection_name}/points/discover/batch": {
+    /**
+     * Discover batch points 
+     * @description Look for points based on target and/or positive and negative example pairs, in batch.
+     */
+    post: operations["discover_batch_points"];
+  };
   "/collections/{collection_name}/points/count": {
     /**
      * Count points 
@@ -404,19 +429,19 @@ export interface components {
       optimizer_status: components["schemas"]["OptimizersStatus"];
       /**
        * Format: uint 
-       * @description Number of vectors in collection All vectors in collection are available for querying Calculated as `points_count x vectors_per_point` Where `vectors_per_point` is a number of named vectors in schema
+       * @description Approximate number of vectors in collection. All vectors in collection are available for querying. Calculated as `points_count x vectors_per_point`. Where `vectors_per_point` is a number of named vectors in schema.
        */
-      vectors_count: number;
+      vectors_count?: number | null;
       /**
        * Format: uint 
-       * @description Number of indexed vectors in the collection. Indexed vectors in large segments are faster to query, as it is stored in vector index (HNSW)
+       * @description Approximate number of indexed vectors in the collection. Indexed vectors in large segments are faster to query, as it is stored in a specialized vector index.
        */
-      indexed_vectors_count: number;
+      indexed_vectors_count?: number | null;
       /**
        * Format: uint 
-       * @description Number of points (vectors + payloads) in collection Each point could be accessed by unique id
+       * @description Approximate number of points (vectors + payloads) in collection. Each point could be accessed by unique id.
        */
-      points_count: number;
+      points_count?: number | null;
       /**
        * Format: uint 
        * @description Number of segments in collection. Each segment has independent vector as payload indexes
@@ -446,13 +471,15 @@ export interface components {
       quantization_config?: components["schemas"]["QuantizationConfig"] | (Record<string, unknown> | null);
     };
     CollectionParams: {
-      vectors: components["schemas"]["VectorsConfig"];
+      vectors?: components["schemas"]["VectorsConfig"];
       /**
        * Format: uint32 
        * @description Number of shards the collection has 
        * @default 1
        */
       shard_number?: number;
+      /** @description Sharding method Default is Auto - points are distributed across all available shards Custom - points are distributed across shards according to shard key */
+      sharding_method?: components["schemas"]["ShardingMethod"] | (Record<string, unknown> | null);
       /**
        * Format: uint32 
        * @description Number of replicas for each shard 
@@ -475,6 +502,10 @@ export interface components {
        * @default false
        */
       on_disk_payload?: boolean;
+      /** @description Configuration of the sparse vector storage */
+      sparse_vectors?: ({
+        [key: string]: components["schemas"]["SparseVectorParams"] | undefined;
+      }) | null;
     };
     /**
      * @description Vector params separator for single and multiple vector modes Single mode:
@@ -507,7 +538,7 @@ export interface components {
      * @description Type of internal tags, build from payload Distance function types used to compare vectors 
      * @enum {string}
      */
-    Distance: "Cosine" | "Euclid" | "Dot";
+    Distance: "Cosine" | "Euclid" | "Dot" | "Manhattan";
     HnswConfigDiff: {
       /**
        * Format: uint 
@@ -567,6 +598,25 @@ export interface components {
     };
     BinaryQuantizationConfig: {
       always_ram?: boolean | null;
+    };
+    /** @enum {string} */
+    ShardingMethod: "auto" | "custom";
+    /** @description Params of single sparse vector data storage */
+    SparseVectorParams: {
+      /** @description Custom params for index. If none - values from collection configuration are used. */
+      index?: components["schemas"]["SparseIndexParams"] | (Record<string, unknown> | null);
+    };
+    /** @description Configuration for sparse inverted index. */
+    SparseIndexParams: {
+      /**
+       * Format: uint 
+       * @description We prefer a full scan search upto (excluding) this number of vectors.
+       * 
+       * Note: this is number of vectors, not KiloBytes.
+       */
+      full_scan_threshold?: number | null;
+      /** @description Store index on disk. If set to false, the index will be stored in RAM. Default: false */
+      on_disk?: boolean | null;
     };
     /** @description Config of HNSW index */
     HnswConfig: {
@@ -704,12 +754,16 @@ export interface components {
     /** @enum {string} */
     TokenizerType: "prefix" | "whitespace" | "word" | "multilingual";
     PointRequest: {
+      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
       /** @description Look for points with ids */
       ids: (components["schemas"]["ExtendedPointId"])[];
       /** @description Select which payload to return with the response. Default: All */
       with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
       with_vector?: components["schemas"]["WithVector"];
     };
+    ShardKeySelector: components["schemas"]["ShardKey"] | (components["schemas"]["ShardKey"])[];
+    ShardKey: string | number;
     /** @description Type, used for specifying point ID in user interface */
     ExtendedPointId: number | string;
     /** @description Options for specifying which payload to include or not */
@@ -733,16 +787,28 @@ export interface components {
       payload?: components["schemas"]["Payload"] | (Record<string, unknown> | null);
       /** @description Vector of the point */
       vector?: components["schemas"]["VectorStruct"] | (Record<string, unknown> | null);
+      /** @description Shard Key */
+      shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
     };
     Payload: {
       [key: string]: unknown;
     };
     /** @description Full vector data per point separator with single and multiple vector modes */
     VectorStruct: (number)[] | ({
-      [key: string]: (number)[] | undefined;
+      [key: string]: components["schemas"]["Vector"] | undefined;
     });
+    Vector: (number)[] | components["schemas"]["SparseVector"];
+    /** @description Sparse vector structure */
+    SparseVector: {
+      /** @description indices must be unique */
+      indices: (number)[];
+      /** @description values and indices must be the same length */
+      values: (number)[];
+    };
     /** @description Search request. Holds all conditions and parameters for the search of most similar points by vector similarity given the filtering restrictions. */
     SearchRequest: {
+      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
       vector: components["schemas"]["NamedVectorStruct"];
       /** @description Look only for points which satisfies this conditions */
       filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
@@ -755,10 +821,9 @@ export interface components {
       limit: number;
       /**
        * Format: uint 
-       * @description Offset of the first result to return. May be used to paginate results. Note: large offset values may cause performance issues. 
-       * @default 0
+       * @description Offset of the first result to return. May be used to paginate results. Note: large offset values may cause performance issues.
        */
-      offset?: number;
+      offset?: number | null;
       /** @description Select which payload to return with the response. Default: None */
       with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
       /**
@@ -781,13 +846,19 @@ export interface components {
      * 
      * { "vector": { "vector": [1.0, 2.0, 3.0], "name": "image-embeddings" } }
      */
-    NamedVectorStruct: (number)[] | components["schemas"]["NamedVector"];
+    NamedVectorStruct: (number)[] | components["schemas"]["NamedVector"] | components["schemas"]["NamedSparseVector"];
     /** @description Vector data with name */
     NamedVector: {
       /** @description Name of vector data */
       name: string;
       /** @description Vector data */
       vector: (number)[];
+    };
+    /** @description Sparse vector data with name */
+    NamedSparseVector: {
+      /** @description Name of vector data */
+      name: string;
+      vector: components["schemas"]["SparseVector"];
     };
     Filter: {
       /** @description At least one of those conditions should match */
@@ -1012,13 +1083,15 @@ export interface components {
       payload?: components["schemas"]["Payload"] | (Record<string, unknown> | null);
       /** @description Vector of the point */
       vector?: components["schemas"]["VectorStruct"] | (Record<string, unknown> | null);
+      /** @description Shard Key */
+      shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
     };
     UpdateResult: {
       /**
        * Format: uint64 
        * @description Sequential number of the operation
        */
-      operation_id: number;
+      operation_id?: number | null;
       status: components["schemas"]["UpdateStatus"];
     };
     /**
@@ -1032,6 +1105,8 @@ export interface components {
      * Service should look for the points which are closer to positive examples and at the same time further to negative examples. The concrete way of how to compare negative and positive distances is up to the `strategy` chosen.
      */
     RecommendRequest: {
+      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
       /**
        * @description Look for vectors closest to those 
        * @default []
@@ -1055,10 +1130,9 @@ export interface components {
       limit: number;
       /**
        * Format: uint 
-       * @description Offset of the first result to return. May be used to paginate results. Note: large offset values may cause performance issues. 
-       * @default 0
+       * @description Offset of the first result to return. May be used to paginate results. Note: large offset values may cause performance issues.
        */
-      offset?: number;
+      offset?: number | null;
       /** @description Select which payload to return with the response. Default: None */
       with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
       /**
@@ -1082,7 +1156,7 @@ export interface components {
        */
       lookup_from?: components["schemas"]["LookupLocation"] | (Record<string, unknown> | null);
     };
-    RecommendExample: components["schemas"]["ExtendedPointId"] | (number)[];
+    RecommendExample: components["schemas"]["ExtendedPointId"] | (number)[] | components["schemas"]["SparseVector"];
     /**
      * @description How to use positive and negative examples to find the results, default is `average_vector`:
      * 
@@ -1102,9 +1176,13 @@ export interface components {
        * @default null
        */
       vector?: string | null;
+      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
     };
     /** @description Scroll request - paginate over all points which matches given condition */
     ScrollRequest: {
+      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
       /** @description Start ID to read points from. */
       offset?: components["schemas"]["ExtendedPointId"] | (Record<string, unknown> | null);
       /**
@@ -1127,13 +1205,18 @@ export interface components {
     };
     /** @description Operation for creating new collection and (optionally) specify index params */
     CreateCollection: {
-      vectors: components["schemas"]["VectorsConfig"];
+      vectors?: components["schemas"]["VectorsConfig"];
       /**
        * Format: uint32 
-       * @description Number of shards in collection. Default is 1 for standalone, otherwise equal to the number of nodes Minimum is 1 
+       * @description For auto sharding: Number of shards in collection. - Default is 1 for standalone, otherwise equal to the number of nodes - Minimum is 1 For custom sharding: Number of shards in collection per shard group. - Default is 1, meaning that each shard key will be mapped to a single shard - Minimum is 1 
        * @default null
        */
       shard_number?: number | null;
+      /**
+       * @description Sharding method Default is Auto - points are distributed across all available shards Custom - points are distributed across shards according to shard key 
+       * @default null
+       */
+      sharding_method?: components["schemas"]["ShardingMethod"] | (Record<string, unknown> | null);
       /**
        * Format: uint32 
        * @description Number of shards replicas. Default is 1 Minimum is 1 
@@ -1167,6 +1250,10 @@ export interface components {
        * @default null
        */
       quantization_config?: components["schemas"]["QuantizationConfig"] | (Record<string, unknown> | null);
+      /** @description Sparse vector data config. */
+      sparse_vectors?: ({
+        [key: string]: components["schemas"]["SparseVectorParams"] | undefined;
+      }) | null;
     };
     WalConfigDiff: {
       /**
@@ -1257,6 +1344,8 @@ export interface components {
        * @default null
        */
       quantization_config?: components["schemas"]["QuantizationConfigDiff"] | (Record<string, unknown> | null);
+      /** @description Map of sparse vector data parameters to update for each sparse vector. */
+      sparse_vectors?: components["schemas"]["SparseVectorsConfig"] | (Record<string, unknown> | null);
     };
     /**
      * @description Vector update params for multiple vectors
@@ -1299,6 +1388,9 @@ export interface components {
        */
       on_disk_payload?: boolean | null;
     };
+    SparseVectorsConfig: {
+      [key: string]: components["schemas"]["SparseVectorParams"] | undefined;
+    };
     /** @description Operation for performing changes of collection aliases. Alias changes are atomic, meaning that no collection modifications can happen between alias operations. */
     ChangeAliasesOperation: {
       actions: (components["schemas"]["AliasOperations"])[];
@@ -1338,38 +1430,45 @@ export interface components {
     PointsSelector: components["schemas"]["PointIdsList"] | components["schemas"]["FilterSelector"];
     PointIdsList: {
       points: (components["schemas"]["ExtendedPointId"])[];
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
     };
     FilterSelector: {
       filter: components["schemas"]["Filter"];
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
     };
     PointInsertOperations: components["schemas"]["PointsBatch"] | components["schemas"]["PointsList"];
-    BatchVectorStruct: ((number)[])[] | ({
-      [key: string]: ((number)[])[] | undefined;
-    });
-    PointStruct: {
-      id: components["schemas"]["ExtendedPointId"];
-      vector: components["schemas"]["VectorStruct"];
-      /** @description Payload values (optional) */
-      payload?: components["schemas"]["Payload"] | (Record<string, unknown> | null);
+    PointsBatch: {
+      batch: components["schemas"]["Batch"];
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
     };
     Batch: {
       ids: (components["schemas"]["ExtendedPointId"])[];
       vectors: components["schemas"]["BatchVectorStruct"];
       payloads?: ((components["schemas"]["Payload"] | (Record<string, unknown> | null))[]) | null;
     };
-    PointsBatch: {
-      batch: components["schemas"]["Batch"];
-    };
+    BatchVectorStruct: ((number)[])[] | ({
+      [key: string]: (components["schemas"]["Vector"])[] | undefined;
+    });
     PointsList: {
       points: (components["schemas"]["PointStruct"])[];
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
     };
+    PointStruct: {
+      id: components["schemas"]["ExtendedPointId"];
+      vector: components["schemas"]["VectorStruct"];
+      /** @description Payload values (optional) */
+      payload?: components["schemas"]["Payload"] | (Record<string, unknown> | null);
+    };
+    /** @description This data structure is used in API interface and applied across multiple shards */
     SetPayload: {
       payload: components["schemas"]["Payload"];
       /** @description Assigns payload to each point in this list */
       points?: (components["schemas"]["ExtendedPointId"])[] | null;
       /** @description Assigns payload to each point that satisfy this filter condition */
       filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
     };
+    /** @description This data structure is used in API interface and applied across multiple shards */
     DeletePayload: {
       /** @description List of payload keys to remove from payload */
       keys: (string)[];
@@ -1377,6 +1476,7 @@ export interface components {
       points?: (components["schemas"]["ExtendedPointId"])[] | null;
       /** @description Deletes values from points that satisfy this filter condition */
       filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
     };
     /** @description Information about current cluster status and structure */
     ClusterStatus: OneOf<[{
@@ -1466,6 +1566,8 @@ export interface components {
     };
     /** @description Count Request Counts the number of points which satisfy the given filter. If filter is not provided, the count of all points in the collection will be returned. */
     CountRequest: {
+      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
       /** @description Look only for points which satisfies this conditions */
       filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
       /**
@@ -1506,6 +1608,8 @@ export interface components {
        * @description Local shard id
        */
       shard_id: number;
+      /** @description User-defined sharding key */
+      shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
       /**
        * Format: uint 
        * @description Number of points in the shard
@@ -1517,13 +1621,15 @@ export interface components {
      * @description State of the single shard within a replica set. 
      * @enum {string}
      */
-    ReplicaState: "Active" | "Dead" | "Partial" | "Initializing" | "Listener";
+    ReplicaState: "Active" | "Dead" | "Partial" | "Initializing" | "Listener" | "PartialSnapshot";
     RemoteShardInfo: {
       /**
        * Format: uint32 
        * @description Remote shard id
        */
       shard_id: number;
+      /** @description User-defined sharding key */
+      shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
       /**
        * Format: uint64 
        * @description Remote peer id
@@ -1540,7 +1646,10 @@ export interface components {
       to: number;
       /** @description If `true` transfer is a synchronization of a replicas If `false` transfer is a moving of a shard from one peer to another */
       sync: boolean;
+      method?: components["schemas"]["ShardTransferMethod"] | (Record<string, unknown> | null);
     };
+    /** @description Methods for transferring a shard from one node to another. */
+    ShardTransferMethod: "stream_records" | "snapshot";
     TelemetryData: {
       id: string;
       app: components["schemas"]["AppBuildTelemetry"];
@@ -1645,8 +1754,12 @@ export interface components {
       num_deleted_vectors: number;
     };
     SegmentConfig: {
-      vector_data: {
+      /** @default {} */
+      vector_data?: {
         [key: string]: components["schemas"]["VectorDataConfig"] | undefined;
+      };
+      sparse_vector_data?: {
+        [key: string]: components["schemas"]["SparseVectorDataConfig"] | undefined;
       };
       payload_storage_type: components["schemas"]["PayloadStorageType"];
     };
@@ -1675,6 +1788,23 @@ export interface components {
       type: "hnsw";
       options: components["schemas"]["HnswConfig"];
     }]>;
+    /** @description Config of single sparse vector data storage */
+    SparseVectorDataConfig: {
+      index: components["schemas"]["SparseIndexConfig"];
+    };
+    /** @description Configuration for sparse inverted index. */
+    SparseIndexConfig: {
+      /**
+       * Format: uint 
+       * @description We prefer a full scan search upto (excluding) this number of vectors.
+       * 
+       * Note: this is number of vectors, not KiloBytes.
+       */
+      full_scan_threshold?: number | null;
+      index_type: components["schemas"]["SparseIndexType"];
+    };
+    /** @description Sparse index types */
+    SparseIndexType: "MutableRam" | "ImmutableRam" | "Mmap";
     /** @description Type of payload storage */
     PayloadStorageType: OneOf<[{
       /** @enum {string} */
@@ -1687,10 +1817,12 @@ export interface components {
       index_name?: string | null;
       unfiltered_plain: components["schemas"]["OperationDurationStatistics"];
       unfiltered_hnsw: components["schemas"]["OperationDurationStatistics"];
+      unfiltered_sparse: components["schemas"]["OperationDurationStatistics"];
       filtered_plain: components["schemas"]["OperationDurationStatistics"];
       filtered_small_cardinality: components["schemas"]["OperationDurationStatistics"];
       filtered_large_cardinality: components["schemas"]["OperationDurationStatistics"];
       filtered_exact: components["schemas"]["OperationDurationStatistics"];
+      filtered_sparse: components["schemas"]["OperationDurationStatistics"];
       unfiltered_exact: components["schemas"]["OperationDurationStatistics"];
     };
     OperationDurationStatistics: {
@@ -1813,7 +1945,7 @@ export interface components {
         [key: string]: components["schemas"]["OperationDurationStatistics"] | undefined;
       };
     };
-    ClusterOperations: components["schemas"]["MoveShardOperation"] | components["schemas"]["ReplicateShardOperation"] | components["schemas"]["AbortTransferOperation"] | components["schemas"]["DropReplicaOperation"];
+    ClusterOperations: components["schemas"]["MoveShardOperation"] | components["schemas"]["ReplicateShardOperation"] | components["schemas"]["AbortTransferOperation"] | components["schemas"]["DropReplicaOperation"] | components["schemas"]["CreateShardingKeyOperation"] | components["schemas"]["DropShardingKeyOperation"];
     MoveShardOperation: {
       move_shard: components["schemas"]["MoveShard"];
     };
@@ -1824,6 +1956,8 @@ export interface components {
       to_peer_id: number;
       /** Format: uint64 */
       from_peer_id: number;
+      /** @description Method for transferring the shard from one node to another */
+      method?: components["schemas"]["ShardTransferMethod"] | (Record<string, unknown> | null);
     };
     ReplicateShardOperation: {
       replicate_shard: components["schemas"]["MoveShard"];
@@ -1839,6 +1973,30 @@ export interface components {
       shard_id: number;
       /** Format: uint64 */
       peer_id: number;
+    };
+    CreateShardingKeyOperation: {
+      create_sharding_key: components["schemas"]["CreateShardingKey"];
+    };
+    CreateShardingKey: {
+      shard_key: components["schemas"]["ShardKey"];
+      /**
+       * Format: uint32 
+       * @description How many shards to create for this key If not specified, will use the default value from config
+       */
+      shards_number?: number | null;
+      /**
+       * Format: uint32 
+       * @description How many replicas to create for each shard If not specified, will use the default value from config
+       */
+      replication_factor?: number | null;
+      /** @description Placement of shards for this key List of peer ids, that can be used to place shards for this key If not specified, will be randomly placed among all peers */
+      placement?: (number)[] | null;
+    };
+    DropShardingKeyOperation: {
+      drop_sharding_key: components["schemas"]["DropShardingKey"];
+    };
+    DropShardingKey: {
+      shard_key: components["schemas"]["ShardKey"];
     };
     SearchRequestBatch: {
       searches: (components["schemas"]["SearchRequest"])[];
@@ -1913,6 +2071,7 @@ export interface components {
     UpdateVectors: {
       /** @description Points with named vectors */
       points: (components["schemas"]["PointVectors"])[];
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
     };
     PointVectors: {
       id: components["schemas"]["ExtendedPointId"];
@@ -1925,6 +2084,7 @@ export interface components {
       filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
       /** @description Vector names */
       vector: (string)[];
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
     };
     PointGroup: {
       /** @description Scored points that have the same value of the group_by key */
@@ -1936,6 +2096,8 @@ export interface components {
     /** @description Value of the group_by key, shared across all the hits in the group */
     GroupId: string | number;
     SearchGroupsRequest: {
+      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
       vector: components["schemas"]["NamedVectorStruct"];
       /** @description Look only for points which satisfies this conditions */
       filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
@@ -1984,6 +2146,8 @@ export interface components {
       with_vectors?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
     };
     RecommendGroupsRequest: {
+      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
       /**
        * @description Look for vectors closest to those 
        * @default []
@@ -2077,6 +2241,62 @@ export interface components {
       priority?: components["schemas"]["SnapshotPriority"] | (Record<string, unknown> | null);
     };
     ShardSnapshotLocation: string;
+    /** @description Use context and a target to find the most similar points, constrained by the context. */
+    DiscoverRequest: {
+      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
+      /**
+       * @description Look for vectors closest to this.
+       * 
+       * When using the target (with or without context), the integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target.
+       */
+      target?: components["schemas"]["RecommendExample"] | (Record<string, unknown> | null);
+      /**
+       * @description Pairs of { positive, negative } examples to constrain the search.
+       * 
+       * When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair.
+       * 
+       * Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0.
+       * 
+       * For discovery search (when including a target), the context part of the score for each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, and -1 otherwise.
+       */
+      context?: (components["schemas"]["ContextExamplePair"])[] | null;
+      /** @description Look only for points which satisfies this conditions */
+      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
+      /** @description Additional search params */
+      params?: components["schemas"]["SearchParams"] | (Record<string, unknown> | null);
+      /**
+       * Format: uint 
+       * @description Max number of result to return
+       */
+      limit: number;
+      /**
+       * Format: uint 
+       * @description Offset of the first result to return. May be used to paginate results. Note: large offset values may cause performance issues.
+       */
+      offset?: number | null;
+      /** @description Select which payload to return with the response. Default: None */
+      with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
+      /** @description Whether to return the point vector with the result? */
+      with_vector?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
+      /**
+       * @description Define which vector to use for recommendation, if not specified - try to use default vector 
+       * @default null
+       */
+      using?: components["schemas"]["UsingVector"] | (Record<string, unknown> | null);
+      /**
+       * @description The location used to lookup vectors. If not specified - use current collection. Note: the other collection should have the same vector size as the current collection 
+       * @default null
+       */
+      lookup_from?: components["schemas"]["LookupLocation"] | (Record<string, unknown> | null);
+    };
+    ContextExamplePair: {
+      positive: components["schemas"]["RecommendExample"];
+      negative: components["schemas"]["RecommendExample"];
+    };
+    DiscoverRequestBatch: {
+      searches: (components["schemas"]["DiscoverRequest"])[];
+    };
   };
   responses: never;
   parameters: never;
@@ -2089,6 +2309,106 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  /** Create shard key */
+  create_shard_key: {
+    parameters: {
+      query?: {
+        /**
+         * @description Wait for operation commit timeout in seconds. 
+         * If timeout is reached - request will return with service error.
+         */
+        timeout?: number;
+      };
+      path: {
+        /** @description Name of the collection to create shards for */
+        collection_name: string;
+      };
+    };
+    /** @description Shard key configuration */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["CreateShardingKey"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            status?: string;
+            result?: boolean;
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /** Delete shard key */
+  delete_shard_key: {
+    parameters: {
+      query?: {
+        /**
+         * @description Wait for operation commit timeout in seconds. 
+         * If timeout is reached - request will return with service error.
+         */
+        timeout?: number;
+      };
+      path: {
+        /** @description Name of the collection to create shards for */
+        collection_name: string;
+      };
+    };
+    /** @description Select shard key to delete */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["DropShardingKey"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            status?: string;
+            result?: boolean;
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
   /**
    * Collect telemetry data 
    * @description Collect telemetry data including app info, system info, collections info, cluster info, configs and statistics
@@ -2110,8 +2430,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["TelemetryData"];
           };
         };
@@ -2167,8 +2486,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["LocksOption"];
           };
         };
@@ -2208,8 +2526,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["LocksOption"];
           };
         };
@@ -2291,8 +2608,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["ClusterStatus"];
           };
         };
@@ -2323,8 +2639,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: boolean;
           };
         };
@@ -2368,8 +2683,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: boolean;
           };
         };
@@ -2403,8 +2717,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["CollectionsResponse"];
           };
         };
@@ -2444,8 +2757,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["CollectionInfo"];
           };
         };
@@ -2498,8 +2810,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: boolean;
           };
         };
@@ -2546,8 +2857,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: boolean;
           };
         };
@@ -2600,8 +2910,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: boolean;
           };
         };
@@ -2647,8 +2956,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: boolean;
           };
         };
@@ -2700,8 +3008,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
         };
@@ -2749,8 +3056,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
         };
@@ -2790,8 +3096,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["CollectionClusterInfo"];
           };
         };
@@ -2841,8 +3146,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: boolean;
           };
         };
@@ -2882,8 +3186,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["CollectionsAliasesResponse"];
           };
         };
@@ -2917,8 +3220,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["CollectionsAliasesResponse"];
           };
         };
@@ -2973,8 +3275,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: boolean;
           };
         };
@@ -2988,8 +3289,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "accepted";
+            status?: string;
           };
         };
       };
@@ -3038,8 +3338,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: boolean;
           };
         };
@@ -3053,8 +3352,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "accepted";
+            status?: string;
           };
         };
       };
@@ -3093,8 +3391,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: (components["schemas"]["SnapshotDescription"])[];
           };
         };
@@ -3138,8 +3435,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["SnapshotDescription"];
           };
         };
@@ -3153,8 +3449,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "accepted";
+            status?: string;
           };
         };
       };
@@ -3233,8 +3528,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: boolean;
           };
         };
@@ -3248,8 +3542,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "accepted";
+            status?: string;
           };
         };
       };
@@ -3282,8 +3575,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: (components["schemas"]["SnapshotDescription"])[];
           };
         };
@@ -3323,8 +3615,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["SnapshotDescription"];
           };
         };
@@ -3338,8 +3629,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "accepted";
+            status?: string;
           };
         };
       };
@@ -3414,8 +3704,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: boolean;
           };
         };
@@ -3429,8 +3718,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "accepted";
+            status?: string;
           };
         };
       };
@@ -3486,8 +3774,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: boolean;
           };
         };
@@ -3501,8 +3788,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "accepted";
+            status?: string;
           };
         };
       };
@@ -3553,8 +3839,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: boolean;
           };
         };
@@ -3568,8 +3853,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "accepted";
+            status?: string;
           };
         };
       };
@@ -3610,8 +3894,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: (components["schemas"]["SnapshotDescription"])[];
           };
         };
@@ -3657,8 +3940,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["SnapshotDescription"];
           };
         };
@@ -3672,8 +3954,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "accepted";
+            status?: string;
           };
         };
       };
@@ -3756,8 +4037,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: boolean;
           };
         };
@@ -3771,8 +4051,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "accepted";
+            status?: string;
           };
         };
       };
@@ -3817,8 +4096,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["Record"];
           };
         };
@@ -3870,8 +4148,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
         };
@@ -3921,8 +4198,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: (components["schemas"]["Record"])[];
           };
         };
@@ -3974,8 +4250,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
         };
@@ -4027,8 +4302,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
         };
@@ -4080,8 +4354,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
         };
@@ -4133,8 +4406,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
         };
@@ -4186,8 +4458,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
         };
@@ -4239,8 +4510,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
         };
@@ -4292,8 +4562,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
         };
@@ -4345,8 +4614,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: (components["schemas"]["UpdateResult"])[];
           };
         };
@@ -4396,8 +4664,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["ScrollResult"];
           };
         };
@@ -4425,6 +4692,8 @@ export interface operations {
       query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to search in */
@@ -4447,8 +4716,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: (components["schemas"]["ScoredPoint"])[];
           };
         };
@@ -4476,6 +4744,8 @@ export interface operations {
       query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to search in */
@@ -4498,8 +4768,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: ((components["schemas"]["ScoredPoint"])[])[];
           };
         };
@@ -4527,6 +4796,8 @@ export interface operations {
       query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to search in */
@@ -4549,8 +4820,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["GroupsResult"];
           };
         };
@@ -4578,6 +4848,8 @@ export interface operations {
       query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to search in */
@@ -4600,8 +4872,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: (components["schemas"]["ScoredPoint"])[];
           };
         };
@@ -4629,6 +4900,8 @@ export interface operations {
       query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to search in */
@@ -4651,8 +4924,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: ((components["schemas"]["ScoredPoint"])[])[];
           };
         };
@@ -4680,6 +4952,8 @@ export interface operations {
       query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to search in */
@@ -4702,9 +4976,115 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["GroupsResult"];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Discover points 
+   * @description Use context and a target to find the most similar points to the target, constrained by the context.
+   * When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair.
+   * Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0.
+   * When using target (with or without context), the score behaves a little different: The  integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target. The context part of the score for  each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair,  and -1 otherwise.
+   */
+  discover_points: {
+    parameters: {
+      query?: {
+        /** @description Define read consistency guarantees for the operation */
+        consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
+      };
+      path: {
+        /** @description Name of the collection to search in */
+        collection_name: string;
+      };
+    };
+    /** @description Request points based on {positive, negative} pairs of examples, and/or a target */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["DiscoverRequest"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            status?: string;
+            result?: (components["schemas"]["ScoredPoint"])[];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Discover batch points 
+   * @description Look for points based on target and/or positive and negative example pairs, in batch.
+   */
+  discover_batch_points: {
+    parameters: {
+      query?: {
+        /** @description Define read consistency guarantees for the operation */
+        consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
+      };
+      path: {
+        /** @description Name of the collection to search in */
+        collection_name: string;
+      };
+    };
+    /** @description Batch request points based on { positive, negative } pairs of examples, and/or a target. */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["DiscoverRequestBatch"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            status?: string;
+            result?: ((components["schemas"]["ScoredPoint"])[])[];
           };
         };
       };
@@ -4749,8 +5129,7 @@ export interface operations {
              * @description Time spent to process this request
              */
             time?: number;
-            /** @enum {string} */
-            status?: "ok";
+            status?: string;
             result?: components["schemas"]["CountResult"];
           };
         };
