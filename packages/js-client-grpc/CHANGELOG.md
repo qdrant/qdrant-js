@@ -5,6 +5,7 @@
 ### Minor Changes
 
 -   Qdrant v1.7.0 API
+-   [#54](https://github.com/qdrant/qdrant-js/pull/54) Thanks [@Morad-m11](https://github.com/Morad-m11)! - recommendBatch mispell
 
 ## 1.6.0
 
