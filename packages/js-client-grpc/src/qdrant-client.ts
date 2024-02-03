@@ -47,7 +47,9 @@ export class QdrantClient {
             }
             const parsedUrl = new URL(url);
             this._host = parsedUrl.hostname;
-            this._port = parsedUrl.port ? Number(parsedUrl.port) : port;
+            const getPort = (url: string): number | null =>
+                url.includes(':443') ? 443 : url.includes(':80') ? 80 : port;
+            this._port = parsedUrl.port ? Number(parsedUrl.port) : getPort(url);
             this._scheme = parsedUrl.protocol.replace(':', '');
 
             if (this._prefix.length > 0 && parsedUrl.pathname !== '/') {
