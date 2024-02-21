@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 importers:
 
   .:
@@ -84,17 +88,17 @@ importers:
   packages/js-client-rest:
     dependencies:
       '@qdrant/openapi-typescript-fetch':
-        specifier: ^1.2.1
-        version: 1.2.1
+        specifier: 1.2.4
+        version: 1.2.4
       '@sevinf/maybe':
-        specifier: ^0.5.0
+        specifier: 0.5.0
         version: 0.5.0
       typescript:
-        specifier: '>=4.1'
+        specifier: '>=4.7'
         version: 5.0.4
       undici:
-        specifier: ^5.26.2
-        version: 5.26.2
+        specifier: 5.28.3
+        version: 5.28.3
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^24.1.0
@@ -582,9 +586,9 @@ packages:
     hasBin: true
     dev: true
 
-  /@qdrant/openapi-typescript-fetch@1.2.1:
-    resolution: {integrity: sha512-oiBJRN1ME7orFZocgE25jrM3knIF/OKJfMsZPBbtMMKfgNVYfps0MokGvSJkBmecj6bf8QoLXWIGlIoaTM4Zmw==}
-    engines: {node: '>=12.0.0', pnpm: '>=8'}
+  /@qdrant/openapi-typescript-fetch@1.2.4:
+    resolution: {integrity: sha512-seKNDuWkmdXcAN4gsW2HmnkjAm8nDDQQlmLgJcAPlFq4gMwoKhIY9dT87nT+lOBAXSpbedr1XsIC42/0LQqs/g==}
+    engines: {node: '>=21.0.0', pnpm: '>=8'}
     dev: false
 
   /@rollup/plugin-commonjs@24.1.0(rollup@3.21.6):
@@ -2084,7 +2088,7 @@ packages:
       fast-glob: 3.2.12
       js-yaml: 4.1.0
       supports-color: 9.3.1
-      undici: 5.26.2
+      undici: 5.28.3
       yargs-parser: 21.1.1
     dev: true
 
@@ -2666,8 +2670,8 @@ packages:
     resolution: {integrity: sha512-TrY6DsjTQQgyS3E3dBaOXf0TpPD8u9FVrVYmKVegJuFw51n/YB9XPt+U6ydzFG5ZIN7+DIjPbNmXoBj9esYhgQ==}
     dev: true
 
-  /undici@5.26.2:
-    resolution: {integrity: sha512-a4PDLQgLTPHVzOK+x3F79/M4GtyYPl+aX9AAK7aQxpwxDwCqkeZCScy7Gk5kWT3JtdFq1uhO3uZJdLtHI4dK9A==}
+  /undici@5.28.3:
+    resolution: {integrity: sha512-3ItfzbrhDlINjaP0duwnNsKpDQk3acHI3gVJ1z4fmwMK31k5G9OVIAMLSIaP6w4FaGkaAkN6zaQO9LUvZ1t7VA==}
     engines: {node: '>=14.0'}
     dependencies:
       '@fastify/busboy': 2.1.0
