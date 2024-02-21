@@ -53,15 +53,17 @@
         "openapi_schema_remote": "https://raw.githubusercontent.com/qdrant/qdrant/master/docs/redoc/master/openapi.json"
     },
     "dependencies": {
+        "@qdrant/openapi-typescript-fetch": "1.2.5",
         "@sevinf/maybe": "0.5.0",
-        "@qdrant/openapi-typescript-fetch": "1.2.4",
         "undici": "5.28.3"
     },
     "devDependencies": {
         "@rollup/plugin-commonjs": "^24.1.0",
         "@rollup/plugin-replace": "^5.0.2",
         "@total-typescript/ts-reset": "^0.4.2",
+        "@types/semver": "7.5.7",
         "openapi-typescript": "^6.2.6",
+        "semver": "7.6.0",
         "ts-prune": "^0.10.3",
         "vitest": "^0.31.4"
     },
