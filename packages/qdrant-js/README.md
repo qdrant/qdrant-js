@@ -29,7 +29,7 @@ import {QdrantClient} from '@qdrant/qdrant-js'; // REST client
 import {QdrantClient} from '@qdrant/qdrant-js/grpc'; // gRPC client
 ```
 
-It is recommended to use the REST (OpenAPI-based) client initially, since REST tends to be easier to debug. Switch to gRPC when you're APIs are working for increase performance. Bare in mind that for small-size request, REST may be of equal if not more performance than gRPC. gRPC incurs a tiny conversion cost but goes easier on the wire, which makes a difference with big data chunks.
+It is recommended to use the REST (OpenAPI-based) client initially, since REST tends to be easier to debug. Switch to gRPC when you're APIs are working for increase performance. Bear in mind that for small-size request, REST may be of equal if not more performance than gRPC. gRPC incurs a tiny conversion cost but goes easier on the wire, which makes a difference with big data chunks.
 
 ## Contributing
 
