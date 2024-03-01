@@ -15,6 +15,7 @@ describe('QdrantClient', () => {
         /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
     const client = new QdrantClient();
     const collectionName = 'test_collection';
+    const bigInt = BigInt(String(Number.MAX_SAFE_INTEGER + 2));
 
     test('signal abort: timeout', async () => {
         const client = new QdrantClient({timeout: 0});
@@ -219,6 +220,14 @@ describe('QdrantClient', () => {
                     },
                     {
                         id: {
+                            pointIdOptions: {case: 'num', value: bigInt},
+                        },
+                        vectors: {
+                            vectorsOptions: {case: 'vector', value: {data: [0.18, 0.01, 0.85, 0.8]}},
+                        },
+                    },
+                    {
+                        id: {
                             pointIdOptions: {case: 'uuid', value: '98a9a4b1-4ef2-46fb-8315-a97d874fe1d7'},
                         },
                         vectors: {
@@ -315,6 +324,24 @@ describe('QdrantClient', () => {
         });
     });
 
+    test('retrieve point by uint64 id (BigInt)', async () => {
+        const points = (
+            await client.api('points').get({
+                collectionName,
+                ids: [
+                    {
+                        pointIdOptions: {case: 'num', value: bigInt},
+                    },
+                ],
+            })
+        ).result;
+        expect(points[0].toJson()).toMatchObject({
+            id: {
+                num: bigInt.toString(),
+            },
+        });
+    });
+
     test('retrieve points', async () => {
         const points = (
             await client.api('points').get({
@@ -334,8 +361,8 @@ describe('QdrantClient', () => {
 
     test('retrieve all points', async () => {
         const result = (await client.api('collections').get({collectionName})).result!;
-        expect(result.toJson(), 'check failed - 6 points expected').toMatchObject({
-            vectorsCount: '6',
+        expect(result.toJson(), 'check failed - 7 points expected').toMatchObject({
+            vectorsCount: '7',
         });
     });
 

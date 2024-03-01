@@ -1,4 +1,5 @@
 import {test, describe, expect} from 'vitest';
+import semver from 'semver';
 import {QdrantClient} from '../../src/qdrant-client.js';
 
 describe('QdrantClient', () => {
@@ -7,6 +8,9 @@ describe('QdrantClient', () => {
     const DIM = 100;
     const client = new QdrantClient();
     const collectionName = 'test_collection';
+    const bigInt = BigInt(String(Number.MAX_SAFE_INTEGER + 2)) as unknown as number;
+    const maxSafeInteger = Number.MAX_SAFE_INTEGER;
+    const supportsJSONBigInt = semver.satisfies(process.versions.node, '>=21');
 
     test('Qdrant service check', async () => {
         const {data} = await client.api('service').telemetry({});
@@ -93,9 +97,10 @@ describe('QdrantClient', () => {
                 {id: 2, vector: [0.19, 0.81, 0.75, 0.11], payload: {city: ['Berlin', 'London']}},
                 {id: 3, vector: [0.36, 0.55, 0.47, 0.94], payload: {city: ['Berlin', 'Moscow']}},
                 {id: 4, vector: [0.18, 0.01, 0.85, 0.8], payload: {city: ['London', 'Moscow']}},
+                {id: maxSafeInteger, vector: [0.19, 0.81, 0.75, 0.11]},
                 {id: '98a9a4b1-4ef2-46fb-8315-a97d874fe1d7', vector: [0.24, 0.18, 0.22, 0.44], payload: {count: [0]}},
                 {id: 'f0e09527-b096-42a8-94e9-ea94d342b925', vector: [0.35, 0.08, 0.11, 0.44]},
-            ],
+            ].concat(supportsJSONBigInt ? [{id: bigInt, vector: [0.19, 0.81, 0.75, 0.11]}] : []),
         });
         expect(result).toMatchObject<typeof result>({operation_id: expect.any(Number) as number, status: 'completed'});
     });
@@ -109,6 +114,15 @@ describe('QdrantClient', () => {
         });
     });
 
+    test.skipIf(!supportsJSONBigInt)('retrieve point by uint64 id (BigInt)', async () => {
+        const result = (await client.api('points').getPoint({collection_name: collectionName, id: bigInt})).data
+            .result!;
+        expect(result).toMatchObject<typeof result>({
+            id: bigInt,
+            vector: [0.19, 0.81, 0.75, 0.11],
+        });
+    });
+
     test('retrieve points', async () => {
         const result = await client.retrieve(collectionName, {ids: [1, 2]});
         expect(result).toHaveLength(2);
@@ -117,7 +131,7 @@ describe('QdrantClient', () => {
     test('retrieve all points', async () => {
         const result = await client.getCollection(collectionName);
         expect(result, 'check failed - 6 points expected').toMatchObject<Pick<typeof result, 'vectors_count'>>({
-            vectors_count: 6,
+            vectors_count: 7 + (supportsJSONBigInt ? 1 : 0),
         });
     });
 

@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 importers:
 
   .:
@@ -84,17 +88,17 @@ importers:
   packages/js-client-rest:
     dependencies:
       '@qdrant/openapi-typescript-fetch':
-        specifier: ^1.2.1
-        version: 1.2.1
+        specifier: 1.2.5
+        version: 1.2.5
       '@sevinf/maybe':
-        specifier: ^0.5.0
+        specifier: 0.5.0
         version: 0.5.0
       typescript:
-        specifier: '>=4.1'
+        specifier: '>=4.7'
         version: 5.0.4
       undici:
-        specifier: ^5.26.2
-        version: 5.26.2
+        specifier: 5.28.3
+        version: 5.28.3
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^24.1.0
@@ -105,9 +109,15 @@ importers:
       '@total-typescript/ts-reset':
         specifier: ^0.4.2
         version: 0.4.2
+      '@types/semver':
+        specifier: 7.5.7
+        version: 7.5.7
       openapi-typescript:
         specifier: ^6.2.6
         version: 6.2.6
+      semver:
+        specifier: 7.6.0
+        version: 7.6.0
       ts-prune:
         specifier: ^0.10.3
         version: 0.10.3
@@ -582,9 +592,9 @@ packages:
     hasBin: true
     dev: true
 
-  /@qdrant/openapi-typescript-fetch@1.2.1:
-    resolution: {integrity: sha512-oiBJRN1ME7orFZocgE25jrM3knIF/OKJfMsZPBbtMMKfgNVYfps0MokGvSJkBmecj6bf8QoLXWIGlIoaTM4Zmw==}
-    engines: {node: '>=12.0.0', pnpm: '>=8'}
+  /@qdrant/openapi-typescript-fetch@1.2.5:
+    resolution: {integrity: sha512-gy9k3C/cZWlc6PoH8iry3d+zOAAuRwxY7dfx856orwhEpp2EFvI/jhZ+nP+uajR7soD9UcrzYTQkWMMD4xVIWg==}
+    engines: {node: '>=18.0.0', pnpm: '>=8'}
     dev: false
 
   /@rollup/plugin-commonjs@24.1.0(rollup@3.21.6):
@@ -731,6 +741,10 @@ packages:
 
   /@types/semver@7.5.0:
     resolution: {integrity: sha512-G8hZ6XJiHnuhQKR7ZmysCeJWE08o8T0AXtk5darsCaTVsYZhhgUrq53jizaR2FvsoeCwJhlmwTjkXBY5Pn/ZHw==}
+    dev: true
+
+  /@types/semver@7.5.7:
+    resolution: {integrity: sha512-/wdoPq1QqkSj9/QOeKkFquEuPzQbHTWAMPH/PaUMB+JuR31lXhlWXRZ52IpfDYVlDOUBvX09uBrPwxGT1hjNBg==}
     dev: true
 
   /@typescript-eslint/eslint-plugin@5.59.5(@typescript-eslint/parser@5.59.5)(eslint@8.41.0)(typescript@5.0.4):
@@ -1194,7 +1208,7 @@ packages:
       js-string-escape: 1.0.1
       lodash: 4.17.21
       md5-hex: 3.0.1
-      semver: 7.5.1
+      semver: 7.6.0
       well-known-symbols: 2.0.0
     dev: true
 
@@ -2084,7 +2098,7 @@ packages:
       fast-glob: 3.2.12
       js-yaml: 4.1.0
       supports-color: 9.3.1
-      undici: 5.26.2
+      undici: 5.28.3
       yargs-parser: 21.1.1
     dev: true
 
@@ -2337,6 +2351,14 @@ packages:
 
   /semver@7.5.1:
     resolution: {integrity: sha512-Wvss5ivl8TMRZXXESstBA4uR5iXgEN/VC5/sOcuXdVLzcdkz4HWetIoRfG5gb5X+ij/G9rw9YoGn3QoQ8OCSpw==}
+    engines: {node: '>=10'}
+    hasBin: true
+    dependencies:
+      lru-cache: 6.0.0
+    dev: true
+
+  /semver@7.6.0:
+    resolution: {integrity: sha512-EnwXhrlwXMk9gKu5/flx5sv/an57AkRplG3hTK68W7FRDN+k+OWBj65M7719OkA82XLBxrcX0KSHj+X5COhOVg==}
     engines: {node: '>=10'}
     hasBin: true
     dependencies:
@@ -2666,8 +2688,8 @@ packages:
     resolution: {integrity: sha512-TrY6DsjTQQgyS3E3dBaOXf0TpPD8u9FVrVYmKVegJuFw51n/YB9XPt+U6ydzFG5ZIN7+DIjPbNmXoBj9esYhgQ==}
     dev: true
 
-  /undici@5.26.2:
-    resolution: {integrity: sha512-a4PDLQgLTPHVzOK+x3F79/M4GtyYPl+aX9AAK7aQxpwxDwCqkeZCScy7Gk5kWT3JtdFq1uhO3uZJdLtHI4dK9A==}
+  /undici@5.28.3:
+    resolution: {integrity: sha512-3ItfzbrhDlINjaP0duwnNsKpDQk3acHI3gVJ1z4fmwMK31k5G9OVIAMLSIaP6w4FaGkaAkN6zaQO9LUvZ1t7VA==}
     engines: {node: '>=14.0'}
     dependencies:
       '@fastify/busboy': 2.1.0

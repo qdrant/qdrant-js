@@ -10,6 +10,7 @@ describe('apiClient', () => {
         ok: true,
         status,
         json: () => new Promise((resolve) => resolve({error_message: 'response error'})),
+        text: () => new Promise((resolve) => resolve(JSON.stringify({error_message: 'response error'}))),
     });
     let originalFetch: typeof global.fetch;
 

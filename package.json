@@ -6,7 +6,7 @@
         "node": ">=18.0.0",
         "pnpm": ">=8"
     },
-    "packageManager": "pnpm@8.3.0",
+    "packageManager": "pnpm@8.15.3",
     "scripts": {
         "prepare": "node scripts/prepare.cjs && pnpm -r build",
         "ci:version": "pnpm changeset version && pnpm install --no-frozen-lockfile && git add .",
