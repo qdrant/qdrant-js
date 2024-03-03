@@ -443,6 +443,7 @@ export class QdrantClient {
             offset,
             with_payload = true,
             with_vector = false,
+            order_by,
         }: SchemaFor<'ScrollRequest'> & {consistency?: SchemaFor<'ReadConsistency'>} = {},
     ) {
         const response = await this._openApiClient.points.scrollPoints({
@@ -453,6 +454,7 @@ export class QdrantClient {
             filter,
             with_payload,
             with_vector,
+            order_by,
             consistency,
         });
         return maybe(response.data.result).orThrow('Scroll points API returned empty');
@@ -845,6 +847,7 @@ export class QdrantClient {
      *                      consistent, but may be unavailable if leader is down
      *     - payload: Key-value pairs of payload to assign
      *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
+     *     - key: Assigns payload to each point that satisfy this path of property
      *     - points|filter: List of affected points, filter or points selector.
      *         Example:
      *             - `points: [
@@ -869,6 +872,7 @@ export class QdrantClient {
             points,
             filter,
             shard_key,
+            key,
             ordering,
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'SetPayload'>,
@@ -879,6 +883,7 @@ export class QdrantClient {
             points,
             filter,
             shard_key,
+            key,
             wait,
             ordering,
         });
@@ -1429,8 +1434,13 @@ export class QdrantClient {
      *         Default: `replica`
      * @returns True if the snapshot was recovered
      */
-    async recoverSnapshot(collection_name: string, {location, priority}: SchemaFor<'SnapshotRecover'>) {
-        const response = await this._openApiClient.snapshots.recoverFromSnapshot({collection_name, location, priority});
+    async recoverSnapshot(collection_name: string, {location, priority, checksum}: SchemaFor<'SnapshotRecover'>) {
+        const response = await this._openApiClient.snapshots.recoverFromSnapshot({
+            collection_name,
+            location,
+            priority,
+            checksum: checksum === null ? undefined : checksum,
+        });
         return maybe(response.data.result).orThrow('Recover from snapshot API returned empty');
     }
 
@@ -1501,12 +1511,13 @@ export class QdrantClient {
     async recoverShardFromSnapshot(
         collection_name: string,
         shard_id: number,
-        {wait = true, ...shard_snapshot_recover}: {wait?: boolean} & SchemaFor<'ShardSnapshotRecover'>,
+        {wait = true, checksum, ...shard_snapshot_recover}: {wait?: boolean} & SchemaFor<'ShardSnapshotRecover'>,
     ) {
         const response = await this._openApiClient.snapshots.recoverShardFromSnapshot({
             collection_name,
             shard_id,
             wait,
+            checksum: checksum === null ? undefined : checksum,
             ...shard_snapshot_recover,
         });
         return maybe(response.data.result).orThrow('Recover shard from snapshot returned empty');
@@ -1708,5 +1719,23 @@ export class QdrantClient {
             searches,
         });
         return maybe(response.data.result).orThrow('Discover batch points returned empty');
+    }
+
+    /**
+     * Returns information about the running Qdrant instance
+     * @description Returns information about the running Qdrant instance like version and commit id
+     */
+    async root() {
+        const response = await this._openApiClient.service.root({});
+        return maybe(response.data.result).orThrow('Root returned empty');
+    }
+
+    /**
+     * Check the existence of a collection
+     * @description Returns "true" if the given collection name exists, and "false" otherwise
+     */
+    async collectionExists(collection_name: string) {
+        const response = await this._openApiClient.collections.collectionExists({collection_name});
+        return maybe(response.data.result).orThrow('Collection exists returned empty');
     }
 }

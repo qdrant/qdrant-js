@@ -36,5 +36,10 @@ export function createServiceApi(client: Client) {
          * An endpoint for health checking used in Kubernetes.
          */
         readyz: client.path('/readyz').method('get').create(),
+
+        /**
+         * Returns information about the running Qdrant instance.
+         */
+        root: client.path('/').method('get').create(),
     } as const;
 }
