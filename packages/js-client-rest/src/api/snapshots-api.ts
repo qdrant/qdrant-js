@@ -48,12 +48,20 @@ export function createSnapshotsApi(client: Client) {
         listSnapshots: client.path('/collections/{collection_name}/snapshots').method('get').create(),
 
         /**
+         * Recover local collection data from an uploaded snapshot. This will overwrite any data, stored on this node, for the collection. If collection does not exist - it will be created.
+         */
+        recoverFromUploadedSnapshot: client
+            .path('/collections/{collection_name}/snapshots/upload')
+            .method('post')
+            .create({wait: true, priority: true, checksum: true}),
+
+        /**
          * Recover local collection data from a snapshot. This will overwrite any data, stored on this node, for the collection. If collection does not exist - it will be created
          */
         recoverFromSnapshot: client
             .path('/collections/{collection_name}/snapshots/recover')
             .method('put')
-            .create({wait: true, checksum: true}),
+            .create({wait: true}),
 
         /**
          * Recover shard of a local collection from an uploaded snapshot. This will overwrite any data, stored on this node, for the collection shard
@@ -69,7 +77,7 @@ export function createSnapshotsApi(client: Client) {
         recoverShardFromSnapshot: client
             .path('/collections/{collection_name}/shards/{shard_id}/snapshots/recover')
             .method('put')
-            .create({wait: true, checksum: true}),
+            .create({wait: true}),
 
         /**
          * Get list of snapshots for a shard of a collection

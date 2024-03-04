@@ -1439,7 +1439,7 @@ export class QdrantClient {
             collection_name,
             location,
             priority,
-            checksum: checksum === null ? undefined : checksum,
+            checksum,
         });
         return maybe(response.data.result).orThrow('Recover from snapshot API returned empty');
     }
@@ -1511,13 +1511,12 @@ export class QdrantClient {
     async recoverShardFromSnapshot(
         collection_name: string,
         shard_id: number,
-        {wait = true, checksum, ...shard_snapshot_recover}: {wait?: boolean} & SchemaFor<'ShardSnapshotRecover'>,
+        {wait = true, ...shard_snapshot_recover}: {wait?: boolean} & SchemaFor<'ShardSnapshotRecover'>,
     ) {
         const response = await this._openApiClient.snapshots.recoverShardFromSnapshot({
             collection_name,
             shard_id,
             wait,
-            checksum: checksum === null ? undefined : checksum,
             ...shard_snapshot_recover,
         });
         return maybe(response.data.result).orThrow('Recover shard from snapshot returned empty');

@@ -3522,8 +3522,6 @@ export interface operations {
       query?: {
         /** @description If true, wait for changes to actually happen. If false - let changes happen in background. Default is true. */
         wait?: boolean;
-        /** @description Optional SHA256 checksum to verify snapshot integrity before recovery. */
-        checksum?: string;
       };
       path: {
         /** @description Name of the collection */
@@ -4025,8 +4023,6 @@ export interface operations {
       query?: {
         /** @description If true, wait for changes to actually happen. If false - let changes happen in background. Default is true. */
         wait?: boolean;
-        /** @description Optional SHA256 checksum to verify snapshot integrity before recovery. */
-        checksum?: string;
       };
       path: {
         /** @description Name of the collection */
