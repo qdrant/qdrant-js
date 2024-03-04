@@ -1,10 +1,18 @@
 # @qdrant/js-client-rest
 
+## 1.8.0
+
+### Minor Changes
+
+-   Qdrant v1.8.0 API
+-   [#62](https://github.com/qdrant/qdrant-js/pull/62) Thanks [@Rendez](https://github.com/Rendez) and [@kartik-gupta-ij](https://github.com/kartik-gupta-ij)! - Implement BigInt support
+
 ## 1.7.0
 
 ### Minor Changes
 
 -   Qdrant v1.7.0 API
+-   [#54](https://github.com/qdrant/qdrant-js/pull/54) Thanks Mohamed Morad (Morad-m11)! - recommendBatch mispell
 
 ## 1.6.0
 

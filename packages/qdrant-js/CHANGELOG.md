@@ -1,5 +1,18 @@
 # @qdrant/qdrant-js
 
+## 1.8.0
+
+### Minor Changes
+
+-   Qdrant v1.8.0 API
+
+### Patch Changes
+
+-   [`65`](https://github.com/qdrant/qdrant-js/pull/65) Thanks [@andreban](https://https://github.com/andreban)! - Fix typo in qdrant-js/README.md
+-   Updated dependencies []:
+    -   @qdrant/js-client-grpc@1.8.0
+    -   @qdrant/js-client-rest@1.8.0
+
 ## 1.7.0
 
 ### Minor Changes
