@@ -257,6 +257,13 @@ export class SnapshotDescription extends Message<SnapshotDescription> {
    */
   size = protoInt64.zero;
 
+  /**
+   * SHA256 digest of the snapshot file
+   *
+   * @generated from field: optional string checksum = 4;
+   */
+  checksum?: string;
+
   constructor(data?: PartialMessage<SnapshotDescription>) {
     super();
     proto3.util.initPartial(data, this);
@@ -268,6 +275,7 @@ export class SnapshotDescription extends Message<SnapshotDescription> {
     { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "creation_time", kind: "message", T: Timestamp },
     { no: 3, name: "size", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 4, name: "checksum", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SnapshotDescription {
