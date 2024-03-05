@@ -429,6 +429,8 @@ export class QdrantClient {
      *         - 'majority' - query all replicas, but return values present in the majority of replicas
      *         - 'quorum' - query the majority of replicas, return values present in all of them
      *         - 'all' - query all replicas, and return values present in all replicas
+     *     - order_by:
+     *         Order the records by a payload field.
      * @returns
      *     A pair of (List of points) and (optional offset for the next scroll request).
      *     If next page offset is `None` - there is no more points in the collection to scroll.
@@ -906,6 +908,8 @@ export class QdrantClient {
      *          - 'strong' - Write operations go through the permanent leader,
      *                      consistent, but may be unavailable if leader is down
      *     - payload: Key-value pairs of payload to assign
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
+     *     - key: Assigns payload to each point that satisfy this path of property
      *     - points|filter: List of affected points, filter or points selector.
      *         Example:
      *             - `points: [
@@ -930,6 +934,8 @@ export class QdrantClient {
             payload,
             points,
             filter,
+            shard_key,
+            key,
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'SetPayload'>,
     ) {
@@ -938,6 +944,8 @@ export class QdrantClient {
             payload,
             points,
             filter,
+            shard_key,
+            key,
             wait,
             ordering,
         });
@@ -1432,6 +1440,8 @@ export class QdrantClient {
      *             - `snapshot` means - prefer snapshot data over the current state
      *             - `replica` means - prefer existing data over the snapshot
      *         Default: `replica`
+     *     - checksum:
+     *         SHA256 checksum to verify snapshot integrity before recovery
      * @returns True if the snapshot was recovered
      */
     async recoverSnapshot(collection_name: string, {location, priority, checksum}: SchemaFor<'SnapshotRecover'>) {
@@ -1723,15 +1733,18 @@ export class QdrantClient {
     /**
      * Returns information about the running Qdrant instance
      * @description Returns information about the running Qdrant instance like version and commit id
+     * @returns Operation result
      */
-    async root() {
+    async versionInfo() {
         const response = await this._openApiClient.service.root({});
-        return maybe(response.data.result).orThrow('Root returned empty');
+        return maybe(response.data.result).orThrow('Version Info returned empty');
     }
 
     /**
      * Check the existence of a collection
+     * @param collection_name Name of the collection
      * @description Returns "true" if the given collection name exists, and "false" otherwise
+     * @returns Operation result
      */
     async collectionExists(collection_name: string) {
         const response = await this._openApiClient.collections.collectionExists({collection_name});
