@@ -67,6 +67,11 @@ export function createCollectionsApi(client: Client) {
         getCollectionsAliases: client.path('/aliases').method('get').create(),
 
         /**
+         * Check the existence of a collection
+         */
+        collectionExists: client.path('/collections/{collection_name}/exists').method('get').create(),
+
+        /**
          * Download specified snapshot from a collection as a file
          * @todo Fetcher needs to handle Blob for file downloads
          */
@@ -76,14 +81,6 @@ export function createCollectionsApi(client: Client) {
          * Get list of snapshots for a collection
          */
         listSnapshots: client.path('/collections/{collection_name}/snapshots').method('get').create(),
-
-        /**
-         * Recover local collection data from a snapshot. This will overwrite any data, stored on this node, for the collection. If collection does not exist - it will be created.
-         */
-        recoverFromSnapshot: client
-            .path('/collections/{collection_name}/snapshots/recover')
-            .method('put')
-            .create({wait: true}),
 
         updateAliases: client.path('/collections/aliases').method('post').create({timeout: true}),
 

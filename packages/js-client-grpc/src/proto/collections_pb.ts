@@ -120,6 +120,11 @@ export enum PayloadSchemaType {
    * @generated from enum value: Bool = 6;
    */
   Bool = 6,
+
+  /**
+   * @generated from enum value: Datetime = 7;
+   */
+  Datetime = 7,
 }
 // Retrieve enum metadata with: proto3.getEnumType(PayloadSchemaType)
 proto3.util.setEnumType(PayloadSchemaType, "qdrant.PayloadSchemaType", [
@@ -130,6 +135,7 @@ proto3.util.setEnumType(PayloadSchemaType, "qdrant.PayloadSchemaType", [
   { no: 4, name: "Geo" },
   { no: 5, name: "Text" },
   { no: 6, name: "Bool" },
+  { no: 7, name: "Datetime" },
 ]);
 
 /**
@@ -297,6 +303,13 @@ export enum ReplicaState {
    * @generated from enum value: PartialSnapshot = 5;
    */
   PartialSnapshot = 5,
+
+  /**
+   * Shard is undergoing recovered by an external node; Normally rejects updates, accepts updates if force is true
+   *
+   * @generated from enum value: Recovery = 6;
+   */
+  Recovery = 6,
 }
 // Retrieve enum metadata with: proto3.getEnumType(ReplicaState)
 proto3.util.setEnumType(ReplicaState, "qdrant.ReplicaState", [
@@ -306,6 +319,7 @@ proto3.util.setEnumType(ReplicaState, "qdrant.ReplicaState", [
   { no: 3, name: "Initializing" },
   { no: 4, name: "Listener" },
   { no: 5, name: "PartialSnapshot" },
+  { no: 6, name: "Recovery" },
 ]);
 
 /**
@@ -313,19 +327,31 @@ proto3.util.setEnumType(ReplicaState, "qdrant.ReplicaState", [
  */
 export enum ShardTransferMethod {
   /**
+   * Stream shard records in batches
+   *
    * @generated from enum value: StreamRecords = 0;
    */
   StreamRecords = 0,
 
   /**
+   * Snapshot the shard and recover it on the target peer
+   *
    * @generated from enum value: Snapshot = 1;
    */
   Snapshot = 1,
+
+  /**
+   * Resolve WAL delta between peers and transfer the difference
+   *
+   * @generated from enum value: WalDelta = 2;
+   */
+  WalDelta = 2,
 }
 // Retrieve enum metadata with: proto3.getEnumType(ShardTransferMethod)
 proto3.util.setEnumType(ShardTransferMethod, "qdrant.ShardTransferMethod", [
   { no: 0, name: "StreamRecords" },
   { no: 1, name: "Snapshot" },
+  { no: 2, name: "WalDelta" },
 ]);
 
 /**
@@ -744,6 +770,125 @@ export class GetCollectionInfoRequest extends Message<GetCollectionInfoRequest> 
 }
 
 /**
+ * @generated from message qdrant.CollectionExistsRequest
+ */
+export class CollectionExistsRequest extends Message<CollectionExistsRequest> {
+  /**
+   * @generated from field: string collection_name = 1;
+   */
+  collectionName = "";
+
+  constructor(data?: PartialMessage<CollectionExistsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.CollectionExistsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collection_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionExistsRequest {
+    return new CollectionExistsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CollectionExistsRequest {
+    return new CollectionExistsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CollectionExistsRequest {
+    return new CollectionExistsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CollectionExistsRequest | PlainMessage<CollectionExistsRequest> | undefined, b: CollectionExistsRequest | PlainMessage<CollectionExistsRequest> | undefined): boolean {
+    return proto3.util.equals(CollectionExistsRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.CollectionExists
+ */
+export class CollectionExists extends Message<CollectionExists> {
+  /**
+   * @generated from field: bool exists = 1;
+   */
+  exists = false;
+
+  constructor(data?: PartialMessage<CollectionExists>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.CollectionExists";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "exists", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionExists {
+    return new CollectionExists().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CollectionExists {
+    return new CollectionExists().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CollectionExists {
+    return new CollectionExists().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CollectionExists | PlainMessage<CollectionExists> | undefined, b: CollectionExists | PlainMessage<CollectionExists> | undefined): boolean {
+    return proto3.util.equals(CollectionExists, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.CollectionExistsResponse
+ */
+export class CollectionExistsResponse extends Message<CollectionExistsResponse> {
+  /**
+   * @generated from field: qdrant.CollectionExists result = 1;
+   */
+  result?: CollectionExists;
+
+  /**
+   * Time spent to process
+   *
+   * @generated from field: double time = 2;
+   */
+  time = 0;
+
+  constructor(data?: PartialMessage<CollectionExistsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.CollectionExistsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "result", kind: "message", T: CollectionExists },
+    { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionExistsResponse {
+    return new CollectionExistsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CollectionExistsResponse {
+    return new CollectionExistsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CollectionExistsResponse {
+    return new CollectionExistsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CollectionExistsResponse | PlainMessage<CollectionExistsResponse> | undefined, b: CollectionExistsResponse | PlainMessage<CollectionExistsResponse> | undefined): boolean {
+    return proto3.util.equals(CollectionExistsResponse, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.ListCollectionsRequest
  */
 export class ListCollectionsRequest extends Message<ListCollectionsRequest> {
@@ -979,7 +1124,10 @@ export class HnswConfigDiff extends Message<HnswConfigDiff> {
 
   /**
    *
-   * Number of parallel threads used for background index building. If 0 - auto selection.
+   * Number of parallel threads used for background index building.
+   * If 0 - automatically select from 8 to 16.
+   * Best to keep between 8 and 16 to prevent likelihood of building broken/inefficient HNSW graphs.
+   * On small CPUs, less threads are used.
    *
    * @generated from field: optional uint64 max_indexing_threads = 4;
    */
@@ -1220,7 +1368,10 @@ export class OptimizersConfigDiff extends Message<OptimizersConfigDiff> {
 
   /**
    *
-   * Max number of threads, which can be used for optimization. If 0 - `NUM_CPU - 1` will be used
+   * Max number of threads (jobs) for running optimizations per shard.
+   * Note: each optimization job will also use `max_indexing_threads` threads by itself for index building.
+   * If null - have no limit and choose dynamically to saturate CPU.
+   * If 0 - no optimization threads, optimizations will be disabled.
    *
    * @generated from field: optional uint64 max_optimization_threads = 8;
    */
@@ -2179,6 +2330,53 @@ export class TextIndexParams extends Message<TextIndexParams> {
 }
 
 /**
+ * @generated from message qdrant.IntegerIndexParams
+ */
+export class IntegerIndexParams extends Message<IntegerIndexParams> {
+  /**
+   * If true - support direct lookups.
+   *
+   * @generated from field: bool lookup = 1;
+   */
+  lookup = false;
+
+  /**
+   * If true - support ranges filters.
+   *
+   * @generated from field: bool range = 2;
+   */
+  range = false;
+
+  constructor(data?: PartialMessage<IntegerIndexParams>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.IntegerIndexParams";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "lookup", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 2, name: "range", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IntegerIndexParams {
+    return new IntegerIndexParams().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): IntegerIndexParams {
+    return new IntegerIndexParams().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): IntegerIndexParams {
+    return new IntegerIndexParams().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: IntegerIndexParams | PlainMessage<IntegerIndexParams> | undefined, b: IntegerIndexParams | PlainMessage<IntegerIndexParams> | undefined): boolean {
+    return proto3.util.equals(IntegerIndexParams, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.PayloadIndexParams
  */
 export class PayloadIndexParams extends Message<PayloadIndexParams> {
@@ -2193,6 +2391,14 @@ export class PayloadIndexParams extends Message<PayloadIndexParams> {
      */
     value: TextIndexParams;
     case: "textIndexParams";
+  } | {
+    /**
+     * Parameters for integer index
+     *
+     * @generated from field: qdrant.IntegerIndexParams integer_index_params = 2;
+     */
+    value: IntegerIndexParams;
+    case: "integerIndexParams";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<PayloadIndexParams>) {
@@ -2204,6 +2410,7 @@ export class PayloadIndexParams extends Message<PayloadIndexParams> {
   static readonly typeName = "qdrant.PayloadIndexParams";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "text_index_params", kind: "message", T: TextIndexParams, oneof: "index_params" },
+    { no: 2, name: "integer_index_params", kind: "message", T: IntegerIndexParams, oneof: "index_params" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PayloadIndexParams {
@@ -3179,6 +3386,63 @@ export class MoveShard extends Message<MoveShard> {
 }
 
 /**
+ * @generated from message qdrant.RestartTransfer
+ */
+export class RestartTransfer extends Message<RestartTransfer> {
+  /**
+   * Local shard id
+   *
+   * @generated from field: uint32 shard_id = 1;
+   */
+  shardId = 0;
+
+  /**
+   * @generated from field: uint64 from_peer_id = 2;
+   */
+  fromPeerId = protoInt64.zero;
+
+  /**
+   * @generated from field: uint64 to_peer_id = 3;
+   */
+  toPeerId = protoInt64.zero;
+
+  /**
+   * @generated from field: qdrant.ShardTransferMethod method = 4;
+   */
+  method = ShardTransferMethod.StreamRecords;
+
+  constructor(data?: PartialMessage<RestartTransfer>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.RestartTransfer";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "shard_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "from_peer_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 3, name: "to_peer_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 4, name: "method", kind: "enum", T: proto3.getEnumType(ShardTransferMethod) },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RestartTransfer {
+    return new RestartTransfer().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): RestartTransfer {
+    return new RestartTransfer().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): RestartTransfer {
+    return new RestartTransfer().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: RestartTransfer | PlainMessage<RestartTransfer> | undefined, b: RestartTransfer | PlainMessage<RestartTransfer> | undefined): boolean {
+    return proto3.util.equals(RestartTransfer, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.Replica
  */
 export class Replica extends Message<Replica> {
@@ -3373,6 +3637,12 @@ export class UpdateCollectionClusterSetupRequest extends Message<UpdateCollectio
      */
     value: DeleteShardKey;
     case: "deleteShardKey";
+  } | {
+    /**
+     * @generated from field: qdrant.RestartTransfer restart_transfer = 9;
+     */
+    value: RestartTransfer;
+    case: "restartTransfer";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   /**
@@ -3397,6 +3667,7 @@ export class UpdateCollectionClusterSetupRequest extends Message<UpdateCollectio
     { no: 5, name: "drop_replica", kind: "message", T: Replica, oneof: "operation" },
     { no: 7, name: "create_shard_key", kind: "message", T: CreateShardKey, oneof: "operation" },
     { no: 8, name: "delete_shard_key", kind: "message", T: DeleteShardKey, oneof: "operation" },
+    { no: 9, name: "restart_transfer", kind: "message", T: RestartTransfer, oneof: "operation" },
     { no: 6, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
   ]);
 

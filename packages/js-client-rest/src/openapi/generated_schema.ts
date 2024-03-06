@@ -18,6 +18,13 @@ export interface paths {
     /** Delete shard key */
     post: operations["delete_shard_key"];
   };
+  "/": {
+    /**
+     * Returns information about the running Qdrant instance 
+     * @description Returns information about the running Qdrant instance like version and commit id
+     */
+    get: operations["root"];
+  };
   "/telemetry": {
     /**
      * Collect telemetry data 
@@ -122,6 +129,13 @@ export interface paths {
      * @description Create index for field in collection
      */
     put: operations["create_field_index"];
+  };
+  "/collections/{collection_name}/exists": {
+    /**
+     * Check the existence of a collection 
+     * @description Returns "true" if the given collection name exists, and "false" otherwise
+     */
+    get: operations["collection_exists"];
   };
   "/collections/{collection_name}/index/{field_name}": {
     /**
@@ -557,7 +571,7 @@ export interface components {
       full_scan_threshold?: number | null;
       /**
        * Format: uint 
-       * @description Number of parallel threads used for background index building. If 0 - auto selection.
+       * @description Number of parallel threads used for background index building. If 0 - automatically select from 8 to 16. Best to keep between 8 and 16 to prevent likelihood of building broken/inefficient HNSW graphs. On small CPUs, less threads are used.
        */
       max_indexing_threads?: number | null;
       /** @description Store HNSW index on disk. If set to false, the index will be stored in RAM. Default: false */
@@ -637,7 +651,7 @@ export interface components {
       full_scan_threshold: number;
       /**
        * Format: uint 
-       * @description Number of parallel threads used for background index building. If 0 - auto selection. 
+       * @description Number of parallel threads used for background index building. If 0 - automatically select from 8 to 16. Best to keep between 8 and 16 to prevent likelihood of slow building or broken/inefficient HNSW graphs. On small CPUs, less threads are used. 
        * @default 0
        */
       max_indexing_threads?: number;
@@ -706,9 +720,10 @@ export interface components {
       flush_interval_sec: number;
       /**
        * Format: uint 
-       * @description Maximum available threads for optimization workers
+       * @description Max number of threads (jobs) for running optimizations per shard. Note: each optimization job will also use `max_indexing_threads` threads by itself for index building. If null - have no limit and choose dynamically to saturate CPU. If 0 - no optimization threads, optimizations will be disabled. 
+       * @default null
        */
-      max_optimization_threads: number;
+      max_optimization_threads?: number | null;
     };
     WalConfig: {
       /**
@@ -736,9 +751,9 @@ export interface components {
      * @description All possible names of payload types 
      * @enum {string}
      */
-    PayloadSchemaType: "keyword" | "integer" | "float" | "geo" | "text" | "bool";
+    PayloadSchemaType: "keyword" | "integer" | "float" | "geo" | "text" | "bool" | "datetime";
     /** @description Payload type with parameters */
-    PayloadSchemaParams: components["schemas"]["TextIndexParams"];
+    PayloadSchemaParams: components["schemas"]["TextIndexParams"] | components["schemas"]["IntegerIndexParams"];
     TextIndexParams: {
       type: components["schemas"]["TextIndexType"];
       tokenizer?: components["schemas"]["TokenizerType"];
@@ -753,6 +768,15 @@ export interface components {
     TextIndexType: "text";
     /** @enum {string} */
     TokenizerType: "prefix" | "whitespace" | "word" | "multilingual";
+    IntegerIndexParams: {
+      type: components["schemas"]["IntegerIndexType"];
+      /** @description If true - support direct lookups. */
+      lookup: boolean;
+      /** @description If true - support ranges filters. */
+      range: boolean;
+    };
+    /** @enum {string} */
+    IntegerIndexType: "integer";
     PointRequest: {
       /** @description Specify in which shards to look for the points, if not specified - look in all shards */
       shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
@@ -863,6 +887,8 @@ export interface components {
     Filter: {
       /** @description At least one of those conditions should match */
       should?: (components["schemas"]["Condition"])[] | null;
+      /** @description At least minimum amount of given conditions should match */
+      min_should?: components["schemas"]["MinShould"] | (Record<string, unknown> | null);
       /** @description All conditions must match */
       must?: (components["schemas"]["Condition"])[] | null;
       /** @description All conditions must NOT match */
@@ -876,7 +902,7 @@ export interface components {
       /** @description Check if point has field with a given value */
       match?: components["schemas"]["Match"] | (Record<string, unknown> | null);
       /** @description Check if points value lies in a given range */
-      range?: components["schemas"]["Range"] | (Record<string, unknown> | null);
+      range?: components["schemas"]["RangeInterface"] | (Record<string, unknown> | null);
       /** @description Check if points geo location lies in a given area */
       geo_bounding_box?: components["schemas"]["GeoBoundingBox"] | (Record<string, unknown> | null);
       /** @description Check if geo point is within a given radius */
@@ -906,6 +932,7 @@ export interface components {
     MatchExcept: {
       except: components["schemas"]["AnyVariants"];
     };
+    RangeInterface: components["schemas"]["Range"] | components["schemas"]["DatetimeRange"];
     /** @description Range filter request */
     Range: {
       /**
@@ -928,6 +955,29 @@ export interface components {
        * @description point.key <= range.lte
        */
       lte?: number | null;
+    };
+    /** @description Range filter request */
+    DatetimeRange: {
+      /**
+       * Format: date-time 
+       * @description point.key < range.lt
+       */
+      lt?: string | null;
+      /**
+       * Format: date-time 
+       * @description point.key > range.gt
+       */
+      gt?: string | null;
+      /**
+       * Format: date-time 
+       * @description point.key >= range.gte
+       */
+      gte?: string | null;
+      /**
+       * Format: date-time 
+       * @description point.key <= range.lte
+       */
+      lte?: string | null;
     };
     /**
      * @description Geo filter request
@@ -1019,6 +1069,11 @@ export interface components {
     Nested: {
       key: string;
       filter: components["schemas"]["Filter"];
+    };
+    MinShould: {
+      conditions: (components["schemas"]["Condition"])[];
+      /** Format: uint */
+      min_count: number;
     };
     /** @description Additional parameters of the search */
     SearchParams: {
@@ -1195,7 +1250,21 @@ export interface components {
       /** @description Select which payload to return with the response. Default: All */
       with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
       with_vector?: components["schemas"]["WithVector"];
+      /** @description Order the records by a payload field. */
+      order_by?: components["schemas"]["OrderByInterface"] | (Record<string, unknown> | null);
     };
+    OrderByInterface: string | components["schemas"]["OrderBy"];
+    OrderBy: {
+      /** @description Payload key to order by */
+      key: string;
+      /** @description Direction of ordering: `asc` or `desc`. Default is ascending. */
+      direction?: components["schemas"]["Direction"] | (Record<string, unknown> | null);
+      /** @description Which payload value to start scrolling from. Default is the lowest value for `asc` and the highest for `desc` */
+      start_from?: components["schemas"]["StartFrom"] | (Record<string, unknown> | null);
+    };
+    /** @enum {string} */
+    Direction: "asc" | "desc";
+    StartFrom: number | string;
     /** @description Result of the points read request */
     ScrollResult: {
       /** @description List of retrieved points */
@@ -1321,7 +1390,7 @@ export interface components {
       flush_interval_sec?: number | null;
       /**
        * Format: uint 
-       * @description Maximum available threads for optimization workers
+       * @description Max number of threads (jobs) for running optimizations per shard. Note: each optimization job will also use `max_indexing_threads` threads by itself for index building. If null - have no limit and choose dynamically to saturate CPU. If 0 - no optimization threads, optimizations will be disabled.
        */
       max_optimization_threads?: number | null;
     };
@@ -1467,6 +1536,8 @@ export interface components {
       /** @description Assigns payload to each point that satisfy this filter condition */
       filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
       shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
+      /** @description Assigns payload to each point that satisfy this path of property */
+      key?: string | null;
     };
     /** @description This data structure is used in API interface and applied across multiple shards */
     DeletePayload: {
@@ -1556,6 +1627,11 @@ export interface components {
       /** Format: uint */
       count: number;
       latest_error?: string | null;
+      /**
+       * Format: date-time 
+       * @description Timestamp of the latest error
+       */
+      latest_error_timestamp?: string | null;
     };
     SnapshotDescription: {
       name: string;
@@ -1563,6 +1639,7 @@ export interface components {
       creation_time?: string | null;
       /** Format: uint64 */
       size: number;
+      checksum?: string | null;
     };
     /** @description Count Request Counts the number of points which satisfy the given filter. If filter is not provided, the count of all points in the collection will be returned. */
     CountRequest: {
@@ -1621,7 +1698,7 @@ export interface components {
      * @description State of the single shard within a replica set. 
      * @enum {string}
      */
-    ReplicaState: "Active" | "Dead" | "Partial" | "Initializing" | "Listener" | "PartialSnapshot";
+    ReplicaState: "Active" | "Dead" | "Partial" | "Initializing" | "Listener" | "PartialSnapshot" | "Recovery";
     RemoteShardInfo: {
       /**
        * Format: uint32 
@@ -1640,13 +1717,21 @@ export interface components {
     ShardTransferInfo: {
       /** Format: uint32 */
       shard_id: number;
-      /** Format: uint64 */
+      /**
+       * Format: uint64 
+       * @description Source peer id
+       */
       from: number;
-      /** Format: uint64 */
+      /**
+       * Format: uint64 
+       * @description Destination peer id
+       */
       to: number;
       /** @description If `true` transfer is a synchronization of a replicas If `false` transfer is a moving of a shard from one peer to another */
       sync: boolean;
       method?: components["schemas"]["ShardTransferMethod"] | (Record<string, unknown> | null);
+      /** @description A human-readable report of the transfer progress. Available only on the source peer. */
+      comment?: string | null;
     };
     /** @description Methods for transferring a shard from one node to another. */
     ShardTransferMethod: "stream_records" | "snapshot";
@@ -1830,12 +1915,26 @@ export interface components {
       count: number;
       /** Format: uint */
       fail_count?: number;
-      /** Format: float */
+      /**
+       * Format: float 
+       * @description The average time taken by 128 latest operations, calculated as a weighted mean.
+       */
       avg_duration_micros?: number | null;
-      /** Format: float */
+      /**
+       * Format: float 
+       * @description The minimum duration of the operations across all the measurements.
+       */
       min_duration_micros?: number | null;
-      /** Format: float */
+      /**
+       * Format: float 
+       * @description The maximum duration of the operations across all the measurements.
+       */
       max_duration_micros?: number | null;
+      /**
+       * Format: uint64 
+       * @description The total duration of all operations in microseconds.
+       */
+      total_duration_micros: number;
       /** Format: date-time */
       last_responded?: string | null;
     };
@@ -1945,7 +2044,7 @@ export interface components {
         [key: string]: components["schemas"]["OperationDurationStatistics"] | undefined;
       };
     };
-    ClusterOperations: components["schemas"]["MoveShardOperation"] | components["schemas"]["ReplicateShardOperation"] | components["schemas"]["AbortTransferOperation"] | components["schemas"]["DropReplicaOperation"] | components["schemas"]["CreateShardingKeyOperation"] | components["schemas"]["DropShardingKeyOperation"];
+    ClusterOperations: components["schemas"]["MoveShardOperation"] | components["schemas"]["ReplicateShardOperation"] | components["schemas"]["AbortTransferOperation"] | components["schemas"]["DropReplicaOperation"] | components["schemas"]["CreateShardingKeyOperation"] | components["schemas"]["DropShardingKeyOperation"] | components["schemas"]["RestartTransferOperation"];
     MoveShardOperation: {
       move_shard: components["schemas"]["MoveShard"];
     };
@@ -1998,6 +2097,18 @@ export interface components {
     DropShardingKey: {
       shard_key: components["schemas"]["ShardKey"];
     };
+    RestartTransferOperation: {
+      restart_transfer: components["schemas"]["RestartTransfer"];
+    };
+    RestartTransfer: {
+      /** Format: uint32 */
+      shard_id: number;
+      /** Format: uint64 */
+      from_peer_id: number;
+      /** Format: uint64 */
+      to_peer_id: number;
+      method: components["schemas"]["ShardTransferMethod"];
+    };
     SearchRequestBatch: {
       searches: (components["schemas"]["SearchRequest"])[];
     };
@@ -2019,6 +2130,11 @@ export interface components {
        * @default null
        */
       priority?: components["schemas"]["SnapshotPriority"] | (Record<string, unknown> | null);
+      /**
+       * @description Optional SHA256 checksum to verify snapshot integrity before recovery. 
+       * @default null
+       */
+      checksum?: string | null;
     };
     /**
      * @description Defines source of truth for snapshot recovery: `NoSync` means - restore snapshot without *any* additional synchronization. `Snapshot` means - prefer snapshot data over the current state. `Replica` means - prefer existing data over the snapshot. 
@@ -2239,6 +2355,11 @@ export interface components {
       location: components["schemas"]["ShardSnapshotLocation"];
       /** @default null */
       priority?: components["schemas"]["SnapshotPriority"] | (Record<string, unknown> | null);
+      /**
+       * @description Optional SHA256 checksum to verify snapshot integrity before recovery. 
+       * @default null
+       */
+      checksum?: string | null;
     };
     ShardSnapshotLocation: string;
     /** @description Use context and a target to find the most similar points, constrained by the context. */
@@ -2296,6 +2417,15 @@ export interface components {
     };
     DiscoverRequestBatch: {
       searches: (components["schemas"]["DiscoverRequest"])[];
+    };
+    VersionInfo: {
+      title: string;
+      version: string;
+      commit?: string | null;
+    };
+    /** @description State of existence of a collection, true = exists, false = does not exist */
+    CollectionExistence: {
+      exists: boolean;
     };
   };
   responses: never;
@@ -2392,6 +2522,40 @@ export interface operations {
             time?: number;
             status?: string;
             result?: boolean;
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Returns information about the running Qdrant instance 
+   * @description Returns information about the running Qdrant instance like version and commit id
+   */
+  root: {
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            status?: string;
+            result?: components["schemas"]["VersionInfo"];
           };
         };
       };
@@ -3028,6 +3192,46 @@ export interface operations {
     };
   };
   /**
+   * Check the existence of a collection 
+   * @description Returns "true" if the given collection name exists, and "false" otherwise
+   */
+  collection_exists: {
+    parameters: {
+      path: {
+        /** @description Name of the collection */
+        collection_name: string;
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            status?: string;
+            result?: components["schemas"]["CollectionExistence"];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
    * Delete index for field in collection 
    * @description Delete field index for collection
    */
@@ -3250,6 +3454,8 @@ export interface operations {
         wait?: boolean;
         /** @description Defines source of truth for snapshot recovery */
         priority?: components["schemas"]["SnapshotPriority"];
+        /** @description Optional SHA256 checksum to verify snapshot integrity before recovery. */
+        checksum?: string;
       };
       path: {
         /** @description Name of the collection */
@@ -3747,6 +3953,8 @@ export interface operations {
         wait?: boolean;
         /** @description Defines source of truth for snapshot recovery */
         priority?: components["schemas"]["SnapshotPriority"];
+        /** @description Optional SHA256 checksum to verify snapshot integrity before recovery. */
+        checksum?: string;
       };
       path: {
         /** @description Name of the collection */

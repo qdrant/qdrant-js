@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ChangeAliases, CollectionClusterInfoRequest, CollectionClusterInfoResponse, CollectionOperationResponse, CreateCollection, CreateShardKeyRequest, CreateShardKeyResponse, DeleteCollection, DeleteShardKeyRequest, DeleteShardKeyResponse, GetCollectionInfoRequest, GetCollectionInfoResponse, ListAliasesRequest, ListAliasesResponse, ListCollectionAliasesRequest, ListCollectionsRequest, ListCollectionsResponse, UpdateCollection, UpdateCollectionClusterSetupRequest, UpdateCollectionClusterSetupResponse } from "./collections_pb.js";
+import { ChangeAliases, CollectionClusterInfoRequest, CollectionClusterInfoResponse, CollectionExistsRequest, CollectionExistsResponse, CollectionOperationResponse, CreateCollection, CreateShardKeyRequest, CreateShardKeyResponse, DeleteCollection, DeleteShardKeyRequest, DeleteShardKeyResponse, GetCollectionInfoRequest, GetCollectionInfoResponse, ListAliasesRequest, ListAliasesResponse, ListCollectionAliasesRequest, ListCollectionsRequest, ListCollectionsResponse, UpdateCollection, UpdateCollectionClusterSetupRequest, UpdateCollectionClusterSetupResponse } from "./collections_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -118,6 +118,18 @@ export const Collections = {
       name: "CollectionClusterInfo",
       I: CollectionClusterInfoRequest,
       O: CollectionClusterInfoResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Check the existence of a collection
+     *
+     * @generated from rpc qdrant.Collections.CollectionExists
+     */
+    collectionExists: {
+      name: "CollectionExists",
+      I: CollectionExistsRequest,
+      O: CollectionExistsResponse,
       kind: MethodKind.Unary,
     },
     /**

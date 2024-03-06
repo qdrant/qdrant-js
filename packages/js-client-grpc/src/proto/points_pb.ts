@@ -4,7 +4,7 @@
 // @ts-nocheck
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
+import { Message, proto3, protoInt64, Timestamp } from "@bufbuild/protobuf";
 import { PayloadIndexParams, ShardKey } from "./collections_pb.js";
 import { Value } from "./json_with_int_pb.js";
 
@@ -105,6 +105,11 @@ export enum FieldType {
    * @generated from enum value: FieldTypeBool = 5;
    */
   FieldTypeBool = 5,
+
+  /**
+   * @generated from enum value: FieldTypeDatetime = 6;
+   */
+  FieldTypeDatetime = 6,
 }
 // Retrieve enum metadata with: proto3.getEnumType(FieldType)
 proto3.util.setEnumType(FieldType, "qdrant.FieldType", [
@@ -114,6 +119,27 @@ proto3.util.setEnumType(FieldType, "qdrant.FieldType", [
   { no: 3, name: "FieldTypeGeo" },
   { no: 4, name: "FieldTypeText" },
   { no: 5, name: "FieldTypeBool" },
+  { no: 6, name: "FieldTypeDatetime" },
+]);
+
+/**
+ * @generated from enum qdrant.Direction
+ */
+export enum Direction {
+  /**
+   * @generated from enum value: Asc = 0;
+   */
+  Asc = 0,
+
+  /**
+   * @generated from enum value: Desc = 1;
+   */
+  Desc = 1,
+}
+// Retrieve enum metadata with: proto3.getEnumType(Direction)
+proto3.util.setEnumType(Direction, "qdrant.Direction", [
+  { no: 0, name: "Asc" },
+  { no: 1, name: "Desc" },
 ]);
 
 /**
@@ -167,12 +193,20 @@ export enum UpdateStatus {
    * @generated from enum value: Completed = 2;
    */
   Completed = 2,
+
+  /**
+   * Internal: update is rejected due to an outdated clock
+   *
+   * @generated from enum value: ClockRejected = 3;
+   */
+  ClockRejected = 3,
 }
 // Retrieve enum metadata with: proto3.getEnumType(UpdateStatus)
 proto3.util.setEnumType(UpdateStatus, "qdrant.UpdateStatus", [
   { no: 0, name: "UnknownUpdateStatus" },
   { no: 1, name: "Acknowledged" },
   { no: 2, name: "Completed" },
+  { no: 3, name: "ClockRejected" },
 ]);
 
 /**
@@ -907,6 +941,13 @@ export class SetPayloadPoints extends Message<SetPayloadPoints> {
    */
   shardKeySelector?: ShardKeySelector;
 
+  /**
+   * Option for indicate property of payload
+   *
+   * @generated from field: optional string key = 8;
+   */
+  key?: string;
+
   constructor(data?: PartialMessage<SetPayloadPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -921,6 +962,7 @@ export class SetPayloadPoints extends Message<SetPayloadPoints> {
     { no: 5, name: "points_selector", kind: "message", T: PointsSelector, opt: true },
     { no: 6, name: "ordering", kind: "message", T: WriteOrdering, opt: true },
     { no: 7, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+    { no: 8, name: "key", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SetPayloadPoints {
@@ -2098,6 +2140,125 @@ export class SearchPointGroups extends Message<SearchPointGroups> {
 }
 
 /**
+ * @generated from message qdrant.StartFrom
+ */
+export class StartFrom extends Message<StartFrom> {
+  /**
+   * @generated from oneof qdrant.StartFrom.value
+   */
+  value: {
+    /**
+     * @generated from field: double float = 1;
+     */
+    value: number;
+    case: "float";
+  } | {
+    /**
+     * @generated from field: int64 integer = 2;
+     */
+    value: bigint;
+    case: "integer";
+  } | {
+    /**
+     * @generated from field: google.protobuf.Timestamp timestamp = 3;
+     */
+    value: Timestamp;
+    case: "timestamp";
+  } | {
+    /**
+     * @generated from field: string datetime = 4;
+     */
+    value: string;
+    case: "datetime";
+  } | { case: undefined; value?: undefined } = { case: undefined };
+
+  constructor(data?: PartialMessage<StartFrom>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.StartFrom";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "float", kind: "scalar", T: 1 /* ScalarType.DOUBLE */, oneof: "value" },
+    { no: 2, name: "integer", kind: "scalar", T: 3 /* ScalarType.INT64 */, oneof: "value" },
+    { no: 3, name: "timestamp", kind: "message", T: Timestamp, oneof: "value" },
+    { no: 4, name: "datetime", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "value" },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StartFrom {
+    return new StartFrom().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StartFrom {
+    return new StartFrom().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StartFrom {
+    return new StartFrom().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: StartFrom | PlainMessage<StartFrom> | undefined, b: StartFrom | PlainMessage<StartFrom> | undefined): boolean {
+    return proto3.util.equals(StartFrom, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.OrderBy
+ */
+export class OrderBy extends Message<OrderBy> {
+  /**
+   * Payload key to order by
+   *
+   * @generated from field: string key = 1;
+   */
+  key = "";
+
+  /**
+   * Ascending or descending order
+   *
+   * @generated from field: optional qdrant.Direction direction = 2;
+   */
+  direction?: Direction;
+
+  /**
+   * Start from this value
+   *
+   * @generated from field: optional qdrant.StartFrom start_from = 3;
+   */
+  startFrom?: StartFrom;
+
+  constructor(data?: PartialMessage<OrderBy>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.OrderBy";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "direction", kind: "enum", T: proto3.getEnumType(Direction), opt: true },
+    { no: 3, name: "start_from", kind: "message", T: StartFrom, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OrderBy {
+    return new OrderBy().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OrderBy {
+    return new OrderBy().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OrderBy {
+    return new OrderBy().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: OrderBy | PlainMessage<OrderBy> | undefined, b: OrderBy | PlainMessage<OrderBy> | undefined): boolean {
+    return proto3.util.equals(OrderBy, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.ScrollPoints
  */
 export class ScrollPoints extends Message<ScrollPoints> {
@@ -2155,6 +2316,13 @@ export class ScrollPoints extends Message<ScrollPoints> {
    */
   shardKeySelector?: ShardKeySelector;
 
+  /**
+   * Order the records by a payload field
+   *
+   * @generated from field: optional qdrant.OrderBy order_by = 10;
+   */
+  orderBy?: OrderBy;
+
   constructor(data?: PartialMessage<ScrollPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2171,6 +2339,7 @@ export class ScrollPoints extends Message<ScrollPoints> {
     { no: 7, name: "with_vectors", kind: "message", T: WithVectorsSelector, opt: true },
     { no: 8, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
     { no: 9, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+    { no: 10, name: "order_by", kind: "message", T: OrderBy, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ScrollPoints {
@@ -3257,6 +3426,13 @@ export class PointsUpdateOperation_SetPayload extends Message<PointsUpdateOperat
    */
   shardKeySelector?: ShardKeySelector;
 
+  /**
+   * Option for indicate property of payload
+   *
+   * @generated from field: optional string key = 4;
+   */
+  key?: string;
+
   constructor(data?: PartialMessage<PointsUpdateOperation_SetPayload>) {
     super();
     proto3.util.initPartial(data, this);
@@ -3268,6 +3444,7 @@ export class PointsUpdateOperation_SetPayload extends Message<PointsUpdateOperat
     { no: 1, name: "payload", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: Value} },
     { no: 2, name: "points_selector", kind: "message", T: PointsSelector, opt: true },
     { no: 3, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+    { no: 4, name: "key", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation_SetPayload {
@@ -4629,6 +4806,13 @@ export class Filter extends Message<Filter> {
    */
   mustNot: Condition[] = [];
 
+  /**
+   * At least minimum amount of given conditions should match 
+   *
+   * @generated from field: optional qdrant.MinShould min_should = 4;
+   */
+  minShould?: MinShould;
+
   constructor(data?: PartialMessage<Filter>) {
     super();
     proto3.util.initPartial(data, this);
@@ -4640,6 +4824,7 @@ export class Filter extends Message<Filter> {
     { no: 1, name: "should", kind: "message", T: Condition, repeated: true },
     { no: 2, name: "must", kind: "message", T: Condition, repeated: true },
     { no: 3, name: "must_not", kind: "message", T: Condition, repeated: true },
+    { no: 4, name: "min_should", kind: "message", T: MinShould, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Filter {
@@ -4656,6 +4841,49 @@ export class Filter extends Message<Filter> {
 
   static equals(a: Filter | PlainMessage<Filter> | undefined, b: Filter | PlainMessage<Filter> | undefined): boolean {
     return proto3.util.equals(Filter, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.MinShould
+ */
+export class MinShould extends Message<MinShould> {
+  /**
+   * @generated from field: repeated qdrant.Condition conditions = 1;
+   */
+  conditions: Condition[] = [];
+
+  /**
+   * @generated from field: uint64 min_count = 2;
+   */
+  minCount = protoInt64.zero;
+
+  constructor(data?: PartialMessage<MinShould>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.MinShould";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "conditions", kind: "message", T: Condition, repeated: true },
+    { no: 2, name: "min_count", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MinShould {
+    return new MinShould().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MinShould {
+    return new MinShould().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MinShould {
+    return new MinShould().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MinShould | PlainMessage<MinShould> | undefined, b: MinShould | PlainMessage<MinShould> | undefined): boolean {
+    return proto3.util.equals(MinShould, a, b);
   }
 }
 
@@ -4946,6 +5174,13 @@ export class FieldCondition extends Message<FieldCondition> {
    */
   geoPolygon?: GeoPolygon;
 
+  /**
+   * Check if datetime is within a given range
+   *
+   * @generated from field: qdrant.DatetimeRange datetime_range = 8;
+   */
+  datetimeRange?: DatetimeRange;
+
   constructor(data?: PartialMessage<FieldCondition>) {
     super();
     proto3.util.initPartial(data, this);
@@ -4961,6 +5196,7 @@ export class FieldCondition extends Message<FieldCondition> {
     { no: 5, name: "geo_radius", kind: "message", T: GeoRadius },
     { no: 6, name: "values_count", kind: "message", T: ValuesCount },
     { no: 7, name: "geo_polygon", kind: "message", T: GeoPolygon },
+    { no: 8, name: "datetime_range", kind: "message", T: DatetimeRange },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FieldCondition {
@@ -5214,6 +5450,61 @@ export class Range extends Message<Range> {
 
   static equals(a: Range | PlainMessage<Range> | undefined, b: Range | PlainMessage<Range> | undefined): boolean {
     return proto3.util.equals(Range, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.DatetimeRange
+ */
+export class DatetimeRange extends Message<DatetimeRange> {
+  /**
+   * @generated from field: optional google.protobuf.Timestamp lt = 1;
+   */
+  lt?: Timestamp;
+
+  /**
+   * @generated from field: optional google.protobuf.Timestamp gt = 2;
+   */
+  gt?: Timestamp;
+
+  /**
+   * @generated from field: optional google.protobuf.Timestamp gte = 3;
+   */
+  gte?: Timestamp;
+
+  /**
+   * @generated from field: optional google.protobuf.Timestamp lte = 4;
+   */
+  lte?: Timestamp;
+
+  constructor(data?: PartialMessage<DatetimeRange>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.DatetimeRange";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "lt", kind: "message", T: Timestamp, opt: true },
+    { no: 2, name: "gt", kind: "message", T: Timestamp, opt: true },
+    { no: 3, name: "gte", kind: "message", T: Timestamp, opt: true },
+    { no: 4, name: "lte", kind: "message", T: Timestamp, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DatetimeRange {
+    return new DatetimeRange().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DatetimeRange {
+    return new DatetimeRange().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DatetimeRange {
+    return new DatetimeRange().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DatetimeRange | PlainMessage<DatetimeRange> | undefined, b: DatetimeRange | PlainMessage<DatetimeRange> | undefined): boolean {
+    return proto3.util.equals(DatetimeRange, a, b);
   }
 }
 
