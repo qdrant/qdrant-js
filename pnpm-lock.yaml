@@ -88,8 +88,8 @@ importers:
   packages/js-client-rest:
     dependencies:
       '@qdrant/openapi-typescript-fetch':
-        specifier: 1.2.5
-        version: 1.2.5
+        specifier: 1.2.6
+        version: 1.2.6
       '@sevinf/maybe':
         specifier: 0.5.0
         version: 0.5.0
@@ -592,8 +592,8 @@ packages:
     hasBin: true
     dev: true
 
-  /@qdrant/openapi-typescript-fetch@1.2.5:
-    resolution: {integrity: sha512-gy9k3C/cZWlc6PoH8iry3d+zOAAuRwxY7dfx856orwhEpp2EFvI/jhZ+nP+uajR7soD9UcrzYTQkWMMD4xVIWg==}
+  /@qdrant/openapi-typescript-fetch@1.2.6:
+    resolution: {integrity: sha512-oQG/FejNpItrxRHoyctYvT3rwGZOnK4jr3JdppO/c78ktDvkWiPXPHNsrDf33K9sZdRb6PR7gi4noIapu5q4HA==}
     engines: {node: '>=18.0.0', pnpm: '>=8'}
     dev: false
 
