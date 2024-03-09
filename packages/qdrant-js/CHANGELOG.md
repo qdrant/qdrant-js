@@ -1,5 +1,13 @@
 # @qdrant/qdrant-js
 
+## 1.8.1
+
+### Patch Changes
+
+-   [#67](https://github.com/qdrant/qdrant-js/pull/67) Update dependencies for @qdrant/openapi-typescript-fetch to 1.2.6
+-   Updated dependencie []:
+    -   @qdrant/js-client-rest@1.8.1
+
 ## 1.8.0
 
 ### Minor Changes
