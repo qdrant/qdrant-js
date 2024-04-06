@@ -131,7 +131,7 @@ importers:
         specifier: workspace:1.8.0
         version: link:../js-client-grpc
       '@qdrant/js-client-rest':
-        specifier: workspace:1.8.1
+        specifier: workspace:1.8.2
         version: link:../js-client-rest
       typescript:
         specifier: '>=4.1'
