@@ -22,9 +22,9 @@ This repository contains packages of the JS SDK for the [Qdrant](https://github.
 
 There are published 3 packages:
 
--   [`@qdrant/qdrant-js`](./packages/qdrant-js) - the main package with the SDK itself.
--   [`@qdrant/js-client-rest`](./packages/js-client-rest) - lightweight REST client for Qdrant.
--   [`@qdrant/js-client-grpc`](./packages/js-client-grpc) - gRPC client for Qdrant.
+-   [`@qdrant/qdrant-js`](https://www.npmjs.com/package/@qdrant/qdrant-js) [Code](./packages/qdrant-js/)- the main package with the SDK itself.
+-   [`@qdrant/js-client-rest`](https://www.npmjs.com/package/@qdrant/js-client-rest) [Code](./packages/qdrant-js/) - lightweight REST client for Qdrant.
+-   [`@qdrant/js-client-grpc`](https://www.npmjs.com/package/@qdrant/js-client-grpc) [Code](./packages/qdrant-js/) - gRPC client for Qdrant.
 
 ## JS/TS Examples
 

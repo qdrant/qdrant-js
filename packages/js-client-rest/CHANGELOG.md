@@ -1,5 +1,11 @@
 # @qdrant/js-client-rest
 
+## 1.8.2
+
+### Patch Changes
+
+-   [#70](https://github.com/qdrant/qdrant-js/pull/70) Bump undici from 5.28.3 to 5.28.4
+
 ## 1.8.1
 
 ### Patch Changes
