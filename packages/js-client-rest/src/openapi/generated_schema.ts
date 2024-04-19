@@ -443,7 +443,7 @@ export interface components {
       optimizer_status: components["schemas"]["OptimizersStatus"];
       /**
        * Format: uint 
-       * @description Approximate number of vectors in collection. All vectors in collection are available for querying. Calculated as `points_count x vectors_per_point`. Where `vectors_per_point` is a number of named vectors in schema.
+       * @description DEPRECATED: Approximate number of vectors in collection. All vectors in collection are available for querying. Calculated as `points_count x vectors_per_point`. Where `vectors_per_point` is a number of named vectors in schema.
        */
       vectors_count?: number | null;
       /**
@@ -471,7 +471,7 @@ export interface components {
      * @description Current state of the collection. `Green` - all good. `Yellow` - optimization is running, `Red` - some operations failed and was not recovered 
      * @enum {string}
      */
-    CollectionStatus: "green" | "yellow" | "red";
+    CollectionStatus: "green" | "yellow" | "grey" | "red";
     /** @description Current state of the collection */
     OptimizersStatus: OneOf<["ok", {
       error: string;
@@ -547,6 +547,7 @@ export interface components {
       quantization_config?: components["schemas"]["QuantizationConfig"] | (Record<string, unknown> | null);
       /** @description If true, vectors are served from disk, improving RAM usage at the cost of latency Default: false */
       on_disk?: boolean | null;
+      datatype?: components["schemas"]["Datatype"] | (Record<string, unknown> | null);
     };
     /**
      * @description Type of internal tags, build from payload Distance function types used to compare vectors 
@@ -613,6 +614,11 @@ export interface components {
     BinaryQuantizationConfig: {
       always_ram?: boolean | null;
     };
+    /**
+     * @description Defines which datatype should be used to represent vectors in the storage. Choosing different datatypes allows to optimize memory usage and performance vs accuracy. - For `float32` datatype - vectors are stored as single-precision floating point numbers, 4bytes. - For `uint8` datatype - vectors are stored as unsigned 8-bit integers, 1byte. It expects vector elements to be in range `[0, 255]`. 
+     * @enum {string}
+     */
+    Datatype: "float32" | "uint8";
     /** @enum {string} */
     ShardingMethod: "auto" | "custom";
     /** @description Params of single sparse vector data storage */
@@ -871,7 +877,7 @@ export interface components {
      * { "vector": { "vector": [1.0, 2.0, 3.0], "name": "image-embeddings" } }
      */
     NamedVectorStruct: (number)[] | components["schemas"]["NamedVector"] | components["schemas"]["NamedSparseVector"];
-    /** @description Vector data with name */
+    /** @description Dense vector data with name */
     NamedVector: {
       /** @description Name of vector data */
       name: string;
@@ -1734,7 +1740,7 @@ export interface components {
       comment?: string | null;
     };
     /** @description Methods for transferring a shard from one node to another. */
-    ShardTransferMethod: "stream_records" | "snapshot";
+    ShardTransferMethod: "stream_records" | "snapshot" | "wal_delta";
     TelemetryData: {
       id: string;
       app: components["schemas"]["AppBuildTelemetry"];
@@ -1747,6 +1753,7 @@ export interface components {
       version: string;
       features?: components["schemas"]["AppFeaturesTelemetry"] | (Record<string, unknown> | null);
       system?: components["schemas"]["RunningEnvironmentTelemetry"] | (Record<string, unknown> | null);
+      jwt_rbac?: boolean | null;
       /** Format: date-time */
       startup: string;
     };
@@ -1860,6 +1867,10 @@ export interface components {
       index: components["schemas"]["Indexes"];
       /** @description Vector specific quantization config that overrides collection config */
       quantization_config?: components["schemas"]["QuantizationConfig"] | (Record<string, unknown> | null);
+      /** @description Vector specific configuration to enable multiple vectors per point */
+      multi_vec_config?: components["schemas"]["MultiVectorConfig"] | (Record<string, unknown> | null);
+      /** @description Vector specific configuration to set specific storage element type */
+      datatype?: components["schemas"]["VectorStorageDatatype"] | (Record<string, unknown> | null);
     };
     /** @description Storage types for vectors */
     VectorStorageType: "Memory" | "Mmap" | "ChunkedMmap";
@@ -1873,6 +1884,15 @@ export interface components {
       type: "hnsw";
       options: components["schemas"]["HnswConfig"];
     }]>;
+    MultiVectorConfig: {
+      MaxSim: components["schemas"]["MaxSimConfig"];
+    };
+    MaxSimConfig: Record<string, never>;
+    /**
+     * @description Storage types for vectors 
+     * @enum {string}
+     */
+    VectorStorageDatatype: "float32" | "uint8";
     /** @description Config of single sparse vector data storage */
     SparseVectorDataConfig: {
       index: components["schemas"]["SparseIndexConfig"];
@@ -2062,7 +2082,15 @@ export interface components {
       replicate_shard: components["schemas"]["MoveShard"];
     };
     AbortTransferOperation: {
-      abort_transfer: components["schemas"]["MoveShard"];
+      abort_transfer: components["schemas"]["AbortShardTransfer"];
+    };
+    AbortShardTransfer: {
+      /** Format: uint32 */
+      shard_id: number;
+      /** Format: uint64 */
+      to_peer_id: number;
+      /** Format: uint64 */
+      from_peer_id: number;
     };
     DropReplicaOperation: {
       drop_replica: components["schemas"]["Replica"];

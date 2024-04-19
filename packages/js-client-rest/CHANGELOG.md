@@ -1,5 +1,11 @@
 # @qdrant/js-client-rest
 
+## 1.9.0
+
+### Minor Changes
+
+-   Qdrant v1.9.0 API
+
 ## 1.8.2
 
 ### Patch Changes

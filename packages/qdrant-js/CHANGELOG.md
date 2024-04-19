@@ -1,5 +1,17 @@
 # @qdrant/qdrant-js
 
+## 1.9.0
+
+### Minor Changes
+
+-   Qdrant v1.9.0 API
+
+### Patch Changes
+
+-   Updated dependencies []:
+    -   @qdrant/js-client-grpc@1.9.0
+    -   @qdrant/js-client-rest@1.9.0
+
 ## 1.8.2
 
 ### Patch Changes

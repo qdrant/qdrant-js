@@ -7,6 +7,32 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
 
 /**
+ * @generated from enum qdrant.Datatype
+ */
+export enum Datatype {
+  /**
+   * @generated from enum value: Default = 0;
+   */
+  Default = 0,
+
+  /**
+   * @generated from enum value: Float32 = 1;
+   */
+  Float32 = 1,
+
+  /**
+   * @generated from enum value: Uint8 = 2;
+   */
+  Uint8 = 2,
+}
+// Retrieve enum metadata with: proto3.getEnumType(Datatype)
+proto3.util.setEnumType(Datatype, "qdrant.Datatype", [
+  { no: 0, name: "Default" },
+  { no: 1, name: "Float32" },
+  { no: 2, name: "Uint8" },
+]);
+
+/**
  * @generated from enum qdrant.Distance
  */
 export enum Distance {
@@ -73,6 +99,13 @@ export enum CollectionStatus {
    * @generated from enum value: Red = 3;
    */
   Red = 3,
+
+  /**
+   * Optimization is pending
+   *
+   * @generated from enum value: Grey = 4;
+   */
+  Grey = 4,
 }
 // Retrieve enum metadata with: proto3.getEnumType(CollectionStatus)
 proto3.util.setEnumType(CollectionStatus, "qdrant.CollectionStatus", [
@@ -80,6 +113,7 @@ proto3.util.setEnumType(CollectionStatus, "qdrant.CollectionStatus", [
   { no: 1, name: "Green" },
   { no: 2, name: "Yellow" },
   { no: 3, name: "Red" },
+  { no: 4, name: "Grey" },
 ]);
 
 /**
@@ -298,7 +332,7 @@ export enum ReplicaState {
   Listener = 4,
 
   /**
-   * Snapshot shard transfer is in progress; Updates should not be sent to (and are ignored by) the shard
+   * Deprecated: snapshot shard transfer is in progress; Updates should not be sent to (and are ignored by) the shard
    *
    * @generated from enum value: PartialSnapshot = 5;
    */
@@ -393,6 +427,13 @@ export class VectorParams extends Message<VectorParams> {
    */
   onDisk?: boolean;
 
+  /**
+   * Data type of the vectors
+   *
+   * @generated from field: optional qdrant.Datatype datatype = 6;
+   */
+  datatype?: Datatype;
+
   constructor(data?: PartialMessage<VectorParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -406,6 +447,7 @@ export class VectorParams extends Message<VectorParams> {
     { no: 3, name: "hnsw_config", kind: "message", T: HnswConfigDiff, opt: true },
     { no: 4, name: "quantization_config", kind: "message", T: QuantizationConfig, opt: true },
     { no: 5, name: "on_disk", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 6, name: "datatype", kind: "enum", T: proto3.getEnumType(Datatype), opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VectorParams {
@@ -3386,6 +3428,57 @@ export class MoveShard extends Message<MoveShard> {
 }
 
 /**
+ * @generated from message qdrant.AbortShardTransfer
+ */
+export class AbortShardTransfer extends Message<AbortShardTransfer> {
+  /**
+   * Local shard id
+   *
+   * @generated from field: uint32 shard_id = 1;
+   */
+  shardId = 0;
+
+  /**
+   * @generated from field: uint64 from_peer_id = 2;
+   */
+  fromPeerId = protoInt64.zero;
+
+  /**
+   * @generated from field: uint64 to_peer_id = 3;
+   */
+  toPeerId = protoInt64.zero;
+
+  constructor(data?: PartialMessage<AbortShardTransfer>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.AbortShardTransfer";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "shard_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "from_peer_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 3, name: "to_peer_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AbortShardTransfer {
+    return new AbortShardTransfer().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AbortShardTransfer {
+    return new AbortShardTransfer().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AbortShardTransfer {
+    return new AbortShardTransfer().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AbortShardTransfer | PlainMessage<AbortShardTransfer> | undefined, b: AbortShardTransfer | PlainMessage<AbortShardTransfer> | undefined): boolean {
+    return proto3.util.equals(AbortShardTransfer, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.RestartTransfer
  */
 export class RestartTransfer extends Message<RestartTransfer> {
@@ -3615,9 +3708,9 @@ export class UpdateCollectionClusterSetupRequest extends Message<UpdateCollectio
     case: "replicateShard";
   } | {
     /**
-     * @generated from field: qdrant.MoveShard abort_transfer = 4;
+     * @generated from field: qdrant.AbortShardTransfer abort_transfer = 4;
      */
-    value: MoveShard;
+    value: AbortShardTransfer;
     case: "abortTransfer";
   } | {
     /**
@@ -3663,7 +3756,7 @@ export class UpdateCollectionClusterSetupRequest extends Message<UpdateCollectio
     { no: 1, name: "collection_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "move_shard", kind: "message", T: MoveShard, oneof: "operation" },
     { no: 3, name: "replicate_shard", kind: "message", T: MoveShard, oneof: "operation" },
-    { no: 4, name: "abort_transfer", kind: "message", T: MoveShard, oneof: "operation" },
+    { no: 4, name: "abort_transfer", kind: "message", T: AbortShardTransfer, oneof: "operation" },
     { no: 5, name: "drop_replica", kind: "message", T: Replica, oneof: "operation" },
     { no: 7, name: "create_shard_key", kind: "message", T: CreateShardKey, oneof: "operation" },
     { no: 8, name: "delete_shard_key", kind: "message", T: DeleteShardKey, oneof: "operation" },
