@@ -130,8 +130,8 @@ describe('QdrantClient', () => {
 
     test('retrieve all points', async () => {
         const result = await client.getCollection(collectionName);
-        expect(result, 'check failed - 6 points expected').toMatchObject<Pick<typeof result, 'vectors_count'>>({
-            vectors_count: 7 + (supportsJSONBigInt ? 1 : 0),
+        expect(result, 'check failed - 6 points expected').toMatchObject<Pick<typeof result, 'points_count'>>({
+            points_count: 7 + (supportsJSONBigInt ? 1 : 0),
         });
     });
 
