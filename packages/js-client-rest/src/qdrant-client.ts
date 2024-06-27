@@ -1767,7 +1767,18 @@ export class QdrantClient {
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
      *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
-     *     - query: Query to perform
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards.
+     *     - prefetch: Sub-requests to perform first. If present, the query will be performed on the results of the prefetch(es).
+     *     - query: Query to perform. If missing without prefetches, returns points ordered by their IDs.
+     *     - using: Define which vector name to use for querying. If missing, the default vector is used.
+     *     - filter: Filter conditions - return only those points that satisfy the specified conditions.
+     *     - params: Search params for when there is no prefetch
+     *     - score_threshold: Return points with scores better than this threshold.
+     *     - limit: Max number of points to return. Default is 10.
+     *     - offset: Offset of the result. Skip this many points. Default is 0
+     *     - with_vector: Options for specifying which vectors to include into the response. Default is false.
+     *     - with_payload: Options for specifying which payload to include or not. Default is false.
+     *     - lookup_from: The location to use for IDs lookup, if not specified - use the current collection and the 'using' vector Note: the other collection vectors should have the same vector size as the 'using' vector in the current collection.
      * @returns Operation result
      */
     async queryPoints(
@@ -1775,14 +1786,36 @@ export class QdrantClient {
         {
             consistency,
             timeout,
+            shard_key,
+            prefetch,
             query,
+            using,
+            filter,
+            params,
+            score_threshold,
+            limit,
+            offset,
+            with_vector,
+            with_payload,
+            lookup_from,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'QueryRequest'>,
     ) {
         const response = await this._openApiClient.points.queryPoints({
             collection_name,
             consistency,
             timeout,
+            shard_key,
+            prefetch,
             query,
+            using,
+            filter,
+            params,
+            score_threshold,
+            limit,
+            offset,
+            with_vector,
+            with_payload,
+            lookup_from,
         });
         return maybe(response.data.result).orThrow('Query points returned empty');
     }
