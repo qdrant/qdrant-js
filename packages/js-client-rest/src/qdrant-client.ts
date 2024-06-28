@@ -1781,7 +1781,7 @@ export class QdrantClient {
      *     - lookup_from: The location to use for IDs lookup, if not specified - use the current collection and the 'using' vector Note: the other collection vectors should have the same vector size as the 'using' vector in the current collection.
      * @returns Operation result
      */
-    async queryPoints(
+    async query(
         collection_name: string,
         {
             consistency,
@@ -1835,7 +1835,7 @@ export class QdrantClient {
      *     - searches: List of queries
      * @returns Operation result
      */
-    async queryBatchPoints(
+    async queryBatch(
         collection_name: string,
         {
             consistency,

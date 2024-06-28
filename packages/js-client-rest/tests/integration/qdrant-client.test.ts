@@ -180,7 +180,7 @@ describe('QdrantClient', () => {
     });
 
     test('query nearest points', async () => {
-        const result = await client.queryPoints(collectionName, {
+        const result = await client.query(collectionName, {
             query: {
                 nearest: [0.2, 0.1, 0.9, 0.7],
             },
@@ -202,7 +202,7 @@ describe('QdrantClient', () => {
     });
 
     test('batch query nearest points', async () => {
-        const result = await client.queryBatchPoints(collectionName, {
+        const result = await client.queryBatch(collectionName, {
             searches: [
                 {
                     query: {
