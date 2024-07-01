@@ -179,6 +179,53 @@ describe('QdrantClient', () => {
         expect(result).toHaveLength(2);
     });
 
+    test('query nearest points', async () => {
+        const result = await client.query(collectionName, {
+            query: {
+                nearest: [0.2, 0.1, 0.9, 0.7],
+            },
+            limit: 3,
+            filter: {
+                should: [
+                    {
+                        key: 'city',
+                        match: {
+                            value: 'London',
+                        },
+                    },
+                ],
+            },
+            with_payload: true,
+            with_vector: true,
+        });
+        expect(result.points).toHaveLength(2);
+    });
+
+    test('batch query nearest points', async () => {
+        const result = await client.queryBatch(collectionName, {
+            searches: [
+                {
+                    query: {
+                        nearest: [0.2, 0.1, 0.9, 0.7],
+                    },
+                    limit: 3,
+                    filter: {
+                        should: [
+                            {
+                                key: 'city',
+                                match: {
+                                    value: 'London',
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+        });
+        console.log(result);
+        expect(result[0].points).toHaveLength(2);
+    });
+
     test('locks', async () => {
         expect(await client.recreateCollection(collectionName, {vectors: {size: DIM, distance: 'Dot'}})).toBeDefined();
 

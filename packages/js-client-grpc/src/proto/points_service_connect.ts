@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ClearPayloadPoints, CountPoints, CountResponse, CreateFieldIndexCollection, DeleteFieldIndexCollection, DeletePayloadPoints, DeletePoints, DeletePointVectors, DiscoverBatchPoints, DiscoverBatchResponse, DiscoverPoints, DiscoverResponse, GetPoints, GetResponse, PointsOperationResponse, RecommendBatchPoints, RecommendBatchResponse, RecommendGroupsResponse, RecommendPointGroups, RecommendPoints, RecommendResponse, ScrollPoints, ScrollResponse, SearchBatchPoints, SearchBatchResponse, SearchGroupsResponse, SearchPointGroups, SearchPoints, SearchResponse, SetPayloadPoints, UpdateBatchPoints, UpdateBatchResponse, UpdatePointVectors, UpsertPoints } from "./points_pb.js";
+import { ClearPayloadPoints, CountPoints, CountResponse, CreateFieldIndexCollection, DeleteFieldIndexCollection, DeletePayloadPoints, DeletePoints, DeletePointVectors, DiscoverBatchPoints, DiscoverBatchResponse, DiscoverPoints, DiscoverResponse, GetPoints, GetResponse, PointsOperationResponse, QueryBatchPoints, QueryBatchResponse, QueryPoints, QueryResponse, RecommendBatchPoints, RecommendBatchResponse, RecommendGroupsResponse, RecommendPointGroups, RecommendPoints, RecommendResponse, ScrollPoints, ScrollResponse, SearchBatchPoints, SearchBatchResponse, SearchGroupsResponse, SearchPointGroups, SearchPoints, SearchResponse, SetPayloadPoints, UpdateBatchPoints, UpdateBatchResponse, UpdatePointVectors, UpsertPoints } from "./points_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -288,6 +288,30 @@ export const Points = {
       name: "UpdateBatch",
       I: UpdateBatchPoints,
       O: UpdateBatchResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Universally query points. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+     *
+     * @generated from rpc qdrant.Points.Query
+     */
+    query: {
+      name: "Query",
+      I: QueryPoints,
+      O: QueryResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Universally query points in a batch fashion. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+     *
+     * @generated from rpc qdrant.Points.QueryBatch
+     */
+    queryBatch: {
+      name: "QueryBatch",
+      I: QueryBatchPoints,
+      O: QueryBatchResponse,
       kind: MethodKind.Unary,
     },
   }

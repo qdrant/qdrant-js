@@ -41,5 +41,15 @@ export function createServiceApi(client: Client) {
          * Returns information about the running Qdrant instance.
          */
         root: client.path('/').method('get').create(),
+
+        /**
+         * Get issues
+         */
+        getIssues: client.path('/issues').method('get').create(),
+
+        /**
+         * Clear issues
+         */
+        clearIssues: client.path('/issues').method('delete').create(),
     } as const;
 }

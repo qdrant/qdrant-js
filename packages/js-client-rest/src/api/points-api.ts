@@ -160,5 +160,21 @@ export function createPointsApi(client: Client) {
             .path('/collections/{collection_name}/points/discover/batch')
             .method('post')
             .create({consistency: true, timeout: true}),
+
+        /**
+         * Query points
+         */
+        queryPoints: client
+            .path('/collections/{collection_name}/points/query')
+            .method('post')
+            .create({consistency: true, timeout: true}),
+
+        /**
+         * Query points in batch
+         */
+        queryBatchPoints: client
+            .path('/collections/{collection_name}/points/query/batch')
+            .method('post')
+            .create({consistency: true, timeout: true}),
     } as const;
 }
