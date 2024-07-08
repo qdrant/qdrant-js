@@ -24,12 +24,54 @@ export enum Datatype {
    * @generated from enum value: Uint8 = 2;
    */
   Uint8 = 2,
+
+  /**
+   * @generated from enum value: Float16 = 3;
+   */
+  Float16 = 3,
 }
 // Retrieve enum metadata with: proto3.getEnumType(Datatype)
 proto3.util.setEnumType(Datatype, "qdrant.Datatype", [
   { no: 0, name: "Default" },
   { no: 1, name: "Float32" },
   { no: 2, name: "Uint8" },
+  { no: 3, name: "Float16" },
+]);
+
+/**
+ * @generated from enum qdrant.Modifier
+ */
+export enum Modifier {
+  /**
+   * @generated from enum value: None = 0;
+   */
+  None = 0,
+
+  /**
+   * Apply Inverse Document Frequency
+   *
+   * @generated from enum value: Idf = 1;
+   */
+  Idf = 1,
+}
+// Retrieve enum metadata with: proto3.getEnumType(Modifier)
+proto3.util.setEnumType(Modifier, "qdrant.Modifier", [
+  { no: 0, name: "None" },
+  { no: 1, name: "Idf" },
+]);
+
+/**
+ * @generated from enum qdrant.MultiVectorComparator
+ */
+export enum MultiVectorComparator {
+  /**
+   * @generated from enum value: MaxSim = 0;
+   */
+  MaxSim = 0,
+}
+// Retrieve enum metadata with: proto3.getEnumType(MultiVectorComparator)
+proto3.util.setEnumType(MultiVectorComparator, "qdrant.MultiVectorComparator", [
+  { no: 0, name: "MaxSim" },
 ]);
 
 /**
@@ -344,6 +386,13 @@ export enum ReplicaState {
    * @generated from enum value: Recovery = 6;
    */
   Recovery = 6,
+
+  /**
+   * Points are being migrated to this shard as part of resharding
+   *
+   * @generated from enum value: Resharding = 7;
+   */
+  Resharding = 7,
 }
 // Retrieve enum metadata with: proto3.getEnumType(ReplicaState)
 proto3.util.setEnumType(ReplicaState, "qdrant.ReplicaState", [
@@ -354,6 +403,7 @@ proto3.util.setEnumType(ReplicaState, "qdrant.ReplicaState", [
   { no: 4, name: "Listener" },
   { no: 5, name: "PartialSnapshot" },
   { no: 6, name: "Recovery" },
+  { no: 7, name: "Resharding" },
 ]);
 
 /**
@@ -380,12 +430,20 @@ export enum ShardTransferMethod {
    * @generated from enum value: WalDelta = 2;
    */
   WalDelta = 2,
+
+  /**
+   * Stream shard records in batches for resharding
+   *
+   * @generated from enum value: ReshardingStreamRecords = 3;
+   */
+  ReshardingStreamRecords = 3,
 }
 // Retrieve enum metadata with: proto3.getEnumType(ShardTransferMethod)
 proto3.util.setEnumType(ShardTransferMethod, "qdrant.ShardTransferMethod", [
   { no: 0, name: "StreamRecords" },
   { no: 1, name: "Snapshot" },
   { no: 2, name: "WalDelta" },
+  { no: 3, name: "ReshardingStreamRecords" },
 ]);
 
 /**
@@ -434,6 +492,13 @@ export class VectorParams extends Message<VectorParams> {
    */
   datatype?: Datatype;
 
+  /**
+   * Configuration for multi-vector search
+   *
+   * @generated from field: optional qdrant.MultiVectorConfig multivector_config = 7;
+   */
+  multivectorConfig?: MultiVectorConfig;
+
   constructor(data?: PartialMessage<VectorParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -448,6 +513,7 @@ export class VectorParams extends Message<VectorParams> {
     { no: 4, name: "quantization_config", kind: "message", T: QuantizationConfig, opt: true },
     { no: 5, name: "on_disk", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 6, name: "datatype", kind: "enum", T: proto3.getEnumType(Datatype), opt: true },
+    { no: 7, name: "multivector_config", kind: "message", T: MultiVectorConfig, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VectorParams {
@@ -707,6 +773,13 @@ export class SparseVectorParams extends Message<SparseVectorParams> {
    */
   index?: SparseIndexConfig;
 
+  /**
+   * If set - apply modifier to the vector values
+   *
+   * @generated from field: optional qdrant.Modifier modifier = 2;
+   */
+  modifier?: Modifier;
+
   constructor(data?: PartialMessage<SparseVectorParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -716,6 +789,7 @@ export class SparseVectorParams extends Message<SparseVectorParams> {
   static readonly typeName = "qdrant.SparseVectorParams";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "index", kind: "message", T: SparseIndexConfig, opt: true },
+    { no: 2, name: "modifier", kind: "enum", T: proto3.getEnumType(Modifier), opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SparseVectorParams {
@@ -769,6 +843,45 @@ export class SparseVectorConfig extends Message<SparseVectorConfig> {
 
   static equals(a: SparseVectorConfig | PlainMessage<SparseVectorConfig> | undefined, b: SparseVectorConfig | PlainMessage<SparseVectorConfig> | undefined): boolean {
     return proto3.util.equals(SparseVectorConfig, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.MultiVectorConfig
+ */
+export class MultiVectorConfig extends Message<MultiVectorConfig> {
+  /**
+   * Comparator for multi-vector search
+   *
+   * @generated from field: qdrant.MultiVectorComparator comparator = 1;
+   */
+  comparator = MultiVectorComparator.MaxSim;
+
+  constructor(data?: PartialMessage<MultiVectorConfig>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.MultiVectorConfig";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "comparator", kind: "enum", T: proto3.getEnumType(MultiVectorComparator) },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MultiVectorConfig {
+    return new MultiVectorConfig().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MultiVectorConfig {
+    return new MultiVectorConfig().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MultiVectorConfig {
+    return new MultiVectorConfig().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MultiVectorConfig | PlainMessage<MultiVectorConfig> | undefined, b: MultiVectorConfig | PlainMessage<MultiVectorConfig> | undefined): boolean {
+    return proto3.util.equals(MultiVectorConfig, a, b);
   }
 }
 
@@ -1245,6 +1358,14 @@ export class SparseIndexConfig extends Message<SparseIndexConfig> {
    */
   onDisk?: boolean;
 
+  /**
+   *
+   * Datatype used to store weights in the index.
+   *
+   * @generated from field: optional qdrant.Datatype datatype = 3;
+   */
+  datatype?: Datatype;
+
   constructor(data?: PartialMessage<SparseIndexConfig>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1255,6 +1376,7 @@ export class SparseIndexConfig extends Message<SparseIndexConfig> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "full_scan_threshold", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
     { no: 2, name: "on_disk", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 3, name: "datatype", kind: "enum", T: proto3.getEnumType(Datatype), opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SparseIndexConfig {
@@ -3252,6 +3374,11 @@ export class ShardTransferInfo extends Message<ShardTransferInfo> {
   shardId = 0;
 
   /**
+   * @generated from field: optional uint32 to_shard_id = 5;
+   */
+  toShardId?: number;
+
+  /**
    * @generated from field: uint64 from = 2;
    */
   from = protoInt64.zero;
@@ -3277,6 +3404,7 @@ export class ShardTransferInfo extends Message<ShardTransferInfo> {
   static readonly typeName = "qdrant.ShardTransferInfo";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "shard_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 5, name: "to_shard_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
     { no: 2, name: "from", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
     { no: 3, name: "to", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
     { no: 4, name: "sync", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
@@ -3304,7 +3432,7 @@ export class ShardTransferInfo extends Message<ShardTransferInfo> {
  */
 export class CollectionClusterInfoResponse extends Message<CollectionClusterInfoResponse> {
   /**
-   * ID of this peer 
+   * ID of this peer
    *
    * @generated from field: uint64 peer_id = 1;
    */
@@ -3382,6 +3510,11 @@ export class MoveShard extends Message<MoveShard> {
   shardId = 0;
 
   /**
+   * @generated from field: optional uint32 to_shard_id = 5;
+   */
+  toShardId?: number;
+
+  /**
    * @generated from field: uint64 from_peer_id = 2;
    */
   fromPeerId = protoInt64.zero;
@@ -3405,6 +3538,7 @@ export class MoveShard extends Message<MoveShard> {
   static readonly typeName = "qdrant.MoveShard";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "shard_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 5, name: "to_shard_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
     { no: 2, name: "from_peer_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
     { no: 3, name: "to_peer_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
     { no: 4, name: "method", kind: "enum", T: proto3.getEnumType(ShardTransferMethod), opt: true },
@@ -3428,6 +3562,69 @@ export class MoveShard extends Message<MoveShard> {
 }
 
 /**
+ * @generated from message qdrant.ReplicateShard
+ */
+export class ReplicateShard extends Message<ReplicateShard> {
+  /**
+   * Local shard id
+   *
+   * @generated from field: uint32 shard_id = 1;
+   */
+  shardId = 0;
+
+  /**
+   * @generated from field: optional uint32 to_shard_id = 5;
+   */
+  toShardId?: number;
+
+  /**
+   * @generated from field: uint64 from_peer_id = 2;
+   */
+  fromPeerId = protoInt64.zero;
+
+  /**
+   * @generated from field: uint64 to_peer_id = 3;
+   */
+  toPeerId = protoInt64.zero;
+
+  /**
+   * @generated from field: optional qdrant.ShardTransferMethod method = 4;
+   */
+  method?: ShardTransferMethod;
+
+  constructor(data?: PartialMessage<ReplicateShard>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.ReplicateShard";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "shard_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 5, name: "to_shard_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
+    { no: 2, name: "from_peer_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 3, name: "to_peer_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 4, name: "method", kind: "enum", T: proto3.getEnumType(ShardTransferMethod), opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ReplicateShard {
+    return new ReplicateShard().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ReplicateShard {
+    return new ReplicateShard().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ReplicateShard {
+    return new ReplicateShard().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ReplicateShard | PlainMessage<ReplicateShard> | undefined, b: ReplicateShard | PlainMessage<ReplicateShard> | undefined): boolean {
+    return proto3.util.equals(ReplicateShard, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.AbortShardTransfer
  */
 export class AbortShardTransfer extends Message<AbortShardTransfer> {
@@ -3437,6 +3634,11 @@ export class AbortShardTransfer extends Message<AbortShardTransfer> {
    * @generated from field: uint32 shard_id = 1;
    */
   shardId = 0;
+
+  /**
+   * @generated from field: optional uint32 to_shard_id = 4;
+   */
+  toShardId?: number;
 
   /**
    * @generated from field: uint64 from_peer_id = 2;
@@ -3457,6 +3659,7 @@ export class AbortShardTransfer extends Message<AbortShardTransfer> {
   static readonly typeName = "qdrant.AbortShardTransfer";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "shard_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 4, name: "to_shard_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
     { no: 2, name: "from_peer_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
     { no: 3, name: "to_peer_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
   ]);
@@ -3490,6 +3693,11 @@ export class RestartTransfer extends Message<RestartTransfer> {
   shardId = 0;
 
   /**
+   * @generated from field: optional uint32 to_shard_id = 5;
+   */
+  toShardId?: number;
+
+  /**
    * @generated from field: uint64 from_peer_id = 2;
    */
   fromPeerId = protoInt64.zero;
@@ -3513,6 +3721,7 @@ export class RestartTransfer extends Message<RestartTransfer> {
   static readonly typeName = "qdrant.RestartTransfer";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "shard_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 5, name: "to_shard_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
     { no: 2, name: "from_peer_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
     { no: 3, name: "to_peer_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
     { no: 4, name: "method", kind: "enum", T: proto3.getEnumType(ShardTransferMethod) },
@@ -3702,9 +3911,9 @@ export class UpdateCollectionClusterSetupRequest extends Message<UpdateCollectio
     case: "moveShard";
   } | {
     /**
-     * @generated from field: qdrant.MoveShard replicate_shard = 3;
+     * @generated from field: qdrant.ReplicateShard replicate_shard = 3;
      */
-    value: MoveShard;
+    value: ReplicateShard;
     case: "replicateShard";
   } | {
     /**
@@ -3755,7 +3964,7 @@ export class UpdateCollectionClusterSetupRequest extends Message<UpdateCollectio
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "collection_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "move_shard", kind: "message", T: MoveShard, oneof: "operation" },
-    { no: 3, name: "replicate_shard", kind: "message", T: MoveShard, oneof: "operation" },
+    { no: 3, name: "replicate_shard", kind: "message", T: ReplicateShard, oneof: "operation" },
     { no: 4, name: "abort_transfer", kind: "message", T: AbortShardTransfer, oneof: "operation" },
     { no: 5, name: "drop_replica", kind: "message", T: Replica, oneof: "operation" },
     { no: 7, name: "create_shard_key", kind: "message", T: CreateShardKey, oneof: "operation" },

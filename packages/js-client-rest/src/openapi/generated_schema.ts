@@ -72,6 +72,18 @@ export interface paths {
      */
     get: operations["readyz"];
   };
+  "/issues": {
+    /**
+     * Get issues 
+     * @description Get a report of performance issues and configuration suggestions
+     */
+    get: operations["get_issues"];
+    /**
+     * Clear issues 
+     * @description Removes all issues reported so far
+     */
+    delete: operations["clear_issues"];
+  };
   "/cluster": {
     /**
      * Get cluster status info 
@@ -413,6 +425,20 @@ export interface paths {
      */
     post: operations["count_points"];
   };
+  "/collections/{collection_name}/points/query": {
+    /**
+     * Query points 
+     * @description Universally query points. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+     */
+    post: operations["query_points"];
+  };
+  "/collections/{collection_name}/points/query/batch": {
+    /**
+     * Query points in batch 
+     * @description Universally query points in batch. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+     */
+    post: operations["query_batch_points"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -547,7 +573,13 @@ export interface components {
       quantization_config?: components["schemas"]["QuantizationConfig"] | (Record<string, unknown> | null);
       /** @description If true, vectors are served from disk, improving RAM usage at the cost of latency Default: false */
       on_disk?: boolean | null;
+      /**
+       * @description Defines which datatype should be used to represent vectors in the storage. Choosing different datatypes allows to optimize memory usage and performance vs accuracy.
+       * 
+       * - For `float32` datatype - vectors are stored as single-precision floating point numbers, 4 bytes. - For `float16` datatype - vectors are stored as half-precision floating point numbers, 2 bytes. - For `uint8` datatype - vectors are stored as unsigned 8-bit integers, 1 byte. It expects vector elements to be in range `[0, 255]`.
+       */
       datatype?: components["schemas"]["Datatype"] | (Record<string, unknown> | null);
+      multivector_config?: components["schemas"]["MultiVectorConfig"] | (Record<string, unknown> | null);
     };
     /**
      * @description Type of internal tags, build from payload Distance function types used to compare vectors 
@@ -614,17 +646,21 @@ export interface components {
     BinaryQuantizationConfig: {
       always_ram?: boolean | null;
     };
-    /**
-     * @description Defines which datatype should be used to represent vectors in the storage. Choosing different datatypes allows to optimize memory usage and performance vs accuracy. - For `float32` datatype - vectors are stored as single-precision floating point numbers, 4bytes. - For `uint8` datatype - vectors are stored as unsigned 8-bit integers, 1byte. It expects vector elements to be in range `[0, 255]`. 
-     * @enum {string}
-     */
-    Datatype: "float32" | "uint8";
+    /** @enum {string} */
+    Datatype: "float32" | "uint8" | "float16";
+    MultiVectorConfig: {
+      comparator: components["schemas"]["MultiVectorComparator"];
+    };
+    /** @enum {string} */
+    MultiVectorComparator: "max_sim";
     /** @enum {string} */
     ShardingMethod: "auto" | "custom";
     /** @description Params of single sparse vector data storage */
     SparseVectorParams: {
       /** @description Custom params for index. If none - values from collection configuration are used. */
       index?: components["schemas"]["SparseIndexParams"] | (Record<string, unknown> | null);
+      /** @description Configures addition value modifications for sparse vectors. Default: none */
+      modifier?: components["schemas"]["Modifier"] | (Record<string, unknown> | null);
     };
     /** @description Configuration for sparse inverted index. */
     SparseIndexParams: {
@@ -637,7 +673,18 @@ export interface components {
       full_scan_threshold?: number | null;
       /** @description Store index on disk. If set to false, the index will be stored in RAM. Default: false */
       on_disk?: boolean | null;
+      /**
+       * @description Defines which datatype should be used for the index. Choosing different datatypes allows to optimize memory usage and performance vs accuracy.
+       * 
+       * - For `float32` datatype - vectors are stored as single-precision floating point numbers, 4 bytes. - For `float16` datatype - vectors are stored as half-precision floating point numbers, 2 bytes. - For `uint8` datatype - vectors are quantized to unsigned 8-bit integers, 1 byte. Quantization to fit byte range `[0, 255]` happens during indexing automatically, so the actual vector data does not need to conform to this range.
+       */
+      datatype?: components["schemas"]["Datatype"] | (Record<string, unknown> | null);
     };
+    /**
+     * @description If used, include weight modification, which will be applied to sparse vectors at query time: None - no modification (default) Idf - inverse document frequency, based on statistics of the collection 
+     * @enum {string}
+     */
+    Modifier: "none" | "idf";
     /** @description Config of HNSW index */
     HnswConfig: {
       /**
@@ -788,7 +835,7 @@ export interface components {
       shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
       /** @description Look for points with ids */
       ids: (components["schemas"]["ExtendedPointId"])[];
-      /** @description Select which payload to return with the response. Default: All */
+      /** @description Select which payload to return with the response. Default is true. */
       with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
       with_vector?: components["schemas"]["WithVector"];
     };
@@ -819,22 +866,24 @@ export interface components {
       vector?: components["schemas"]["VectorStruct"] | (Record<string, unknown> | null);
       /** @description Shard Key */
       shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
+      order_value?: components["schemas"]["OrderValue"] | (Record<string, unknown> | null);
     };
     Payload: {
       [key: string]: unknown;
     };
     /** @description Full vector data per point separator with single and multiple vector modes */
-    VectorStruct: (number)[] | ({
+    VectorStruct: (number)[] | ((number)[])[] | ({
       [key: string]: components["schemas"]["Vector"] | undefined;
     });
-    Vector: (number)[] | components["schemas"]["SparseVector"];
+    Vector: (number)[] | components["schemas"]["SparseVector"] | ((number)[])[];
     /** @description Sparse vector structure */
     SparseVector: {
-      /** @description indices must be unique */
+      /** @description Indices must be unique */
       indices: (number)[];
-      /** @description values and indices must be the same length */
+      /** @description Values and indices must be the same length */
       values: (number)[];
     };
+    OrderValue: number;
     /** @description Search request. Holds all conditions and parameters for the search of most similar points by vector similarity given the filtering restrictions. */
     SearchRequest: {
       /** @description Specify in which shards to look for the points, if not specified - look in all shards */
@@ -854,10 +903,10 @@ export interface components {
        * @description Offset of the first result to return. May be used to paginate results. Note: large offset values may cause performance issues.
        */
       offset?: number | null;
-      /** @description Select which payload to return with the response. Default: None */
+      /** @description Select which payload to return with the response. Default is false. */
       with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
       /**
-       * @description Whether to return the point vector with the result? 
+       * @description Options for specifying which vectors to include into response. Default is false. 
        * @default null
        */
       with_vector?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
@@ -891,14 +940,23 @@ export interface components {
       vector: components["schemas"]["SparseVector"];
     };
     Filter: {
-      /** @description At least one of those conditions should match */
-      should?: (components["schemas"]["Condition"])[] | null;
+      /**
+       * @description At least one of those conditions should match 
+       * @default null
+       */
+      should?: components["schemas"]["Condition"] | (components["schemas"]["Condition"])[] | (Record<string, unknown> | null);
       /** @description At least minimum amount of given conditions should match */
       min_should?: components["schemas"]["MinShould"] | (Record<string, unknown> | null);
-      /** @description All conditions must match */
-      must?: (components["schemas"]["Condition"])[] | null;
-      /** @description All conditions must NOT match */
-      must_not?: (components["schemas"]["Condition"])[] | null;
+      /**
+       * @description All conditions must match 
+       * @default null
+       */
+      must?: components["schemas"]["Condition"] | (components["schemas"]["Condition"])[] | (Record<string, unknown> | null);
+      /**
+       * @description All conditions must NOT match 
+       * @default null
+       */
+      must_not?: components["schemas"]["Condition"] | (components["schemas"]["Condition"])[] | (Record<string, unknown> | null);
     };
     Condition: components["schemas"]["FieldCondition"] | components["schemas"]["IsEmptyCondition"] | components["schemas"]["IsNullCondition"] | components["schemas"]["HasIdCondition"] | components["schemas"]["NestedCondition"] | components["schemas"]["Filter"];
     /** @description All possible payload filtering conditions */
@@ -1146,6 +1204,8 @@ export interface components {
       vector?: components["schemas"]["VectorStruct"] | (Record<string, unknown> | null);
       /** @description Shard Key */
       shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
+      /** @description Order-by value */
+      order_value?: components["schemas"]["OrderValue"] | (Record<string, unknown> | null);
     };
     UpdateResult: {
       /**
@@ -1194,10 +1254,10 @@ export interface components {
        * @description Offset of the first result to return. May be used to paginate results. Note: large offset values may cause performance issues.
        */
       offset?: number | null;
-      /** @description Select which payload to return with the response. Default: None */
+      /** @description Select which payload to return with the response. Default is false. */
       with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
       /**
-       * @description Whether to return the point vector with the result? 
+       * @description Options for specifying which vectors to include into response. Default is false. 
        * @default null
        */
       with_vector?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
@@ -1253,7 +1313,7 @@ export interface components {
       limit?: number | null;
       /** @description Look only for points which satisfies this conditions. If not provided - all points. */
       filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
-      /** @description Select which payload to return with the response. Default: All */
+      /** @description Select which payload to return with the response. Default is true. */
       with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
       with_vector?: components["schemas"]["WithVector"];
       /** @description Order the records by a payload field. */
@@ -1521,7 +1581,7 @@ export interface components {
       vectors: components["schemas"]["BatchVectorStruct"];
       payloads?: ((components["schemas"]["Payload"] | (Record<string, unknown> | null))[]) | null;
     };
-    BatchVectorStruct: ((number)[])[] | ({
+    BatchVectorStruct: ((number)[])[] | (((number)[])[])[] | ({
       [key: string]: (components["schemas"]["Vector"])[] | undefined;
     });
     PointsList: {
@@ -1868,7 +1928,7 @@ export interface components {
       /** @description Vector specific quantization config that overrides collection config */
       quantization_config?: components["schemas"]["QuantizationConfig"] | (Record<string, unknown> | null);
       /** @description Vector specific configuration to enable multiple vectors per point */
-      multi_vec_config?: components["schemas"]["MultiVectorConfig"] | (Record<string, unknown> | null);
+      multivector_config?: components["schemas"]["MultiVectorConfig"] | (Record<string, unknown> | null);
       /** @description Vector specific configuration to set specific storage element type */
       datatype?: components["schemas"]["VectorStorageDatatype"] | (Record<string, unknown> | null);
     };
@@ -1884,15 +1944,11 @@ export interface components {
       type: "hnsw";
       options: components["schemas"]["HnswConfig"];
     }]>;
-    MultiVectorConfig: {
-      MaxSim: components["schemas"]["MaxSimConfig"];
-    };
-    MaxSimConfig: Record<string, never>;
     /**
      * @description Storage types for vectors 
      * @enum {string}
      */
-    VectorStorageDatatype: "float32" | "uint8";
+    VectorStorageDatatype: "float32" | "float16" | "uint8";
     /** @description Config of single sparse vector data storage */
     SparseVectorDataConfig: {
       index: components["schemas"]["SparseIndexConfig"];
@@ -1907,6 +1963,8 @@ export interface components {
        */
       full_scan_threshold?: number | null;
       index_type: components["schemas"]["SparseIndexType"];
+      /** @description Datatype used to store weights in the index. */
+      datatype?: components["schemas"]["VectorStorageDatatype"] | (Record<string, unknown> | null);
     };
     /** @description Sparse index types */
     SparseIndexType: "MutableRam" | "ImmutableRam" | "Mmap";
@@ -2079,7 +2137,17 @@ export interface components {
       method?: components["schemas"]["ShardTransferMethod"] | (Record<string, unknown> | null);
     };
     ReplicateShardOperation: {
-      replicate_shard: components["schemas"]["MoveShard"];
+      replicate_shard: components["schemas"]["ReplicateShard"];
+    };
+    ReplicateShard: {
+      /** Format: uint32 */
+      shard_id: number;
+      /** Format: uint64 */
+      to_peer_id: number;
+      /** Format: uint64 */
+      from_peer_id: number;
+      /** @description Method for transferring the shard from one node to another */
+      method?: components["schemas"]["ShardTransferMethod"] | (Record<string, unknown> | null);
     };
     AbortTransferOperation: {
       abort_transfer: components["schemas"]["AbortShardTransfer"];
@@ -2163,6 +2231,11 @@ export interface components {
        * @default null
        */
       checksum?: string | null;
+      /**
+       * @description Optional API key used when fetching the snapshot from a remote URL. 
+       * @default null
+       */
+      api_key?: string | null;
     };
     /**
      * @description Defines source of truth for snapshot recovery: `NoSync` means - restore snapshot without *any* additional synchronization. `Snapshot` means - prefer snapshot data over the current state. `Replica` means - prefer existing data over the snapshot. 
@@ -2247,10 +2320,10 @@ export interface components {
       filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
       /** @description Additional search params */
       params?: components["schemas"]["SearchParams"] | (Record<string, unknown> | null);
-      /** @description Select which payload to return with the response. Default: None */
+      /** @description Select which payload to return with the response. Default is false. */
       with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
       /**
-       * @description Whether to return the point vector with the result? 
+       * @description Options for specifying which vectors to include into response. Default is false. 
        * @default null
        */
       with_vector?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
@@ -2311,10 +2384,10 @@ export interface components {
       filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
       /** @description Additional search params */
       params?: components["schemas"]["SearchParams"] | (Record<string, unknown> | null);
-      /** @description Select which payload to return with the response. Default: None */
+      /** @description Select which payload to return with the response. Default is false. */
       with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
       /**
-       * @description Whether to return the point vector with the result? 
+       * @description Options for specifying which vectors to include into response. Default is false. 
        * @default null
        */
       with_vector?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
@@ -2388,6 +2461,11 @@ export interface components {
        * @default null
        */
       checksum?: string | null;
+      /**
+       * @description Optional API key used when fetching the snapshot from a remote URL. 
+       * @default null
+       */
+      api_key?: string | null;
     };
     ShardSnapshotLocation: string;
     /** @description Use context and a target to find the most similar points, constrained by the context. */
@@ -2424,9 +2502,9 @@ export interface components {
        * @description Offset of the first result to return. May be used to paginate results. Note: large offset values may cause performance issues.
        */
       offset?: number | null;
-      /** @description Select which payload to return with the response. Default: None */
+      /** @description Select which payload to return with the response. Default is false. */
       with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
-      /** @description Whether to return the point vector with the result? */
+      /** @description Options for specifying which vectors to include into response. Default is false. */
       with_vector?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
       /**
        * @description Define which vector to use for recommendation, if not specified - try to use default vector 
@@ -2454,6 +2532,126 @@ export interface components {
     /** @description State of existence of a collection, true = exists, false = does not exist */
     CollectionExistence: {
       exists: boolean;
+    };
+    QueryRequest: {
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
+      /**
+       * @description Sub-requests to perform first. If present, the query will be performed on the results of the prefetch(es). 
+       * @default null
+       */
+      prefetch?: components["schemas"]["Prefetch"] | (components["schemas"]["Prefetch"])[] | (Record<string, unknown> | null);
+      /** @description Query to perform. If missing without prefetches, returns points ordered by their IDs. */
+      query?: components["schemas"]["QueryInterface"] | (Record<string, unknown> | null);
+      /** @description Define which vector name to use for querying. If missing, the default vector is used. */
+      using?: string | null;
+      /** @description Filter conditions - return only those points that satisfy the specified conditions. */
+      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
+      /** @description Search params for when there is no prefetch */
+      params?: components["schemas"]["SearchParams"] | (Record<string, unknown> | null);
+      /**
+       * Format: float 
+       * @description Return points with scores better than this threshold.
+       */
+      score_threshold?: number | null;
+      /**
+       * Format: uint 
+       * @description Max number of points to return. Default is 10.
+       */
+      limit?: number | null;
+      /**
+       * Format: uint 
+       * @description Offset of the result. Skip this many points. Default is 0
+       */
+      offset?: number | null;
+      /** @description Options for specifying which vectors to include into the response. Default is false. */
+      with_vector?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
+      /** @description Options for specifying which payload to include or not. Default is false. */
+      with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
+      /**
+       * @description The location to use for IDs lookup, if not specified - use the current collection and the 'using' vector Note: the other collection vectors should have the same vector size as the 'using' vector in the current collection 
+       * @default null
+       */
+      lookup_from?: components["schemas"]["LookupLocation"] | (Record<string, unknown> | null);
+    };
+    Prefetch: {
+      /**
+       * @description Sub-requests to perform first. If present, the query will be performed on the results of the prefetches. 
+       * @default null
+       */
+      prefetch?: components["schemas"]["Prefetch"] | (components["schemas"]["Prefetch"])[] | (Record<string, unknown> | null);
+      /** @description Query to perform. If missing without prefetches, returns points ordered by their IDs. */
+      query?: components["schemas"]["QueryInterface"] | (Record<string, unknown> | null);
+      /** @description Define which vector name to use for querying. If missing, the default vector is used. */
+      using?: string | null;
+      /** @description Filter conditions - return only those points that satisfy the specified conditions. */
+      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
+      /** @description Search params for when there is no prefetch */
+      params?: components["schemas"]["SearchParams"] | (Record<string, unknown> | null);
+      /**
+       * Format: float 
+       * @description Return points with scores better than this threshold.
+       */
+      score_threshold?: number | null;
+      /**
+       * Format: uint 
+       * @description Max number of points to return. Default is 10.
+       */
+      limit?: number | null;
+      /**
+       * @description The location to use for IDs lookup, if not specified - use the current collection and the 'using' vector Note: the other collection vectors should have the same vector size as the 'using' vector in the current collection 
+       * @default null
+       */
+      lookup_from?: components["schemas"]["LookupLocation"] | (Record<string, unknown> | null);
+    };
+    QueryInterface: components["schemas"]["VectorInput"] | components["schemas"]["Query"];
+    VectorInput: (number)[] | components["schemas"]["SparseVector"] | ((number)[])[] | components["schemas"]["ExtendedPointId"];
+    Query: components["schemas"]["NearestQuery"] | components["schemas"]["RecommendQuery"] | components["schemas"]["DiscoverQuery"] | components["schemas"]["ContextQuery"] | components["schemas"]["OrderByQuery"] | components["schemas"]["FusionQuery"];
+    NearestQuery: {
+      nearest: components["schemas"]["VectorInput"];
+    };
+    RecommendQuery: {
+      recommend: components["schemas"]["RecommendInput"];
+    };
+    RecommendInput: {
+      /** @description Look for vectors closest to the vectors from these points */
+      positive?: (components["schemas"]["VectorInput"])[] | null;
+      /** @description Try to avoid vectors like the vector from these points */
+      negative?: (components["schemas"]["VectorInput"])[] | null;
+      /** @description How to use the provided vectors to find the results */
+      strategy?: components["schemas"]["RecommendStrategy"] | (Record<string, unknown> | null);
+    };
+    DiscoverQuery: {
+      discover: components["schemas"]["DiscoverInput"];
+    };
+    DiscoverInput: {
+      target: components["schemas"]["VectorInput"];
+      /** @description Search space will be constrained by these pairs of vectors */
+      context: components["schemas"]["ContextPair"] | (components["schemas"]["ContextPair"])[] | (Record<string, unknown> | null);
+    };
+    ContextPair: {
+      positive: components["schemas"]["VectorInput"];
+      negative: components["schemas"]["VectorInput"];
+    };
+    ContextQuery: {
+      context: components["schemas"]["ContextInput"];
+    };
+    ContextInput: components["schemas"]["ContextPair"] | (components["schemas"]["ContextPair"])[] | (Record<string, unknown> | null);
+    OrderByQuery: {
+      order_by: components["schemas"]["OrderByInterface"];
+    };
+    FusionQuery: {
+      fusion: components["schemas"]["Fusion"];
+    };
+    /**
+     * @description Fusion algorithm allows to combine results of multiple prefetches. Available fusion algorithms: * `rrf` - Rank Reciprocal Fusion 
+     * @enum {string}
+     */
+    Fusion: "rrf";
+    QueryRequestBatch: {
+      searches: (components["schemas"]["QueryRequest"])[];
+    };
+    QueryResponse: {
+      points: (components["schemas"]["ScoredPoint"])[];
     };
   };
   responses: never;
@@ -2779,6 +2977,38 @@ export interface operations {
       200: {
         content: {
           "text/plain": string;
+        };
+      };
+      /** @description error */
+      "4XX": never;
+    };
+  };
+  /**
+   * Get issues 
+   * @description Get a report of performance issues and configuration suggestions
+   */
+  get_issues: {
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      /** @description error */
+      "4XX": never;
+    };
+  };
+  /**
+   * Clear issues 
+   * @description Removes all issues reported so far
+   */
+  clear_issues: {
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": boolean;
         };
       };
       /** @description error */
@@ -5367,6 +5597,110 @@ export interface operations {
             time?: number;
             status?: string;
             result?: components["schemas"]["CountResult"];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Query points 
+   * @description Universally query points. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+   */
+  query_points: {
+    parameters: {
+      query?: {
+        /** @description Define read consistency guarantees for the operation */
+        consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
+      };
+      path: {
+        /** @description Name of the collection to query */
+        collection_name: string;
+      };
+    };
+    /** @description Describes the query to make to the collection */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["QueryRequest"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            status?: string;
+            result?: components["schemas"]["QueryResponse"];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Query points in batch 
+   * @description Universally query points in batch. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+   */
+  query_batch_points: {
+    parameters: {
+      query?: {
+        /** @description Define read consistency guarantees for the operation */
+        consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
+      };
+      path: {
+        /** @description Name of the collection to query */
+        collection_name: string;
+      };
+    };
+    /** @description Describes the queries to make to the collection */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["QueryRequestBatch"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            status?: string;
+            result?: (components["schemas"]["QueryResponse"])[];
           };
         };
       };

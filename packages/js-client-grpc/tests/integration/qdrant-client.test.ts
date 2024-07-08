@@ -423,4 +423,42 @@ describe('QdrantClient', () => {
         ).result;
         expect(result).toHaveLength(2);
     });
+
+    test('query points filter', async () => {
+        const result = (
+            await client.api('points').query({
+                collectionName,
+                filter: {
+                    should: [
+                        {
+                            conditionOneOf: {
+                                case: 'field',
+                                value: {
+                                    key: 'city',
+                                    match: {
+                                        matchValue: {case: 'keyword', value: 'London'},
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                },
+                limit: 3n,
+                query: {
+                    variant: {
+                        case: 'nearest',
+                        value: {
+                            variant: {
+                                case: 'dense',
+                                value: {
+                                    data: [0.2, 0.1, 0.9, 0.7],
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+        ).result;
+        expect(result).toHaveLength(2);
+    });
 });

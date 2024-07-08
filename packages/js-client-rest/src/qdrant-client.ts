@@ -1442,12 +1442,16 @@ export class QdrantClient {
      *         SHA256 checksum to verify snapshot integrity before recovery
      * @returns True if the snapshot was recovered
      */
-    async recoverSnapshot(collection_name: string, {location, priority, checksum}: SchemaFor<'SnapshotRecover'>) {
+    async recoverSnapshot(
+        collection_name: string,
+        {location, priority, checksum, api_key}: SchemaFor<'SnapshotRecover'>,
+    ) {
         const response = await this._openApiClient.snapshots.recoverFromSnapshot({
             collection_name,
             location,
             priority,
             checksum,
+            api_key,
         });
         return maybe(response.data.result).orThrow('Recover from snapshot API returned empty');
     }
@@ -1747,5 +1751,102 @@ export class QdrantClient {
     async collectionExists(collection_name: string) {
         const response = await this._openApiClient.collections.collectionExists({collection_name});
         return maybe(response.data.result).orThrow('Collection exists returned empty');
+    }
+
+    /**
+     * Query points
+     * @description Universally query points. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+     * @param collection_name Name of the collection
+     * @param {object} args -
+     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
+     *         Values:
+     *             number - number of replicas to query, values should present in all queried replicas
+     *             'majority' - query all replicas, but return values present in the majority of replicas
+     *             'quorum' - query the majority of replicas, return values present in all of them
+     *             'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards.
+     *     - prefetch: Sub-requests to perform first. If present, the query will be performed on the results of the prefetch(es).
+     *     - query: Query to perform. If missing without prefetches, returns points ordered by their IDs.
+     *     - using: Define which vector name to use for querying. If missing, the default vector is used.
+     *     - filter: Filter conditions - return only those points that satisfy the specified conditions.
+     *     - params: Search params for when there is no prefetch
+     *     - score_threshold: Return points with scores better than this threshold.
+     *     - limit: Max number of points to return. Default is 10.
+     *     - offset: Offset of the result. Skip this many points. Default is 0
+     *     - with_vector: Options for specifying which vectors to include into the response. Default is false.
+     *     - with_payload: Options for specifying which payload to include or not. Default is false.
+     *     - lookup_from: The location to use for IDs lookup, if not specified - use the current collection and the 'using' vector Note: the other collection vectors should have the same vector size as the 'using' vector in the current collection.
+     * @returns Operation result
+     */
+    async query(
+        collection_name: string,
+        {
+            consistency,
+            timeout,
+            shard_key,
+            prefetch,
+            query,
+            using,
+            filter,
+            params,
+            score_threshold,
+            limit,
+            offset,
+            with_vector,
+            with_payload,
+            lookup_from,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'QueryRequest'>,
+    ) {
+        const response = await this._openApiClient.points.queryPoints({
+            collection_name,
+            consistency,
+            timeout,
+            shard_key,
+            prefetch,
+            query,
+            using,
+            filter,
+            params,
+            score_threshold,
+            limit,
+            offset,
+            with_vector,
+            with_payload,
+            lookup_from,
+        });
+        return maybe(response.data.result).orThrow('Query points returned empty');
+    }
+
+    /**
+     * Query points in batch
+     * @description Universally query points in batch. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+     * @param collection_name Name of the collection
+     * @param {object} args -
+     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
+     *         Values:
+     *             number - number of replicas to query, values should present in all queried replicas
+     *             'majority' - query all replicas, but return values present in the majority of replicas
+     *             'quorum' - query the majority of replicas, return values present in all of them
+     *             'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - searches: List of queries
+     * @returns Operation result
+     */
+    async queryBatch(
+        collection_name: string,
+        {
+            consistency,
+            timeout,
+            searches,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'QueryRequestBatch'>,
+    ) {
+        const response = await this._openApiClient.points.queryBatchPoints({
+            collection_name,
+            consistency,
+            timeout,
+            searches,
+        });
+        return maybe(response.data.result).orThrow('Query points returned empty');
     }
 }

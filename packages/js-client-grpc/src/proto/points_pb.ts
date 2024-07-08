@@ -172,6 +172,22 @@ proto3.util.setEnumType(RecommendStrategy, "qdrant.RecommendStrategy", [
 ]);
 
 /**
+ * @generated from enum qdrant.Fusion
+ */
+export enum Fusion {
+  /**
+   * Reciprocal Rank Fusion
+   *
+   * @generated from enum value: RRF = 0;
+   */
+  RRF = 0,
+}
+// Retrieve enum metadata with: proto3.getEnumType(Fusion)
+proto3.util.setEnumType(Fusion, "qdrant.Fusion", [
+  { no: 0, name: "RRF" },
+]);
+
+/**
  * @generated from enum qdrant.UpdateStatus
  */
 export enum UpdateStatus {
@@ -394,18 +410,31 @@ export class SparseIndices extends Message<SparseIndices> {
 }
 
 /**
+ * Legacy vector format, which determines the vector type by the configuration of its fields.
+ *
  * @generated from message qdrant.Vector
  */
 export class Vector extends Message<Vector> {
   /**
+   * Vector data (flatten for multi vectors)
+   *
    * @generated from field: repeated float data = 1;
    */
   data: number[] = [];
 
   /**
+   * Sparse indices for sparse vectors
+   *
    * @generated from field: optional qdrant.SparseIndices indices = 2;
    */
   indices?: SparseIndices;
+
+  /**
+   * Number of vectors per multi vector
+   *
+   * @generated from field: optional uint32 vectors_count = 3;
+   */
+  vectorsCount?: number;
 
   constructor(data?: PartialMessage<Vector>) {
     super();
@@ -417,6 +446,7 @@ export class Vector extends Message<Vector> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "data", kind: "scalar", T: 2 /* ScalarType.FLOAT */, repeated: true },
     { no: 2, name: "indices", kind: "message", T: SparseIndices, opt: true },
+    { no: 3, name: "vectors_count", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Vector {
@@ -433,6 +463,189 @@ export class Vector extends Message<Vector> {
 
   static equals(a: Vector | PlainMessage<Vector> | undefined, b: Vector | PlainMessage<Vector> | undefined): boolean {
     return proto3.util.equals(Vector, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.DenseVector
+ */
+export class DenseVector extends Message<DenseVector> {
+  /**
+   * @generated from field: repeated float data = 1;
+   */
+  data: number[] = [];
+
+  constructor(data?: PartialMessage<DenseVector>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.DenseVector";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "data", kind: "scalar", T: 2 /* ScalarType.FLOAT */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DenseVector {
+    return new DenseVector().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DenseVector {
+    return new DenseVector().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DenseVector {
+    return new DenseVector().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DenseVector | PlainMessage<DenseVector> | undefined, b: DenseVector | PlainMessage<DenseVector> | undefined): boolean {
+    return proto3.util.equals(DenseVector, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.SparseVector
+ */
+export class SparseVector extends Message<SparseVector> {
+  /**
+   * @generated from field: repeated float values = 1;
+   */
+  values: number[] = [];
+
+  /**
+   * @generated from field: repeated uint32 indices = 2;
+   */
+  indices: number[] = [];
+
+  constructor(data?: PartialMessage<SparseVector>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.SparseVector";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "values", kind: "scalar", T: 2 /* ScalarType.FLOAT */, repeated: true },
+    { no: 2, name: "indices", kind: "scalar", T: 13 /* ScalarType.UINT32 */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SparseVector {
+    return new SparseVector().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SparseVector {
+    return new SparseVector().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SparseVector {
+    return new SparseVector().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SparseVector | PlainMessage<SparseVector> | undefined, b: SparseVector | PlainMessage<SparseVector> | undefined): boolean {
+    return proto3.util.equals(SparseVector, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.MultiDenseVector
+ */
+export class MultiDenseVector extends Message<MultiDenseVector> {
+  /**
+   * @generated from field: repeated qdrant.DenseVector vectors = 1;
+   */
+  vectors: DenseVector[] = [];
+
+  constructor(data?: PartialMessage<MultiDenseVector>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.MultiDenseVector";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "vectors", kind: "message", T: DenseVector, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MultiDenseVector {
+    return new MultiDenseVector().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MultiDenseVector {
+    return new MultiDenseVector().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MultiDenseVector {
+    return new MultiDenseVector().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MultiDenseVector | PlainMessage<MultiDenseVector> | undefined, b: MultiDenseVector | PlainMessage<MultiDenseVector> | undefined): boolean {
+    return proto3.util.equals(MultiDenseVector, a, b);
+  }
+}
+
+/**
+ * Vector type to be used in queries. Ids will be substituted with their corresponding vectors from the collection.
+ *
+ * @generated from message qdrant.VectorInput
+ */
+export class VectorInput extends Message<VectorInput> {
+  /**
+   * @generated from oneof qdrant.VectorInput.variant
+   */
+  variant: {
+    /**
+     * @generated from field: qdrant.PointId id = 1;
+     */
+    value: PointId;
+    case: "id";
+  } | {
+    /**
+     * @generated from field: qdrant.DenseVector dense = 2;
+     */
+    value: DenseVector;
+    case: "dense";
+  } | {
+    /**
+     * @generated from field: qdrant.SparseVector sparse = 3;
+     */
+    value: SparseVector;
+    case: "sparse";
+  } | {
+    /**
+     * @generated from field: qdrant.MultiDenseVector multi_dense = 4;
+     */
+    value: MultiDenseVector;
+    case: "multiDense";
+  } | { case: undefined; value?: undefined } = { case: undefined };
+
+  constructor(data?: PartialMessage<VectorInput>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.VectorInput";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "message", T: PointId, oneof: "variant" },
+    { no: 2, name: "dense", kind: "message", T: DenseVector, oneof: "variant" },
+    { no: 3, name: "sparse", kind: "message", T: SparseVector, oneof: "variant" },
+    { no: 4, name: "multi_dense", kind: "message", T: MultiDenseVector, oneof: "variant" },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VectorInput {
+    return new VectorInput().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): VectorInput {
+    return new VectorInput().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): VectorInput {
+    return new VectorInput().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: VectorInput | PlainMessage<VectorInput> | undefined, b: VectorInput | PlainMessage<VectorInput> | undefined): boolean {
+    return proto3.util.equals(VectorInput, a, b);
   }
 }
 
@@ -3184,7 +3397,7 @@ export class DiscoverBatchPoints extends Message<DiscoverBatchPoints> {
  */
 export class CountPoints extends Message<CountPoints> {
   /**
-   * name of the collection
+   * Name of the collection
    *
    * @generated from field: string collection_name = 1;
    */
@@ -3251,6 +3464,589 @@ export class CountPoints extends Message<CountPoints> {
 }
 
 /**
+ * @generated from message qdrant.RecommendInput
+ */
+export class RecommendInput extends Message<RecommendInput> {
+  /**
+   * Look for vectors closest to the vectors from these points
+   *
+   * @generated from field: repeated qdrant.VectorInput positive = 1;
+   */
+  positive: VectorInput[] = [];
+
+  /**
+   * Try to avoid vectors like the vector from these points
+   *
+   * @generated from field: repeated qdrant.VectorInput negative = 2;
+   */
+  negative: VectorInput[] = [];
+
+  /**
+   * How to use the provided vectors to find the results
+   *
+   * @generated from field: optional qdrant.RecommendStrategy strategy = 3;
+   */
+  strategy?: RecommendStrategy;
+
+  constructor(data?: PartialMessage<RecommendInput>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.RecommendInput";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "positive", kind: "message", T: VectorInput, repeated: true },
+    { no: 2, name: "negative", kind: "message", T: VectorInput, repeated: true },
+    { no: 3, name: "strategy", kind: "enum", T: proto3.getEnumType(RecommendStrategy), opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RecommendInput {
+    return new RecommendInput().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): RecommendInput {
+    return new RecommendInput().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): RecommendInput {
+    return new RecommendInput().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: RecommendInput | PlainMessage<RecommendInput> | undefined, b: RecommendInput | PlainMessage<RecommendInput> | undefined): boolean {
+    return proto3.util.equals(RecommendInput, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.ContextInputPair
+ */
+export class ContextInputPair extends Message<ContextInputPair> {
+  /**
+   * A positive vector
+   *
+   * @generated from field: qdrant.VectorInput positive = 1;
+   */
+  positive?: VectorInput;
+
+  /**
+   * Repel from this vector
+   *
+   * @generated from field: qdrant.VectorInput negative = 2;
+   */
+  negative?: VectorInput;
+
+  constructor(data?: PartialMessage<ContextInputPair>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.ContextInputPair";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "positive", kind: "message", T: VectorInput },
+    { no: 2, name: "negative", kind: "message", T: VectorInput },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ContextInputPair {
+    return new ContextInputPair().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ContextInputPair {
+    return new ContextInputPair().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ContextInputPair {
+    return new ContextInputPair().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ContextInputPair | PlainMessage<ContextInputPair> | undefined, b: ContextInputPair | PlainMessage<ContextInputPair> | undefined): boolean {
+    return proto3.util.equals(ContextInputPair, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.DiscoverInput
+ */
+export class DiscoverInput extends Message<DiscoverInput> {
+  /**
+   * Use this as the primary search objective
+   *
+   * @generated from field: qdrant.VectorInput target = 1;
+   */
+  target?: VectorInput;
+
+  /**
+   * Search space will be constrained by these pairs of vectors
+   *
+   * @generated from field: qdrant.ContextInput context = 2;
+   */
+  context?: ContextInput;
+
+  constructor(data?: PartialMessage<DiscoverInput>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.DiscoverInput";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "target", kind: "message", T: VectorInput },
+    { no: 2, name: "context", kind: "message", T: ContextInput },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DiscoverInput {
+    return new DiscoverInput().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DiscoverInput {
+    return new DiscoverInput().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DiscoverInput {
+    return new DiscoverInput().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DiscoverInput | PlainMessage<DiscoverInput> | undefined, b: DiscoverInput | PlainMessage<DiscoverInput> | undefined): boolean {
+    return proto3.util.equals(DiscoverInput, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.ContextInput
+ */
+export class ContextInput extends Message<ContextInput> {
+  /**
+   * Search space will be constrained by these pairs of vectors
+   *
+   * @generated from field: repeated qdrant.ContextInputPair pairs = 1;
+   */
+  pairs: ContextInputPair[] = [];
+
+  constructor(data?: PartialMessage<ContextInput>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.ContextInput";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "pairs", kind: "message", T: ContextInputPair, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ContextInput {
+    return new ContextInput().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ContextInput {
+    return new ContextInput().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ContextInput {
+    return new ContextInput().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ContextInput | PlainMessage<ContextInput> | undefined, b: ContextInput | PlainMessage<ContextInput> | undefined): boolean {
+    return proto3.util.equals(ContextInput, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.Query
+ */
+export class Query extends Message<Query> {
+  /**
+   * @generated from oneof qdrant.Query.variant
+   */
+  variant: {
+    /**
+     * Find the nearest neighbors to this vector.
+     *
+     * @generated from field: qdrant.VectorInput nearest = 1;
+     */
+    value: VectorInput;
+    case: "nearest";
+  } | {
+    /**
+     * Use multiple positive and negative vectors to find the results.
+     *
+     * @generated from field: qdrant.RecommendInput recommend = 2;
+     */
+    value: RecommendInput;
+    case: "recommend";
+  } | {
+    /**
+     * Search for nearest points, but constrain the search space with context
+     *
+     * @generated from field: qdrant.DiscoverInput discover = 3;
+     */
+    value: DiscoverInput;
+    case: "discover";
+  } | {
+    /**
+     * Return points that live in positive areas.
+     *
+     * @generated from field: qdrant.ContextInput context = 4;
+     */
+    value: ContextInput;
+    case: "context";
+  } | {
+    /**
+     * Order the points by a payload field.
+     *
+     * @generated from field: qdrant.OrderBy order_by = 5;
+     */
+    value: OrderBy;
+    case: "orderBy";
+  } | {
+    /**
+     * Fuse the results of multiple prefetches.
+     *
+     * @generated from field: qdrant.Fusion fusion = 6;
+     */
+    value: Fusion;
+    case: "fusion";
+  } | { case: undefined; value?: undefined } = { case: undefined };
+
+  constructor(data?: PartialMessage<Query>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.Query";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "nearest", kind: "message", T: VectorInput, oneof: "variant" },
+    { no: 2, name: "recommend", kind: "message", T: RecommendInput, oneof: "variant" },
+    { no: 3, name: "discover", kind: "message", T: DiscoverInput, oneof: "variant" },
+    { no: 4, name: "context", kind: "message", T: ContextInput, oneof: "variant" },
+    { no: 5, name: "order_by", kind: "message", T: OrderBy, oneof: "variant" },
+    { no: 6, name: "fusion", kind: "enum", T: proto3.getEnumType(Fusion), oneof: "variant" },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Query {
+    return new Query().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Query {
+    return new Query().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Query {
+    return new Query().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Query | PlainMessage<Query> | undefined, b: Query | PlainMessage<Query> | undefined): boolean {
+    return proto3.util.equals(Query, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.PrefetchQuery
+ */
+export class PrefetchQuery extends Message<PrefetchQuery> {
+  /**
+   * Sub-requests to perform first. If present, the query will be performed on the results of the prefetches.
+   *
+   * @generated from field: repeated qdrant.PrefetchQuery prefetch = 1;
+   */
+  prefetch: PrefetchQuery[] = [];
+
+  /**
+   * Query to perform. If missing, returns points ordered by their IDs.
+   *
+   * @generated from field: optional qdrant.Query query = 2;
+   */
+  query?: Query;
+
+  /**
+   * Define which vector to use for querying. If missing, the default vector is is used.
+   *
+   * @generated from field: optional string using = 3;
+   */
+  using?: string;
+
+  /**
+   * Filter conditions - return only those points that satisfy the specified conditions.
+   *
+   * @generated from field: optional qdrant.Filter filter = 4;
+   */
+  filter?: Filter;
+
+  /**
+   * Search params for when there is no prefetch.
+   *
+   * @generated from field: optional qdrant.SearchParams params = 5;
+   */
+  params?: SearchParams;
+
+  /**
+   * Return points with scores better than this threshold.
+   *
+   * @generated from field: optional float score_threshold = 6;
+   */
+  scoreThreshold?: number;
+
+  /**
+   * Max number of points. Default is 10
+   *
+   * @generated from field: optional uint64 limit = 7;
+   */
+  limit?: bigint;
+
+  /**
+   * The location to use for IDs lookup, if not specified - use the current collection and the 'using' vector
+   *
+   * @generated from field: optional qdrant.LookupLocation lookup_from = 8;
+   */
+  lookupFrom?: LookupLocation;
+
+  constructor(data?: PartialMessage<PrefetchQuery>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.PrefetchQuery";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "prefetch", kind: "message", T: PrefetchQuery, repeated: true },
+    { no: 2, name: "query", kind: "message", T: Query, opt: true },
+    { no: 3, name: "using", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 4, name: "filter", kind: "message", T: Filter, opt: true },
+    { no: 5, name: "params", kind: "message", T: SearchParams, opt: true },
+    { no: 6, name: "score_threshold", kind: "scalar", T: 2 /* ScalarType.FLOAT */, opt: true },
+    { no: 7, name: "limit", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 8, name: "lookup_from", kind: "message", T: LookupLocation, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PrefetchQuery {
+    return new PrefetchQuery().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PrefetchQuery {
+    return new PrefetchQuery().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PrefetchQuery {
+    return new PrefetchQuery().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PrefetchQuery | PlainMessage<PrefetchQuery> | undefined, b: PrefetchQuery | PlainMessage<PrefetchQuery> | undefined): boolean {
+    return proto3.util.equals(PrefetchQuery, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.QueryPoints
+ */
+export class QueryPoints extends Message<QueryPoints> {
+  /**
+   * Name of the collection
+   *
+   * @generated from field: string collection_name = 1;
+   */
+  collectionName = "";
+
+  /**
+   * Sub-requests to perform first. If present, the query will be performed on the results of the prefetches.
+   *
+   * @generated from field: repeated qdrant.PrefetchQuery prefetch = 2;
+   */
+  prefetch: PrefetchQuery[] = [];
+
+  /**
+   * Query to perform. If missing, returns points ordered by their IDs.
+   *
+   * @generated from field: optional qdrant.Query query = 3;
+   */
+  query?: Query;
+
+  /**
+   * Define which vector to use for querying. If missing, the default vector is used.
+   *
+   * @generated from field: optional string using = 4;
+   */
+  using?: string;
+
+  /**
+   * Filter conditions - return only those points that satisfy the specified conditions.
+   *
+   * @generated from field: optional qdrant.Filter filter = 5;
+   */
+  filter?: Filter;
+
+  /**
+   * Search params for when there is no prefetch.
+   *
+   * @generated from field: optional qdrant.SearchParams params = 6;
+   */
+  params?: SearchParams;
+
+  /**
+   * Return points with scores better than this threshold.
+   *
+   * @generated from field: optional float score_threshold = 7;
+   */
+  scoreThreshold?: number;
+
+  /**
+   * Max number of points. Default is 10.
+   *
+   * @generated from field: optional uint64 limit = 8;
+   */
+  limit?: bigint;
+
+  /**
+   * Offset of the result. Skip this many points. Default is 0.
+   *
+   * @generated from field: optional uint64 offset = 9;
+   */
+  offset?: bigint;
+
+  /**
+   * Options for specifying which vectors to include into the response.
+   *
+   * @generated from field: optional qdrant.WithVectorsSelector with_vectors = 10;
+   */
+  withVectors?: WithVectorsSelector;
+
+  /**
+   * Options for specifying which payload to include or not.
+   *
+   * @generated from field: optional qdrant.WithPayloadSelector with_payload = 11;
+   */
+  withPayload?: WithPayloadSelector;
+
+  /**
+   * Options for specifying read consistency guarantees.
+   *
+   * @generated from field: optional qdrant.ReadConsistency read_consistency = 12;
+   */
+  readConsistency?: ReadConsistency;
+
+  /**
+   * Specify in which shards to look for the points, if not specified - look in all shards.
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 13;
+   */
+  shardKeySelector?: ShardKeySelector;
+
+  /**
+   * The location to use for IDs lookup, if not specified - use the current collection and the 'using' vector
+   *
+   * @generated from field: optional qdrant.LookupLocation lookup_from = 14;
+   */
+  lookupFrom?: LookupLocation;
+
+  /**
+   * If set, overrides global timeout setting for this request. Unit is seconds.
+   *
+   * @generated from field: optional uint64 timeout = 15;
+   */
+  timeout?: bigint;
+
+  constructor(data?: PartialMessage<QueryPoints>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.QueryPoints";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collection_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "prefetch", kind: "message", T: PrefetchQuery, repeated: true },
+    { no: 3, name: "query", kind: "message", T: Query, opt: true },
+    { no: 4, name: "using", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 5, name: "filter", kind: "message", T: Filter, opt: true },
+    { no: 6, name: "params", kind: "message", T: SearchParams, opt: true },
+    { no: 7, name: "score_threshold", kind: "scalar", T: 2 /* ScalarType.FLOAT */, opt: true },
+    { no: 8, name: "limit", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 9, name: "offset", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 10, name: "with_vectors", kind: "message", T: WithVectorsSelector, opt: true },
+    { no: 11, name: "with_payload", kind: "message", T: WithPayloadSelector, opt: true },
+    { no: 12, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
+    { no: 13, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+    { no: 14, name: "lookup_from", kind: "message", T: LookupLocation, opt: true },
+    { no: 15, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryPoints {
+    return new QueryPoints().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryPoints {
+    return new QueryPoints().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryPoints {
+    return new QueryPoints().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryPoints | PlainMessage<QueryPoints> | undefined, b: QueryPoints | PlainMessage<QueryPoints> | undefined): boolean {
+    return proto3.util.equals(QueryPoints, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.QueryBatchPoints
+ */
+export class QueryBatchPoints extends Message<QueryBatchPoints> {
+  /**
+   * @generated from field: string collection_name = 1;
+   */
+  collectionName = "";
+
+  /**
+   * @generated from field: repeated qdrant.QueryPoints query_points = 2;
+   */
+  queryPoints: QueryPoints[] = [];
+
+  /**
+   * Options for specifying read consistency guarantees
+   *
+   * @generated from field: optional qdrant.ReadConsistency read_consistency = 3;
+   */
+  readConsistency?: ReadConsistency;
+
+  /**
+   * If set, overrides global timeout setting for this request. Unit is seconds.
+   *
+   * @generated from field: optional uint64 timeout = 4;
+   */
+  timeout?: bigint;
+
+  constructor(data?: PartialMessage<QueryBatchPoints>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.QueryBatchPoints";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collection_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "query_points", kind: "message", T: QueryPoints, repeated: true },
+    { no: 3, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
+    { no: 4, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryBatchPoints {
+    return new QueryBatchPoints().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryBatchPoints {
+    return new QueryBatchPoints().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryBatchPoints {
+    return new QueryBatchPoints().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryBatchPoints | PlainMessage<QueryBatchPoints> | undefined, b: QueryBatchPoints | PlainMessage<QueryBatchPoints> | undefined): boolean {
+    return proto3.util.equals(QueryBatchPoints, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.PointsUpdateOperation
  */
 export class PointsUpdateOperation extends Message<PointsUpdateOperation> {
@@ -3278,9 +4074,9 @@ export class PointsUpdateOperation extends Message<PointsUpdateOperation> {
     case: "setPayload";
   } | {
     /**
-     * @generated from field: qdrant.PointsUpdateOperation.SetPayload overwrite_payload = 4;
+     * @generated from field: qdrant.PointsUpdateOperation.OverwritePayload overwrite_payload = 4;
      */
-    value: PointsUpdateOperation_SetPayload;
+    value: PointsUpdateOperation_OverwritePayload;
     case: "overwritePayload";
   } | {
     /**
@@ -3332,7 +4128,7 @@ export class PointsUpdateOperation extends Message<PointsUpdateOperation> {
     { no: 1, name: "upsert", kind: "message", T: PointsUpdateOperation_PointStructList, oneof: "operation" },
     { no: 2, name: "delete_deprecated", kind: "message", T: PointsSelector, oneof: "operation" },
     { no: 3, name: "set_payload", kind: "message", T: PointsUpdateOperation_SetPayload, oneof: "operation" },
-    { no: 4, name: "overwrite_payload", kind: "message", T: PointsUpdateOperation_SetPayload, oneof: "operation" },
+    { no: 4, name: "overwrite_payload", kind: "message", T: PointsUpdateOperation_OverwritePayload, oneof: "operation" },
     { no: 5, name: "delete_payload", kind: "message", T: PointsUpdateOperation_DeletePayload, oneof: "operation" },
     { no: 6, name: "clear_payload_deprecated", kind: "message", T: PointsSelector, oneof: "operation" },
     { no: 7, name: "update_vectors", kind: "message", T: PointsUpdateOperation_UpdateVectors, oneof: "operation" },
@@ -3461,6 +4257,67 @@ export class PointsUpdateOperation_SetPayload extends Message<PointsUpdateOperat
 
   static equals(a: PointsUpdateOperation_SetPayload | PlainMessage<PointsUpdateOperation_SetPayload> | undefined, b: PointsUpdateOperation_SetPayload | PlainMessage<PointsUpdateOperation_SetPayload> | undefined): boolean {
     return proto3.util.equals(PointsUpdateOperation_SetPayload, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.PointsUpdateOperation.OverwritePayload
+ */
+export class PointsUpdateOperation_OverwritePayload extends Message<PointsUpdateOperation_OverwritePayload> {
+  /**
+   * @generated from field: map<string, qdrant.Value> payload = 1;
+   */
+  payload: { [key: string]: Value } = {};
+
+  /**
+   * Affected points
+   *
+   * @generated from field: optional qdrant.PointsSelector points_selector = 2;
+   */
+  pointsSelector?: PointsSelector;
+
+  /**
+   * Option for custom sharding to specify used shard keys
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 3;
+   */
+  shardKeySelector?: ShardKeySelector;
+
+  /**
+   * Option for indicate property of payload
+   *
+   * @generated from field: optional string key = 4;
+   */
+  key?: string;
+
+  constructor(data?: PartialMessage<PointsUpdateOperation_OverwritePayload>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.PointsUpdateOperation.OverwritePayload";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "payload", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: Value} },
+    { no: 2, name: "points_selector", kind: "message", T: PointsSelector, opt: true },
+    { no: 3, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+    { no: 4, name: "key", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation_OverwritePayload {
+    return new PointsUpdateOperation_OverwritePayload().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PointsUpdateOperation_OverwritePayload {
+    return new PointsUpdateOperation_OverwritePayload().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PointsUpdateOperation_OverwritePayload {
+    return new PointsUpdateOperation_OverwritePayload().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PointsUpdateOperation_OverwritePayload | PlainMessage<PointsUpdateOperation_OverwritePayload> | undefined, b: PointsUpdateOperation_OverwritePayload | PlainMessage<PointsUpdateOperation_OverwritePayload> | undefined): boolean {
+    return proto3.util.equals(PointsUpdateOperation_OverwritePayload, a, b);
   }
 }
 
@@ -3867,6 +4724,56 @@ export class UpdateResult extends Message<UpdateResult> {
 }
 
 /**
+ * @generated from message qdrant.OrderValue
+ */
+export class OrderValue extends Message<OrderValue> {
+  /**
+   * @generated from oneof qdrant.OrderValue.variant
+   */
+  variant: {
+    /**
+     * @generated from field: int64 int = 1;
+     */
+    value: bigint;
+    case: "int";
+  } | {
+    /**
+     * @generated from field: double float = 2;
+     */
+    value: number;
+    case: "float";
+  } | { case: undefined; value?: undefined } = { case: undefined };
+
+  constructor(data?: PartialMessage<OrderValue>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.OrderValue";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "int", kind: "scalar", T: 3 /* ScalarType.INT64 */, oneof: "variant" },
+    { no: 2, name: "float", kind: "scalar", T: 1 /* ScalarType.DOUBLE */, oneof: "variant" },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OrderValue {
+    return new OrderValue().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OrderValue {
+    return new OrderValue().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OrderValue {
+    return new OrderValue().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: OrderValue | PlainMessage<OrderValue> | undefined, b: OrderValue | PlainMessage<OrderValue> | undefined): boolean {
+    return proto3.util.equals(OrderValue, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.ScoredPoint
  */
 export class ScoredPoint extends Message<ScoredPoint> {
@@ -3912,6 +4819,13 @@ export class ScoredPoint extends Message<ScoredPoint> {
    */
   shardKey?: ShardKey;
 
+  /**
+   * Order by value
+   *
+   * @generated from field: optional qdrant.OrderValue order_value = 8;
+   */
+  orderValue?: OrderValue;
+
   constructor(data?: PartialMessage<ScoredPoint>) {
     super();
     proto3.util.initPartial(data, this);
@@ -3926,6 +4840,7 @@ export class ScoredPoint extends Message<ScoredPoint> {
     { no: 5, name: "version", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
     { no: 6, name: "vectors", kind: "message", T: Vectors, opt: true },
     { no: 7, name: "shard_key", kind: "message", T: ShardKey, opt: true },
+    { no: 8, name: "order_value", kind: "message", T: OrderValue, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ScoredPoint {
@@ -4144,6 +5059,96 @@ export class SearchResponse extends Message<SearchResponse> {
 
   static equals(a: SearchResponse | PlainMessage<SearchResponse> | undefined, b: SearchResponse | PlainMessage<SearchResponse> | undefined): boolean {
     return proto3.util.equals(SearchResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.QueryResponse
+ */
+export class QueryResponse extends Message<QueryResponse> {
+  /**
+   * @generated from field: repeated qdrant.ScoredPoint result = 1;
+   */
+  result: ScoredPoint[] = [];
+
+  /**
+   * Time spent to process
+   *
+   * @generated from field: double time = 2;
+   */
+  time = 0;
+
+  constructor(data?: PartialMessage<QueryResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.QueryResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "result", kind: "message", T: ScoredPoint, repeated: true },
+    { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryResponse {
+    return new QueryResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryResponse {
+    return new QueryResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryResponse {
+    return new QueryResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryResponse | PlainMessage<QueryResponse> | undefined, b: QueryResponse | PlainMessage<QueryResponse> | undefined): boolean {
+    return proto3.util.equals(QueryResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.QueryBatchResponse
+ */
+export class QueryBatchResponse extends Message<QueryBatchResponse> {
+  /**
+   * @generated from field: repeated qdrant.BatchResult result = 1;
+   */
+  result: BatchResult[] = [];
+
+  /**
+   * Time spent to process
+   *
+   * @generated from field: double time = 2;
+   */
+  time = 0;
+
+  constructor(data?: PartialMessage<QueryBatchResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.QueryBatchResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "result", kind: "message", T: BatchResult, repeated: true },
+    { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryBatchResponse {
+    return new QueryBatchResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryBatchResponse {
+    return new QueryBatchResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryBatchResponse {
+    return new QueryBatchResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryBatchResponse | PlainMessage<QueryBatchResponse> | undefined, b: QueryBatchResponse | PlainMessage<QueryBatchResponse> | undefined): boolean {
+    return proto3.util.equals(QueryBatchResponse, a, b);
   }
 }
 
@@ -4435,6 +5440,13 @@ export class RetrievedPoint extends Message<RetrievedPoint> {
    */
   shardKey?: ShardKey;
 
+  /**
+   * Order-by value
+   *
+   * @generated from field: optional qdrant.OrderValue order_value = 6;
+   */
+  orderValue?: OrderValue;
+
   constructor(data?: PartialMessage<RetrievedPoint>) {
     super();
     proto3.util.initPartial(data, this);
@@ -4447,6 +5459,7 @@ export class RetrievedPoint extends Message<RetrievedPoint> {
     { no: 2, name: "payload", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: Value} },
     { no: 4, name: "vectors", kind: "message", T: Vectors, opt: true },
     { no: 5, name: "shard_key", kind: "message", T: ShardKey, opt: true },
+    { no: 6, name: "order_value", kind: "message", T: OrderValue, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RetrievedPoint {
