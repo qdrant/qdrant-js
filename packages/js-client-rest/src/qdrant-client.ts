@@ -833,9 +833,7 @@ export class QdrantClient {
     }
 
     /**
-     * Overwrites payload of the specified points
-     * After this operation is applied, only the specified payload will be present in the point.
-     * The existing payload, even if the key is not specified in the payload, will be deleted.
+     * Sets payload values for specified points.
      * @param collection_name Name of the collection
      * @param {object} args
      *     - wait: Await for the results to be processed.
