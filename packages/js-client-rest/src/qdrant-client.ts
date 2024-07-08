@@ -833,7 +833,7 @@ export class QdrantClient {
     }
 
     /**
-     * Set only the given payload values on a point.
+     * Sets payload values for specified points.
      * @param collection_name Name of the collection
      * @param {object} args
      *     - wait: Await for the results to be processed.
