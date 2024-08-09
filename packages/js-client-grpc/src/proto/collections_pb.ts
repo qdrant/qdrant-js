@@ -2431,6 +2431,146 @@ export class CollectionConfig extends Message<CollectionConfig> {
 }
 
 /**
+ * @generated from message qdrant.KeywordIndexParams
+ */
+export class KeywordIndexParams extends Message<KeywordIndexParams> {
+  constructor(data?: PartialMessage<KeywordIndexParams>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.KeywordIndexParams";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): KeywordIndexParams {
+    return new KeywordIndexParams().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): KeywordIndexParams {
+    return new KeywordIndexParams().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): KeywordIndexParams {
+    return new KeywordIndexParams().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: KeywordIndexParams | PlainMessage<KeywordIndexParams> | undefined, b: KeywordIndexParams | PlainMessage<KeywordIndexParams> | undefined): boolean {
+    return proto3.util.equals(KeywordIndexParams, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.IntegerIndexParams
+ */
+export class IntegerIndexParams extends Message<IntegerIndexParams> {
+  /**
+   * If true - support direct lookups.
+   *
+   * @generated from field: bool lookup = 1;
+   */
+  lookup = false;
+
+  /**
+   * If true - support ranges filters.
+   *
+   * @generated from field: bool range = 2;
+   */
+  range = false;
+
+  constructor(data?: PartialMessage<IntegerIndexParams>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.IntegerIndexParams";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "lookup", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 2, name: "range", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IntegerIndexParams {
+    return new IntegerIndexParams().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): IntegerIndexParams {
+    return new IntegerIndexParams().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): IntegerIndexParams {
+    return new IntegerIndexParams().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: IntegerIndexParams | PlainMessage<IntegerIndexParams> | undefined, b: IntegerIndexParams | PlainMessage<IntegerIndexParams> | undefined): boolean {
+    return proto3.util.equals(IntegerIndexParams, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.FloatIndexParams
+ */
+export class FloatIndexParams extends Message<FloatIndexParams> {
+  constructor(data?: PartialMessage<FloatIndexParams>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.FloatIndexParams";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FloatIndexParams {
+    return new FloatIndexParams().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): FloatIndexParams {
+    return new FloatIndexParams().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): FloatIndexParams {
+    return new FloatIndexParams().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: FloatIndexParams | PlainMessage<FloatIndexParams> | undefined, b: FloatIndexParams | PlainMessage<FloatIndexParams> | undefined): boolean {
+    return proto3.util.equals(FloatIndexParams, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.GeoIndexParams
+ */
+export class GeoIndexParams extends Message<GeoIndexParams> {
+  constructor(data?: PartialMessage<GeoIndexParams>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.GeoIndexParams";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GeoIndexParams {
+    return new GeoIndexParams().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GeoIndexParams {
+    return new GeoIndexParams().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GeoIndexParams {
+    return new GeoIndexParams().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GeoIndexParams | PlainMessage<GeoIndexParams> | undefined, b: GeoIndexParams | PlainMessage<GeoIndexParams> | undefined): boolean {
+    return proto3.util.equals(GeoIndexParams, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.TextIndexParams
  */
 export class TextIndexParams extends Message<TextIndexParams> {
@@ -2494,49 +2634,64 @@ export class TextIndexParams extends Message<TextIndexParams> {
 }
 
 /**
- * @generated from message qdrant.IntegerIndexParams
+ * @generated from message qdrant.BoolIndexParams
  */
-export class IntegerIndexParams extends Message<IntegerIndexParams> {
-  /**
-   * If true - support direct lookups.
-   *
-   * @generated from field: bool lookup = 1;
-   */
-  lookup = false;
-
-  /**
-   * If true - support ranges filters.
-   *
-   * @generated from field: bool range = 2;
-   */
-  range = false;
-
-  constructor(data?: PartialMessage<IntegerIndexParams>) {
+export class BoolIndexParams extends Message<BoolIndexParams> {
+  constructor(data?: PartialMessage<BoolIndexParams>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "qdrant.IntegerIndexParams";
+  static readonly typeName = "qdrant.BoolIndexParams";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "lookup", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 2, name: "range", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IntegerIndexParams {
-    return new IntegerIndexParams().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BoolIndexParams {
+    return new BoolIndexParams().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): IntegerIndexParams {
-    return new IntegerIndexParams().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BoolIndexParams {
+    return new BoolIndexParams().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): IntegerIndexParams {
-    return new IntegerIndexParams().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BoolIndexParams {
+    return new BoolIndexParams().fromJsonString(jsonString, options);
   }
 
-  static equals(a: IntegerIndexParams | PlainMessage<IntegerIndexParams> | undefined, b: IntegerIndexParams | PlainMessage<IntegerIndexParams> | undefined): boolean {
-    return proto3.util.equals(IntegerIndexParams, a, b);
+  static equals(a: BoolIndexParams | PlainMessage<BoolIndexParams> | undefined, b: BoolIndexParams | PlainMessage<BoolIndexParams> | undefined): boolean {
+    return proto3.util.equals(BoolIndexParams, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.DatetimeIndexParams
+ */
+export class DatetimeIndexParams extends Message<DatetimeIndexParams> {
+  constructor(data?: PartialMessage<DatetimeIndexParams>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.DatetimeIndexParams";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DatetimeIndexParams {
+    return new DatetimeIndexParams().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DatetimeIndexParams {
+    return new DatetimeIndexParams().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DatetimeIndexParams {
+    return new DatetimeIndexParams().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DatetimeIndexParams | PlainMessage<DatetimeIndexParams> | undefined, b: DatetimeIndexParams | PlainMessage<DatetimeIndexParams> | undefined): boolean {
+    return proto3.util.equals(DatetimeIndexParams, a, b);
   }
 }
 
@@ -2549,12 +2704,12 @@ export class PayloadIndexParams extends Message<PayloadIndexParams> {
    */
   indexParams: {
     /**
-     * Parameters for text index
+     * Parameters for keyword index
      *
-     * @generated from field: qdrant.TextIndexParams text_index_params = 1;
+     * @generated from field: qdrant.KeywordIndexParams keyword_index_params = 3;
      */
-    value: TextIndexParams;
-    case: "textIndexParams";
+    value: KeywordIndexParams;
+    case: "keywordIndexParams";
   } | {
     /**
      * Parameters for integer index
@@ -2563,6 +2718,46 @@ export class PayloadIndexParams extends Message<PayloadIndexParams> {
      */
     value: IntegerIndexParams;
     case: "integerIndexParams";
+  } | {
+    /**
+     * Parameters for float index
+     *
+     * @generated from field: qdrant.FloatIndexParams float_index_params = 4;
+     */
+    value: FloatIndexParams;
+    case: "floatIndexParams";
+  } | {
+    /**
+     * Parameters for geo index
+     *
+     * @generated from field: qdrant.GeoIndexParams geo_index_params = 5;
+     */
+    value: GeoIndexParams;
+    case: "geoIndexParams";
+  } | {
+    /**
+     * Parameters for text index
+     *
+     * @generated from field: qdrant.TextIndexParams text_index_params = 1;
+     */
+    value: TextIndexParams;
+    case: "textIndexParams";
+  } | {
+    /**
+     * Parameters for bool index
+     *
+     * @generated from field: qdrant.BoolIndexParams bool_index_params = 6;
+     */
+    value: BoolIndexParams;
+    case: "boolIndexParams";
+  } | {
+    /**
+     * Parameters for datetime index
+     *
+     * @generated from field: qdrant.DatetimeIndexParams datetime_index_params = 7;
+     */
+    value: DatetimeIndexParams;
+    case: "datetimeIndexParams";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<PayloadIndexParams>) {
@@ -2573,8 +2768,13 @@ export class PayloadIndexParams extends Message<PayloadIndexParams> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "qdrant.PayloadIndexParams";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "text_index_params", kind: "message", T: TextIndexParams, oneof: "index_params" },
+    { no: 3, name: "keyword_index_params", kind: "message", T: KeywordIndexParams, oneof: "index_params" },
     { no: 2, name: "integer_index_params", kind: "message", T: IntegerIndexParams, oneof: "index_params" },
+    { no: 4, name: "float_index_params", kind: "message", T: FloatIndexParams, oneof: "index_params" },
+    { no: 5, name: "geo_index_params", kind: "message", T: GeoIndexParams, oneof: "index_params" },
+    { no: 1, name: "text_index_params", kind: "message", T: TextIndexParams, oneof: "index_params" },
+    { no: 6, name: "bool_index_params", kind: "message", T: BoolIndexParams, oneof: "index_params" },
+    { no: 7, name: "datetime_index_params", kind: "message", T: DatetimeIndexParams, oneof: "index_params" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PayloadIndexParams {
@@ -3424,6 +3624,55 @@ export class ShardTransferInfo extends Message<ShardTransferInfo> {
 
   static equals(a: ShardTransferInfo | PlainMessage<ShardTransferInfo> | undefined, b: ShardTransferInfo | PlainMessage<ShardTransferInfo> | undefined): boolean {
     return proto3.util.equals(ShardTransferInfo, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.ReshardingInfo
+ */
+export class ReshardingInfo extends Message<ReshardingInfo> {
+  /**
+   * @generated from field: uint32 shard_id = 1;
+   */
+  shardId = 0;
+
+  /**
+   * @generated from field: uint64 peer_id = 2;
+   */
+  peerId = protoInt64.zero;
+
+  /**
+   * @generated from field: optional qdrant.ShardKey shard_key = 3;
+   */
+  shardKey?: ShardKey;
+
+  constructor(data?: PartialMessage<ReshardingInfo>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.ReshardingInfo";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "shard_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "peer_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 3, name: "shard_key", kind: "message", T: ShardKey, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ReshardingInfo {
+    return new ReshardingInfo().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ReshardingInfo {
+    return new ReshardingInfo().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ReshardingInfo {
+    return new ReshardingInfo().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ReshardingInfo | PlainMessage<ReshardingInfo> | undefined, b: ReshardingInfo | PlainMessage<ReshardingInfo> | undefined): boolean {
+    return proto3.util.equals(ReshardingInfo, a, b);
   }
 }
 
