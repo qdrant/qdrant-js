@@ -176,5 +176,13 @@ export function createPointsApi(client: Client) {
             .path('/collections/{collection_name}/points/query/batch')
             .method('post')
             .create({consistency: true, timeout: true}),
+
+        /**
+         * Query points, grouped by a given payload field
+         */
+        queryPointsGroups: client
+            .path('/collections/{collection_name}/points/query/groups')
+            .method('post')
+            .create({consistency: true, timeout: true}),
     } as const;
 }

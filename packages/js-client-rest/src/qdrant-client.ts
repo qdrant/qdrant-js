@@ -1739,7 +1739,7 @@ export class QdrantClient {
      */
     async versionInfo() {
         const response = await this._openApiClient.service.root({});
-        return maybe(response.data.result).orThrow('Version Info returned empty');
+        return maybe(response.data).orThrow('Version Info returned empty');
     }
 
     /**
@@ -1848,5 +1848,73 @@ export class QdrantClient {
             searches,
         });
         return maybe(response.data.result).orThrow('Query points returned empty');
+    }
+
+    /**
+     * Query points, grouped by a given payload field
+     * @description Universally query points, grouped by a given payload field
+     * @param collection_name Name of the collection
+     * @param {object} args -
+     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
+     *         Values:
+     *             number - number of replicas to query, values should present in all queried replicas
+     *             'majority' - query all replicas, but return values present in the majority of replicas
+     *             'quorum' - query the majority of replicas, return values present in all of them
+     *             'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards.
+     *     - prefetch: Sub-requests to perform first. If present, the query will be performed on the results of the prefetch(es).
+     *     - query: Query to perform. If missing without prefetches, returns points ordered by their IDs.
+     *     - using: Define which vector name to use for querying. If missing, the default vector is used.
+     *     - filter: Filter conditions - return only those points that satisfy the specified conditions.
+     *     - params: Search params for when there is no prefetch
+     *     - score_threshold: Return points with scores better than this threshold.
+     *     - with_vector: Options for specifying which vectors to include into the response. Default is false.
+     *     - with_payload: Options for specifying which payload to include or not. Default is false.
+     *     - group_by: Payload field to group by, must be a string or number field. If the field contains more than 1 value, all values will be used for grouping. One point can be in multiple groups.
+     *     - group_size: Maximum amount of points to return per group. Default is 3.
+     *     - limit: Maximum amount of groups to return. Default is 10.
+     *     - with_lookup: Look for points in another collection using the group ids.
+     * @returns Operation result
+     */
+    async queryGroups(
+        collection_name: string,
+        {
+            consistency,
+            timeout,
+            shard_key,
+            prefetch,
+            query,
+            using,
+            filter,
+            params,
+            score_threshold,
+            with_vector,
+            with_payload,
+            group_by,
+            group_size,
+            limit,
+            with_lookup,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'QueryGroupsRequest'>,
+    ) {
+        const response = await this._openApiClient.points.queryPointsGroups({
+            collection_name,
+            consistency,
+            timeout,
+            shard_key,
+            prefetch,
+            query,
+            using,
+            filter,
+            params,
+            score_threshold,
+            with_vector,
+            with_payload,
+            group_by,
+            group_size,
+            limit,
+            with_lookup,
+        });
+        return maybe(response.data.result).orThrow('Query groups returned empty');
     }
 }

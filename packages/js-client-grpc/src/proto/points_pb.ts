@@ -143,7 +143,7 @@ proto3.util.setEnumType(Direction, "qdrant.Direction", [
 ]);
 
 /**
- * How to use positive and negative vectors to find the results, default is `AverageVector`:
+ * How to use positive and negative vectors to find the results, default is `AverageVector`.
  *
  * @generated from enum qdrant.RecommendStrategy
  */
@@ -650,10 +650,6 @@ export class VectorInput extends Message<VectorInput> {
 }
 
 /**
- * ---------------------------------------------
- * ----------------- ShardKeySelector ----------
- * ---------------------------------------------
- *
  * @generated from message qdrant.ShardKeySelector
  */
 export class ShardKeySelector extends Message<ShardKeySelector> {

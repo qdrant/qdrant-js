@@ -439,6 +439,13 @@ export interface paths {
      */
     post: operations["query_batch_points"];
   };
+  "/collections/{collection_name}/points/query/groups": {
+    /**
+     * Query points, grouped by a given payload field 
+     * @description Universally query points, grouped by a given payload field
+     */
+    post: operations["query_points_groups"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -806,21 +813,12 @@ export interface components {
      */
     PayloadSchemaType: "keyword" | "integer" | "float" | "geo" | "text" | "bool" | "datetime";
     /** @description Payload type with parameters */
-    PayloadSchemaParams: components["schemas"]["TextIndexParams"] | components["schemas"]["IntegerIndexParams"];
-    TextIndexParams: {
-      type: components["schemas"]["TextIndexType"];
-      tokenizer?: components["schemas"]["TokenizerType"];
-      /** Format: uint */
-      min_token_len?: number | null;
-      /** Format: uint */
-      max_token_len?: number | null;
-      /** @description If true, lowercase all tokens. Default: true */
-      lowercase?: boolean | null;
+    PayloadSchemaParams: components["schemas"]["KeywordIndexParams"] | components["schemas"]["IntegerIndexParams"] | components["schemas"]["FloatIndexParams"] | components["schemas"]["GeoIndexParams"] | components["schemas"]["TextIndexParams"] | components["schemas"]["BoolIndexParams"] | components["schemas"]["DatetimeIndexParams"];
+    KeywordIndexParams: {
+      type: components["schemas"]["KeywordIndexType"];
     };
     /** @enum {string} */
-    TextIndexType: "text";
-    /** @enum {string} */
-    TokenizerType: "prefix" | "whitespace" | "word" | "multilingual";
+    KeywordIndexType: "keyword";
     IntegerIndexParams: {
       type: components["schemas"]["IntegerIndexType"];
       /** @description If true - support direct lookups. */
@@ -830,6 +828,40 @@ export interface components {
     };
     /** @enum {string} */
     IntegerIndexType: "integer";
+    FloatIndexParams: {
+      type: components["schemas"]["FloatIndexType"];
+    };
+    /** @enum {string} */
+    FloatIndexType: "float";
+    GeoIndexParams: {
+      type: components["schemas"]["GeoIndexType"];
+    };
+    /** @enum {string} */
+    GeoIndexType: "geo";
+    TextIndexParams: {
+      type: components["schemas"]["TextIndexType"];
+      tokenizer?: components["schemas"]["TokenizerType"];
+      /** Format: uint */
+      min_token_len?: number | null;
+      /** Format: uint */
+      max_token_len?: number | null;
+      /** @description If true, lowercase all tokens. Default: true. */
+      lowercase?: boolean | null;
+    };
+    /** @enum {string} */
+    TextIndexType: "text";
+    /** @enum {string} */
+    TokenizerType: "prefix" | "whitespace" | "word" | "multilingual";
+    BoolIndexParams: {
+      type: components["schemas"]["BoolIndexType"];
+    };
+    /** @enum {string} */
+    BoolIndexType: "bool";
+    DatetimeIndexParams: {
+      type: components["schemas"]["DatetimeIndexType"];
+    };
+    /** @enum {string} */
+    DatetimeIndexType: "datetime";
     PointRequest: {
       /** @description Specify in which shards to look for the points, if not specified - look in all shards */
       shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
@@ -860,12 +892,30 @@ export interface components {
     /** @description Point data */
     Record: {
       id: components["schemas"]["ExtendedPointId"];
-      /** @description Payload - values assigned to the point */
+      /**
+       * @description Payload - values assigned to the point 
+       * @example {
+       *   "city": "London",
+       *   "color": "green"
+       * }
+       */
       payload?: components["schemas"]["Payload"] | (Record<string, unknown> | null);
-      /** @description Vector of the point */
+      /**
+       * @description Vector of the point 
+       * @example [
+       *   0.875,
+       *   0.140625,
+       *   -0.15625,
+       *   0.96875
+       * ]
+       */
       vector?: components["schemas"]["VectorStruct"] | (Record<string, unknown> | null);
-      /** @description Shard Key */
+      /**
+       * @description Shard Key 
+       * @example region_1
+       */
       shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
+      /** @example 1 */
       order_value?: components["schemas"]["OrderValue"] | (Record<string, unknown> | null);
     };
     Payload: {
@@ -926,16 +976,44 @@ export interface components {
      * { "vector": { "vector": [1.0, 2.0, 3.0], "name": "image-embeddings" } }
      */
     NamedVectorStruct: (number)[] | components["schemas"]["NamedVector"] | components["schemas"]["NamedSparseVector"];
-    /** @description Dense vector data with name */
     NamedVector: {
-      /** @description Name of vector data */
+      /**
+       * @description Name of vector data 
+       * @example {
+       *   "name": "image",
+       *   "vector": [
+       *     0.875,
+       *     0.140625,
+       *     -0.15625,
+       *     0.96875
+       *   ]
+       * }
+       */
       name: string;
       /** @description Vector data */
       vector: (number)[];
     };
-    /** @description Sparse vector data with name */
     NamedSparseVector: {
-      /** @description Name of vector data */
+      /**
+       * @description Name of vector data 
+       * @example {
+       *   "name": "keyword",
+       *   "vector": {
+       *     "indices": [
+       *       0,
+       *       1,
+       *       6,
+       *       9
+       *     ],
+       *     "values": [
+       *       0.875,
+       *       0.140625,
+       *       -0.15625,
+       *       0.96875
+       *     ]
+       *   }
+       * }
+       */
       name: string;
       vector: components["schemas"]["SparseVector"];
     };
@@ -1190,21 +1268,43 @@ export interface components {
       id: components["schemas"]["ExtendedPointId"];
       /**
        * Format: uint64 
-       * @description Point version
+       * @description Point version 
+       * @example 1
        */
       version: number;
       /**
        * Format: float 
-       * @description Points vector distance to the query vector
+       * @description Points vector distance to the query vector 
+       * @example 0.75
        */
       score: number;
-      /** @description Payload - values assigned to the point */
+      /**
+       * @description Payload - values assigned to the point 
+       * @example {
+       *   "city": "London",
+       *   "color": "green"
+       * }
+       */
       payload?: components["schemas"]["Payload"] | (Record<string, unknown> | null);
-      /** @description Vector of the point */
+      /**
+       * @description Vector of the point 
+       * @example [
+       *   0.875,
+       *   0.140625,
+       *   -0.15625,
+       *   0.96875
+       * ]
+       */
       vector?: components["schemas"]["VectorStruct"] | (Record<string, unknown> | null);
-      /** @description Shard Key */
+      /**
+       * @description Shard Key 
+       * @example region_1
+       */
       shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
-      /** @description Order-by value */
+      /**
+       * @description Order-by value 
+       * @example 1
+       */
       order_value?: components["schemas"]["OrderValue"] | (Record<string, unknown> | null);
     };
     UpdateResult: {
@@ -1319,7 +1419,15 @@ export interface components {
       /** @description Order the records by a payload field. */
       order_by?: components["schemas"]["OrderByInterface"] | (Record<string, unknown> | null);
     };
+    /** @example timestamp */
     OrderByInterface: string | components["schemas"]["OrderBy"];
+    /**
+     * @example {
+     *   "direction": "desc",
+     *   "key": "timestamp",
+     *   "start_from": 123
+     * }
+     */
     OrderBy: {
       /** @description Payload key to order by */
       key: string;
@@ -1744,6 +1852,8 @@ export interface components {
       remote_shards: (components["schemas"]["RemoteShardInfo"])[];
       /** @description Shard transfers */
       shard_transfers: (components["schemas"]["ShardTransferInfo"])[];
+      /** @description Resharding operations */
+      resharding_operations: (components["schemas"]["ReshardingInfo"])[];
     };
     LocalShardInfo: {
       /**
@@ -1801,6 +1911,15 @@ export interface components {
     };
     /** @description Methods for transferring a shard from one node to another. */
     ShardTransferMethod: "stream_records" | "snapshot" | "wal_delta";
+    ReshardingInfo: {
+      /** Format: uint32 */
+      shard_id: number;
+      /** Format: uint64 */
+      peer_id: number;
+      shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
+      /** @description A human-readable report of the operation progress. Available only on the source peer. */
+      comment?: string | null;
+    };
     TelemetryData: {
       id: string;
       app: components["schemas"]["AppBuildTelemetry"];
@@ -2348,6 +2467,13 @@ export interface components {
       with_lookup?: components["schemas"]["WithLookupInterface"] | (Record<string, unknown> | null);
     };
     WithLookupInterface: string | components["schemas"]["WithLookup"];
+    /**
+     * @example {
+     *   "collection": "collection_b",
+     *   "shard_key": "region_1",
+     *   "vector": "image_vector"
+     * }
+     */
     WithLookup: {
       /** @description Name of the collection to use for points lookup */
       collection: string;
@@ -2533,6 +2659,53 @@ export interface components {
     CollectionExistence: {
       exists: boolean;
     };
+    /**
+     * @example {
+     *   "filter": {
+     *     "min_should": null,
+     *     "must": [
+     *       {
+     *         "geo_bounding_box": null,
+     *         "geo_polygon": null,
+     *         "geo_radius": null,
+     *         "key": "city",
+     *         "match": {
+     *           "text": "Berlin"
+     *         },
+     *         "range": null,
+     *         "values_count": null
+     *       }
+     *     ],
+     *     "must_not": null,
+     *     "should": null
+     *   },
+     *   "limit": 10,
+     *   "lookup_from": {
+     *     "collection": "collection_b",
+     *     "shard_key": "region_1",
+     *     "vector": "image_vector"
+     *   },
+     *   "offset": 0,
+     *   "params": {
+     *     "exact": false,
+     *     "hnsw_ef": 100,
+     *     "indexed_only": false,
+     *     "quantization": null
+     *   },
+     *   "prefetch": null,
+     *   "query": [
+     *     0.875,
+     *     0.140625,
+     *     -0.15625,
+     *     0.96875
+     *   ],
+     *   "score_threshold": 0.25,
+     *   "shard_key": "region_1",
+     *   "using": "image_vector",
+     *   "with_payload": true,
+     *   "with_vector": true
+     * }
+     */
     QueryRequest: {
       shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
       /**
@@ -2606,12 +2779,66 @@ export interface components {
     QueryInterface: components["schemas"]["VectorInput"] | components["schemas"]["Query"];
     VectorInput: (number)[] | components["schemas"]["SparseVector"] | ((number)[])[] | components["schemas"]["ExtendedPointId"];
     Query: components["schemas"]["NearestQuery"] | components["schemas"]["RecommendQuery"] | components["schemas"]["DiscoverQuery"] | components["schemas"]["ContextQuery"] | components["schemas"]["OrderByQuery"] | components["schemas"]["FusionQuery"];
+    /**
+     * @example {
+     *   "nearest": [
+     *     0.875,
+     *     0.140625,
+     *     -0.15625,
+     *     0.96875
+     *   ]
+     * }
+     */
     NearestQuery: {
       nearest: components["schemas"]["VectorInput"];
     };
+    /**
+     * @example {
+     *   "recommend": {
+     *     "negative": [
+     *       [
+     *         0.4749999940395355,
+     *         0.44062501192092896,
+     *         -0.2562499940395355,
+     *         0.3687500059604645
+     *       ]
+     *     ],
+     *     "positive": [
+     *       [
+     *         0.875,
+     *         0.140625,
+     *         -0.15625,
+     *         0.96875
+     *       ]
+     *     ],
+     *     "strategy": "average_vector"
+     *   }
+     * }
+     */
     RecommendQuery: {
       recommend: components["schemas"]["RecommendInput"];
     };
+    /**
+     * @example {
+     *   "negative": [
+     *     [
+     *       0.4749999940395355,
+     *       0.44062501192092896,
+     *       -0.2562499940395355,
+     *       0.3687500059604645
+     *     ]
+     *   ],
+     *   "positive": [
+     *     [
+     *       0.875,
+     *       0.140625,
+     *       -0.15625,
+     *       0.96875
+     *     ]
+     *   ],
+     *   "strategy": "average_vector"
+     * }
+     */
     RecommendInput: {
       /** @description Look for vectors closest to the vectors from these points */
       positive?: (components["schemas"]["VectorInput"])[] | null;
@@ -2620,38 +2847,332 @@ export interface components {
       /** @description How to use the provided vectors to find the results */
       strategy?: components["schemas"]["RecommendStrategy"] | (Record<string, unknown> | null);
     };
+    /**
+     * @example {
+     *   "discover": {
+     *     "context": [
+     *       {
+     *         "negative": [
+     *           0.4749999940395355,
+     *           0.44062501192092896,
+     *           -0.2562499940395355,
+     *           0.3687500059604645
+     *         ],
+     *         "positive": [
+     *           0.875,
+     *           0.140625,
+     *           -0.15625,
+     *           0.96875
+     *         ]
+     *       }
+     *     ],
+     *     "target": [
+     *       0.875,
+     *       0.140625,
+     *       -0.15625,
+     *       0.96875
+     *     ]
+     *   }
+     * }
+     */
     DiscoverQuery: {
       discover: components["schemas"]["DiscoverInput"];
     };
+    /**
+     * @example {
+     *   "context": [
+     *     {
+     *       "negative": [
+     *         0.4749999940395355,
+     *         0.44062501192092896,
+     *         -0.2562499940395355,
+     *         0.3687500059604645
+     *       ],
+     *       "positive": [
+     *         0.875,
+     *         0.140625,
+     *         -0.15625,
+     *         0.96875
+     *       ]
+     *     }
+     *   ],
+     *   "target": [
+     *     0.875,
+     *     0.140625,
+     *     -0.15625,
+     *     0.96875
+     *   ]
+     * }
+     */
     DiscoverInput: {
       target: components["schemas"]["VectorInput"];
       /** @description Search space will be constrained by these pairs of vectors */
       context: components["schemas"]["ContextPair"] | (components["schemas"]["ContextPair"])[] | (Record<string, unknown> | null);
     };
+    /**
+     * @example {
+     *   "negative": [
+     *     0.4749999940395355,
+     *     0.44062501192092896,
+     *     -0.2562499940395355,
+     *     0.3687500059604645
+     *   ],
+     *   "positive": [
+     *     0.875,
+     *     0.140625,
+     *     -0.15625,
+     *     0.96875
+     *   ]
+     * }
+     */
     ContextPair: {
       positive: components["schemas"]["VectorInput"];
       negative: components["schemas"]["VectorInput"];
     };
+    /**
+     * @example {
+     *   "context": [
+     *     {
+     *       "negative": [
+     *         0.4749999940395355,
+     *         0.44062501192092896,
+     *         -0.2562499940395355,
+     *         0.3687500059604645
+     *       ],
+     *       "positive": [
+     *         0.875,
+     *         0.140625,
+     *         -0.15625,
+     *         0.96875
+     *       ]
+     *     }
+     *   ]
+     * }
+     */
     ContextQuery: {
       context: components["schemas"]["ContextInput"];
     };
+    /**
+     * @example [
+     *   {
+     *     "negative": [
+     *       0.4749999940395355,
+     *       0.44062501192092896,
+     *       -0.2562499940395355,
+     *       0.3687500059604645
+     *     ],
+     *     "positive": [
+     *       0.875,
+     *       0.140625,
+     *       -0.15625,
+     *       0.96875
+     *     ]
+     *   }
+     * ]
+     */
     ContextInput: components["schemas"]["ContextPair"] | (components["schemas"]["ContextPair"])[] | (Record<string, unknown> | null);
+    /**
+     * @example {
+     *   "order_by": "timestamp"
+     * }
+     */
     OrderByQuery: {
       order_by: components["schemas"]["OrderByInterface"];
     };
+    /**
+     * @example {
+     *   "fusion": "rrf"
+     * }
+     */
     FusionQuery: {
       fusion: components["schemas"]["Fusion"];
     };
     /**
      * @description Fusion algorithm allows to combine results of multiple prefetches. Available fusion algorithms: * `rrf` - Rank Reciprocal Fusion 
+     * @example rrf 
      * @enum {string}
      */
     Fusion: "rrf";
+    /**
+     * @example {
+     *   "searches": [
+     *     {
+     *       "filter": {
+     *         "min_should": null,
+     *         "must": [
+     *           {
+     *             "geo_bounding_box": null,
+     *             "geo_polygon": null,
+     *             "geo_radius": null,
+     *             "key": "city",
+     *             "match": {
+     *               "text": "Berlin"
+     *             },
+     *             "range": null,
+     *             "values_count": null
+     *           }
+     *         ],
+     *         "must_not": null,
+     *         "should": null
+     *       },
+     *       "limit": 10,
+     *       "lookup_from": {
+     *         "collection": "collection_b",
+     *         "shard_key": "region_1",
+     *         "vector": "image_vector"
+     *       },
+     *       "offset": 0,
+     *       "params": {
+     *         "exact": false,
+     *         "hnsw_ef": 100,
+     *         "indexed_only": false,
+     *         "quantization": null
+     *       },
+     *       "prefetch": null,
+     *       "query": [
+     *         0.875,
+     *         0.140625,
+     *         -0.15625,
+     *         0.96875
+     *       ],
+     *       "score_threshold": 0.25,
+     *       "shard_key": "region_1",
+     *       "using": "image_vector",
+     *       "with_payload": true,
+     *       "with_vector": true
+     *     },
+     *     {
+     *       "filter": {
+     *         "min_should": null,
+     *         "must": [
+     *           {
+     *             "geo_bounding_box": null,
+     *             "geo_polygon": null,
+     *             "geo_radius": null,
+     *             "key": "city",
+     *             "match": {
+     *               "text": "New York"
+     *             },
+     *             "range": null,
+     *             "values_count": null
+     *           }
+     *         ],
+     *         "must_not": null,
+     *         "should": null
+     *       },
+     *       "limit": 10,
+     *       "lookup_from": {
+     *         "collection": "collection_b",
+     *         "shard_key": "region_1",
+     *         "vector": "image_vector"
+     *       },
+     *       "offset": 0,
+     *       "params": {
+     *         "exact": false,
+     *         "hnsw_ef": 100,
+     *         "indexed_only": false,
+     *         "quantization": null
+     *       },
+     *       "prefetch": null,
+     *       "query": [
+     *         0.875,
+     *         0.140625,
+     *         -0.15625,
+     *         0.96875
+     *       ],
+     *       "score_threshold": 0.25,
+     *       "shard_key": "region_1",
+     *       "using": "code_vector",
+     *       "with_payload": true,
+     *       "with_vector": true
+     *     }
+     *   ]
+     * }
+     */
     QueryRequestBatch: {
       searches: (components["schemas"]["QueryRequest"])[];
     };
+    /**
+     * @example {
+     *   "points": [
+     *     {
+     *       "id": 1,
+     *       "order_value": 1,
+     *       "payload": {
+     *         "city": "London",
+     *         "color": "green"
+     *       },
+     *       "score": 0.25,
+     *       "shard_key": "region_1",
+     *       "vector": [
+     *         0.875,
+     *         0.140625,
+     *         -0.15625,
+     *         0.96875
+     *       ],
+     *       "version": 1
+     *     },
+     *     {
+     *       "id": 2,
+     *       "order_value": 1,
+     *       "payload": {
+     *         "city": "Berlin",
+     *         "color": "red"
+     *       },
+     *       "score": 0.25,
+     *       "shard_key": "region_1",
+     *       "vector": [
+     *         0.4749999940395355,
+     *         0.44062501192092896,
+     *         -0.2562499940395355,
+     *         0.3687500059604645
+     *       ],
+     *       "version": 1
+     *     }
+     *   ]
+     * }
+     */
     QueryResponse: {
       points: (components["schemas"]["ScoredPoint"])[];
+    };
+    QueryGroupsRequest: {
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
+      /**
+       * @description Sub-requests to perform first. If present, the query will be performed on the results of the prefetch(es). 
+       * @default null
+       */
+      prefetch?: components["schemas"]["Prefetch"] | (components["schemas"]["Prefetch"])[] | (Record<string, unknown> | null);
+      /** @description Query to perform. If missing without prefetches, returns points ordered by their IDs. */
+      query?: components["schemas"]["QueryInterface"] | (Record<string, unknown> | null);
+      /** @description Define which vector name to use for querying. If missing, the default vector is used. */
+      using?: string | null;
+      /** @description Filter conditions - return only those points that satisfy the specified conditions. */
+      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
+      /** @description Search params for when there is no prefetch */
+      params?: components["schemas"]["SearchParams"] | (Record<string, unknown> | null);
+      /**
+       * Format: float 
+       * @description Return points with scores better than this threshold.
+       */
+      score_threshold?: number | null;
+      /** @description Options for specifying which vectors to include into the response. Default is false. */
+      with_vector?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
+      /** @description Options for specifying which payload to include or not. Default is false. */
+      with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
+      /** @description Payload field to group by, must be a string or number field. If the field contains more than 1 value, all values will be used for grouping. One point can be in multiple groups. */
+      group_by: string;
+      /**
+       * Format: uint 
+       * @description Maximum amount of points to return per group. Default is 3.
+       */
+      group_size?: number | null;
+      /**
+       * Format: uint 
+       * @description Maximum amount of groups to return. Default is 10.
+       */
+      limit?: number | null;
+      /** @description Look for points in another collection using the group ids */
+      with_lookup?: components["schemas"]["WithLookupInterface"] | (Record<string, unknown> | null);
     };
   };
   responses: never;
@@ -2771,32 +3292,14 @@ export interface operations {
    */
   root: {
     responses: {
-      /** @description successful operation */
+      /** @description Qdrant server version information */
       200: {
         content: {
-          "application/json": {
-            /**
-             * Format: float 
-             * @description Time spent to process this request
-             */
-            time?: number;
-            status?: string;
-            result?: components["schemas"]["VersionInfo"];
-          };
+          "application/json": components["schemas"]["VersionInfo"];
         };
       };
       /** @description error */
-      default: {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description error */
-      "4XX": {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
+      "4XX": never;
     };
   };
   /**
@@ -5701,6 +6204,58 @@ export interface operations {
             time?: number;
             status?: string;
             result?: (components["schemas"]["QueryResponse"])[];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Query points, grouped by a given payload field 
+   * @description Universally query points, grouped by a given payload field
+   */
+  query_points_groups: {
+    parameters: {
+      query?: {
+        /** @description Define read consistency guarantees for the operation */
+        consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
+      };
+      path: {
+        /** @description Name of the collection to query */
+        collection_name: string;
+      };
+    };
+    /** @description Describes the query to make to the collection */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["QueryGroupsRequest"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request
+             */
+            time?: number;
+            status?: string;
+            result?: components["schemas"]["GroupsResult"];
           };
         };
       };
