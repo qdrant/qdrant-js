@@ -110,6 +110,11 @@ export enum FieldType {
    * @generated from enum value: FieldTypeDatetime = 6;
    */
   FieldTypeDatetime = 6,
+
+  /**
+   * @generated from enum value: FieldTypeUuid = 7;
+   */
+  FieldTypeUuid = 7,
 }
 // Retrieve enum metadata with: proto3.getEnumType(FieldType)
 proto3.util.setEnumType(FieldType, "qdrant.FieldType", [
@@ -120,6 +125,7 @@ proto3.util.setEnumType(FieldType, "qdrant.FieldType", [
   { no: 4, name: "FieldTypeText" },
   { no: 5, name: "FieldTypeBool" },
   { no: 6, name: "FieldTypeDatetime" },
+  { no: 7, name: "FieldTypeUuid" },
 ]);
 
 /**
@@ -149,7 +155,7 @@ proto3.util.setEnumType(Direction, "qdrant.Direction", [
  */
 export enum RecommendStrategy {
   /**
-   * Average positive and negative vectors and create a single query with the formula 
+   * Average positive and negative vectors and create a single query with the formula
    * `query = avg_pos + avg_pos - avg_neg`. Then performs normal search.
    *
    * @generated from enum value: AverageVector = 0;
@@ -157,8 +163,8 @@ export enum RecommendStrategy {
   AverageVector = 0,
 
   /**
-   * Uses custom search objective. Each candidate is compared against all 
-   * examples, its score is then chosen from the `max(max_pos_score, max_neg_score)`. 
+   * Uses custom search objective. Each candidate is compared against all
+   * examples, its score is then chosen from the `max(max_pos_score, max_neg_score)`.
    * If the `max_neg_score` is chosen then it is squared and negated.
    *
    * @generated from enum value: BestScore = 1;
@@ -181,10 +187,38 @@ export enum Fusion {
    * @generated from enum value: RRF = 0;
    */
   RRF = 0,
+
+  /**
+   * Distribution-Based Score Fusion
+   *
+   * @generated from enum value: DBSF = 1;
+   */
+  DBSF = 1,
 }
 // Retrieve enum metadata with: proto3.getEnumType(Fusion)
 proto3.util.setEnumType(Fusion, "qdrant.Fusion", [
   { no: 0, name: "RRF" },
+  { no: 1, name: "DBSF" },
+]);
+
+/**
+ * Sample points from the collection
+ *
+ * Available sampling methods:
+ *
+ * * `random` - Random sampling
+ *
+ * @generated from enum qdrant.Sample
+ */
+export enum Sample {
+  /**
+   * @generated from enum value: Random = 0;
+   */
+  Random = 0,
+}
+// Retrieve enum metadata with: proto3.getEnumType(Sample)
+proto3.util.setEnumType(Sample, "qdrant.Sample", [
+  { no: 0, name: "Random" },
 ]);
 
 /**
@@ -874,6 +908,13 @@ export class GetPoints extends Message<GetPoints> {
    */
   shardKeySelector?: ShardKeySelector;
 
+  /**
+   * If set, overrides global timeout setting for this request. Unit is seconds.
+   *
+   * @generated from field: optional uint64 timeout = 8;
+   */
+  timeout?: bigint;
+
   constructor(data?: PartialMessage<GetPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -888,6 +929,7 @@ export class GetPoints extends Message<GetPoints> {
     { no: 5, name: "with_vectors", kind: "message", T: WithVectorsSelector, opt: true },
     { no: 6, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
     { no: 7, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+    { no: 8, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetPoints {
@@ -1887,7 +1929,7 @@ export class SearchParams extends Message<SearchParams> {
 
   /**
    *
-   * If set to true, search will ignore quantized vector data 
+   * If set to true, search will ignore quantized vector data
    *
    * @generated from field: optional qdrant.QuantizationSearchParams quantization = 3;
    */
@@ -2532,6 +2574,13 @@ export class ScrollPoints extends Message<ScrollPoints> {
    */
   orderBy?: OrderBy;
 
+  /**
+   * If set, overrides global timeout setting for this request. Unit is seconds.
+   *
+   * @generated from field: optional uint64 timeout = 11;
+   */
+  timeout?: bigint;
+
   constructor(data?: PartialMessage<ScrollPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2549,6 +2598,7 @@ export class ScrollPoints extends Message<ScrollPoints> {
     { no: 8, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
     { no: 9, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
     { no: 10, name: "order_by", kind: "message", T: OrderBy, opt: true },
+    { no: 11, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ScrollPoints {
@@ -3427,6 +3477,13 @@ export class CountPoints extends Message<CountPoints> {
    */
   shardKeySelector?: ShardKeySelector;
 
+  /**
+   * If set, overrides global timeout setting for this request. Unit is seconds.
+   *
+   * @generated from field: optional uint64 timeout = 6;
+   */
+  timeout?: bigint;
+
   constructor(data?: PartialMessage<CountPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -3440,6 +3497,7 @@ export class CountPoints extends Message<CountPoints> {
     { no: 3, name: "exact", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 4, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
     { no: 5, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+    { no: 6, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CountPoints {
@@ -3702,6 +3760,14 @@ export class Query extends Message<Query> {
      */
     value: Fusion;
     case: "fusion";
+  } | {
+    /**
+     * Sample points from the collection.
+     *
+     * @generated from field: qdrant.Sample sample = 7;
+     */
+    value: Sample;
+    case: "sample";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<Query>) {
@@ -3718,6 +3784,7 @@ export class Query extends Message<Query> {
     { no: 4, name: "context", kind: "message", T: ContextInput, oneof: "variant" },
     { no: 5, name: "order_by", kind: "message", T: OrderBy, oneof: "variant" },
     { no: 6, name: "fusion", kind: "enum", T: proto3.getEnumType(Fusion), oneof: "variant" },
+    { no: 7, name: "sample", kind: "enum", T: proto3.getEnumType(Sample), oneof: "variant" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Query {
@@ -4039,6 +4106,265 @@ export class QueryBatchPoints extends Message<QueryBatchPoints> {
 
   static equals(a: QueryBatchPoints | PlainMessage<QueryBatchPoints> | undefined, b: QueryBatchPoints | PlainMessage<QueryBatchPoints> | undefined): boolean {
     return proto3.util.equals(QueryBatchPoints, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.QueryPointGroups
+ */
+export class QueryPointGroups extends Message<QueryPointGroups> {
+  /**
+   * Name of the collection
+   *
+   * @generated from field: string collection_name = 1;
+   */
+  collectionName = "";
+
+  /**
+   * Sub-requests to perform first. If present, the query will be performed on the results of the prefetches.
+   *
+   * @generated from field: repeated qdrant.PrefetchQuery prefetch = 2;
+   */
+  prefetch: PrefetchQuery[] = [];
+
+  /**
+   * Query to perform. If missing, returns points ordered by their IDs.
+   *
+   * @generated from field: optional qdrant.Query query = 3;
+   */
+  query?: Query;
+
+  /**
+   * Define which vector to use for querying. If missing, the default vector is used.
+   *
+   * @generated from field: optional string using = 4;
+   */
+  using?: string;
+
+  /**
+   * Filter conditions - return only those points that satisfy the specified conditions.
+   *
+   * @generated from field: optional qdrant.Filter filter = 5;
+   */
+  filter?: Filter;
+
+  /**
+   * Search params for when there is no prefetch.
+   *
+   * @generated from field: optional qdrant.SearchParams params = 6;
+   */
+  params?: SearchParams;
+
+  /**
+   * Return points with scores better than this threshold.
+   *
+   * @generated from field: optional float score_threshold = 7;
+   */
+  scoreThreshold?: number;
+
+  /**
+   * Options for specifying which payload to include or not
+   *
+   * @generated from field: qdrant.WithPayloadSelector with_payload = 8;
+   */
+  withPayload?: WithPayloadSelector;
+
+  /**
+   * Options for specifying which vectors to include into response
+   *
+   * @generated from field: optional qdrant.WithVectorsSelector with_vectors = 9;
+   */
+  withVectors?: WithVectorsSelector;
+
+  /**
+   * The location to use for IDs lookup, if not specified - use the current collection and the 'using' vector
+   *
+   * @generated from field: optional qdrant.LookupLocation lookup_from = 10;
+   */
+  lookupFrom?: LookupLocation;
+
+  /**
+   * Max number of points. Default is 3.
+   *
+   * @generated from field: optional uint64 limit = 11;
+   */
+  limit?: bigint;
+
+  /**
+   * Maximum amount of points to return per group. Default to 10.
+   *
+   * @generated from field: optional uint64 group_size = 12;
+   */
+  groupSize?: bigint;
+
+  /**
+   * Payload field to group by, must be a string or number field. If there are multiple values for the field, all of them will be used. One point can be in multiple groups.
+   *
+   * @generated from field: string group_by = 13;
+   */
+  groupBy = "";
+
+  /**
+   * Options for specifying read consistency guarantees
+   *
+   * @generated from field: optional qdrant.ReadConsistency read_consistency = 14;
+   */
+  readConsistency?: ReadConsistency;
+
+  /**
+   * Options for specifying how to use the group id to lookup points in another collection
+   *
+   * @generated from field: optional qdrant.WithLookup with_lookup = 15;
+   */
+  withLookup?: WithLookup;
+
+  /**
+   * If set, overrides global timeout setting for this request. Unit is seconds.
+   *
+   * @generated from field: optional uint64 timeout = 16;
+   */
+  timeout?: bigint;
+
+  /**
+   * Specify in which shards to look for the points, if not specified - look in all shards
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 17;
+   */
+  shardKeySelector?: ShardKeySelector;
+
+  constructor(data?: PartialMessage<QueryPointGroups>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.QueryPointGroups";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collection_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "prefetch", kind: "message", T: PrefetchQuery, repeated: true },
+    { no: 3, name: "query", kind: "message", T: Query, opt: true },
+    { no: 4, name: "using", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 5, name: "filter", kind: "message", T: Filter, opt: true },
+    { no: 6, name: "params", kind: "message", T: SearchParams, opt: true },
+    { no: 7, name: "score_threshold", kind: "scalar", T: 2 /* ScalarType.FLOAT */, opt: true },
+    { no: 8, name: "with_payload", kind: "message", T: WithPayloadSelector },
+    { no: 9, name: "with_vectors", kind: "message", T: WithVectorsSelector, opt: true },
+    { no: 10, name: "lookup_from", kind: "message", T: LookupLocation, opt: true },
+    { no: 11, name: "limit", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 12, name: "group_size", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 13, name: "group_by", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 14, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
+    { no: 15, name: "with_lookup", kind: "message", T: WithLookup, opt: true },
+    { no: 16, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 17, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryPointGroups {
+    return new QueryPointGroups().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryPointGroups {
+    return new QueryPointGroups().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryPointGroups {
+    return new QueryPointGroups().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryPointGroups | PlainMessage<QueryPointGroups> | undefined, b: QueryPointGroups | PlainMessage<QueryPointGroups> | undefined): boolean {
+    return proto3.util.equals(QueryPointGroups, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.FacetValue
+ */
+export class FacetValue extends Message<FacetValue> {
+  /**
+   * @generated from oneof qdrant.FacetValue.variant
+   */
+  variant: {
+    /**
+     * String value from the facet
+     *
+     * @generated from field: string string_value = 1;
+     */
+    value: string;
+    case: "stringValue";
+  } | { case: undefined; value?: undefined } = { case: undefined };
+
+  constructor(data?: PartialMessage<FacetValue>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.FacetValue";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "string_value", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "variant" },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FacetValue {
+    return new FacetValue().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): FacetValue {
+    return new FacetValue().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): FacetValue {
+    return new FacetValue().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: FacetValue | PlainMessage<FacetValue> | undefined, b: FacetValue | PlainMessage<FacetValue> | undefined): boolean {
+    return proto3.util.equals(FacetValue, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.FacetValueHit
+ */
+export class FacetValueHit extends Message<FacetValueHit> {
+  /**
+   * Value from the facet
+   *
+   * @generated from field: qdrant.FacetValue value = 1;
+   */
+  value?: FacetValue;
+
+  /**
+   * Number of points with this value
+   *
+   * @generated from field: uint64 count = 2;
+   */
+  count = protoInt64.zero;
+
+  constructor(data?: PartialMessage<FacetValueHit>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.FacetValueHit";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "value", kind: "message", T: FacetValue },
+    { no: 2, name: "count", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FacetValueHit {
+    return new FacetValueHit().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): FacetValueHit {
+    return new FacetValueHit().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): FacetValueHit {
+    return new FacetValueHit().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: FacetValueHit | PlainMessage<FacetValueHit> | undefined, b: FacetValueHit | PlainMessage<FacetValueHit> | undefined): boolean {
+    return proto3.util.equals(FacetValueHit, a, b);
   }
 }
 
@@ -4931,7 +5257,7 @@ export class PointGroup extends Message<PointGroup> {
   id?: GroupId;
 
   /**
-   * Points in the group 
+   * Points in the group
    *
    * @generated from field: repeated qdrant.ScoredPoint hits = 2;
    */
@@ -5145,6 +5471,51 @@ export class QueryBatchResponse extends Message<QueryBatchResponse> {
 
   static equals(a: QueryBatchResponse | PlainMessage<QueryBatchResponse> | undefined, b: QueryBatchResponse | PlainMessage<QueryBatchResponse> | undefined): boolean {
     return proto3.util.equals(QueryBatchResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.QueryGroupsResponse
+ */
+export class QueryGroupsResponse extends Message<QueryGroupsResponse> {
+  /**
+   * @generated from field: qdrant.GroupsResult result = 1;
+   */
+  result?: GroupsResult;
+
+  /**
+   * Time spent to process
+   *
+   * @generated from field: double time = 2;
+   */
+  time = 0;
+
+  constructor(data?: PartialMessage<QueryGroupsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.QueryGroupsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "result", kind: "message", T: GroupsResult },
+    { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGroupsResponse {
+    return new QueryGroupsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGroupsResponse {
+    return new QueryGroupsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGroupsResponse {
+    return new QueryGroupsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGroupsResponse | PlainMessage<QueryGroupsResponse> | undefined, b: QueryGroupsResponse | PlainMessage<QueryGroupsResponse> | undefined): boolean {
+    return proto3.util.equals(QueryGroupsResponse, a, b);
   }
 }
 
@@ -5816,7 +6187,7 @@ export class Filter extends Message<Filter> {
   mustNot: Condition[] = [];
 
   /**
-   * At least minimum amount of given conditions should match 
+   * At least minimum amount of given conditions should match
    *
    * @generated from field: optional qdrant.MinShould min_should = 4;
    */

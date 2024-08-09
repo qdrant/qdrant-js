@@ -201,6 +201,11 @@ export enum PayloadSchemaType {
    * @generated from enum value: Datetime = 7;
    */
   Datetime = 7,
+
+  /**
+   * @generated from enum value: Uuid = 8;
+   */
+  Uuid = 8,
 }
 // Retrieve enum metadata with: proto3.getEnumType(PayloadSchemaType)
 proto3.util.setEnumType(PayloadSchemaType, "qdrant.PayloadSchemaType", [
@@ -212,6 +217,7 @@ proto3.util.setEnumType(PayloadSchemaType, "qdrant.PayloadSchemaType", [
   { no: 5, name: "Text" },
   { no: 6, name: "Bool" },
   { no: 7, name: "Datetime" },
+  { no: 8, name: "Uuid" },
 ]);
 
 /**
@@ -2434,6 +2440,20 @@ export class CollectionConfig extends Message<CollectionConfig> {
  * @generated from message qdrant.KeywordIndexParams
  */
 export class KeywordIndexParams extends Message<KeywordIndexParams> {
+  /**
+   * If true - used for tenant optimization.
+   *
+   * @generated from field: optional bool is_tenant = 1;
+   */
+  isTenant?: boolean;
+
+  /**
+   * If true - store index on disk.
+   *
+   * @generated from field: optional bool on_disk = 2;
+   */
+  onDisk?: boolean;
+
   constructor(data?: PartialMessage<KeywordIndexParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2442,6 +2462,8 @@ export class KeywordIndexParams extends Message<KeywordIndexParams> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "qdrant.KeywordIndexParams";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "is_tenant", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 2, name: "on_disk", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): KeywordIndexParams {
@@ -2479,6 +2501,20 @@ export class IntegerIndexParams extends Message<IntegerIndexParams> {
    */
   range = false;
 
+  /**
+   * If true - use this key to organize storage of the collection data. This option assumes that this key will be used in majority of filtered requests.
+   *
+   * @generated from field: optional bool is_principal = 3;
+   */
+  isPrincipal?: boolean;
+
+  /**
+   * If true - store index on disk.
+   *
+   * @generated from field: optional bool on_disk = 4;
+   */
+  onDisk?: boolean;
+
   constructor(data?: PartialMessage<IntegerIndexParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2489,6 +2525,8 @@ export class IntegerIndexParams extends Message<IntegerIndexParams> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "lookup", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 2, name: "range", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 3, name: "is_principal", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 4, name: "on_disk", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IntegerIndexParams {
@@ -2512,6 +2550,20 @@ export class IntegerIndexParams extends Message<IntegerIndexParams> {
  * @generated from message qdrant.FloatIndexParams
  */
 export class FloatIndexParams extends Message<FloatIndexParams> {
+  /**
+   * If true - store index on disk.
+   *
+   * @generated from field: optional bool on_disk = 1;
+   */
+  onDisk?: boolean;
+
+  /**
+   * If true - use this key to organize storage of the collection data. This option assumes that this key will be used in majority of filtered requests.
+   *
+   * @generated from field: optional bool is_principal = 2;
+   */
+  isPrincipal?: boolean;
+
   constructor(data?: PartialMessage<FloatIndexParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2520,6 +2572,8 @@ export class FloatIndexParams extends Message<FloatIndexParams> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "qdrant.FloatIndexParams";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "on_disk", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 2, name: "is_principal", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FloatIndexParams {
@@ -2668,6 +2722,20 @@ export class BoolIndexParams extends Message<BoolIndexParams> {
  * @generated from message qdrant.DatetimeIndexParams
  */
 export class DatetimeIndexParams extends Message<DatetimeIndexParams> {
+  /**
+   * If true - store index on disk.
+   *
+   * @generated from field: optional bool on_disk = 1;
+   */
+  onDisk?: boolean;
+
+  /**
+   * If true - use this key to organize storage of the collection data. This option assumes that this key will be used in majority of filtered requests.
+   *
+   * @generated from field: optional bool is_principal = 2;
+   */
+  isPrincipal?: boolean;
+
   constructor(data?: PartialMessage<DatetimeIndexParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2676,6 +2744,8 @@ export class DatetimeIndexParams extends Message<DatetimeIndexParams> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "qdrant.DatetimeIndexParams";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "on_disk", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 2, name: "is_principal", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DatetimeIndexParams {
@@ -2692,6 +2762,53 @@ export class DatetimeIndexParams extends Message<DatetimeIndexParams> {
 
   static equals(a: DatetimeIndexParams | PlainMessage<DatetimeIndexParams> | undefined, b: DatetimeIndexParams | PlainMessage<DatetimeIndexParams> | undefined): boolean {
     return proto3.util.equals(DatetimeIndexParams, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.UuidIndexParams
+ */
+export class UuidIndexParams extends Message<UuidIndexParams> {
+  /**
+   * If true - used for tenant optimization.
+   *
+   * @generated from field: optional bool is_tenant = 1;
+   */
+  isTenant?: boolean;
+
+  /**
+   * If true - store index on disk.
+   *
+   * @generated from field: optional bool on_disk = 2;
+   */
+  onDisk?: boolean;
+
+  constructor(data?: PartialMessage<UuidIndexParams>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.UuidIndexParams";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "is_tenant", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 2, name: "on_disk", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UuidIndexParams {
+    return new UuidIndexParams().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UuidIndexParams {
+    return new UuidIndexParams().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UuidIndexParams {
+    return new UuidIndexParams().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: UuidIndexParams | PlainMessage<UuidIndexParams> | undefined, b: UuidIndexParams | PlainMessage<UuidIndexParams> | undefined): boolean {
+    return proto3.util.equals(UuidIndexParams, a, b);
   }
 }
 
@@ -2758,6 +2875,14 @@ export class PayloadIndexParams extends Message<PayloadIndexParams> {
      */
     value: DatetimeIndexParams;
     case: "datetimeIndexParams";
+  } | {
+    /**
+     * Parameters for uuid index
+     *
+     * @generated from field: qdrant.UuidIndexParams uuid_index_params = 8;
+     */
+    value: UuidIndexParams;
+    case: "uuidIndexParams";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<PayloadIndexParams>) {
@@ -2775,6 +2900,7 @@ export class PayloadIndexParams extends Message<PayloadIndexParams> {
     { no: 1, name: "text_index_params", kind: "message", T: TextIndexParams, oneof: "index_params" },
     { no: 6, name: "bool_index_params", kind: "message", T: BoolIndexParams, oneof: "index_params" },
     { no: 7, name: "datetime_index_params", kind: "message", T: DatetimeIndexParams, oneof: "index_params" },
+    { no: 8, name: "uuid_index_params", kind: "message", T: UuidIndexParams, oneof: "index_params" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PayloadIndexParams {
