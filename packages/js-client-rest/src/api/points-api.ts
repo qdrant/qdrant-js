@@ -13,7 +13,7 @@ export function createPointsApi(client: Client) {
         /**
          * Count points which matches given filtering condition
          */
-        countPoints: client.path('/collections/{collection_name}/points/count').method('post').create(),
+        countPoints: client.path('/collections/{collection_name}/points/count').method('post').create({timeout: true}),
 
         /**
          * Delete specified key payload for points
@@ -55,7 +55,10 @@ export function createPointsApi(client: Client) {
         /**
          * Retrieve multiple points by specified IDs
          */
-        getPoints: client.path('/collections/{collection_name}/points').method('post').create({consistency: true}),
+        getPoints: client
+            .path('/collections/{collection_name}/points')
+            .method('post')
+            .create({consistency: true, timeout: true}),
 
         /**
          * Replace full payload of points with new one
@@ -95,7 +98,7 @@ export function createPointsApi(client: Client) {
         scrollPoints: client
             .path('/collections/{collection_name}/points/scroll')
             .method('post')
-            .create({consistency: true}),
+            .create({consistency: true, timeout: true}),
 
         /**
          * Retrieve by batch the closest points based on vector similarity and given filtering conditions
@@ -174,6 +177,14 @@ export function createPointsApi(client: Client) {
          */
         queryBatchPoints: client
             .path('/collections/{collection_name}/points/query/batch')
+            .method('post')
+            .create({consistency: true, timeout: true}),
+
+        /**
+         * Query points, grouped by a given payload field
+         */
+        queryPointsGroups: client
+            .path('/collections/{collection_name}/points/query/groups')
             .method('post')
             .create({consistency: true, timeout: true}),
     } as const;

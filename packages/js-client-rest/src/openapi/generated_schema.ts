@@ -439,6 +439,13 @@ export interface paths {
      */
     post: operations["query_batch_points"];
   };
+  "/collections/{collection_name}/points/query/groups": {
+    /**
+     * Query points, grouped by a given payload field 
+     * @description Universally query points, grouped by a given payload field
+     */
+    post: operations["query_points_groups"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -457,6 +464,24 @@ export interface components {
       };
       result?: Record<string, unknown> | null;
     };
+    /**
+     * @example {
+     *   "collections": [
+     *     {
+     *       "name": "arivx-title"
+     *     },
+     *     {
+     *       "name": "arivx-abstract"
+     *     },
+     *     {
+     *       "name": "medium-title"
+     *     },
+     *     {
+     *       "name": "medium-text"
+     *     }
+     *   ]
+     * }
+     */
     CollectionsResponse: {
       collections: (components["schemas"]["CollectionDescription"])[];
     };
@@ -804,9 +829,45 @@ export interface components {
      * @description All possible names of payload types 
      * @enum {string}
      */
-    PayloadSchemaType: "keyword" | "integer" | "float" | "geo" | "text" | "bool" | "datetime";
+    PayloadSchemaType: "keyword" | "integer" | "float" | "geo" | "text" | "bool" | "datetime" | "uuid";
     /** @description Payload type with parameters */
-    PayloadSchemaParams: components["schemas"]["TextIndexParams"] | components["schemas"]["IntegerIndexParams"];
+    PayloadSchemaParams: components["schemas"]["KeywordIndexParams"] | components["schemas"]["IntegerIndexParams"] | components["schemas"]["FloatIndexParams"] | components["schemas"]["GeoIndexParams"] | components["schemas"]["TextIndexParams"] | components["schemas"]["BoolIndexParams"] | components["schemas"]["DatetimeIndexParams"] | components["schemas"]["UuidIndexParams"];
+    KeywordIndexParams: {
+      type: components["schemas"]["KeywordIndexType"];
+      /** @description If true - used for tenant optimization. Default: false. */
+      is_tenant?: boolean | null;
+      /** @description If true, store the index on disk. Default: false. */
+      on_disk?: boolean | null;
+    };
+    /** @enum {string} */
+    KeywordIndexType: "keyword";
+    IntegerIndexParams: {
+      type: components["schemas"]["IntegerIndexType"];
+      /** @description If true - support direct lookups. */
+      lookup: boolean;
+      /** @description If true - support ranges filters. */
+      range: boolean;
+      /** @description If true - use this key to organize storage of the collection data. This option assumes that this key will be used in majority of filtered requests. */
+      is_principal?: boolean | null;
+      /** @description If true, store the index on disk. Default: false. */
+      on_disk?: boolean | null;
+    };
+    /** @enum {string} */
+    IntegerIndexType: "integer";
+    FloatIndexParams: {
+      type: components["schemas"]["FloatIndexType"];
+      /** @description If true - use this key to organize storage of the collection data. This option assumes that this key will be used in majority of filtered requests. */
+      is_principal?: boolean | null;
+      /** @description If true, store the index on disk. Default: false. */
+      on_disk?: boolean | null;
+    };
+    /** @enum {string} */
+    FloatIndexType: "float";
+    GeoIndexParams: {
+      type: components["schemas"]["GeoIndexType"];
+    };
+    /** @enum {string} */
+    GeoIndexType: "geo";
     TextIndexParams: {
       type: components["schemas"]["TextIndexType"];
       tokenizer?: components["schemas"]["TokenizerType"];
@@ -814,22 +875,36 @@ export interface components {
       min_token_len?: number | null;
       /** Format: uint */
       max_token_len?: number | null;
-      /** @description If true, lowercase all tokens. Default: true */
+      /** @description If true, lowercase all tokens. Default: true. */
       lowercase?: boolean | null;
     };
     /** @enum {string} */
     TextIndexType: "text";
     /** @enum {string} */
     TokenizerType: "prefix" | "whitespace" | "word" | "multilingual";
-    IntegerIndexParams: {
-      type: components["schemas"]["IntegerIndexType"];
-      /** @description If true - support direct lookups. */
-      lookup: boolean;
-      /** @description If true - support ranges filters. */
-      range: boolean;
+    BoolIndexParams: {
+      type: components["schemas"]["BoolIndexType"];
     };
     /** @enum {string} */
-    IntegerIndexType: "integer";
+    BoolIndexType: "bool";
+    DatetimeIndexParams: {
+      type: components["schemas"]["DatetimeIndexType"];
+      /** @description If true - use this key to organize storage of the collection data. This option assumes that this key will be used in majority of filtered requests. */
+      is_principal?: boolean | null;
+      /** @description If true, store the index on disk. Default: false. */
+      on_disk?: boolean | null;
+    };
+    /** @enum {string} */
+    DatetimeIndexType: "datetime";
+    UuidIndexParams: {
+      type: components["schemas"]["UuidIndexType"];
+      /** @description If true - used for tenant optimization. */
+      is_tenant?: boolean | null;
+      /** @description If true, store the index on disk. Default: false. */
+      on_disk?: boolean | null;
+    };
+    /** @enum {string} */
+    UuidIndexType: "uuid";
     PointRequest: {
       /** @description Specify in which shards to look for the points, if not specified - look in all shards */
       shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
@@ -868,6 +943,12 @@ export interface components {
       shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
       order_value?: components["schemas"]["OrderValue"] | (Record<string, unknown> | null);
     };
+    /**
+     * @example {
+     *   "city": "London",
+     *   "color": "green"
+     * }
+     */
     Payload: {
       [key: string]: unknown;
     };
@@ -1190,12 +1271,14 @@ export interface components {
       id: components["schemas"]["ExtendedPointId"];
       /**
        * Format: uint64 
-       * @description Point version
+       * @description Point version 
+       * @example 3
        */
       version: number;
       /**
        * Format: float 
-       * @description Points vector distance to the query vector
+       * @description Points vector distance to the query vector 
+       * @example 0.75
        */
       score: number;
       /** @description Payload - values assigned to the point */
@@ -1333,7 +1416,37 @@ export interface components {
     StartFrom: number | string;
     /** @description Result of the points read request */
     ScrollResult: {
-      /** @description List of retrieved points */
+      /**
+       * @description List of retrieved points 
+       * @example [
+       *   {
+       *     "id": 40,
+       *     "payload": {
+       *       "city": "London",
+       *       "color": "green"
+       *     },
+       *     "vector": [
+       *       0.875,
+       *       0.140625,
+       *       0.897599995136261
+       *     ],
+       *     "shard_key": "region_1"
+       *   },
+       *   {
+       *     "id": 41,
+       *     "payload": {
+       *       "city": "Paris",
+       *       "color": "red"
+       *     },
+       *     "vector": [
+       *       0.75,
+       *       0.640625,
+       *       0.8945000171661377
+       *     ],
+       *     "shard_key": "region_1"
+       *   }
+       * ]
+       */
       points: (components["schemas"]["Record"])[];
       /** @description Offset which should be used to retrieve a next page result */
       next_page_offset?: components["schemas"]["ExtendedPointId"] | (Record<string, unknown> | null);
@@ -1343,7 +1456,9 @@ export interface components {
       vectors?: components["schemas"]["VectorsConfig"];
       /**
        * Format: uint32 
-       * @description For auto sharding: Number of shards in collection. - Default is 1 for standalone, otherwise equal to the number of nodes - Minimum is 1 For custom sharding: Number of shards in collection per shard group. - Default is 1, meaning that each shard key will be mapped to a single shard - Minimum is 1 
+       * @description For auto sharding: Number of shards in collection. - Default is 1 for standalone, otherwise equal to the number of nodes - Minimum is 1
+       * 
+       * For custom sharding: Number of shards in collection per shard group. - Default is 1, meaning that each shard key will be mapped to a single shard - Minimum is 1 
        * @default null
        */
       shard_number?: number | null;
@@ -1699,6 +1814,14 @@ export interface components {
        */
       latest_error_timestamp?: string | null;
     };
+    /**
+     * @example {
+     *   "name": "my-collection-3766212330831337-2024-07-22-08-31-55.snapshot",
+     *   "creation_time": "2022-08-04T10:49:10",
+     *   "size": 1000000,
+     *   "checksum": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0"
+     * }
+     */
     SnapshotDescription: {
       name: string;
       /** Format: partial-date-time */
@@ -1744,6 +1867,8 @@ export interface components {
       remote_shards: (components["schemas"]["RemoteShardInfo"])[];
       /** @description Shard transfers */
       shard_transfers: (components["schemas"]["ShardTransferInfo"])[];
+      /** @description Resharding operations */
+      resharding_operations: (components["schemas"]["ReshardingInfo"])[];
     };
     LocalShardInfo: {
       /**
@@ -1801,6 +1926,18 @@ export interface components {
     };
     /** @description Methods for transferring a shard from one node to another. */
     ShardTransferMethod: "stream_records" | "snapshot" | "wal_delta";
+    ReshardingInfo: {
+      direction: components["schemas"]["ReshardingDirection"];
+      /** Format: uint32 */
+      shard_id: number;
+      /** Format: uint64 */
+      peer_id: number;
+      shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
+      /** @description A human-readable report of the operation progress. Available only on the source peer. */
+      comment?: string | null;
+    };
+    /** @description Resharding direction, scale up or down in number of shards */
+    ReshardingDirection: "up" | "down";
     TelemetryData: {
       id: string;
       app: components["schemas"]["AppBuildTelemetry"];
@@ -1933,7 +2070,7 @@ export interface components {
       datatype?: components["schemas"]["VectorStorageDatatype"] | (Record<string, unknown> | null);
     };
     /** @description Storage types for vectors */
-    VectorStorageType: "Memory" | "Mmap" | "ChunkedMmap";
+    VectorStorageType: "Memory" | "Mmap" | "ChunkedMmap" | "InRamChunkedMmap";
     /** @description Vector index configuration */
     Indexes: OneOf<[{
       /** @enum {string} */
@@ -2245,6 +2382,12 @@ export interface components {
     CollectionsAliasesResponse: {
       aliases: (components["schemas"]["AliasDescription"])[];
     };
+    /**
+     * @example {
+     *   "alias_name": "blogs-title",
+     *   "collection_name": "arivx-title"
+     * }
+     */
     AliasDescription: {
       alias_name: string;
       collection_name: string;
@@ -2605,7 +2748,7 @@ export interface components {
     };
     QueryInterface: components["schemas"]["VectorInput"] | components["schemas"]["Query"];
     VectorInput: (number)[] | components["schemas"]["SparseVector"] | ((number)[])[] | components["schemas"]["ExtendedPointId"];
-    Query: components["schemas"]["NearestQuery"] | components["schemas"]["RecommendQuery"] | components["schemas"]["DiscoverQuery"] | components["schemas"]["ContextQuery"] | components["schemas"]["OrderByQuery"] | components["schemas"]["FusionQuery"];
+    Query: components["schemas"]["NearestQuery"] | components["schemas"]["RecommendQuery"] | components["schemas"]["DiscoverQuery"] | components["schemas"]["ContextQuery"] | components["schemas"]["OrderByQuery"] | components["schemas"]["FusionQuery"] | components["schemas"]["SampleQuery"];
     NearestQuery: {
       nearest: components["schemas"]["VectorInput"];
     };
@@ -2643,15 +2786,68 @@ export interface components {
       fusion: components["schemas"]["Fusion"];
     };
     /**
-     * @description Fusion algorithm allows to combine results of multiple prefetches. Available fusion algorithms: * `rrf` - Rank Reciprocal Fusion 
+     * @description Fusion algorithm allows to combine results of multiple prefetches.
+     * 
+     * Available fusion algorithms:
+     * 
+     * * `rrf` - Reciprocal Rank Fusion * `dbsf` - Distribution-Based Score Fusion 
      * @enum {string}
      */
-    Fusion: "rrf";
+    Fusion: "rrf" | "dbsf";
+    SampleQuery: {
+      sample: components["schemas"]["Sample"];
+    };
+    /** @enum {string} */
+    Sample: "random";
     QueryRequestBatch: {
       searches: (components["schemas"]["QueryRequest"])[];
     };
     QueryResponse: {
       points: (components["schemas"]["ScoredPoint"])[];
+    };
+    QueryGroupsRequest: {
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
+      /**
+       * @description Sub-requests to perform first. If present, the query will be performed on the results of the prefetch(es). 
+       * @default null
+       */
+      prefetch?: components["schemas"]["Prefetch"] | (components["schemas"]["Prefetch"])[] | (Record<string, unknown> | null);
+      /** @description Query to perform. If missing without prefetches, returns points ordered by their IDs. */
+      query?: components["schemas"]["QueryInterface"] | (Record<string, unknown> | null);
+      /** @description Define which vector name to use for querying. If missing, the default vector is used. */
+      using?: string | null;
+      /** @description Filter conditions - return only those points that satisfy the specified conditions. */
+      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
+      /** @description Search params for when there is no prefetch */
+      params?: components["schemas"]["SearchParams"] | (Record<string, unknown> | null);
+      /**
+       * Format: float 
+       * @description Return points with scores better than this threshold.
+       */
+      score_threshold?: number | null;
+      /** @description Options for specifying which vectors to include into the response. Default is false. */
+      with_vector?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
+      /** @description Options for specifying which payload to include or not. Default is false. */
+      with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
+      /**
+       * @description The location to use for IDs lookup, if not specified - use the current collection and the 'using' vector Note: the other collection vectors should have the same vector size as the 'using' vector in the current collection 
+       * @default null
+       */
+      lookup_from?: components["schemas"]["LookupLocation"] | (Record<string, unknown> | null);
+      /** @description Payload field to group by, must be a string or number field. If the field contains more than 1 value, all values will be used for grouping. One point can be in multiple groups. */
+      group_by: string;
+      /**
+       * Format: uint 
+       * @description Maximum amount of points to return per group. Default is 3.
+       */
+      group_size?: number | null;
+      /**
+       * Format: uint 
+       * @description Maximum amount of groups to return. Default is 10.
+       */
+      limit?: number | null;
+      /** @description Look for points in another collection using the group ids */
+      with_lookup?: components["schemas"]["WithLookupInterface"] | (Record<string, unknown> | null);
     };
   };
   responses: never;
@@ -2693,9 +2889,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: boolean;
           };
@@ -2743,9 +2941,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: boolean;
           };
@@ -2771,32 +2971,14 @@ export interface operations {
    */
   root: {
     responses: {
-      /** @description successful operation */
+      /** @description Qdrant server version information */
       200: {
         content: {
-          "application/json": {
-            /**
-             * Format: float 
-             * @description Time spent to process this request
-             */
-            time?: number;
-            status?: string;
-            result?: components["schemas"]["VersionInfo"];
-          };
+          "application/json": components["schemas"]["VersionInfo"];
         };
       };
       /** @description error */
-      default: {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description error */
-      "4XX": {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
+      "4XX": never;
     };
   };
   /**
@@ -2817,9 +2999,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["TelemetryData"];
           };
@@ -2873,9 +3057,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["LocksOption"];
           };
@@ -2913,9 +3099,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["LocksOption"];
           };
@@ -3027,9 +3215,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["ClusterStatus"];
           };
@@ -3058,9 +3248,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: boolean;
           };
@@ -3102,9 +3294,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: boolean;
           };
@@ -3136,9 +3330,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["CollectionsResponse"];
           };
@@ -3176,9 +3372,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["CollectionInfo"];
           };
@@ -3229,9 +3427,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: boolean;
           };
@@ -3276,9 +3476,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: boolean;
           };
@@ -3329,9 +3531,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: boolean;
           };
@@ -3375,9 +3579,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: boolean;
           };
@@ -3427,9 +3633,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
@@ -3467,9 +3675,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["CollectionExistence"];
           };
@@ -3515,9 +3725,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
@@ -3555,9 +3767,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["CollectionClusterInfo"];
           };
@@ -3605,9 +3819,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: boolean;
           };
@@ -3645,9 +3861,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["CollectionsAliasesResponse"];
           };
@@ -3679,9 +3897,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["CollectionsAliasesResponse"];
           };
@@ -3736,9 +3956,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: boolean;
           };
@@ -3799,9 +4021,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: boolean;
           };
@@ -3852,9 +4076,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: (components["schemas"]["SnapshotDescription"])[];
           };
@@ -3896,9 +4122,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["SnapshotDescription"];
           };
@@ -3989,9 +4217,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: boolean;
           };
@@ -4036,9 +4266,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: (components["schemas"]["SnapshotDescription"])[];
           };
@@ -4076,9 +4308,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["SnapshotDescription"];
           };
@@ -4165,9 +4399,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: boolean;
           };
@@ -4237,9 +4473,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: boolean;
           };
@@ -4302,9 +4540,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: boolean;
           };
@@ -4357,9 +4597,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: (components["schemas"]["SnapshotDescription"])[];
           };
@@ -4403,9 +4645,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["SnapshotDescription"];
           };
@@ -4500,9 +4744,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: boolean;
           };
@@ -4559,9 +4805,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["Record"];
           };
@@ -4611,9 +4859,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
@@ -4642,6 +4892,8 @@ export interface operations {
       query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to retrieve from */
@@ -4661,9 +4913,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: (components["schemas"]["Record"])[];
           };
@@ -4713,9 +4967,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
@@ -4765,9 +5021,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
@@ -4817,9 +5075,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
@@ -4869,9 +5129,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
@@ -4921,9 +5183,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
@@ -4973,9 +5237,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
@@ -5025,9 +5291,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["UpdateResult"];
           };
@@ -5077,9 +5345,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: (components["schemas"]["UpdateResult"])[];
           };
@@ -5108,6 +5378,8 @@ export interface operations {
       query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to retrieve from */
@@ -5127,9 +5399,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["ScrollResult"];
           };
@@ -5179,9 +5453,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: (components["schemas"]["ScoredPoint"])[];
           };
@@ -5231,9 +5507,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: ((components["schemas"]["ScoredPoint"])[])[];
           };
@@ -5283,9 +5561,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["GroupsResult"];
           };
@@ -5335,9 +5615,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: (components["schemas"]["ScoredPoint"])[];
           };
@@ -5387,9 +5669,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: ((components["schemas"]["ScoredPoint"])[])[];
           };
@@ -5439,9 +5723,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["GroupsResult"];
           };
@@ -5494,9 +5780,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: (components["schemas"]["ScoredPoint"])[];
           };
@@ -5546,9 +5834,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: ((components["schemas"]["ScoredPoint"])[])[];
           };
@@ -5574,6 +5864,10 @@ export interface operations {
    */
   count_points: {
     parameters: {
+      query?: {
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
+      };
       path: {
         /** @description Name of the collection to count in */
         collection_name: string;
@@ -5592,9 +5886,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["CountResult"];
           };
@@ -5644,9 +5940,11 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: components["schemas"]["QueryResponse"];
           };
@@ -5696,11 +5994,67 @@ export interface operations {
           "application/json": {
             /**
              * Format: float 
-             * @description Time spent to process this request
+             * @description Time spent to process this request 
+             * @example 0.002
              */
             time?: number;
+            /** @example ok */
             status?: string;
             result?: (components["schemas"]["QueryResponse"])[];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Query points, grouped by a given payload field 
+   * @description Universally query points, grouped by a given payload field
+   */
+  query_points_groups: {
+    parameters: {
+      query?: {
+        /** @description Define read consistency guarantees for the operation */
+        consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
+      };
+      path: {
+        /** @description Name of the collection to query */
+        collection_name: string;
+      };
+    };
+    /** @description Describes the query to make to the collection */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["QueryGroupsRequest"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request 
+             * @example 0.002
+             */
+            time?: number;
+            /** @example ok */
+            status?: string;
+            result?: components["schemas"]["GroupsResult"];
           };
         };
       };
