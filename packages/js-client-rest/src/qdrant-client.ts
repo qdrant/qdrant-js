@@ -441,12 +441,13 @@ export class QdrantClient {
             shard_key,
             filter,
             consistency,
+            timeout,
             limit = 10,
             offset,
             with_payload = true,
             with_vector = false,
             order_by,
-        }: SchemaFor<'ScrollRequest'> & {consistency?: SchemaFor<'ReadConsistency'>} = {},
+        }: SchemaFor<'ScrollRequest'> & {timeout?: number} & {consistency?: SchemaFor<'ReadConsistency'>} = {},
     ) {
         const response = await this._openApiClient.points.scrollPoints({
             collection_name,
@@ -458,6 +459,7 @@ export class QdrantClient {
             with_vector,
             order_by,
             consistency,
+            timeout,
         });
         return maybe(response.data.result).orThrow('Scroll points API returned empty');
     }
@@ -475,12 +477,16 @@ export class QdrantClient {
      *         Default: `true`
      * @returns Amount of points in the collection matching the filter.
      */
-    async count(collection_name: string, {shard_key, filter, exact = true}: SchemaFor<'CountRequest'> = {}) {
+    async count(
+        collection_name: string,
+        {shard_key, filter, exact = true, timeout}: SchemaFor<'CountRequest'> & {timeout?: number} = {},
+    ) {
         const response = await this._openApiClient.points.countPoints({
             collection_name,
             shard_key,
             filter,
             exact,
+            timeout,
         });
         return maybe(response.data.result).orThrow('Count points returned empty');
     }
@@ -772,7 +778,8 @@ export class QdrantClient {
             with_payload = true,
             with_vector,
             consistency,
-        }: SchemaFor<'PointRequest'> & {consistency?: SchemaFor<'ReadConsistency'>},
+            timeout,
+        }: SchemaFor<'PointRequest'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
     ) {
         const response = await this._openApiClient.points.getPoints({
             collection_name,
@@ -781,6 +788,7 @@ export class QdrantClient {
             with_payload,
             with_vector,
             consistency,
+            timeout,
         });
         return maybe(response.data.result).orThrow('Retrieve API returned empty');
     }
