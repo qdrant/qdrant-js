@@ -35,7 +35,7 @@ export class QdrantClient {
     private _restUri: string;
     private _openApiClient: OpenApiClient;
 
-    constructor({url, host, apiKey, https, prefix, port = 6333, timeout = 300_000, ...args}: QdrantClientParams = {}) {
+    constructor({url, host, apiKey, https, prefix, port=0, timeout = 300_000, ...args}: QdrantClientParams = {}) {
         this._https = https ?? typeof apiKey === 'string';
         this._scheme = this._https ? 'https' : 'http';
         this._prefix = prefix ?? '';
@@ -49,11 +49,16 @@ export class QdrantClient {
                 `Only one of \`url\`, \`host\` params can be set. Url is ${url}, host is ${host}`,
             );
         }
-        if (host && (host.startsWith('http://') || host.startsWith('https://') || /:\d+$/.test(host))) {
-            throw new QdrantClientConfigError(
-                'The `host` param is not expected to contain neither protocol (http:// or https://) nor port (:6333).\n' +
-                    'Try to use the `url` parameter instead.',
-            );
+
+        if (host) {
+            if (host.startsWith('http://') || host.startsWith('https://')) {
+                throw new QdrantClientConfigError(
+                    'The `host` param is not expected to contain a protocol (http:// or https://).\n' +
+                        'Try to use the `url` parameter instead.',
+                );
+            }
+            this._host = host;
+            this._port = port || null; // Use port if provided, otherwise null
         } else if (url) {
             if (!(url.startsWith('http://') || url.startsWith('https://'))) {
                 throw new QdrantClientConfigError(
@@ -62,7 +67,7 @@ export class QdrantClient {
             }
             const parsedUrl = new URL(url);
             this._host = parsedUrl.hostname;
-            this._port = parsedUrl.port ? Number(parsedUrl.port) : port;
+            this._port = parsedUrl.port ? Number(parsedUrl.port) : null;
             this._scheme = parsedUrl.protocol.replace(':', '');
 
             if (this._prefix.length > 0 && parsedUrl.pathname !== '/') {
@@ -72,8 +77,8 @@ export class QdrantClient {
                 );
             }
         } else {
-            this._port = port;
-            this._host = host ?? '127.0.0.1';
+            this._host = '127.0.0.1';
+            this._port = port || 6333; // Use default port 6333 if not provided
         }
 
         const headers = new Headers([['user-agent', 'qdrant-js']]);
@@ -92,8 +97,13 @@ export class QdrantClient {
             headers.set('api-key', apiKey);
         }
 
-        const address = this._port ? `${this._host}:${this._port}` : this._host;
-        this._restUri = `${this._scheme}://${address}${this._prefix}`;
+        // Construct the REST URI
+        this._restUri = `${this._scheme}://${this._host}`;
+        if (this._port) {
+            this._restUri += `:${this._port}`;
+        }
+        this._restUri += this._prefix;
+
         const connections = args.maxConnections;
         const restArgs: RestArgs = {headers, timeout, connections};
 
