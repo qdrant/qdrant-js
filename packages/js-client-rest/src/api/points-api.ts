@@ -187,5 +187,29 @@ export function createPointsApi(client: Client) {
             .path('/collections/{collection_name}/points/query/groups')
             .method('post')
             .create({consistency: true, timeout: true}),
+
+        /**
+         * Facet a payload key with a given filter.
+         */
+        facet: client
+            .path('/collections/{collection_name}/facet')
+            .method('post')
+            .create({consistency: true, timeout: true}),
+
+        /**
+         * Search points matrix distance pairs
+         */
+        searchPointsMatrixPairs: client
+            .path('/collections/{collection_name}/points/search/matrix/pairs')
+            .method('post')
+            .create({consistency: true, timeout: true}),
+
+        /**
+         * Search points matrix distance offsets
+         */
+        searchPointsMatrixOffsets: client
+            .path('/collections/{collection_name}/points/search/matrix/offsets')
+            .method('post')
+            .create({consistency: true, timeout: true}),
     } as const;
 }
