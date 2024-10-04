@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ClearPayloadPoints, CountPoints, CountResponse, CreateFieldIndexCollection, DeleteFieldIndexCollection, DeletePayloadPoints, DeletePoints, DeletePointVectors, DiscoverBatchPoints, DiscoverBatchResponse, DiscoverPoints, DiscoverResponse, GetPoints, GetResponse, PointsOperationResponse, QueryBatchPoints, QueryBatchResponse, QueryGroupsResponse, QueryPointGroups, QueryPoints, QueryResponse, RecommendBatchPoints, RecommendBatchResponse, RecommendGroupsResponse, RecommendPointGroups, RecommendPoints, RecommendResponse, ScrollPoints, ScrollResponse, SearchBatchPoints, SearchBatchResponse, SearchGroupsResponse, SearchPointGroups, SearchPoints, SearchResponse, SetPayloadPoints, UpdateBatchPoints, UpdateBatchResponse, UpdatePointVectors, UpsertPoints } from "./points_pb.js";
+import { ClearPayloadPoints, CountPoints, CountResponse, CreateFieldIndexCollection, DeleteFieldIndexCollection, DeletePayloadPoints, DeletePoints, DeletePointVectors, DiscoverBatchPoints, DiscoverBatchResponse, DiscoverPoints, DiscoverResponse, FacetCounts, FacetResponse, GetPoints, GetResponse, PointsOperationResponse, QueryBatchPoints, QueryBatchResponse, QueryGroupsResponse, QueryPointGroups, QueryPoints, QueryResponse, RecommendBatchPoints, RecommendBatchResponse, RecommendGroupsResponse, RecommendPointGroups, RecommendPoints, RecommendResponse, ScrollPoints, ScrollResponse, SearchBatchPoints, SearchBatchResponse, SearchGroupsResponse, SearchMatrixOffsetsResponse, SearchMatrixPairsResponse, SearchMatrixPoints, SearchPointGroups, SearchPoints, SearchResponse, SetPayloadPoints, UpdateBatchPoints, UpdateBatchResponse, UpdatePointVectors, UpsertPoints } from "./points_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -324,6 +324,42 @@ export const Points = {
       name: "QueryGroups",
       I: QueryPointGroups,
       O: QueryGroupsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Perform facet counts. For each value in the field, count the number of points that have this value and match the conditions.
+     *
+     * @generated from rpc qdrant.Points.Facet
+     */
+    facet: {
+      name: "Facet",
+      I: FacetCounts,
+      O: FacetResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Compute distance matrix for sampled points with a pair based output format
+     *
+     * @generated from rpc qdrant.Points.SearchMatrixPairs
+     */
+    searchMatrixPairs: {
+      name: "SearchMatrixPairs",
+      I: SearchMatrixPoints,
+      O: SearchMatrixPairsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Compute distance matrix for sampled points with an offset based output format
+     *
+     * @generated from rpc qdrant.Points.SearchMatrixOffsets
+     */
+    searchMatrixOffsets: {
+      name: "SearchMatrixOffsets",
+      I: SearchMatrixPoints,
+      O: SearchMatrixOffsetsResponse,
       kind: MethodKind.Unary,
     },
   }

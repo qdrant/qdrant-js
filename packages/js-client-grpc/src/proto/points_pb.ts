@@ -4277,6 +4277,101 @@ export class QueryPointGroups extends Message<QueryPointGroups> {
 }
 
 /**
+ * @generated from message qdrant.FacetCounts
+ */
+export class FacetCounts extends Message<FacetCounts> {
+  /**
+   * Name of the collection
+   *
+   * @generated from field: string collection_name = 1;
+   */
+  collectionName = "";
+
+  /**
+   * Payload key of the facet
+   *
+   * @generated from field: string key = 2;
+   */
+  key = "";
+
+  /**
+   * Filter conditions - return only those points that satisfy the specified conditions.
+   *
+   * @generated from field: optional qdrant.Filter filter = 3;
+   */
+  filter?: Filter;
+
+  /**
+   * Max number of facets. Default is 10.
+   *
+   * @generated from field: optional uint64 limit = 4;
+   */
+  limit?: bigint;
+
+  /**
+   * If true, return exact counts, slower but useful for debugging purposes. Default is false.
+   *
+   * @generated from field: optional bool exact = 5;
+   */
+  exact?: boolean;
+
+  /**
+   * If set, overrides global timeout setting for this request. Unit is seconds.
+   *
+   * @generated from field: optional uint64 timeout = 6;
+   */
+  timeout?: bigint;
+
+  /**
+   * Options for specifying read consistency guarantees
+   *
+   * @generated from field: optional qdrant.ReadConsistency read_consistency = 7;
+   */
+  readConsistency?: ReadConsistency;
+
+  /**
+   * Specify in which shards to look for the points, if not specified - look in all shards
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 8;
+   */
+  shardKeySelector?: ShardKeySelector;
+
+  constructor(data?: PartialMessage<FacetCounts>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.FacetCounts";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collection_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "filter", kind: "message", T: Filter, opt: true },
+    { no: 4, name: "limit", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 5, name: "exact", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 6, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 7, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
+    { no: 8, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FacetCounts {
+    return new FacetCounts().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): FacetCounts {
+    return new FacetCounts().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): FacetCounts {
+    return new FacetCounts().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: FacetCounts | PlainMessage<FacetCounts> | undefined, b: FacetCounts | PlainMessage<FacetCounts> | undefined): boolean {
+    return proto3.util.equals(FacetCounts, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.FacetValue
  */
 export class FacetValue extends Message<FacetValue> {
@@ -4291,6 +4386,14 @@ export class FacetValue extends Message<FacetValue> {
      */
     value: string;
     case: "stringValue";
+  } | {
+    /**
+     * Integer value from the facet
+     *
+     * @generated from field: int64 integer_value = 2;
+     */
+    value: bigint;
+    case: "integerValue";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<FacetValue>) {
@@ -4302,6 +4405,7 @@ export class FacetValue extends Message<FacetValue> {
   static readonly typeName = "qdrant.FacetValue";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "string_value", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "variant" },
+    { no: 2, name: "integer_value", kind: "scalar", T: 3 /* ScalarType.INT64 */, oneof: "variant" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FacetValue {
@@ -4322,9 +4426,9 @@ export class FacetValue extends Message<FacetValue> {
 }
 
 /**
- * @generated from message qdrant.FacetValueHit
+ * @generated from message qdrant.FacetHit
  */
-export class FacetValueHit extends Message<FacetValueHit> {
+export class FacetHit extends Message<FacetHit> {
   /**
    * Value from the facet
    *
@@ -4339,32 +4443,284 @@ export class FacetValueHit extends Message<FacetValueHit> {
    */
   count = protoInt64.zero;
 
-  constructor(data?: PartialMessage<FacetValueHit>) {
+  constructor(data?: PartialMessage<FacetHit>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "qdrant.FacetValueHit";
+  static readonly typeName = "qdrant.FacetHit";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "value", kind: "message", T: FacetValue },
     { no: 2, name: "count", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FacetValueHit {
-    return new FacetValueHit().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FacetHit {
+    return new FacetHit().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): FacetValueHit {
-    return new FacetValueHit().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): FacetHit {
+    return new FacetHit().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): FacetValueHit {
-    return new FacetValueHit().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): FacetHit {
+    return new FacetHit().fromJsonString(jsonString, options);
   }
 
-  static equals(a: FacetValueHit | PlainMessage<FacetValueHit> | undefined, b: FacetValueHit | PlainMessage<FacetValueHit> | undefined): boolean {
-    return proto3.util.equals(FacetValueHit, a, b);
+  static equals(a: FacetHit | PlainMessage<FacetHit> | undefined, b: FacetHit | PlainMessage<FacetHit> | undefined): boolean {
+    return proto3.util.equals(FacetHit, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.SearchMatrixPoints
+ */
+export class SearchMatrixPoints extends Message<SearchMatrixPoints> {
+  /**
+   * Name of the collection
+   *
+   * @generated from field: string collection_name = 1;
+   */
+  collectionName = "";
+
+  /**
+   * Filter conditions - return only those points that satisfy the specified conditions.
+   *
+   * @generated from field: optional qdrant.Filter filter = 2;
+   */
+  filter?: Filter;
+
+  /**
+   * How many points to select and search within. Default is 10.
+   *
+   * @generated from field: optional uint64 sample = 3;
+   */
+  sample?: bigint;
+
+  /**
+   * How many neighbours per sample to find. Default is 3.
+   *
+   * @generated from field: optional uint64 limit = 4;
+   */
+  limit?: bigint;
+
+  /**
+   * Define which vector to use for querying. If missing, the default vector is is used.
+   *
+   * @generated from field: optional string using = 5;
+   */
+  using?: string;
+
+  /**
+   * If set, overrides global timeout setting for this request. Unit is seconds.
+   *
+   * @generated from field: optional uint64 timeout = 6;
+   */
+  timeout?: bigint;
+
+  /**
+   * Options for specifying read consistency guarantees
+   *
+   * @generated from field: optional qdrant.ReadConsistency read_consistency = 7;
+   */
+  readConsistency?: ReadConsistency;
+
+  /**
+   * Specify in which shards to look for the points, if not specified - look in all shards
+   *
+   * @generated from field: optional qdrant.ShardKeySelector shard_key_selector = 8;
+   */
+  shardKeySelector?: ShardKeySelector;
+
+  constructor(data?: PartialMessage<SearchMatrixPoints>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.SearchMatrixPoints";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collection_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "filter", kind: "message", T: Filter, opt: true },
+    { no: 3, name: "sample", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 4, name: "limit", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 5, name: "using", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 6, name: "timeout", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 7, name: "read_consistency", kind: "message", T: ReadConsistency, opt: true },
+    { no: 8, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchMatrixPoints {
+    return new SearchMatrixPoints().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchMatrixPoints {
+    return new SearchMatrixPoints().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchMatrixPoints {
+    return new SearchMatrixPoints().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SearchMatrixPoints | PlainMessage<SearchMatrixPoints> | undefined, b: SearchMatrixPoints | PlainMessage<SearchMatrixPoints> | undefined): boolean {
+    return proto3.util.equals(SearchMatrixPoints, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.SearchMatrixPairs
+ */
+export class SearchMatrixPairs extends Message<SearchMatrixPairs> {
+  /**
+   * List of pairs of points with scores
+   *
+   * @generated from field: repeated qdrant.SearchMatrixPair pairs = 1;
+   */
+  pairs: SearchMatrixPair[] = [];
+
+  constructor(data?: PartialMessage<SearchMatrixPairs>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.SearchMatrixPairs";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "pairs", kind: "message", T: SearchMatrixPair, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchMatrixPairs {
+    return new SearchMatrixPairs().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchMatrixPairs {
+    return new SearchMatrixPairs().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchMatrixPairs {
+    return new SearchMatrixPairs().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SearchMatrixPairs | PlainMessage<SearchMatrixPairs> | undefined, b: SearchMatrixPairs | PlainMessage<SearchMatrixPairs> | undefined): boolean {
+    return proto3.util.equals(SearchMatrixPairs, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.SearchMatrixPair
+ */
+export class SearchMatrixPair extends Message<SearchMatrixPair> {
+  /**
+   * first id of the pair
+   *
+   * @generated from field: qdrant.PointId a = 1;
+   */
+  a?: PointId;
+
+  /**
+   * second id of the pair
+   *
+   * @generated from field: qdrant.PointId b = 2;
+   */
+  b?: PointId;
+
+  /**
+   * score of the pair
+   *
+   * @generated from field: float score = 3;
+   */
+  score = 0;
+
+  constructor(data?: PartialMessage<SearchMatrixPair>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.SearchMatrixPair";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "a", kind: "message", T: PointId },
+    { no: 2, name: "b", kind: "message", T: PointId },
+    { no: 3, name: "score", kind: "scalar", T: 2 /* ScalarType.FLOAT */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchMatrixPair {
+    return new SearchMatrixPair().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchMatrixPair {
+    return new SearchMatrixPair().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchMatrixPair {
+    return new SearchMatrixPair().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SearchMatrixPair | PlainMessage<SearchMatrixPair> | undefined, b: SearchMatrixPair | PlainMessage<SearchMatrixPair> | undefined): boolean {
+    return proto3.util.equals(SearchMatrixPair, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.SearchMatrixOffsets
+ */
+export class SearchMatrixOffsets extends Message<SearchMatrixOffsets> {
+  /**
+   * Row indices of the matrix
+   *
+   * @generated from field: repeated uint64 offsets_row = 1;
+   */
+  offsetsRow: bigint[] = [];
+
+  /**
+   * Column indices of the matrix
+   *
+   * @generated from field: repeated uint64 offsets_col = 2;
+   */
+  offsetsCol: bigint[] = [];
+
+  /**
+   * Scores associated with matrix coordinates
+   *
+   * @generated from field: repeated float scores = 3;
+   */
+  scores: number[] = [];
+
+  /**
+   * Ids of the points in order
+   *
+   * @generated from field: repeated qdrant.PointId ids = 4;
+   */
+  ids: PointId[] = [];
+
+  constructor(data?: PartialMessage<SearchMatrixOffsets>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.SearchMatrixOffsets";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "offsets_row", kind: "scalar", T: 4 /* ScalarType.UINT64 */, repeated: true },
+    { no: 2, name: "offsets_col", kind: "scalar", T: 4 /* ScalarType.UINT64 */, repeated: true },
+    { no: 3, name: "scores", kind: "scalar", T: 2 /* ScalarType.FLOAT */, repeated: true },
+    { no: 4, name: "ids", kind: "message", T: PointId, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchMatrixOffsets {
+    return new SearchMatrixOffsets().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchMatrixOffsets {
+    return new SearchMatrixOffsets().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchMatrixOffsets {
+    return new SearchMatrixOffsets().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SearchMatrixOffsets | PlainMessage<SearchMatrixOffsets> | undefined, b: SearchMatrixOffsets | PlainMessage<SearchMatrixOffsets> | undefined): boolean {
+    return proto3.util.equals(SearchMatrixOffsets, a, b);
   }
 }
 
@@ -6158,6 +6514,141 @@ export class UpdateBatchResponse extends Message<UpdateBatchResponse> {
 
   static equals(a: UpdateBatchResponse | PlainMessage<UpdateBatchResponse> | undefined, b: UpdateBatchResponse | PlainMessage<UpdateBatchResponse> | undefined): boolean {
     return proto3.util.equals(UpdateBatchResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.FacetResponse
+ */
+export class FacetResponse extends Message<FacetResponse> {
+  /**
+   * @generated from field: repeated qdrant.FacetHit hits = 1;
+   */
+  hits: FacetHit[] = [];
+
+  /**
+   * Time spent to process
+   *
+   * @generated from field: double time = 2;
+   */
+  time = 0;
+
+  constructor(data?: PartialMessage<FacetResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.FacetResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "hits", kind: "message", T: FacetHit, repeated: true },
+    { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FacetResponse {
+    return new FacetResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): FacetResponse {
+    return new FacetResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): FacetResponse {
+    return new FacetResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: FacetResponse | PlainMessage<FacetResponse> | undefined, b: FacetResponse | PlainMessage<FacetResponse> | undefined): boolean {
+    return proto3.util.equals(FacetResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.SearchMatrixPairsResponse
+ */
+export class SearchMatrixPairsResponse extends Message<SearchMatrixPairsResponse> {
+  /**
+   * @generated from field: qdrant.SearchMatrixPairs result = 1;
+   */
+  result?: SearchMatrixPairs;
+
+  /**
+   * Time spent to process
+   *
+   * @generated from field: double time = 2;
+   */
+  time = 0;
+
+  constructor(data?: PartialMessage<SearchMatrixPairsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.SearchMatrixPairsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "result", kind: "message", T: SearchMatrixPairs },
+    { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchMatrixPairsResponse {
+    return new SearchMatrixPairsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchMatrixPairsResponse {
+    return new SearchMatrixPairsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchMatrixPairsResponse {
+    return new SearchMatrixPairsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SearchMatrixPairsResponse | PlainMessage<SearchMatrixPairsResponse> | undefined, b: SearchMatrixPairsResponse | PlainMessage<SearchMatrixPairsResponse> | undefined): boolean {
+    return proto3.util.equals(SearchMatrixPairsResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.SearchMatrixOffsetsResponse
+ */
+export class SearchMatrixOffsetsResponse extends Message<SearchMatrixOffsetsResponse> {
+  /**
+   * @generated from field: qdrant.SearchMatrixOffsets result = 1;
+   */
+  result?: SearchMatrixOffsets;
+
+  /**
+   * Time spent to process
+   *
+   * @generated from field: double time = 2;
+   */
+  time = 0;
+
+  constructor(data?: PartialMessage<SearchMatrixOffsetsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.SearchMatrixOffsetsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "result", kind: "message", T: SearchMatrixOffsets },
+    { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchMatrixOffsetsResponse {
+    return new SearchMatrixOffsetsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchMatrixOffsetsResponse {
+    return new SearchMatrixOffsetsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchMatrixOffsetsResponse {
+    return new SearchMatrixOffsetsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SearchMatrixOffsetsResponse | PlainMessage<SearchMatrixOffsetsResponse> | undefined, b: SearchMatrixOffsetsResponse | PlainMessage<SearchMatrixOffsetsResponse> | undefined): boolean {
+    return proto3.util.equals(SearchMatrixOffsetsResponse, a, b);
   }
 }
 
