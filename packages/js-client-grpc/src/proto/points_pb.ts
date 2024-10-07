@@ -4394,6 +4394,14 @@ export class FacetValue extends Message<FacetValue> {
      */
     value: bigint;
     case: "integerValue";
+  } | {
+    /**
+     * Boolean value from the facet
+     *
+     * @generated from field: bool bool_value = 3;
+     */
+    value: boolean;
+    case: "boolValue";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<FacetValue>) {
@@ -4406,6 +4414,7 @@ export class FacetValue extends Message<FacetValue> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "string_value", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "variant" },
     { no: 2, name: "integer_value", kind: "scalar", T: 3 /* ScalarType.INT64 */, oneof: "variant" },
+    { no: 3, name: "bool_value", kind: "scalar", T: 8 /* ScalarType.BOOL */, oneof: "variant" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FacetValue {

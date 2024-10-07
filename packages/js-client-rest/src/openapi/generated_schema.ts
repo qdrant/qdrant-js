@@ -886,6 +886,8 @@ export interface components {
     FloatIndexType: "float";
     GeoIndexParams: {
       type: components["schemas"]["GeoIndexType"];
+      /** @description If true, store the index on disk. Default: false. */
+      on_disk?: boolean | null;
     };
     /** @enum {string} */
     GeoIndexType: "geo";
@@ -2969,7 +2971,7 @@ export interface components {
       /** Format: uint */
       count: number;
     };
-    FacetValue: string | number;
+    FacetValue: string | number | boolean;
   };
   responses: never;
   parameters: never;

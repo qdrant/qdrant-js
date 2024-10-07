@@ -2692,6 +2692,13 @@ export class FloatIndexParams extends Message<FloatIndexParams> {
  * @generated from message qdrant.GeoIndexParams
  */
 export class GeoIndexParams extends Message<GeoIndexParams> {
+  /**
+   * If true - store index on disk.
+   *
+   * @generated from field: optional bool on_disk = 1;
+   */
+  onDisk?: boolean;
+
   constructor(data?: PartialMessage<GeoIndexParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2700,6 +2707,7 @@ export class GeoIndexParams extends Message<GeoIndexParams> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "qdrant.GeoIndexParams";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "on_disk", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GeoIndexParams {
