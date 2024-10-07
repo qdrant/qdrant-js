@@ -458,14 +458,14 @@ export interface paths {
      * Search points matrix distance pairs 
      * @description Compute distance matrix for sampled points with a pair based output format
      */
-    post: operations["search_points_matrix_pairs"];
+    post: operations["search_matrix_pairs"];
   };
   "/collections/{collection_name}/points/search/matrix/offsets": {
     /**
      * Search points matrix distance offsets 
      * @description Compute distance matrix for sampled points with an offset based output format
      */
-    post: operations["search_points_matrix_offsets"];
+    post: operations["search_matrix_offsets"];
   };
 }
 
@@ -6253,7 +6253,7 @@ export interface operations {
    * Search points matrix distance pairs 
    * @description Compute distance matrix for sampled points with a pair based output format
    */
-  search_points_matrix_pairs: {
+  search_matrix_pairs: {
     parameters: {
       query?: {
         /** @description Define read consistency guarantees for the operation */
@@ -6307,7 +6307,7 @@ export interface operations {
    * Search points matrix distance offsets 
    * @description Compute distance matrix for sampled points with an offset based output format
    */
-  search_points_matrix_offsets: {
+  search_matrix_offsets: {
     parameters: {
       query?: {
         /** @description Define read consistency guarantees for the operation */

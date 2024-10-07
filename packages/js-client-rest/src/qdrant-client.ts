@@ -1989,7 +1989,7 @@ export class QdrantClient {
      *     - using: Define which vector name to use for querying. If missing, the default vector is used.
      * @returns Operation result
      */
-    async searchPointsMatrixPairs(
+    async searchMatrixPairs(
         collection_name: string,
         {
             consistency,
@@ -2001,7 +2001,7 @@ export class QdrantClient {
             using,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchMatrixRequest'>,
     ) {
-        const response = await this._openApiClient.points.searchPointsMatrixPairs({
+        const response = await this._openApiClient.points.searchMatrixPairs({
             collection_name,
             consistency,
             timeout,
@@ -2015,7 +2015,7 @@ export class QdrantClient {
     }
 
     /**
-     * SSearch points matrix distance offsets.
+     * Search points matrix distance offsets.
      * @description Compute distance matrix for sampled points with an offset based output format.
      * @param collection_name Name of the collection
      * @param {object} args -
@@ -2033,7 +2033,7 @@ export class QdrantClient {
      *     - using: Define which vector name to use for querying. If missing, the default vector is used.
      * @returns Operation result
      */
-    async searchPointsMatrixOffsets(
+    async searchMatrixOffsets(
         collection_name: string,
         {
             consistency,
@@ -2045,7 +2045,7 @@ export class QdrantClient {
             using,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchMatrixRequest'>,
     ) {
-        const response = await this._openApiClient.points.searchPointsMatrixOffsets({
+        const response = await this._openApiClient.points.searchMatrixOffsets({
             collection_name,
             consistency,
             timeout,

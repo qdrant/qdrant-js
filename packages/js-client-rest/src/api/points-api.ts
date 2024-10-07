@@ -199,7 +199,7 @@ export function createPointsApi(client: Client) {
         /**
          * Search points matrix distance pairs
          */
-        searchPointsMatrixPairs: client
+        searchMatrixPairs: client
             .path('/collections/{collection_name}/points/search/matrix/pairs')
             .method('post')
             .create({consistency: true, timeout: true}),
@@ -207,7 +207,7 @@ export function createPointsApi(client: Client) {
         /**
          * Search points matrix distance offsets
          */
-        searchPointsMatrixOffsets: client
+        searchMatrixOffsets: client
             .path('/collections/{collection_name}/points/search/matrix/offsets')
             .method('post')
             .create({consistency: true, timeout: true}),
