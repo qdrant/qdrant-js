@@ -425,6 +425,13 @@ export interface paths {
      */
     post: operations["count_points"];
   };
+  "/collections/{collection_name}/facet": {
+    /**
+     * Facet a payload key with a given filter. 
+     * @description Count points that satisfy the given filter for each unique value of a payload key.
+     */
+    post: operations["facet"];
+  };
   "/collections/{collection_name}/points/query": {
     /**
      * Query points 
@@ -445,6 +452,20 @@ export interface paths {
      * @description Universally query points, grouped by a given payload field
      */
     post: operations["query_points_groups"];
+  };
+  "/collections/{collection_name}/points/search/matrix/pairs": {
+    /**
+     * Search points matrix distance pairs 
+     * @description Compute distance matrix for sampled points with a pair based output format
+     */
+    post: operations["search_matrix_pairs"];
+  };
+  "/collections/{collection_name}/points/search/matrix/offsets": {
+    /**
+     * Search points matrix distance offsets 
+     * @description Compute distance matrix for sampled points with an offset based output format
+     */
+    post: operations["search_matrix_offsets"];
   };
 }
 
@@ -519,7 +540,7 @@ export interface components {
       };
     };
     /**
-     * @description Current state of the collection. `Green` - all good. `Yellow` - optimization is running, `Red` - some operations failed and was not recovered 
+     * @description Current state of the collection. `Green` - all good. `Yellow` - optimization is running, 'Grey' - optimizations are possible but not triggered, `Red` - some operations failed and was not recovered 
      * @enum {string}
      */
     CollectionStatus: "green" | "yellow" | "grey" | "red";
@@ -844,9 +865,9 @@ export interface components {
     IntegerIndexParams: {
       type: components["schemas"]["IntegerIndexType"];
       /** @description If true - support direct lookups. */
-      lookup: boolean;
+      lookup?: boolean | null;
       /** @description If true - support ranges filters. */
-      range: boolean;
+      range?: boolean | null;
       /** @description If true - use this key to organize storage of the collection data. This option assumes that this key will be used in majority of filtered requests. */
       is_principal?: boolean | null;
       /** @description If true, store the index on disk. Default: false. */
@@ -865,18 +886,28 @@ export interface components {
     FloatIndexType: "float";
     GeoIndexParams: {
       type: components["schemas"]["GeoIndexType"];
+      /** @description If true, store the index on disk. Default: false. */
+      on_disk?: boolean | null;
     };
     /** @enum {string} */
     GeoIndexType: "geo";
     TextIndexParams: {
       type: components["schemas"]["TextIndexType"];
       tokenizer?: components["schemas"]["TokenizerType"];
-      /** Format: uint */
+      /**
+       * Format: uint 
+       * @description Minimum characters to be tokenized.
+       */
       min_token_len?: number | null;
-      /** Format: uint */
+      /**
+       * Format: uint 
+       * @description Maximum characters to be tokenized.
+       */
       max_token_len?: number | null;
       /** @description If true, lowercase all tokens. Default: true. */
       lowercase?: boolean | null;
+      /** @description If true, store the index on disk. Default: false. */
+      on_disk?: boolean | null;
     };
     /** @enum {string} */
     TextIndexType: "text";
@@ -955,14 +986,25 @@ export interface components {
     /** @description Full vector data per point separator with single and multiple vector modes */
     VectorStruct: (number)[] | ((number)[])[] | ({
       [key: string]: components["schemas"]["Vector"] | undefined;
-    });
-    Vector: (number)[] | components["schemas"]["SparseVector"] | ((number)[])[];
+    }) | components["schemas"]["Document"];
+    Vector: (number)[] | components["schemas"]["SparseVector"] | ((number)[])[] | components["schemas"]["Document"];
     /** @description Sparse vector structure */
     SparseVector: {
       /** @description Indices must be unique */
       indices: (number)[];
       /** @description Values and indices must be the same length */
       values: (number)[];
+    };
+    /**
+     * @description WARN: Work-in-progress, unimplemented
+     * 
+     * Text document for embedding. Requires inference infrastructure, unimplemented.
+     */
+    Document: {
+      /** @description Text of the document This field will be used as input for the embedding model */
+      text: string;
+      /** @description Name of the model used to generate the vector List of available models depends on a provider */
+      model?: string | null;
     };
     OrderValue: number;
     /** @description Search request. Holds all conditions and parameters for the search of most similar points by vector similarity given the filtering restrictions. */
@@ -1698,7 +1740,7 @@ export interface components {
     };
     BatchVectorStruct: ((number)[])[] | (((number)[])[])[] | ({
       [key: string]: (components["schemas"]["Vector"])[] | undefined;
-    });
+    }) | (components["schemas"]["Document"])[];
     PointsList: {
       points: (components["schemas"]["PointStruct"])[];
       shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
@@ -1868,7 +1910,7 @@ export interface components {
       /** @description Shard transfers */
       shard_transfers: (components["schemas"]["ShardTransferInfo"])[];
       /** @description Resharding operations */
-      resharding_operations: (components["schemas"]["ReshardingInfo"])[];
+      resharding_operations?: (components["schemas"]["ReshardingInfo"])[] | null;
     };
     LocalShardInfo: {
       /**
@@ -1951,6 +1993,7 @@ export interface components {
       features?: components["schemas"]["AppFeaturesTelemetry"] | (Record<string, unknown> | null);
       system?: components["schemas"]["RunningEnvironmentTelemetry"] | (Record<string, unknown> | null);
       jwt_rbac?: boolean | null;
+      hide_jwt_dashboard?: boolean | null;
       /** Format: date-time */
       startup: string;
     };
@@ -1985,6 +2028,7 @@ export interface components {
       config: components["schemas"]["CollectionConfig"];
       shards: (components["schemas"]["ReplicaSetTelemetry"])[];
       transfers: (components["schemas"]["ShardTransferInfo"])[];
+      resharding: (components["schemas"]["ReshardingInfo"])[];
     };
     ReplicaSetTelemetry: {
       /** Format: uint32 */
@@ -1997,9 +2041,20 @@ export interface components {
     };
     LocalShardTelemetry: {
       variant_name?: string | null;
+      status?: components["schemas"]["ShardStatus"] | (Record<string, unknown> | null);
+      /**
+       * Format: uint 
+       * @description Total number of optimized points since the last start.
+       */
+      total_optimized_points: number;
       segments: (components["schemas"]["SegmentTelemetry"])[];
       optimizations: components["schemas"]["OptimizerTelemetry"];
     };
+    /**
+     * @description Current state of the shard (supports same states as the collection) `Green` - all good. `Yellow` - optimization is running, 'Grey' - optimizations are possible but not triggered, `Red` - some operations failed and was not recovered 
+     * @enum {string}
+     */
+    ShardStatus: "green" | "yellow" | "grey" | "red";
     SegmentTelemetry: {
       info: components["schemas"]["SegmentInfo"];
       config: components["schemas"]["SegmentConfig"];
@@ -2209,6 +2264,12 @@ export interface components {
       enabled: boolean;
       status?: components["schemas"]["ClusterStatusTelemetry"] | (Record<string, unknown> | null);
       config?: components["schemas"]["ClusterConfigTelemetry"] | (Record<string, unknown> | null);
+      peers?: ({
+        [key: string]: components["schemas"]["PeerInfo"] | undefined;
+      }) | null;
+      metadata?: {
+        [key: string]: unknown;
+      } | null;
     };
     ClusterStatusTelemetry: {
       /** Format: uint */
@@ -2747,7 +2808,7 @@ export interface components {
       lookup_from?: components["schemas"]["LookupLocation"] | (Record<string, unknown> | null);
     };
     QueryInterface: components["schemas"]["VectorInput"] | components["schemas"]["Query"];
-    VectorInput: (number)[] | components["schemas"]["SparseVector"] | ((number)[])[] | components["schemas"]["ExtendedPointId"];
+    VectorInput: (number)[] | components["schemas"]["SparseVector"] | ((number)[])[] | components["schemas"]["ExtendedPointId"] | components["schemas"]["Document"];
     Query: components["schemas"]["NearestQuery"] | components["schemas"]["RecommendQuery"] | components["schemas"]["DiscoverQuery"] | components["schemas"]["ContextQuery"] | components["schemas"]["OrderByQuery"] | components["schemas"]["FusionQuery"] | components["schemas"]["SampleQuery"];
     NearestQuery: {
       nearest: components["schemas"]["VectorInput"];
@@ -2849,6 +2910,68 @@ export interface components {
       /** @description Look for points in another collection using the group ids */
       with_lookup?: components["schemas"]["WithLookupInterface"] | (Record<string, unknown> | null);
     };
+    SearchMatrixRequest: {
+      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
+      /** @description Look only for points which satisfies this conditions */
+      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
+      /**
+       * Format: uint 
+       * @description How many points to select and search within. Default is 10.
+       */
+      sample?: number | null;
+      /**
+       * Format: uint 
+       * @description How many neighbours per sample to find. Default is 3.
+       */
+      limit?: number | null;
+      /** @description Define which vector name to use for querying. If missing, the default vector is used. */
+      using?: string | null;
+    };
+    SearchMatrixOffsetsResponse: {
+      /** @description Row indices of the matrix */
+      offsets_row: (number)[];
+      /** @description Column indices of the matrix */
+      offsets_col: (number)[];
+      /** @description Scores associated with matrix coordinates */
+      scores: (number)[];
+      /** @description Ids of the points in order */
+      ids: (components["schemas"]["ExtendedPointId"])[];
+    };
+    SearchMatrixPairsResponse: {
+      /** @description List of pairs of points with scores */
+      pairs: (components["schemas"]["SearchMatrixPair"])[];
+    };
+    /** @description Pair of points (a, b) with score */
+    SearchMatrixPair: {
+      a: components["schemas"]["ExtendedPointId"];
+      b: components["schemas"]["ExtendedPointId"];
+      /** Format: float */
+      score: number;
+    };
+    FacetRequest: {
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
+      /** @description Payload key to use for faceting. */
+      key: string;
+      /**
+       * Format: uint 
+       * @description Max number of hits to return. Default is 10.
+       */
+      limit?: number | null;
+      /** @description Filter conditions - only consider points that satisfy these conditions. */
+      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
+      /** @description Whether to do a more expensive exact count for each of the values in the facet. Default is false. */
+      exact?: boolean | null;
+    };
+    FacetResponse: {
+      hits: (components["schemas"]["FacetValueHit"])[];
+    };
+    FacetValueHit: {
+      value: components["schemas"]["FacetValue"];
+      /** Format: uint */
+      count: number;
+    };
+    FacetValue: string | number | boolean;
   };
   responses: never;
   parameters: never;
@@ -5911,6 +6034,60 @@ export interface operations {
     };
   };
   /**
+   * Facet a payload key with a given filter. 
+   * @description Count points that satisfy the given filter for each unique value of a payload key.
+   */
+  facet: {
+    parameters: {
+      query?: {
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
+        /** @description Define read consistency guarantees for the operation */
+        consistency?: components["schemas"]["ReadConsistency"];
+      };
+      path: {
+        /** @description Name of the collection to facet in */
+        collection_name: string;
+      };
+    };
+    /** @description Request counts of points for each unique value of a payload key */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["FacetRequest"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request 
+             * @example 0.002
+             */
+            time?: number;
+            /** @example ok */
+            status?: string;
+            result?: components["schemas"]["FacetResponse"];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
    * Query points 
    * @description Universally query points. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
    */
@@ -6055,6 +6232,114 @@ export interface operations {
             /** @example ok */
             status?: string;
             result?: components["schemas"]["GroupsResult"];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Search points matrix distance pairs 
+   * @description Compute distance matrix for sampled points with a pair based output format
+   */
+  search_matrix_pairs: {
+    parameters: {
+      query?: {
+        /** @description Define read consistency guarantees for the operation */
+        consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
+      };
+      path: {
+        /** @description Name of the collection to search in */
+        collection_name: string;
+      };
+    };
+    /** @description Search matrix request with optional filtering */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["SearchMatrixRequest"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request 
+             * @example 0.002
+             */
+            time?: number;
+            /** @example ok */
+            status?: string;
+            result?: components["schemas"]["SearchMatrixPairsResponse"];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Search points matrix distance offsets 
+   * @description Compute distance matrix for sampled points with an offset based output format
+   */
+  search_matrix_offsets: {
+    parameters: {
+      query?: {
+        /** @description Define read consistency guarantees for the operation */
+        consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
+      };
+      path: {
+        /** @description Name of the collection to search in */
+        collection_name: string;
+      };
+    };
+    /** @description Search matrix request with optional filtering */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["SearchMatrixRequest"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * Format: float 
+             * @description Time spent to process this request 
+             * @example 0.002
+             */
+            time?: number;
+            /** @example ok */
+            status?: string;
+            result?: components["schemas"]["SearchMatrixOffsetsResponse"];
           };
         };
       };

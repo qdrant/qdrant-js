@@ -1925,4 +1925,136 @@ export class QdrantClient {
         });
         return maybe(response.data.result).orThrow('Query groups returned empty');
     }
+
+    /**
+     * Facet a payload key with a given filter.
+     * @description Count points that satisfy the given filter for each unique value of a payload key.
+     * @param collection_name Name of the collection
+     * @param {object} args -
+     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
+     *         Values:
+     *             number - number of replicas to query, values should present in all queried replicas
+     *             'majority' - query all replicas, but return values present in the majority of replicas
+     *             'quorum' - query the majority of replicas, return values present in all of them
+     *             'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards.
+     *     - key: Payload key to use for faceting.
+     *     - limit: Max number of hits to return. Default is 10.
+     *     - filter: Filter conditions - only consider points that satisfy these conditions.
+     *     - exact: Whether to do a more expensive exact count for each of the values in the facet. Default is false.
+     * @returns Operation result
+     */
+    async facet(
+        collection_name: string,
+        {
+            consistency,
+            timeout,
+            shard_key,
+            key,
+            limit,
+            filter,
+            exact,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'FacetRequest'>,
+    ) {
+        const response = await this._openApiClient.points.facet({
+            collection_name,
+            consistency,
+            timeout,
+            shard_key,
+            key,
+            limit,
+            filter,
+            exact,
+        });
+        return maybe(response.data.result).orThrow('Facet returned empty');
+    }
+
+    /**
+     * Search points matrix distance pairs.
+     * @description Compute distance matrix for sampled points with a pair based output format.
+     * @param collection_name Name of the collection
+     * @param {object} args -
+     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
+     *         Values:
+     *             number - number of replicas to query, values should present in all queried replicas
+     *             'majority' - query all replicas, but return values present in the majority of replicas
+     *             'quorum' - query the majority of replicas, return values present in all of them
+     *             'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards.
+     *     - filter: Look only for points which satisfies this conditions.
+     *     - sample: How many points to select and search within. Default is 10.
+     *     - limit: How many neighbours per sample to find. Default is 3.
+     *     - using: Define which vector name to use for querying. If missing, the default vector is used.
+     * @returns Operation result
+     */
+    async searchMatrixPairs(
+        collection_name: string,
+        {
+            consistency,
+            timeout,
+            shard_key,
+            filter,
+            sample,
+            limit,
+            using,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchMatrixRequest'>,
+    ) {
+        const response = await this._openApiClient.points.searchMatrixPairs({
+            collection_name,
+            consistency,
+            timeout,
+            shard_key,
+            filter,
+            sample,
+            limit,
+            using,
+        });
+        return maybe(response.data.result).orThrow('Search points matrix pairs returned empty');
+    }
+
+    /**
+     * Search points matrix distance offsets.
+     * @description Compute distance matrix for sampled points with an offset based output format.
+     * @param collection_name Name of the collection
+     * @param {object} args -
+     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
+     *         Values:
+     *             number - number of replicas to query, values should present in all queried replicas
+     *             'majority' - query all replicas, but return values present in the majority of replicas
+     *             'quorum' - query the majority of replicas, return values present in all of them
+     *             'all' - query all replicas, and return values present in all replicas
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards.
+     *     - filter: Look only for points which satisfies this conditions.
+     *     - sample: How many points to select and search within. Default is 10.
+     *     - limit: How many neighbours per sample to find. Default is 3.
+     *     - using: Define which vector name to use for querying. If missing, the default vector is used.
+     * @returns Operation result
+     */
+    async searchMatrixOffsets(
+        collection_name: string,
+        {
+            consistency,
+            timeout,
+            shard_key,
+            filter,
+            sample,
+            limit,
+            using,
+        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchMatrixRequest'>,
+    ) {
+        const response = await this._openApiClient.points.searchMatrixOffsets({
+            collection_name,
+            consistency,
+            timeout,
+            shard_key,
+            filter,
+            sample,
+            limit,
+            using,
+        });
+        return maybe(response.data.result).orThrow('Search points matrix offsets returned empty');
+    }
 }

@@ -1876,6 +1876,85 @@ export class QuantizationConfigDiff extends Message<QuantizationConfigDiff> {
 }
 
 /**
+ * @generated from message qdrant.StrictModeConfig
+ */
+export class StrictModeConfig extends Message<StrictModeConfig> {
+  /**
+   * @generated from field: optional bool enabled = 1;
+   */
+  enabled?: boolean;
+
+  /**
+   * @generated from field: optional uint32 max_query_limit = 2;
+   */
+  maxQueryLimit?: number;
+
+  /**
+   * @generated from field: optional uint32 max_timeout = 3;
+   */
+  maxTimeout?: number;
+
+  /**
+   * @generated from field: optional bool unindexed_filtering_retrieve = 4;
+   */
+  unindexedFilteringRetrieve?: boolean;
+
+  /**
+   * @generated from field: optional bool unindexed_filtering_update = 5;
+   */
+  unindexedFilteringUpdate?: boolean;
+
+  /**
+   * @generated from field: optional uint32 search_max_hnsw_ef = 6;
+   */
+  searchMaxHnswEf?: number;
+
+  /**
+   * @generated from field: optional bool search_allow_exact = 7;
+   */
+  searchAllowExact?: boolean;
+
+  /**
+   * @generated from field: optional float search_max_oversampling = 8;
+   */
+  searchMaxOversampling?: number;
+
+  constructor(data?: PartialMessage<StrictModeConfig>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.StrictModeConfig";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "enabled", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 2, name: "max_query_limit", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
+    { no: 3, name: "max_timeout", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
+    { no: 4, name: "unindexed_filtering_retrieve", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 5, name: "unindexed_filtering_update", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 6, name: "search_max_hnsw_ef", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
+    { no: 7, name: "search_allow_exact", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 8, name: "search_max_oversampling", kind: "scalar", T: 2 /* ScalarType.FLOAT */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StrictModeConfig {
+    return new StrictModeConfig().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StrictModeConfig {
+    return new StrictModeConfig().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StrictModeConfig {
+    return new StrictModeConfig().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: StrictModeConfig | PlainMessage<StrictModeConfig> | undefined, b: StrictModeConfig | PlainMessage<StrictModeConfig> | undefined): boolean {
+    return proto3.util.equals(StrictModeConfig, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.CreateCollection
  */
 export class CreateCollection extends Message<CreateCollection> {
@@ -1977,6 +2056,13 @@ export class CreateCollection extends Message<CreateCollection> {
    */
   sparseVectorsConfig?: SparseVectorConfig;
 
+  /**
+   * Configuration for strict mode
+   *
+   * @generated from field: optional qdrant.StrictModeConfig strict_mode_config = 17;
+   */
+  strictModeConfig?: StrictModeConfig;
+
   constructor(data?: PartialMessage<CreateCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1999,6 +2085,7 @@ export class CreateCollection extends Message<CreateCollection> {
     { no: 14, name: "quantization_config", kind: "message", T: QuantizationConfig, opt: true },
     { no: 15, name: "sharding_method", kind: "enum", T: proto3.getEnumType(ShardingMethod), opt: true },
     { no: 16, name: "sparse_vectors_config", kind: "message", T: SparseVectorConfig, opt: true },
+    { no: 17, name: "strict_mode_config", kind: "message", T: StrictModeConfig, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateCollection {
@@ -2404,6 +2491,13 @@ export class CollectionConfig extends Message<CollectionConfig> {
    */
   quantizationConfig?: QuantizationConfig;
 
+  /**
+   * Configuration of strict mode.
+   *
+   * @generated from field: optional qdrant.StrictModeConfig strict_mode_config = 6;
+   */
+  strictModeConfig?: StrictModeConfig;
+
   constructor(data?: PartialMessage<CollectionConfig>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2417,6 +2511,7 @@ export class CollectionConfig extends Message<CollectionConfig> {
     { no: 3, name: "optimizer_config", kind: "message", T: OptimizersConfigDiff },
     { no: 4, name: "wal_config", kind: "message", T: WalConfigDiff },
     { no: 5, name: "quantization_config", kind: "message", T: QuantizationConfig, opt: true },
+    { no: 6, name: "strict_mode_config", kind: "message", T: StrictModeConfig, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionConfig {
@@ -2490,16 +2585,16 @@ export class IntegerIndexParams extends Message<IntegerIndexParams> {
   /**
    * If true - support direct lookups.
    *
-   * @generated from field: bool lookup = 1;
+   * @generated from field: optional bool lookup = 1;
    */
-  lookup = false;
+  lookup?: boolean;
 
   /**
    * If true - support ranges filters.
    *
-   * @generated from field: bool range = 2;
+   * @generated from field: optional bool range = 2;
    */
-  range = false;
+  range?: boolean;
 
   /**
    * If true - use this key to organize storage of the collection data. This option assumes that this key will be used in majority of filtered requests.
@@ -2523,8 +2618,8 @@ export class IntegerIndexParams extends Message<IntegerIndexParams> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "qdrant.IntegerIndexParams";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "lookup", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 2, name: "range", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: "lookup", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 2, name: "range", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 3, name: "is_principal", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 4, name: "on_disk", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
@@ -2597,6 +2692,13 @@ export class FloatIndexParams extends Message<FloatIndexParams> {
  * @generated from message qdrant.GeoIndexParams
  */
 export class GeoIndexParams extends Message<GeoIndexParams> {
+  /**
+   * If true - store index on disk.
+   *
+   * @generated from field: optional bool on_disk = 1;
+   */
+  onDisk?: boolean;
+
   constructor(data?: PartialMessage<GeoIndexParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2605,6 +2707,7 @@ export class GeoIndexParams extends Message<GeoIndexParams> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "qdrant.GeoIndexParams";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "on_disk", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GeoIndexParams {
@@ -2656,6 +2759,13 @@ export class TextIndexParams extends Message<TextIndexParams> {
    */
   maxTokenLen?: bigint;
 
+  /**
+   * If true - store index on disk.
+   *
+   * @generated from field: optional bool on_disk = 5;
+   */
+  onDisk?: boolean;
+
   constructor(data?: PartialMessage<TextIndexParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2668,6 +2778,7 @@ export class TextIndexParams extends Message<TextIndexParams> {
     { no: 2, name: "lowercase", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 3, name: "min_token_len", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
     { no: 4, name: "max_token_len", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 5, name: "on_disk", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TextIndexParams {
