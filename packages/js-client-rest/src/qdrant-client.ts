@@ -71,6 +71,10 @@ export class QdrantClient {
                         `url is ${url}, prefix is ${parsedUrl.pathname}`,
                 );
             }
+            
+            if (parsedUrl.pathname !== '/') {
+                this._prefix = parsedUrl.pathname;
+            }
         } else {
             this._port = port;
             this._host = host ?? '127.0.0.1';
