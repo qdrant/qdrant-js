@@ -4,6 +4,7 @@ import {Collections} from './proto/collections_service_connect.js';
 import {Points} from './proto/points_service_connect.js';
 import {Snapshots} from './proto/snapshots_service_connect.js';
 import {Qdrant} from './proto/qdrant_connect.js';
+import {PACKAGE_VERSION} from './client-version.js';
 
 type Clients = {
     collections: PromiseClient<typeof Collections>;
@@ -50,7 +51,7 @@ function createClients(transport: Transport) {
 export function createApis(baseUrl: string, {timeout, apiKey}: {timeout: number; apiKey?: string}): GrpcClients {
     const interceptors: Interceptor[] = [
         (next) => (req) => {
-            req.header.set('user-agent', 'qdrant-js');
+            req.header.set('user-agent', 'qdrant-js/' + String(PACKAGE_VERSION));
             return next(req);
         },
     ];
