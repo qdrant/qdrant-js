@@ -9,7 +9,6 @@ import {createSnapshotsApi} from './api/snapshots-api.js';
 import {createShardsApi} from './api/shards-api.js';
 import {QdrantClientTimeoutError, QdrantClientUnexpectedResponseError} from './errors.js';
 import {RestArgs} from './types.js';
-import {PACKAGE_VERSION} from './client-version.js';
 
 export type Client = ReturnType<typeof Fetcher.for<paths>>;
 
@@ -57,7 +56,6 @@ export function createClient(baseUrl: string, {headers, timeout, connections}: R
 
     const client = Fetcher.for<paths>();
     // Configure client with 'undici' agent which is used in Node 18+
-    headers.set('user-agent', 'qdrant-js/' + String(PACKAGE_VERSION));
     client.configure({
         baseUrl,
         init: {

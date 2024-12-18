@@ -2,6 +2,7 @@ import {maybe} from '@sevinf/maybe';
 import {OpenApiClient, createApis} from './api-client.js';
 import {QdrantClientConfigError} from './errors.js';
 import {RestArgs, SchemaFor} from './types.js';
+import {PACKAGE_VERSION} from './client-version.js';
 
 export type QdrantClientParams = {
     port?: number | null;
@@ -76,7 +77,7 @@ export class QdrantClient {
             this._host = host ?? '127.0.0.1';
         }
 
-        const headers = new Headers([['user-agent', 'qdrant-js']]);
+        const headers = new Headers([['user-agent', 'qdrant-js/' + String(PACKAGE_VERSION)]]);
 
         const metadata = args.headers ?? {};
         Object.keys(metadata).forEach((field) => {
