@@ -51,7 +51,7 @@ function createClients(transport: Transport) {
 export function createApis(baseUrl: string, {timeout, apiKey}: {timeout: number; apiKey?: string}): GrpcClients {
     const interceptors: Interceptor[] = [
         (next) => (req) => {
-            req.header.set('user-agent', 'qdrant-js' + String(PACKAGE_VERSION));
+            req.header.set('user-agent', 'qdrant-js/' + String(PACKAGE_VERSION));
             return next(req);
         },
     ];
