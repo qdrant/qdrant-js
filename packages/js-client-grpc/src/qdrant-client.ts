@@ -1,5 +1,6 @@
 import {GrpcClients, createApis} from './api-client.js';
 import {QdrantClientConfigError} from './errors.js';
+import {ClientVersion, PACKAGE_VERSION} from './client-version.js';
 
 export type QdrantClientParams = {
     port?: number | null;
@@ -9,6 +10,7 @@ export type QdrantClientParams = {
     url?: string;
     host?: string;
     timeout?: number;
+    checkCompatibility?: boolean;
 };
 
 export class QdrantClient {
@@ -20,7 +22,16 @@ export class QdrantClient {
     private _grcpClients: GrpcClients;
     private _restUri: string;
 
-    constructor({url, host, apiKey, https, prefix, port = 6334, timeout = 300_000}: QdrantClientParams = {}) {
+    constructor({
+        url,
+        host,
+        apiKey,
+        https,
+        prefix,
+        port = 6334,
+        timeout = 300_000,
+        checkCompatibility = true,
+    }: QdrantClientParams = {}) {
         this._https = https ?? typeof apiKey === 'string';
         this._scheme = this._https ? 'https' : 'http';
         this._prefix = prefix ?? '';
@@ -71,6 +82,24 @@ export class QdrantClient {
         this._restUri = `${this._scheme}://${address}${this._prefix}`;
 
         this._grcpClients = createApis(this._restUri, {apiKey, timeout});
+
+        if (checkCompatibility) {
+            this._grcpClients.service
+                .healthCheck({})
+                .then((response) => {
+                    const serverVersion = response.version;
+                    if (!ClientVersion.isCompatible(PACKAGE_VERSION, serverVersion)) {
+                        console.warn(
+                            `Client version ${PACKAGE_VERSION} is incompatible with server version ${serverVersion}. Major versions should match and minor version difference must not exceed 1. Set checkCompatibility=false to skip version check.`,
+                        );
+                    }
+                })
+                .catch(() => {
+                    console.warn(
+                        `Failed to obtain server version. Unable to check client-server compatibility. Set checkCompatibility=false to skip version check.`,
+                    );
+                });
+        }
     }
 
     /**
