@@ -1,7 +1,6 @@
 import {GrpcClients, createApis} from './api-client.js';
 import {QdrantClientConfigError} from './errors.js';
 import {ClientVersion, PACKAGE_VERSION} from './client-version.js';
-import {HealthCheckRequest} from './proto/qdrant_pb.js';
 
 export type QdrantClientParams = {
     port?: number | null;
@@ -86,7 +85,7 @@ export class QdrantClient {
 
         if (checkCompatibility) {
             this._grcpClients.service
-                .healthCheck(HealthCheckRequest)
+                .healthCheck({})
                 .then((response) => {
                     const serverVersion = response.version;
                     if (!ClientVersion.isCompatible(PACKAGE_VERSION, serverVersion)) {
