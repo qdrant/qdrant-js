@@ -28,7 +28,7 @@ export type QdrantClientParams = {
     /**
      * Check compatibility with the server version. Default: `true`
      */
-    check_compatibility?: boolean;
+    checkCompatibility?: boolean;
 };
 
 export class QdrantClient {
@@ -48,7 +48,7 @@ export class QdrantClient {
         prefix,
         port = 6333,
         timeout = 300_000,
-        check_compatibility = true,
+        checkCompatibility = true,
         ...args
     }: QdrantClientParams = {}) {
         this._https = https ?? typeof apiKey === 'string';
@@ -114,7 +114,7 @@ export class QdrantClient {
 
         this._openApiClient = createApis(this._restUri, restArgs);
 
-        if (check_compatibility) {
+        if (checkCompatibility) {
             this._openApiClient.service
                 .root({})
                 .then((response) => {

@@ -11,7 +11,7 @@ export type QdrantClientParams = {
     url?: string;
     host?: string;
     timeout?: number;
-    check_compatibility?: boolean;
+    checkCompatibility?: boolean;
 };
 
 export class QdrantClient {
@@ -31,7 +31,7 @@ export class QdrantClient {
         prefix,
         port = 6334,
         timeout = 300_000,
-        check_compatibility = true,
+        checkCompatibility = true,
     }: QdrantClientParams = {}) {
         this._https = https ?? typeof apiKey === 'string';
         this._scheme = this._https ? 'https' : 'http';
@@ -84,7 +84,7 @@ export class QdrantClient {
 
         this._grcpClients = createApis(this._restUri, {apiKey, timeout});
 
-        if (check_compatibility) {
+        if (checkCompatibility) {
             this._grcpClients.service
                 .healthCheck(HealthCheckRequest)
                 .then((response) => {
