@@ -19,16 +19,9 @@ export const ClientVersion = {
 
         let major = undefined;
         let minor = undefined;
-        try {
-            [major, minor] = version.split('.', 2);
-            major = major.trim();
-            minor = minor.trim();
-            major = parseInt(major, 10);
-            minor = parseInt(minor, 10);
-        } catch (error) {
-            throw new Error(`Unable to parse version, expected format: x.y[.z], found: ${version}`);
-        }
-
+        [major, minor] = version.split('.', 2);
+        major = parseInt(major, 10);
+        minor = parseInt(minor, 10);
         if (isNaN(major) || isNaN(minor)) {
             throw new Error(`Unable to parse version, expected format: x.y[.z], found: ${version}`);
         }
@@ -45,30 +38,19 @@ export const ClientVersion = {
      * @returns True if compatible, otherwise false.
      */
     isCompatible(clientVersion: string, serverVersion: string): boolean {
-        if (!clientVersion) {
-            console.debug(`Unable to compare with client version: null`);
+        if (!clientVersion || !serverVersion) {
+            console.debug(
+                `Unable to compare versions with null values. Client: ${clientVersion}, Server: ${serverVersion}`,
+            );
             return false;
         }
 
-        if (!serverVersion) {
-            console.debug(`Unable to compare with server version: null`);
-            return false;
-        }
-
-        if (clientVersion === serverVersion) {
-            return true;
-        }
+        if (clientVersion === serverVersion) return true;
 
         try {
-            const parsedClientVersion = ClientVersion.parseVersion(clientVersion);
-            const parsedServerVersion = ClientVersion.parseVersion(serverVersion);
-
-            const majorDiff = Math.abs(parsedClientVersion.major - parsedServerVersion.major);
-            if (majorDiff >= 1) {
-                return false;
-            }
-
-            return Math.abs(parsedClientVersion.minor - parsedServerVersion.minor) <= 1;
+            const client = ClientVersion.parseVersion(clientVersion);
+            const server = ClientVersion.parseVersion(serverVersion);
+            return client.major === server.major && Math.abs(client.minor - server.minor) <= 1;
         } catch (error) {
             console.debug(`Unable to compare versions: ${error as string}`);
             return false;
