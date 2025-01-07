@@ -2,7 +2,7 @@ import {maybe} from '@sevinf/maybe';
 import {OpenApiClient, createApis} from './api-client.js';
 import {QdrantClientConfigError} from './errors.js';
 import {RestArgs, SchemaFor} from './types.js';
-import {PACKAGE_VERSION} from './client-version.js';
+import {PACKAGE_VERSION, ClientVersion} from './client-version.js';
 
 export type QdrantClientParams = {
     port?: number | null;
@@ -25,6 +25,10 @@ export type QdrantClientParams = {
      * to open simultaneously while building a request pool in memory.
      */
     maxConnections?: number;
+    /**
+     * Check compatibility with the server version. Default: `true`
+     */
+    check_compatibility?: boolean;
 };
 
 export class QdrantClient {
@@ -36,7 +40,17 @@ export class QdrantClient {
     private _restUri: string;
     private _openApiClient: OpenApiClient;
 
-    constructor({url, host, apiKey, https, prefix, port = 6333, timeout = 300_000, ...args}: QdrantClientParams = {}) {
+    constructor({
+        url,
+        host,
+        apiKey,
+        https,
+        prefix,
+        port = 6333,
+        timeout = 300_000,
+        check_compatibility = true,
+        ...args
+    }: QdrantClientParams = {}) {
         this._https = https ?? typeof apiKey === 'string';
         this._scheme = this._https ? 'https' : 'http';
         this._prefix = prefix ?? '';
@@ -99,6 +113,24 @@ export class QdrantClient {
         const restArgs: RestArgs = {headers, timeout, connections};
 
         this._openApiClient = createApis(this._restUri, restArgs);
+
+        if (check_compatibility) {
+            this._openApiClient.service
+                .root({})
+                .then((response) => {
+                    const serverVersion = response.data.version;
+                    if (!ClientVersion.isCompatible(PACKAGE_VERSION, serverVersion)) {
+                        console.warn(
+                            `Client version ${PACKAGE_VERSION} is incompatible with server version ${serverVersion}. Major versions should match and minor version difference must not exceed 1. Set checkCompatibility=false to skip version check.`,
+                        );
+                    }
+                })
+                .catch(() => {
+                    console.warn(
+                        `Failed to obtain server version. Unable to check client-server compatibility. Set checkCompatibility=false to skip version check.`,
+                    );
+                });
+        }
     }
 
     /**
