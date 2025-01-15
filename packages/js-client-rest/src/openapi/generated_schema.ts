@@ -548,13 +548,15 @@ export interface components {
     OptimizersStatus: OneOf<["ok", {
       error: string;
     }]>;
+    /** @description Information about the collection configuration */
     CollectionConfig: {
       params: components["schemas"]["CollectionParams"];
       hnsw_config: components["schemas"]["HnswConfig"];
       optimizer_config: components["schemas"]["OptimizersConfig"];
-      wal_config: components["schemas"]["WalConfig"];
+      wal_config?: components["schemas"]["WalConfig"] | (Record<string, unknown> | null);
       /** @default null */
       quantization_config?: components["schemas"]["QuantizationConfig"] | (Record<string, unknown> | null);
+      strict_mode_config?: components["schemas"]["StrictModeConfig"] | (Record<string, unknown> | null);
     };
     CollectionParams: {
       vectors?: components["schemas"]["VectorsConfig"];
@@ -584,8 +586,10 @@ export interface components {
        */
       read_fan_out_factor?: number | null;
       /**
-       * @description If true - point's payload will not be stored in memory. It will be read from the disk every time it is requested. This setting saves RAM by (slightly) increasing the response time. Note: those payload values that are involved in filtering and are indexed - remain in RAM. 
-       * @default false
+       * @description If true - point's payload will not be stored in memory. It will be read from the disk every time it is requested. This setting saves RAM by (slightly) increasing the response time. Note: those payload values that are involved in filtering and are indexed - remain in RAM.
+       * 
+       * Default: true 
+       * @default true
        */
       on_disk_payload?: boolean;
       /** @description Configuration of the sparse vector storage */
@@ -790,7 +794,7 @@ export interface components {
       max_segment_size?: number | null;
       /**
        * Format: uint 
-       * @description Maximum size (in kilobytes) of vectors to store in-memory per segment. Segments larger than this threshold will be stored as read-only memmaped file.
+       * @description Maximum size (in kilobytes) of vectors to store in-memory per segment. Segments larger than this threshold will be stored as read-only memmapped file.
        * 
        * Memmap storage is disabled by default, to enable it, set this threshold to a reasonable value.
        * 
@@ -835,6 +839,71 @@ export interface components {
        * @description Number of WAL segments to create ahead of actually used ones
        */
       wal_segments_ahead: number;
+    };
+    StrictModeConfig: {
+      /** @description Whether strict mode is enabled for a collection or not. */
+      enabled?: boolean | null;
+      /**
+       * Format: uint 
+       * @description Max allowed `limit` parameter for all APIs that don't have their own max limit.
+       */
+      max_query_limit?: number | null;
+      /**
+       * Format: uint 
+       * @description Max allowed `timeout` parameter.
+       */
+      max_timeout?: number | null;
+      /** @description Allow usage of unindexed fields in retrieval based (eg. search) filters. */
+      unindexed_filtering_retrieve?: boolean | null;
+      /** @description Allow usage of unindexed fields in filtered updates (eg. delete by payload). */
+      unindexed_filtering_update?: boolean | null;
+      /**
+       * Format: uint 
+       * @description Max HNSW value allowed in search parameters.
+       */
+      search_max_hnsw_ef?: number | null;
+      /** @description Whether exact search is allowed or not. */
+      search_allow_exact?: boolean | null;
+      /**
+       * Format: double 
+       * @description Max oversampling value allowed in search.
+       */
+      search_max_oversampling?: number | null;
+      /**
+       * Format: uint 
+       * @description Max batchsize when upserting
+       */
+      upsert_max_batchsize?: number | null;
+      /**
+       * Format: uint 
+       * @description Max size of a collections vector storage in bytes, ignoring replicas.
+       */
+      max_collection_vector_size_bytes?: number | null;
+      /**
+       * Format: uint 
+       * @description Max number of read operations per minute per replica
+       */
+      read_rate_limit?: number | null;
+      /**
+       * Format: uint 
+       * @description Max number of write operations per minute per replica
+       */
+      write_rate_limit?: number | null;
+      /**
+       * Format: uint 
+       * @description Max size of a collections payload storage in bytes
+       */
+      max_collection_payload_size_bytes?: number | null;
+      /**
+       * Format: uint 
+       * @description Max conditions a filter can have.
+       */
+      filter_max_conditions?: number | null;
+      /**
+       * Format: uint 
+       * @description Max size of a condition, eg. items in `MatchAny`.
+       */
+      condition_max_size?: number | null;
     };
     /** @description Display payload field type & index information */
     PayloadIndexInfo: {
@@ -915,6 +984,8 @@ export interface components {
     TokenizerType: "prefix" | "whitespace" | "word" | "multilingual";
     BoolIndexParams: {
       type: components["schemas"]["BoolIndexType"];
+      /** @description If true, store the index on disk. Default: false. */
+      on_disk?: boolean | null;
     };
     /** @enum {string} */
     BoolIndexType: "bool";
@@ -969,7 +1040,7 @@ export interface components {
       /** @description Payload - values assigned to the point */
       payload?: components["schemas"]["Payload"] | (Record<string, unknown> | null);
       /** @description Vector of the point */
-      vector?: components["schemas"]["VectorStruct"] | (Record<string, unknown> | null);
+      vector?: components["schemas"]["VectorStructOutput"] | (Record<string, unknown> | null);
       /** @description Shard Key */
       shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
       order_value?: components["schemas"]["OrderValue"] | (Record<string, unknown> | null);
@@ -983,28 +1054,18 @@ export interface components {
     Payload: {
       [key: string]: unknown;
     };
-    /** @description Full vector data per point separator with single and multiple vector modes */
-    VectorStruct: (number)[] | ((number)[])[] | ({
-      [key: string]: components["schemas"]["Vector"] | undefined;
-    }) | components["schemas"]["Document"];
-    Vector: (number)[] | components["schemas"]["SparseVector"] | ((number)[])[] | components["schemas"]["Document"];
+    /** @description Vector data stored in Point */
+    VectorStructOutput: (number)[] | ((number)[])[] | ({
+      [key: string]: components["schemas"]["VectorOutput"] | undefined;
+    });
+    /** @description Vector Data stored in Point */
+    VectorOutput: (number)[] | components["schemas"]["SparseVector"] | ((number)[])[];
     /** @description Sparse vector structure */
     SparseVector: {
       /** @description Indices must be unique */
       indices: (number)[];
       /** @description Values and indices must be the same length */
       values: (number)[];
-    };
-    /**
-     * @description WARN: Work-in-progress, unimplemented
-     * 
-     * Text document for embedding. Requires inference infrastructure, unimplemented.
-     */
-    Document: {
-      /** @description Text of the document This field will be used as input for the embedding model */
-      text: string;
-      /** @description Name of the model used to generate the vector List of available models depends on a provider */
-      model?: string | null;
     };
     OrderValue: number;
     /** @description Search request. Holds all conditions and parameters for the search of most similar points by vector similarity given the filtering restrictions. */
@@ -1081,7 +1142,7 @@ export interface components {
        */
       must_not?: components["schemas"]["Condition"] | (components["schemas"]["Condition"])[] | (Record<string, unknown> | null);
     };
-    Condition: components["schemas"]["FieldCondition"] | components["schemas"]["IsEmptyCondition"] | components["schemas"]["IsNullCondition"] | components["schemas"]["HasIdCondition"] | components["schemas"]["NestedCondition"] | components["schemas"]["Filter"];
+    Condition: components["schemas"]["FieldCondition"] | components["schemas"]["IsEmptyCondition"] | components["schemas"]["IsNullCondition"] | components["schemas"]["HasIdCondition"] | components["schemas"]["HasVectorCondition"] | components["schemas"]["NestedCondition"] | components["schemas"]["Filter"];
     /** @description All possible payload filtering conditions */
     FieldCondition: {
       /** @description Payload key */
@@ -1249,6 +1310,10 @@ export interface components {
     HasIdCondition: {
       has_id: (components["schemas"]["ExtendedPointId"])[];
     };
+    /** @description Filter points which have specific vector assigned */
+    HasVectorCondition: {
+      has_vector: string;
+    };
     NestedCondition: {
       nested: components["schemas"]["Nested"];
     };
@@ -1326,7 +1391,7 @@ export interface components {
       /** @description Payload - values assigned to the point */
       payload?: components["schemas"]["Payload"] | (Record<string, unknown> | null);
       /** @description Vector of the point */
-      vector?: components["schemas"]["VectorStruct"] | (Record<string, unknown> | null);
+      vector?: components["schemas"]["VectorStructOutput"] | (Record<string, unknown> | null);
       /** @description Shard Key */
       shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
       /** @description Order-by value */
@@ -1522,7 +1587,9 @@ export interface components {
        */
       write_consistency_factor?: number | null;
       /**
-       * @description If true - point's payload will not be stored in memory. It will be read from the disk every time it is requested. This setting saves RAM by (slightly) increasing the response time. Note: those payload values that are involved in filtering and are indexed - remain in RAM. 
+       * @description If true - point's payload will not be stored in memory. It will be read from the disk every time it is requested. This setting saves RAM by (slightly) increasing the response time. Note: those payload values that are involved in filtering and are indexed - remain in RAM.
+       * 
+       * Default: true 
        * @default null
        */
       on_disk_payload?: boolean | null;
@@ -1546,6 +1613,8 @@ export interface components {
       sparse_vectors?: ({
         [key: string]: components["schemas"]["SparseVectorParams"] | undefined;
       }) | null;
+      /** @description Strict-mode config. */
+      strict_mode_config?: components["schemas"]["StrictModeConfig"] | (Record<string, unknown> | null);
     };
     WalConfigDiff: {
       /**
@@ -1586,7 +1655,7 @@ export interface components {
       max_segment_size?: number | null;
       /**
        * Format: uint 
-       * @description Maximum size (in kilobytes) of vectors to store in-memory per segment. Segments larger than this threshold will be stored as read-only memmaped file.
+       * @description Maximum size (in kilobytes) of vectors to store in-memory per segment. Segments larger than this threshold will be stored as read-only memmapped file.
        * 
        * Memmap storage is disabled by default, to enable it, set this threshold to a reasonable value.
        * 
@@ -1611,12 +1680,12 @@ export interface components {
        * @description Minimum interval between forced flushes.
        */
       flush_interval_sec?: number | null;
-      /**
-       * Format: uint 
-       * @description Max number of threads (jobs) for running optimizations per shard. Note: each optimization job will also use `max_indexing_threads` threads by itself for index building. If null - have no limit and choose dynamically to saturate CPU. If 0 - no optimization threads, optimizations will be disabled.
-       */
-      max_optimization_threads?: number | null;
+      /** @description Max number of threads (jobs) for running optimizations per shard. Note: each optimization job will also use `max_indexing_threads` threads by itself for index building. If "auto" - have no limit and choose dynamically to saturate CPU. If 0 - no optimization threads, optimizations will be disabled. */
+      max_optimization_threads?: components["schemas"]["MaxOptimizationThreads"] | (Record<string, unknown> | null);
     };
+    MaxOptimizationThreads: components["schemas"]["MaxOptimizationThreadsSetting"] | number;
+    /** @enum {string} */
+    MaxOptimizationThreadsSetting: "auto";
     /** @description Operation for creating new collection and (optionally) specify index params */
     InitFrom: {
       collection: string;
@@ -1638,6 +1707,7 @@ export interface components {
       quantization_config?: components["schemas"]["QuantizationConfigDiff"] | (Record<string, unknown> | null);
       /** @description Map of sparse vector data parameters to update for each sparse vector. */
       sparse_vectors?: components["schemas"]["SparseVectorsConfig"] | (Record<string, unknown> | null);
+      strict_mode_config?: components["schemas"]["StrictModeConfig"] | (Record<string, unknown> | null);
     };
     /**
      * @description Vector update params for multiple vectors
@@ -1740,7 +1810,69 @@ export interface components {
     };
     BatchVectorStruct: ((number)[])[] | (((number)[])[])[] | ({
       [key: string]: (components["schemas"]["Vector"])[] | undefined;
-    }) | (components["schemas"]["Document"])[];
+    }) | (components["schemas"]["Document"])[] | (components["schemas"]["Image"])[] | (components["schemas"]["InferenceObject"])[];
+    /** @description Vector Data Vectors can be described directly with values Or specified with source "objects" for inference */
+    Vector: (number)[] | components["schemas"]["SparseVector"] | ((number)[])[] | components["schemas"]["Document"] | components["schemas"]["Image"] | components["schemas"]["InferenceObject"];
+    /**
+     * @description WARN: Work-in-progress, unimplemented
+     * 
+     * Text document for embedding. Requires inference infrastructure, unimplemented.
+     */
+    Document: {
+      /**
+       * @description Text of the document This field will be used as input for the embedding model 
+       * @example This is a document text
+       */
+      text: string;
+      /**
+       * @description Name of the model used to generate the vector List of available models depends on a provider 
+       * @example jinaai/jina-embeddings-v2-base-en
+       */
+      model: string;
+      /** @description Parameters for the model Values of the parameters are model-specific */
+      options?: {
+        [key: string]: unknown;
+      } | null;
+    };
+    /**
+     * @description WARN: Work-in-progress, unimplemented
+     * 
+     * Image object for embedding. Requires inference infrastructure, unimplemented.
+     */
+    Image: {
+      /**
+       * @description Image data: base64 encoded image or an URL 
+       * @example https://example.com/image.jpg
+       */
+      image: unknown;
+      /**
+       * @description Name of the model used to generate the vector List of available models depends on a provider 
+       * @example Qdrant/clip-ViT-B-32-vision
+       */
+      model: string;
+      /** @description Parameters for the model Values of the parameters are model-specific */
+      options?: {
+        [key: string]: unknown;
+      } | null;
+    };
+    /**
+     * @description WARN: Work-in-progress, unimplemented
+     * 
+     * Custom object for embedding. Requires inference infrastructure, unimplemented.
+     */
+    InferenceObject: {
+      /** @description Arbitrary data, used as input for the embedding model Used if the model requires more than one input or a custom input */
+      object: unknown;
+      /**
+       * @description Name of the model used to generate the vector List of available models depends on a provider 
+       * @example jinaai/jina-embeddings-v2-base-en
+       */
+      model: string;
+      /** @description Parameters for the model Values of the parameters are model-specific */
+      options?: {
+        [key: string]: unknown;
+      } | null;
+    };
     PointsList: {
       points: (components["schemas"]["PointStruct"])[];
       shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
@@ -1751,6 +1883,10 @@ export interface components {
       /** @description Payload values (optional) */
       payload?: components["schemas"]["Payload"] | (Record<string, unknown> | null);
     };
+    /** @description Full vector data per point separator with single and multiple vector modes */
+    VectorStruct: (number)[] | ((number)[])[] | ({
+      [key: string]: components["schemas"]["Vector"] | undefined;
+    }) | components["schemas"]["Document"] | components["schemas"]["Image"] | components["schemas"]["InferenceObject"];
     /** @description This data structure is used in API interface and applied across multiple shards */
     SetPayload: {
       payload: components["schemas"]["Payload"];
@@ -1931,7 +2067,7 @@ export interface components {
      * @description State of the single shard within a replica set. 
      * @enum {string}
      */
-    ReplicaState: "Active" | "Dead" | "Partial" | "Initializing" | "Listener" | "PartialSnapshot" | "Recovery";
+    ReplicaState: "Active" | "Dead" | "Partial" | "Initializing" | "Listener" | "PartialSnapshot" | "Recovery" | "Resharding" | "ReshardingScaleDown";
     RemoteShardInfo: {
       /**
        * Format: uint32 
@@ -1951,6 +2087,13 @@ export interface components {
       /** Format: uint32 */
       shard_id: number;
       /**
+       * Format: uint32 
+       * @description Target shard ID if different than source shard ID
+       * 
+       * Used exclusively with `ReshardStreamRecords` transfer method.
+       */
+      to_shard_id?: number | null;
+      /**
        * Format: uint64 
        * @description Source peer id
        */
@@ -1967,7 +2110,7 @@ export interface components {
       comment?: string | null;
     };
     /** @description Methods for transferring a shard from one node to another. */
-    ShardTransferMethod: "stream_records" | "snapshot" | "wal_delta";
+    ShardTransferMethod: "stream_records" | "snapshot" | "wal_delta" | "resharding_stream_records";
     ReshardingInfo: {
       direction: components["schemas"]["ReshardingDirection"];
       /** Format: uint32 */
@@ -1975,8 +2118,6 @@ export interface components {
       /** Format: uint64 */
       peer_id: number;
       shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
-      /** @description A human-readable report of the operation progress. Available only on the source peer. */
-      comment?: string | null;
     };
     /** @description Resharding direction, scale up or down in number of shards */
     ReshardingDirection: "up" | "down";
@@ -1984,8 +2125,10 @@ export interface components {
       id: string;
       app: components["schemas"]["AppBuildTelemetry"];
       collections: components["schemas"]["CollectionsTelemetry"];
-      cluster: components["schemas"]["ClusterTelemetry"];
-      requests: components["schemas"]["RequestsTelemetry"];
+      cluster?: components["schemas"]["ClusterTelemetry"] | (Record<string, unknown> | null);
+      requests?: components["schemas"]["RequestsTelemetry"] | (Record<string, unknown> | null);
+      memory?: components["schemas"]["MemoryTelemetry"] | (Record<string, unknown> | null);
+      hardware?: components["schemas"]["HardwareTelemetry"] | (Record<string, unknown> | null);
     };
     AppBuildTelemetry: {
       name: string;
@@ -2002,6 +2145,7 @@ export interface components {
       web_feature: boolean;
       service_debug_feature: boolean;
       recovery_mode: boolean;
+      gpu: boolean;
     };
     RunningEnvironmentTelemetry: {
       distribution?: string | null;
@@ -2014,6 +2158,13 @@ export interface components {
       /** Format: uint */
       disk_size?: number | null;
       cpu_flags: string;
+      cpu_endian?: components["schemas"]["CpuEndian"] | (Record<string, unknown> | null);
+      gpu_devices?: (components["schemas"]["GpuDeviceTelemetry"])[] | null;
+    };
+    /** @enum {string} */
+    CpuEndian: "little" | "big" | "other";
+    GpuDeviceTelemetry: {
+      name: string;
     };
     CollectionsTelemetry: {
       /** Format: uint */
@@ -2025,14 +2176,32 @@ export interface components {
       id: string;
       /** Format: uint64 */
       init_time_ms: number;
-      config: components["schemas"]["CollectionConfig"];
+      config: components["schemas"]["CollectionConfigInternal"];
       shards: (components["schemas"]["ReplicaSetTelemetry"])[];
       transfers: (components["schemas"]["ShardTransferInfo"])[];
       resharding: (components["schemas"]["ReshardingInfo"])[];
+      shard_clean_tasks: {
+        [key: string]: components["schemas"]["ShardCleanStatusTelemetry"] | undefined;
+      };
+    };
+    CollectionConfigInternal: {
+      params: components["schemas"]["CollectionParams"];
+      hnsw_config: components["schemas"]["HnswConfig"];
+      optimizer_config: components["schemas"]["OptimizersConfig"];
+      wal_config: components["schemas"]["WalConfig"];
+      /** @default null */
+      quantization_config?: components["schemas"]["QuantizationConfig"] | (Record<string, unknown> | null);
+      strict_mode_config?: components["schemas"]["StrictModeConfig"] | (Record<string, unknown> | null);
+      /**
+       * Format: uuid 
+       * @default null
+       */
+      uuid?: string | null;
     };
     ReplicaSetTelemetry: {
       /** Format: uint32 */
       id: number;
+      key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
       local?: components["schemas"]["LocalShardTelemetry"] | (Record<string, unknown> | null);
       remote: (components["schemas"]["RemoteShardTelemetry"])[];
       replicate_states: {
@@ -2049,9 +2218,12 @@ export interface components {
       total_optimized_points: number;
       segments: (components["schemas"]["SegmentTelemetry"])[];
       optimizations: components["schemas"]["OptimizerTelemetry"];
+      async_scorer?: boolean | null;
     };
     /**
-     * @description Current state of the shard (supports same states as the collection) `Green` - all good. `Yellow` - optimization is running, 'Grey' - optimizations are possible but not triggered, `Red` - some operations failed and was not recovered 
+     * @description Current state of the shard (supports same states as the collection)
+     * 
+     * `Green` - all good. `Yellow` - optimization is running, 'Grey' - optimizations are possible but not triggered, `Red` - some operations failed and was not recovered 
      * @enum {string}
      */
     ShardStatus: "green" | "yellow" | "grey" | "red";
@@ -2072,6 +2244,16 @@ export interface components {
       num_indexed_vectors: number;
       /** Format: uint */
       num_deleted_vectors: number;
+      /**
+       * Format: uint 
+       * @description An ESTIMATION of effective amount of bytes used for vectors Do NOT rely on this number unless you know what you are doing
+       */
+      vectors_size_bytes: number;
+      /**
+       * Format: uint 
+       * @description An estimation of the effective amount of bytes used for payloads
+       */
+      payloads_size_bytes: number;
       /** Format: uint */
       ram_usage_bytes: number;
       /** Format: uint */
@@ -2144,6 +2326,7 @@ export interface components {
     /** @description Config of single sparse vector data storage */
     SparseVectorDataConfig: {
       index: components["schemas"]["SparseIndexConfig"];
+      storage_type?: components["schemas"]["SparseVectorStorageType"];
     };
     /** @description Configuration for sparse inverted index. */
     SparseIndexConfig: {
@@ -2160,6 +2343,7 @@ export interface components {
     };
     /** @description Sparse index types */
     SparseIndexType: "MutableRam" | "ImmutableRam" | "Mmap";
+    SparseVectorStorageType: "on_disk" | "mmap";
     /** @description Type of payload storage */
     PayloadStorageType: OneOf<[{
       /** @enum {string} */
@@ -2167,6 +2351,9 @@ export interface components {
     }, {
       /** @enum {string} */
       type: "on_disk";
+    }, {
+      /** @enum {string} */
+      type: "mmap";
     }]>;
     VectorIndexSearchesTelemetry: {
       index_name?: string | null;
@@ -2210,9 +2397,15 @@ export interface components {
     };
     PayloadIndexTelemetry: {
       field_name?: string | null;
-      /** Format: uint */
+      /**
+       * Format: uint 
+       * @description The amount of values indexed for all points.
+       */
       points_values_count: number;
-      /** Format: uint */
+      /**
+       * Format: uint 
+       * @description The amount of points that have at least one value indexed.
+       */
       points_count: number;
       /** Format: uint */
       histogram_bucket_size?: number | null;
@@ -2253,6 +2446,18 @@ export interface components {
       peer_id?: number | null;
       searches: components["schemas"]["OperationDurationStatistics"];
       updates: components["schemas"]["OperationDurationStatistics"];
+    };
+    ShardCleanStatusTelemetry: OneOf<["started" | "done" | "cancelled", {
+      progress: components["schemas"]["ShardCleanStatusProgressTelemetry"];
+    }, {
+      failed: components["schemas"]["ShardCleanStatusFailedTelemetry"];
+    }]>;
+    ShardCleanStatusProgressTelemetry: {
+      /** Format: uint */
+      deleted_points: number;
+    };
+    ShardCleanStatusFailedTelemetry: {
+      reason: string;
     };
     CollectionsAggregatedTelemetry: {
       /** Format: uint */
@@ -2320,7 +2525,48 @@ export interface components {
         [key: string]: components["schemas"]["OperationDurationStatistics"] | undefined;
       };
     };
-    ClusterOperations: components["schemas"]["MoveShardOperation"] | components["schemas"]["ReplicateShardOperation"] | components["schemas"]["AbortTransferOperation"] | components["schemas"]["DropReplicaOperation"] | components["schemas"]["CreateShardingKeyOperation"] | components["schemas"]["DropShardingKeyOperation"] | components["schemas"]["RestartTransferOperation"];
+    MemoryTelemetry: {
+      /**
+       * Format: uint 
+       * @description Total number of bytes in active pages allocated by the application
+       */
+      active_bytes: number;
+      /**
+       * Format: uint 
+       * @description Total number of bytes allocated by the application
+       */
+      allocated_bytes: number;
+      /**
+       * Format: uint 
+       * @description Total number of bytes dedicated to metadata
+       */
+      metadata_bytes: number;
+      /**
+       * Format: uint 
+       * @description Maximum number of bytes in physically resident data pages mapped
+       */
+      resident_bytes: number;
+      /**
+       * Format: uint 
+       * @description Total number of bytes in virtual memory mappings
+       */
+      retained_bytes: number;
+    };
+    HardwareTelemetry: {
+      collection_data: {
+        [key: string]: components["schemas"]["HardwareUsage"] | undefined;
+      };
+    };
+    /** @description Usage of the hardware resources, spent to process the request */
+    HardwareUsage: {
+      /** Format: uint */
+      cpu: number;
+      /** Format: uint */
+      io_read: number;
+      /** Format: uint */
+      io_write: number;
+    };
+    ClusterOperations: components["schemas"]["MoveShardOperation"] | components["schemas"]["ReplicateShardOperation"] | components["schemas"]["AbortTransferOperation"] | components["schemas"]["DropReplicaOperation"] | components["schemas"]["CreateShardingKeyOperation"] | components["schemas"]["DropShardingKeyOperation"] | components["schemas"]["RestartTransferOperation"] | components["schemas"]["StartReshardingOperation"] | components["schemas"]["AbortReshardingOperation"];
     MoveShardOperation: {
       move_shard: components["schemas"]["MoveShard"];
     };
@@ -2403,6 +2649,19 @@ export interface components {
       to_peer_id: number;
       method: components["schemas"]["ShardTransferMethod"];
     };
+    StartReshardingOperation: {
+      start_resharding: components["schemas"]["StartResharding"];
+    };
+    StartResharding: {
+      direction: components["schemas"]["ReshardingDirection"];
+      /** Format: uint64 */
+      peer_id?: number | null;
+      shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
+    };
+    AbortReshardingOperation: {
+      abort_resharding: components["schemas"]["AbortResharding"];
+    };
+    AbortResharding: Record<string, never>;
     SearchRequestBatch: {
       searches: (components["schemas"]["SearchRequest"])[];
     };
@@ -2436,7 +2695,9 @@ export interface components {
       api_key?: string | null;
     };
     /**
-     * @description Defines source of truth for snapshot recovery: `NoSync` means - restore snapshot without *any* additional synchronization. `Snapshot` means - prefer snapshot data over the current state. `Replica` means - prefer existing data over the snapshot. 
+     * @description Defines source of truth for snapshot recovery:
+     * 
+     * `NoSync` means - restore snapshot without *any* additional synchronization. `Snapshot` means - prefer snapshot data over the current state. `Replica` means - prefer existing data over the snapshot. 
      * @enum {string}
      */
     SnapshotPriority: "no_sync" | "snapshot" | "replica";
@@ -2808,7 +3069,7 @@ export interface components {
       lookup_from?: components["schemas"]["LookupLocation"] | (Record<string, unknown> | null);
     };
     QueryInterface: components["schemas"]["VectorInput"] | components["schemas"]["Query"];
-    VectorInput: (number)[] | components["schemas"]["SparseVector"] | ((number)[])[] | components["schemas"]["ExtendedPointId"] | components["schemas"]["Document"];
+    VectorInput: (number)[] | components["schemas"]["SparseVector"] | ((number)[])[] | components["schemas"]["ExtendedPointId"] | components["schemas"]["Document"] | components["schemas"]["Image"] | components["schemas"]["InferenceObject"];
     Query: components["schemas"]["NearestQuery"] | components["schemas"]["RecommendQuery"] | components["schemas"]["DiscoverQuery"] | components["schemas"]["ContextQuery"] | components["schemas"]["OrderByQuery"] | components["schemas"]["FusionQuery"] | components["schemas"]["SampleQuery"];
     NearestQuery: {
       nearest: components["schemas"]["VectorInput"];
@@ -3010,6 +3271,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3062,6 +3325,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3113,6 +3378,8 @@ export interface operations {
       query?: {
         /** @description If true, anonymize result */
         anonymize?: boolean;
+        /** @description Level of details in telemetry data. Minimal level is 0, maximal is infinity */
+        details_level?: number;
       };
     };
     responses: {
@@ -3120,6 +3387,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3178,6 +3447,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3220,6 +3491,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3336,6 +3609,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3369,6 +3644,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3415,6 +3692,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3451,6 +3730,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3493,6 +3774,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3548,6 +3831,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3597,6 +3882,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3652,6 +3939,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3700,6 +3989,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3754,6 +4045,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3796,6 +4089,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3846,6 +4141,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3888,6 +4185,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3940,6 +4239,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -3982,6 +4283,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -4018,6 +4321,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -4197,6 +4502,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -4387,6 +4694,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -4718,6 +5027,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -4926,6 +5237,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -4980,6 +5293,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5034,6 +5349,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5088,6 +5405,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5142,6 +5461,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5196,6 +5517,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5250,6 +5573,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5304,6 +5629,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5358,6 +5685,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5412,6 +5741,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5466,6 +5797,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5520,6 +5853,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5574,6 +5909,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5628,6 +5965,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5682,6 +6021,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5736,6 +6077,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5790,6 +6133,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5844,6 +6189,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5901,6 +6248,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -5955,6 +6304,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -6007,6 +6358,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -6061,6 +6414,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -6115,6 +6470,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -6169,6 +6526,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -6223,6 +6582,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -6277,6 +6638,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
@@ -6331,6 +6694,8 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
             /**
              * Format: float 
              * @description Time spent to process this request 
