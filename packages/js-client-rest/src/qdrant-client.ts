@@ -1211,6 +1211,7 @@ export class QdrantClient {
      *     - quantization_config: Params for quantization, if None - quantization will be disabled
      *     - init_from: Use data stored in another collection to initialize this collection
      *     - sparse_vectors: Sparse vector data config
+     *     - strict_mode_config: Strict mode configuration
      *     - timeout:
      *         Wait for operation commit timeout in seconds.
      *         If timeout is reached, request will return with service error.
@@ -1231,6 +1232,7 @@ export class QdrantClient {
             wal_config,
             write_consistency_factor,
             sparse_vectors,
+            strict_mode_config,
         }: {timeout?: number} & SchemaFor<'CreateCollection'>,
     ) {
         const response = await this._openApiClient.collections.createCollection({
@@ -1248,6 +1250,7 @@ export class QdrantClient {
             wal_config,
             write_consistency_factor,
             sparse_vectors,
+            strict_mode_config,
         });
 
         return maybe(response.data.result).orThrow('Create collection returned empty');
@@ -1286,6 +1289,7 @@ export class QdrantClient {
      *     - quantizationConfig: Params for quantization, if None - quantization will be disabled
      *     - initFrom: Use data stored in another collection to initialize this collection
      *     - sparse_vectors: Sparse vector data config
+     *     - strict_mode_config: Strict mode configuration
      *     - timeout:
      *         Wait for operation commit timeout in seconds.
      *         If timeout is reached, request will return with service error.
@@ -1306,6 +1310,7 @@ export class QdrantClient {
             wal_config,
             write_consistency_factor,
             sparse_vectors,
+            strict_mode_config,
         }: {timeout?: number} & SchemaFor<'CreateCollection'>,
     ) {
         maybe(
@@ -1332,6 +1337,7 @@ export class QdrantClient {
             wal_config,
             write_consistency_factor,
             sparse_vectors,
+            strict_mode_config,
         });
 
         return maybe(response).orThrow('Create collection returned empty');

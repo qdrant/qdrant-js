@@ -394,11 +394,18 @@ export enum ReplicaState {
   Recovery = 6,
 
   /**
-   * Points are being migrated to this shard as part of resharding
+   * Points are being migrated to this shard as part of scale-up resharding
    *
    * @generated from enum value: Resharding = 7;
    */
   Resharding = 7,
+
+  /**
+   * Points are being migrated to this shard as part of scale-down resharding
+   *
+   * @generated from enum value: ReshardingScaleDown = 8;
+   */
+  ReshardingScaleDown = 8,
 }
 // Retrieve enum metadata with: proto3.getEnumType(ReplicaState)
 proto3.util.setEnumType(ReplicaState, "qdrant.ReplicaState", [
@@ -410,6 +417,34 @@ proto3.util.setEnumType(ReplicaState, "qdrant.ReplicaState", [
   { no: 5, name: "PartialSnapshot" },
   { no: 6, name: "Recovery" },
   { no: 7, name: "Resharding" },
+  { no: 8, name: "ReshardingScaleDown" },
+]);
+
+/**
+ *
+ * Resharding direction, scale up or down in number of shards
+ *
+ * @generated from enum qdrant.ReshardingDirection
+ */
+export enum ReshardingDirection {
+  /**
+   * Scale up, add a new shard
+   *
+   * @generated from enum value: Up = 0;
+   */
+  Up = 0,
+
+  /**
+   * Scale down, remove a shard
+   *
+   * @generated from enum value: Down = 1;
+   */
+  Down = 1,
+}
+// Retrieve enum metadata with: proto3.getEnumType(ReshardingDirection)
+proto3.util.setEnumType(ReshardingDirection, "qdrant.ReshardingDirection", [
+  { no: 0, name: "Up" },
+  { no: 1, name: "Down" },
 ]);
 
 /**
@@ -1210,6 +1245,70 @@ export class ListCollectionsResponse extends Message<ListCollectionsResponse> {
 }
 
 /**
+ * @generated from message qdrant.MaxOptimizationThreads
+ */
+export class MaxOptimizationThreads extends Message<MaxOptimizationThreads> {
+  /**
+   * @generated from oneof qdrant.MaxOptimizationThreads.variant
+   */
+  variant: {
+    /**
+     * @generated from field: uint64 value = 1;
+     */
+    value: bigint;
+    case: "value";
+  } | {
+    /**
+     * @generated from field: qdrant.MaxOptimizationThreads.Setting setting = 2;
+     */
+    value: MaxOptimizationThreads_Setting;
+    case: "setting";
+  } | { case: undefined; value?: undefined } = { case: undefined };
+
+  constructor(data?: PartialMessage<MaxOptimizationThreads>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.MaxOptimizationThreads";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "value", kind: "scalar", T: 4 /* ScalarType.UINT64 */, oneof: "variant" },
+    { no: 2, name: "setting", kind: "enum", T: proto3.getEnumType(MaxOptimizationThreads_Setting), oneof: "variant" },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MaxOptimizationThreads {
+    return new MaxOptimizationThreads().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MaxOptimizationThreads {
+    return new MaxOptimizationThreads().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MaxOptimizationThreads {
+    return new MaxOptimizationThreads().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MaxOptimizationThreads | PlainMessage<MaxOptimizationThreads> | undefined, b: MaxOptimizationThreads | PlainMessage<MaxOptimizationThreads> | undefined): boolean {
+    return proto3.util.equals(MaxOptimizationThreads, a, b);
+  }
+}
+
+/**
+ * @generated from enum qdrant.MaxOptimizationThreads.Setting
+ */
+export enum MaxOptimizationThreads_Setting {
+  /**
+   * @generated from enum value: Auto = 0;
+   */
+  Auto = 0,
+}
+// Retrieve enum metadata with: proto3.getEnumType(MaxOptimizationThreads_Setting)
+proto3.util.setEnumType(MaxOptimizationThreads_Setting, "qdrant.MaxOptimizationThreads.Setting", [
+  { no: 0, name: "Auto" },
+]);
+
+/**
  * @generated from message qdrant.OptimizerStatus
  */
 export class OptimizerStatus extends Message<OptimizerStatus> {
@@ -1502,7 +1601,7 @@ export class OptimizersConfigDiff extends Message<OptimizersConfigDiff> {
   /**
    *
    * Maximum size (in kilobytes) of vectors to store in-memory per segment.
-   * Segments larger than this threshold will be stored as read-only memmaped file.
+   * Segments larger than this threshold will be stored as read-only memmapped file.
    *
    * Memmap storage is disabled by default, to enable it, set this threshold to a reasonable value.
    *
@@ -1537,15 +1636,22 @@ export class OptimizersConfigDiff extends Message<OptimizersConfigDiff> {
   flushIntervalSec?: bigint;
 
   /**
+   * Deprecated in favor of `max_optimization_threads`
+   *
+   * @generated from field: optional uint64 deprecated_max_optimization_threads = 8;
+   */
+  deprecatedMaxOptimizationThreads?: bigint;
+
+  /**
    *
    * Max number of threads (jobs) for running optimizations per shard.
    * Note: each optimization job will also use `max_indexing_threads` threads by itself for index building.
-   * If null - have no limit and choose dynamically to saturate CPU.
+   * If "auto" - have no limit and choose dynamically to saturate CPU.
    * If 0 - no optimization threads, optimizations will be disabled.
    *
-   * @generated from field: optional uint64 max_optimization_threads = 8;
+   * @generated from field: optional qdrant.MaxOptimizationThreads max_optimization_threads = 9;
    */
-  maxOptimizationThreads?: bigint;
+  maxOptimizationThreads?: MaxOptimizationThreads;
 
   constructor(data?: PartialMessage<OptimizersConfigDiff>) {
     super();
@@ -1562,7 +1668,8 @@ export class OptimizersConfigDiff extends Message<OptimizersConfigDiff> {
     { no: 5, name: "memmap_threshold", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
     { no: 6, name: "indexing_threshold", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
     { no: 7, name: "flush_interval_sec", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
-    { no: 8, name: "max_optimization_threads", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 8, name: "deprecated_max_optimization_threads", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 9, name: "max_optimization_threads", kind: "message", T: MaxOptimizationThreads, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OptimizersConfigDiff {
@@ -1919,6 +2026,45 @@ export class StrictModeConfig extends Message<StrictModeConfig> {
    */
   searchMaxOversampling?: number;
 
+  /**
+   * @generated from field: optional uint64 upsert_max_batchsize = 9;
+   */
+  upsertMaxBatchsize?: bigint;
+
+  /**
+   * @generated from field: optional uint64 max_collection_vector_size_bytes = 10;
+   */
+  maxCollectionVectorSizeBytes?: bigint;
+
+  /**
+   * Max number of read operations per minute per replica
+   *
+   * @generated from field: optional uint32 read_rate_limit = 11;
+   */
+  readRateLimit?: number;
+
+  /**
+   * Max number of write operations per minute per replica
+   *
+   * @generated from field: optional uint32 write_rate_limit = 12;
+   */
+  writeRateLimit?: number;
+
+  /**
+   * @generated from field: optional uint64 max_collection_payload_size_bytes = 13;
+   */
+  maxCollectionPayloadSizeBytes?: bigint;
+
+  /**
+   * @generated from field: optional uint64 filter_max_conditions = 14;
+   */
+  filterMaxConditions?: bigint;
+
+  /**
+   * @generated from field: optional uint64 condition_max_size = 15;
+   */
+  conditionMaxSize?: bigint;
+
   constructor(data?: PartialMessage<StrictModeConfig>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1935,6 +2081,13 @@ export class StrictModeConfig extends Message<StrictModeConfig> {
     { no: 6, name: "search_max_hnsw_ef", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
     { no: 7, name: "search_allow_exact", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 8, name: "search_max_oversampling", kind: "scalar", T: 2 /* ScalarType.FLOAT */, opt: true },
+    { no: 9, name: "upsert_max_batchsize", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 10, name: "max_collection_vector_size_bytes", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 11, name: "read_rate_limit", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
+    { no: 12, name: "write_rate_limit", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
+    { no: 13, name: "max_collection_payload_size_bytes", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 14, name: "filter_max_conditions", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 15, name: "condition_max_size", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StrictModeConfig {
@@ -2165,6 +2318,13 @@ export class UpdateCollection extends Message<UpdateCollection> {
    */
   sparseVectorsConfig?: SparseVectorConfig;
 
+  /**
+   * New strict mode configuration
+   *
+   * @generated from field: optional qdrant.StrictModeConfig strict_mode_config = 9;
+   */
+  strictModeConfig?: StrictModeConfig;
+
   constructor(data?: PartialMessage<UpdateCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2181,6 +2341,7 @@ export class UpdateCollection extends Message<UpdateCollection> {
     { no: 6, name: "vectors_config", kind: "message", T: VectorsConfigDiff, opt: true },
     { no: 7, name: "quantization_config", kind: "message", T: QuantizationConfigDiff, opt: true },
     { no: 8, name: "sparse_vectors_config", kind: "message", T: SparseVectorConfig, opt: true },
+    { no: 9, name: "strict_mode_config", kind: "message", T: StrictModeConfig, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateCollection {
@@ -2802,6 +2963,13 @@ export class TextIndexParams extends Message<TextIndexParams> {
  * @generated from message qdrant.BoolIndexParams
  */
 export class BoolIndexParams extends Message<BoolIndexParams> {
+  /**
+   * If true - store index on disk.
+   *
+   * @generated from field: optional bool on_disk = 1;
+   */
+  onDisk?: boolean;
+
   constructor(data?: PartialMessage<BoolIndexParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2810,6 +2978,7 @@ export class BoolIndexParams extends Message<BoolIndexParams> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "qdrant.BoolIndexParams";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "on_disk", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BoolIndexParams {
@@ -3883,6 +4052,11 @@ export class ReshardingInfo extends Message<ReshardingInfo> {
    */
   shardKey?: ShardKey;
 
+  /**
+   * @generated from field: qdrant.ReshardingDirection direction = 4;
+   */
+  direction = ReshardingDirection.Up;
+
   constructor(data?: PartialMessage<ReshardingInfo>) {
     super();
     proto3.util.initPartial(data, this);
@@ -3894,6 +4068,7 @@ export class ReshardingInfo extends Message<ReshardingInfo> {
     { no: 1, name: "shard_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 2, name: "peer_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
     { no: 3, name: "shard_key", kind: "message", T: ShardKey, opt: true },
+    { no: 4, name: "direction", kind: "enum", T: proto3.getEnumType(ReshardingDirection) },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ReshardingInfo {
@@ -3952,6 +4127,13 @@ export class CollectionClusterInfoResponse extends Message<CollectionClusterInfo
    */
   shardTransfers: ShardTransferInfo[] = [];
 
+  /**
+   * Resharding operations
+   *
+   * @generated from field: repeated qdrant.ReshardingInfo resharding_operations = 6;
+   */
+  reshardingOperations: ReshardingInfo[] = [];
+
   constructor(data?: PartialMessage<CollectionClusterInfoResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -3965,6 +4147,7 @@ export class CollectionClusterInfoResponse extends Message<CollectionClusterInfo
     { no: 3, name: "local_shards", kind: "message", T: LocalShardInfo, repeated: true },
     { no: 4, name: "remote_shards", kind: "message", T: RemoteShardInfo, repeated: true },
     { no: 5, name: "shard_transfers", kind: "message", T: ShardTransferInfo, repeated: true },
+    { no: 6, name: "resharding_operations", kind: "message", T: ReshardingInfo, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionClusterInfoResponse {
