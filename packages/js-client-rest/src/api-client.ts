@@ -1,4 +1,4 @@
-import {Fetcher, Middleware} from '@qdrant/openapi-typescript-fetch';
+import {ApiError, Fetcher, Middleware} from '@qdrant/openapi-typescript-fetch';
 import {paths} from './openapi/generated_schema.js';
 import {createDispatcher} from './dispatcher.js';
 import {createClusterApi} from './api/cluster-api.js';
@@ -7,7 +7,11 @@ import {createPointsApi} from './api/points-api.js';
 import {createServiceApi} from './api/service-api.js';
 import {createSnapshotsApi} from './api/snapshots-api.js';
 import {createShardsApi} from './api/shards-api.js';
-import {QdrantClientTimeoutError, QdrantClientUnexpectedResponseError} from './errors.js';
+import {
+    QdrantClientResourceExhaustedError,
+    QdrantClientTimeoutError,
+    QdrantClientUnexpectedResponseError,
+} from './errors.js';
 import {RestArgs} from './types.js';
 
 export type Client = ReturnType<typeof Fetcher.for<paths>>;
@@ -47,10 +51,26 @@ export function createClient(baseUrl: string, {headers, timeout, connections}: R
     }
 
     use.push(async (url, init, next) => {
-        const response = await next(url, init);
-        if (response.status === 200 || response.status === 201) {
-            return response;
+        let response;
+        try {
+            response = await next(url, init);
+
+            if (response.status === 200 || response.status === 201) {
+                return response;
+            }
+        } catch (error) {
+            if (error instanceof ApiError && error.status === 429) {
+                const retryAfterHeader = error.headers.get('retry-after')?.[0];
+                if (retryAfterHeader) {
+                    const retryAfterSeconds = Number(retryAfterHeader);
+                    if (!isNaN(retryAfterSeconds)) {
+                        throw new QdrantClientResourceExhaustedError(retryAfterSeconds);
+                    }
+                }
+            }
+            throw error;
         }
+
         throw QdrantClientUnexpectedResponseError.forResponse(response);
     });
 

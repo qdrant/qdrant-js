@@ -29,3 +29,14 @@ export class QdrantClientUnexpectedResponseError extends CustomError {
 export class QdrantClientConfigError extends CustomError {}
 
 export class QdrantClientTimeoutError extends CustomError {}
+
+export class QdrantClientResourceExhaustedError extends CustomError {
+    retry_after_s: number;
+
+    constructor(retryAfter: number) {
+        super('Resource exhausted: Retry after specified duration');
+        this.name = this.constructor.name;
+        this.retry_after_s = retryAfter;
+        Object.setPrototypeOf(this, new.target.prototype);
+    }
+}

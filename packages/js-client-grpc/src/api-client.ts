@@ -1,10 +1,11 @@
-import {Transport, Interceptor, createPromiseClient, PromiseClient} from '@bufbuild/connect';
-import {createGrpcTransport, compressionGzip} from '@bufbuild/connect-node';
+import {Code, ConnectError, createPromiseClient, Interceptor, PromiseClient, Transport} from '@bufbuild/connect';
+import {compressionGzip, createGrpcTransport} from '@bufbuild/connect-node';
 import {Collections} from './proto/collections_service_connect.js';
 import {Points} from './proto/points_service_connect.js';
 import {Snapshots} from './proto/snapshots_service_connect.js';
 import {Qdrant} from './proto/qdrant_connect.js';
 import {PACKAGE_VERSION} from './client-version.js';
+import {ResourceExhaustedError} from './errors.js';
 
 type Clients = {
     collections: PromiseClient<typeof Collections>;
@@ -54,6 +55,21 @@ export function createApis(baseUrl: string, {timeout, apiKey}: {timeout: number;
             req.header.set('user-agent', 'qdrant-js/' + String(PACKAGE_VERSION));
             return next(req);
         },
+        (next) => (req) =>
+            next(req)
+                .then((response) => response)
+                .catch((error) => {
+                    if (error instanceof ConnectError && error.code === Code.ResourceExhausted) {
+                        const retryAfterHeader = error.metadata.get('retry-after')?.[0];
+                        if (retryAfterHeader) {
+                            const retryAfterSeconds = Number(retryAfterHeader);
+                            if (!isNaN(retryAfterSeconds)) {
+                                throw new ResourceExhaustedError(retryAfterSeconds);
+                            }
+                        }
+                    }
+                    throw error;
+                }),
     ];
     if (apiKey !== undefined) {
         interceptors.push((next) => (req) => {
