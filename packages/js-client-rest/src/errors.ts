@@ -31,12 +31,12 @@ export class QdrantClientConfigError extends CustomError {}
 export class QdrantClientTimeoutError extends CustomError {}
 
 export class QdrantClientResourceExhaustedError extends CustomError {
-    retry_after_s: number;
+    retry_after: string;
 
-    constructor(retryAfter: number) {
+    constructor(retryAfter: string) {
         super('Resource exhausted: Retry after specified duration');
         this.name = this.constructor.name;
-        this.retry_after_s = retryAfter;
+        this.retry_after = retryAfter;
         Object.setPrototypeOf(this, new.target.prototype);
     }
 }

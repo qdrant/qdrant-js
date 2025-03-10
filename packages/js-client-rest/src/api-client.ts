@@ -60,13 +60,8 @@ export function createClient(baseUrl: string, {headers, timeout, connections}: R
             }
         } catch (error) {
             if (error instanceof ApiError && error.status === 429) {
-                const retryAfterHeader = error.headers.get('retry-after')?.[0];
-                if (retryAfterHeader) {
-                    const retryAfterSeconds = Number(retryAfterHeader);
-                    if (!isNaN(retryAfterSeconds)) {
-                        throw new QdrantClientResourceExhaustedError(retryAfterSeconds);
-                    }
-                }
+                const retryAfterHeader = error.headers.get('retry-after')?.[0] ?? '';
+                throw new QdrantClientResourceExhaustedError(retryAfterHeader);
             }
             throw error;
         }

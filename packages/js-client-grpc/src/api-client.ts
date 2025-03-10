@@ -60,13 +60,8 @@ export function createApis(baseUrl: string, {timeout, apiKey}: {timeout: number;
                 .then((response) => response)
                 .catch((error) => {
                     if (error instanceof ConnectError && error.code === Code.ResourceExhausted) {
-                        const retryAfterHeader = error.metadata.get('retry-after')?.[0];
-                        if (retryAfterHeader) {
-                            const retryAfterSeconds = Number(retryAfterHeader);
-                            if (!isNaN(retryAfterSeconds)) {
-                                throw new ResourceExhaustedError(retryAfterSeconds);
-                            }
-                        }
+                        const retryAfterHeader = error.metadata.get('retry-after')?.[0] ?? '';
+                        throw new ResourceExhaustedError(retryAfterHeader);
                     }
                     throw error;
                 }),

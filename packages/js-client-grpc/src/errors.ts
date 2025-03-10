@@ -11,12 +11,12 @@ class CustomError extends Error {
 export class QdrantClientConfigError extends CustomError {}
 
 class CustomConnectError extends ConnectError {
-    retry_after_s: number;
+    retry_after: string;
 
-    constructor(retryAfter: number) {
+    constructor(retryAfter: string) {
         super('Resource exhausted: Retry after specified duration', Code.ResourceExhausted);
         this.name = this.constructor.name;
-        this.retry_after_s = retryAfter;
+        this.retry_after = retryAfter;
         Object.setPrototypeOf(this, new.target.prototype);
     }
 }
