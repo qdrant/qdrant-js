@@ -5,7 +5,7 @@ import {Points} from './proto/points_service_connect.js';
 import {Snapshots} from './proto/snapshots_service_connect.js';
 import {Qdrant} from './proto/qdrant_connect.js';
 import {PACKAGE_VERSION} from './client-version.js';
-import {ResourceExhaustedError} from './errors.js';
+import {QdrantClientResourceExhaustedError} from './errors.js';
 
 type Clients = {
     collections: PromiseClient<typeof Collections>;
@@ -60,8 +60,10 @@ export function createApis(baseUrl: string, {timeout, apiKey}: {timeout: number;
                 .then((response) => response)
                 .catch((error) => {
                     if (error instanceof ConnectError && error.code === Code.ResourceExhausted) {
-                        const retryAfterHeader = error.metadata.get('retry-after')?.[0] ?? '';
-                        throw new ResourceExhaustedError(retryAfterHeader);
+                        const retryAfterHeader = error.metadata.get('retry-after')?.[0];
+                        if (retryAfterHeader) {
+                            throw new QdrantClientResourceExhaustedError(error.rawMessage, retryAfterHeader);
+                        }
                     }
                     throw error;
                 }),

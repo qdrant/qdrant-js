@@ -10,15 +10,19 @@ class CustomError extends Error {
 
 export class QdrantClientConfigError extends CustomError {}
 
-class CustomConnectError extends ConnectError {
-    retry_after: string;
+export class QdrantClientResourceExhaustedError extends ConnectError {
+    retry_after: number;
 
-    constructor(retryAfter: string) {
-        super('Resource exhausted: Retry after specified duration', Code.ResourceExhausted);
+    constructor(message: string, retryAfter: string) {
+        super(message, Code.ResourceExhausted);
         this.name = this.constructor.name;
-        this.retry_after = retryAfter;
+
+        const retryAfterNumber = Number(retryAfter);
+        if (isNaN(retryAfterNumber)) {
+            throw new CustomError(`Invalid retryAfter value: ${retryAfter}`);
+        }
+        this.retry_after = retryAfterNumber;
+
         Object.setPrototypeOf(this, new.target.prototype);
     }
 }
-
-export class ResourceExhaustedError extends CustomConnectError {}
