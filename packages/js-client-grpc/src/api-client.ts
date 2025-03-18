@@ -56,17 +56,15 @@ export function createApis(baseUrl: string, {timeout, apiKey}: {timeout: number;
             return next(req);
         },
         (next) => (req) =>
-            next(req)
-                .then((response) => response)
-                .catch((error) => {
-                    if (error instanceof ConnectError && error.code === Code.ResourceExhausted) {
-                        const retryAfterHeader = error.metadata.get('retry-after')?.[0];
-                        if (retryAfterHeader) {
-                            throw new QdrantClientResourceExhaustedError(error.rawMessage, retryAfterHeader);
-                        }
+            next(req).catch((error) => {
+                if (error instanceof ConnectError && error.code === Code.ResourceExhausted) {
+                    const retryAfterHeader = error.metadata.get('retry-after')?.[0];
+                    if (retryAfterHeader) {
+                        throw new QdrantClientResourceExhaustedError(error.rawMessage, retryAfterHeader);
                     }
-                    throw error;
-                }),
+                }
+                throw error;
+            }),
     ];
     if (apiKey !== undefined) {
         interceptors.push((next) => (req) => {
