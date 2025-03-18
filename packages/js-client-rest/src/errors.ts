@@ -29,3 +29,19 @@ export class QdrantClientUnexpectedResponseError extends CustomError {
 export class QdrantClientConfigError extends CustomError {}
 
 export class QdrantClientTimeoutError extends CustomError {}
+
+export class QdrantClientResourceExhaustedError extends CustomError {
+    retry_after: number;
+
+    constructor(message: string, retryAfter: string) {
+        super(message);
+
+        const retryAfterNumber = Number(retryAfter);
+        if (isNaN(retryAfterNumber)) {
+            throw new CustomError(`Invalid retryAfter value: ${retryAfter}`);
+        }
+        this.retry_after = retryAfterNumber;
+
+        Object.setPrototypeOf(this, new.target.prototype);
+    }
+}
