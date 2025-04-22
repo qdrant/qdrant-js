@@ -1,12 +1,12 @@
 import {ApiError, Fetcher, Middleware} from '@qdrant/openapi-typescript-fetch';
 import {paths} from './openapi/generated_schema.js';
 import {createDispatcher} from './dispatcher.js';
-import {createClusterApi} from './api/cluster-api.js';
-import {createCollectionsApi} from './api/collections-api.js';
-import {createPointsApi} from './api/points-api.js';
-import {createServiceApi} from './api/service-api.js';
-import {createSnapshotsApi} from './api/snapshots-api.js';
-import {createShardsApi} from './api/shards-api.js';
+import {ClusterApi, createClusterApi} from './api/cluster-api.js';
+import {CollectionsApi, createCollectionsApi} from './api/collections-api.js';
+import {createPointsApi, PointsApi} from './api/points-api.js';
+import {createServiceApi, ServiceApi} from './api/service-api.js';
+import {createSnapshotsApi, SnapshotsApi} from './api/snapshots-api.js';
+import {createShardsApi, ShardsApi} from './api/shards-api.js';
 import {
     QdrantClientResourceExhaustedError,
     QdrantClientTimeoutError,
@@ -16,7 +16,16 @@ import {RestArgs} from './types.js';
 
 export type Client = ReturnType<typeof Fetcher.for<paths>>;
 
-export function createApis(baseUrl: string, args: RestArgs) {
+type ClientApi = {
+    cluster: ClusterApi;
+    collections: CollectionsApi;
+    points: PointsApi;
+    service: ServiceApi;
+    snapshots: SnapshotsApi;
+    shards: ShardsApi;
+};
+
+export function createApis(baseUrl: string, args: RestArgs): ClientApi {
     const client = createClient(baseUrl, args);
 
     return {

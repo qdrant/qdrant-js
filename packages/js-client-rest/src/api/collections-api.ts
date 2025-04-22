@@ -1,6 +1,573 @@
+import {TypedFetch} from '@qdrant/openapi-typescript-fetch';
 import {Client} from '../api-client.js';
+import {components} from '../openapi/generated_schema.js';
 
-export function createCollectionsApi(client: Client) {
+export type CollectionsApi = {
+    collectionClusterInfo: TypedFetch<{
+        parameters: {
+            path: {
+                collection_name: string;
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['CollectionClusterInfo'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    createCollection: TypedFetch<{
+        parameters: {
+            query?: {
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['CreateCollection'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: boolean;
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    createFieldIndex: TypedFetch<{
+        parameters: {
+            query?: {
+                wait?: boolean;
+                ordering?: components['schemas']['WriteOrdering'];
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['CreateFieldIndex'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['UpdateResult'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    createSnapshot: TypedFetch<{
+        parameters: {
+            query?: {
+                wait?: boolean;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['SnapshotDescription'];
+                    };
+                };
+            };
+            202: {
+                content: {
+                    'application/json': {
+                        time?: number;
+                        status?: string;
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    deleteCollection: TypedFetch<{
+        parameters: {
+            query?: {
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: boolean;
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    deleteFieldIndex: TypedFetch<{
+        parameters: {
+            query?: {
+                wait?: boolean;
+                ordering?: components['schemas']['WriteOrdering'];
+            };
+            path: {
+                collection_name: string;
+                field_name: string;
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['UpdateResult'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    deleteSnapshots: TypedFetch<{
+        parameters: {
+            query?: {
+                wait?: boolean;
+            };
+            path: {
+                collection_name: string;
+                snapshot_name: string;
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        time?: number;
+                        status?: string;
+                        result?: boolean;
+                    };
+                };
+            };
+            202: {
+                content: {
+                    'application/json': {
+                        time?: number;
+                        status?: string;
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    getCollection: TypedFetch<{
+        parameters: {
+            path: {
+                collection_name: string;
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['CollectionInfo'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    getCollectionAliases: TypedFetch<{
+        parameters: {
+            path: {
+                collection_name: string;
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['CollectionsAliasesResponse'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    getCollections: TypedFetch<{
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['CollectionsResponse'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    getCollectionsAliases: TypedFetch<{
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['CollectionsAliasesResponse'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    collectionExists: TypedFetch<{
+        parameters: {
+            path: {
+                collection_name: string;
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['CollectionExistence'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    getSnapshot: TypedFetch<{
+        parameters: {
+            path: {
+                collection_name: string;
+                snapshot_name: string;
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/octet-stream': string;
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    listSnapshots: TypedFetch<{
+        parameters: {
+            path: {
+                collection_name: string;
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['SnapshotDescription'][];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    updateAliases: TypedFetch<{
+        parameters: {
+            query?: {
+                timeout?: number;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['ChangeAliasesOperation'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: boolean;
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    updateCollection: TypedFetch<{
+        parameters: {
+            query?: {
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['UpdateCollection'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: boolean;
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    updateCollectionCluster: TypedFetch<{
+        parameters: {
+            query?: {
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['ClusterOperations'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: boolean;
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+};
+
+export function createCollectionsApi(client: Client): CollectionsApi {
     return {
         /**
          * Get cluster information for a collection
