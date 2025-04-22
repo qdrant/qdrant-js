@@ -136,8 +136,7 @@ export class QdrantClient {
     /**
      * API getter
      *
-     * @param name Name of api
-     * @returns An instance of a namespaced API, generated from OpenAPI schema.
+     * @returns An instance of an API, generated from OpenAPI schema.
      */
     api<T extends keyof OpenApiClient>(name: T): OpenApiClient[T] {
         return this._openApiClient[name];
