@@ -177,7 +177,7 @@ pathMembers.forEach((pathMember) => {
     }
 });
 
-const formattedOutput = operationMembersWithChildren
+const generatedType = operationMembersWithChildren
     .map((member) => {
         const operation = pathOperations[member.name];
         let result = operation.comment + `\n`;
@@ -190,7 +190,7 @@ const formattedOutput = operationMembersWithChildren
     })
     .join('\n');
 
-const header = `// AUTOMATICALLY GENERATED FILE. DO NOT EDIT!
+const generatedTypeHeader = `// AUTOMATICALLY GENERATED FILE. DO NOT EDIT!
 
 import {TypedFetch} from '@qdrant/openapi-typescript-fetch';
 import {components} from '../openapi/generated_schema.js';
@@ -198,11 +198,11 @@ import {components} from '../openapi/generated_schema.js';
 export type ClientApi = {
 `;
 
-const output = header + addLeadingSpaces(formattedOutput, 2) + '}\n';
+const generatedTypeFile = generatedTypeHeader + addLeadingSpaces(generatedType, 2) + '}\n';
 
-fs.writeFileSync('./src/openapi/generated_client_type.ts', output);
+fs.writeFileSync('./src/openapi/generated_client_type.ts', generatedTypeFile);
 
-const formattedOutput2 = operationMembersWithChildren
+const generatedConstructor = operationMembersWithChildren
     .map((member) => {
         const operation = pathOperations[member.name];
 
@@ -233,7 +233,7 @@ const formattedOutput2 = operationMembersWithChildren
     })
     .join('\n');
 
-const pathsFileHeader = `// AUTOMATICALLY GENERATED FILE. DO NOT EDIT!
+const generatedConstructorHeader = `// AUTOMATICALLY GENERATED FILE. DO NOT EDIT!
 
 import {Client} from '../api-client.js';
 import {ClientApi} from './generated_client_type.js';
@@ -242,6 +242,6 @@ export function createClientApi(client: Client) : ClientApi {
   return {
 `;
 
-const pathsOutput = pathsFileHeader + addLeadingSpaces(formattedOutput2, 4) + '  }\n}\n';
+const generatedConstructorFile = generatedConstructorHeader + addLeadingSpaces(generatedConstructor, 4) + '  }\n}\n';
 
-fs.writeFileSync('./src/openapi/generated_api_client.ts', pathsOutput);
+fs.writeFileSync('./src/openapi/generated_api_client.ts', generatedConstructorFile);
