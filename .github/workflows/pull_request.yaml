@@ -20,14 +20,16 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-          version: 9.15.0
+          version: 9.15.9
           run_install: false
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
+          scope: "@qdrant"
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
+          cache-dependency-path: "pnpm-lock.yaml"
 
       - name: Node packages audit
         run: pnpm audit --prod
