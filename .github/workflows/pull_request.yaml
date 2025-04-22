@@ -20,7 +20,7 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-          version: 8.15.9
+          version: 9.15.9
           run_install: false
 
       - name: Use Node.js ${{ matrix.node-version }}
@@ -31,13 +31,10 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: "pnpm-lock.yaml"
 
-      - name: Check pnpm version
-        run: pnpm --version
-
       - name: Node packages audit
         run: pnpm audit --prod
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
         env:
           CI: 1
