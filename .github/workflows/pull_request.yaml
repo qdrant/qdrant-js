@@ -30,6 +30,9 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: "pnpm-lock.yaml"
 
+      - name: Check pnpm version
+        run: pnpm --version
+
       - name: Node packages audit
         run: pnpm audit --prod
 
