@@ -30,7 +30,7 @@ describe('apiClient', () => {
             headers,
         });
 
-        await expect(apis.service.postLocks({error_message: 'request error', write: true})).resolves.toMatchObject({
+        await expect(apis.postLocks({error_message: 'request error', write: true})).resolves.toMatchObject({
             data: {error_message: 'response error'},
         });
 

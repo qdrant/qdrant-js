@@ -3,6 +3,7 @@ import {OpenApiClient, createApis} from './api-client.js';
 import {QdrantClientConfigError} from './errors.js';
 import {RestArgs, SchemaFor} from './types.js';
 import {PACKAGE_VERSION, ClientVersion} from './client-version.js';
+import {ClientApi} from './openapi/generated_client_type.js';
 
 export type QdrantClientParams = {
     port?: number | null;
@@ -115,7 +116,7 @@ export class QdrantClient {
         this._openApiClient = createApis(this._restUri, restArgs);
 
         if (checkCompatibility) {
-            this._openApiClient.service
+            this._openApiClient
                 .root({})
                 .then((response) => {
                     const serverVersion = response.data.version;
@@ -138,8 +139,8 @@ export class QdrantClient {
      *
      * @returns An instance of an API, generated from OpenAPI schema.
      */
-    api<T extends keyof OpenApiClient>(name: T): OpenApiClient[T] {
-        return this._openApiClient[name];
+    api(): ClientApi {
+        return this._openApiClient;
     }
 
     /**
@@ -167,7 +168,7 @@ export class QdrantClient {
             timeout?: number;
         },
     ) {
-        const response = await this._openApiClient.points.searchBatchPoints({
+        const response = await this._openApiClient.searchBatchPoints({
             collection_name,
             consistency,
             timeout,
@@ -258,7 +259,7 @@ export class QdrantClient {
                 consistency?: SchemaFor<'ReadConsistency'>;
             } & {timeout?: number},
     ) {
-        const response = await this._openApiClient.points.searchPoints({
+        const response = await this._openApiClient.searchPoints({
             collection_name,
             consistency,
             timeout,
@@ -298,7 +299,7 @@ export class QdrantClient {
             timeout,
         }: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
     ) {
-        const response = await this._openApiClient.points.recommendBatchPoints({
+        const response = await this._openApiClient.recommendBatchPoints({
             collection_name,
             searches,
             consistency,
@@ -318,7 +319,7 @@ export class QdrantClient {
             timeout,
         }: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
     ) {
-        const response = await this._openApiClient.points.recommendBatchPoints({
+        const response = await this._openApiClient.recommendBatchPoints({
             collection_name,
             searches,
             consistency,
@@ -413,7 +414,7 @@ export class QdrantClient {
                 timeout?: number;
             },
     ) {
-        const response = await this._openApiClient.points.recommendPoints({
+        const response = await this._openApiClient.recommendPoints({
             collection_name,
             limit,
             shard_key,
@@ -481,7 +482,7 @@ export class QdrantClient {
             order_by,
         }: SchemaFor<'ScrollRequest'> & {timeout?: number} & {consistency?: SchemaFor<'ReadConsistency'>} = {},
     ) {
-        const response = await this._openApiClient.points.scrollPoints({
+        const response = await this._openApiClient.scrollPoints({
             collection_name,
             shard_key,
             limit,
@@ -513,7 +514,7 @@ export class QdrantClient {
         collection_name: string,
         {shard_key, filter, exact = true, timeout}: SchemaFor<'CountRequest'> & {timeout?: number} = {},
     ) {
-        const response = await this._openApiClient.points.countPoints({
+        const response = await this._openApiClient.countPoints({
             collection_name,
             shard_key,
             filter,
@@ -529,7 +530,7 @@ export class QdrantClient {
      * @returns Operation result
      */
     async collectionClusterInfo(collection_name: string) {
-        const response = await this._openApiClient.collections.collectionClusterInfo({collection_name});
+        const response = await this._openApiClient.collectionClusterInfo({collection_name});
         return maybe(response.data.result).orThrow('Collection cluster info returned empty');
     }
 
@@ -560,7 +561,7 @@ export class QdrantClient {
             shard_key,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateVectors'>,
     ) {
-        const response = await this._openApiClient.points.updateVectors({
+        const response = await this._openApiClient.updateVectors({
             collection_name,
             wait,
             ordering,
@@ -601,7 +602,7 @@ export class QdrantClient {
             shard_key,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'DeleteVectors'>,
     ) {
-        const response = await this._openApiClient.points.deleteVectors({
+        const response = await this._openApiClient.deleteVectors({
             collection_name,
             wait,
             ordering,
@@ -653,7 +654,7 @@ export class QdrantClient {
             limit,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchGroupsRequest'>,
     ) {
-        const response = await this._openApiClient.points.searchPointGroups({
+        const response = await this._openApiClient.searchPointGroups({
             collection_name,
             consistency,
             timeout,
@@ -719,7 +720,7 @@ export class QdrantClient {
             limit,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'RecommendGroupsRequest'>,
     ) {
-        const response = await this._openApiClient.points.recommendPointGroups({
+        const response = await this._openApiClient.recommendPointGroups({
             collection_name,
             consistency,
             timeout,
@@ -766,7 +767,7 @@ export class QdrantClient {
             ...points_or_batch
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointInsertOperations'>,
     ) {
-        const response = await this._openApiClient.points.upsertPoints({
+        const response = await this._openApiClient.upsertPoints({
             collection_name,
             wait,
             ordering,
@@ -813,7 +814,7 @@ export class QdrantClient {
             timeout,
         }: SchemaFor<'PointRequest'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
     ) {
-        const response = await this._openApiClient.points.getPoints({
+        const response = await this._openApiClient.getPoints({
             collection_name,
             shard_key,
             ids,
@@ -863,7 +864,7 @@ export class QdrantClient {
             ...points_selector
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'>,
     ) {
-        const response = await this._openApiClient.points.deletePoints({
+        const response = await this._openApiClient.deletePoints({
             collection_name,
             wait,
             ordering,
@@ -917,7 +918,7 @@ export class QdrantClient {
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'SetPayload'>,
     ) {
-        const response = await this._openApiClient.points.setPayload({
+        const response = await this._openApiClient.setPayload({
             collection_name,
             payload,
             points,
@@ -977,7 +978,7 @@ export class QdrantClient {
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'SetPayload'>,
     ) {
-        const response = await this._openApiClient.points.overwritePayload({
+        const response = await this._openApiClient.overwritePayload({
             collection_name,
             payload,
             points,
@@ -1034,7 +1035,7 @@ export class QdrantClient {
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'> &
             SchemaFor<'DeletePayload'>,
     ) {
-        const response = await this._openApiClient.points.deletePayload({
+        const response = await this._openApiClient.deletePayload({
             collection_name,
             keys,
             points,
@@ -1084,7 +1085,7 @@ export class QdrantClient {
             ...points_selector
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'>,
     ) {
-        const response = await this._openApiClient.points.clearPayload({
+        const response = await this._openApiClient.clearPayload({
             collection_name,
             wait,
             ordering,
@@ -1102,7 +1103,7 @@ export class QdrantClient {
      * @returns Operation result
      */
     async updateCollectionAliases({actions, timeout}: {timeout?: number} & SchemaFor<'ChangeAliasesOperation'>) {
-        const response = await this._openApiClient.collections.updateAliases({actions, timeout});
+        const response = await this._openApiClient.updateAliases({actions, timeout});
         return maybe(response.data.result).orThrow('Update aliases returned empty');
     }
 
@@ -1112,7 +1113,7 @@ export class QdrantClient {
      * @returns Collection aliases
      */
     async getCollectionAliases(collection_name: string) {
-        const response = await this._openApiClient.collections.getCollectionAliases({collection_name});
+        const response = await this._openApiClient.getCollectionAliases({collection_name});
         return maybe(response.data.result).orThrow('Get collection aliases returned empty');
     }
 
@@ -1121,7 +1122,7 @@ export class QdrantClient {
      * @returns All aliases of all collections
      */
     async getAliases() {
-        const response = await this._openApiClient.collections.getCollectionsAliases({});
+        const response = await this._openApiClient.getCollectionsAliases({});
         return maybe(response.data.result).orThrow('Get aliases returned empty');
     }
 
@@ -1130,7 +1131,7 @@ export class QdrantClient {
      * @returns List of the collections
      */
     async getCollections() {
-        const response = await this._openApiClient.collections.getCollections({});
+        const response = await this._openApiClient.getCollections({});
         return maybe(response.data.result).orThrow('Get collections returned empty');
     }
 
@@ -1141,7 +1142,7 @@ export class QdrantClient {
      * @returns Detailed information about the collection
      */
     async getCollection(collection_name: string) {
-        const response = await this._openApiClient.collections.getCollection({collection_name});
+        const response = await this._openApiClient.getCollection({collection_name});
         return maybe(response.data.result).orThrow('Get collection returned empty');
     }
 
@@ -1156,7 +1157,7 @@ export class QdrantClient {
      * @returns Operation result
      */
     async updateCollection(collection_name: string, args?: SchemaFor<'UpdateCollection'> & {timeout?: number}) {
-        const response = await this._openApiClient.collections.updateCollection({
+        const response = await this._openApiClient.updateCollection({
             collection_name,
             ...args,
         });
@@ -1173,7 +1174,7 @@ export class QdrantClient {
      * @returns Operation result
      */
     async deleteCollection(collection_name: string, args?: {timeout?: number}) {
-        const response = await this._openApiClient.collections.deleteCollection({collection_name, ...args});
+        const response = await this._openApiClient.deleteCollection({collection_name, ...args});
         return maybe(response.data.result).orThrow('Delete collection returned empty');
     }
 
@@ -1234,7 +1235,7 @@ export class QdrantClient {
             strict_mode_config,
         }: {timeout?: number} & SchemaFor<'CreateCollection'>,
     ) {
-        const response = await this._openApiClient.collections.createCollection({
+        const response = await this._openApiClient.createCollection({
             collection_name,
             timeout,
             vectors,
@@ -1313,7 +1314,7 @@ export class QdrantClient {
         }: {timeout?: number} & SchemaFor<'CreateCollection'>,
     ) {
         maybe(
-            await this._openApiClient.collections.deleteCollection({
+            await this._openApiClient.deleteCollection({
                 collection_name,
                 timeout,
             }),
@@ -1321,7 +1322,7 @@ export class QdrantClient {
             .get('ok')
             .orThrow('Delete collection returned failed');
 
-        const response = await this._openApiClient.collections.createCollection({
+        const response = await this._openApiClient.createCollection({
             collection_name,
             timeout,
             vectors,
@@ -1370,7 +1371,7 @@ export class QdrantClient {
             field_schema,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'CreateFieldIndex'>,
     ) {
-        const response = await this._openApiClient.collections.createFieldIndex({
+        const response = await this._openApiClient.createFieldIndex({
             collection_name,
             field_name,
             field_schema,
@@ -1402,7 +1403,7 @@ export class QdrantClient {
         field_name: string,
         {wait = true, ordering}: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} = {},
     ) {
-        const response = await this._openApiClient.collections.deleteFieldIndex({
+        const response = await this._openApiClient.deleteFieldIndex({
             collection_name,
             field_name,
             wait,
@@ -1417,7 +1418,7 @@ export class QdrantClient {
      * @returns List of snapshots
      */
     async listSnapshots(collection_name: string) {
-        const response = await this._openApiClient.snapshots.listSnapshots({collection_name});
+        const response = await this._openApiClient.listSnapshots({collection_name});
         return maybe(response.data.result).orThrow('List snapshots API returned empty');
     }
 
@@ -1427,7 +1428,7 @@ export class QdrantClient {
      * @returns Snapshot description
      */
     async createSnapshot(collection_name: string, args?: {wait?: boolean}) {
-        const response = await this._openApiClient.snapshots.createSnapshot({collection_name, ...args});
+        const response = await this._openApiClient.createSnapshot({collection_name, ...args});
         return maybe(response.data.result).orNull();
     }
 
@@ -1438,7 +1439,7 @@ export class QdrantClient {
      * @returns True if snapshot was deleted
      */
     async deleteSnapshot(collection_name: string, snapshot_name: string, args?: {wait?: boolean}) {
-        const response = await this._openApiClient.snapshots.deleteSnapshot({collection_name, snapshot_name, ...args});
+        const response = await this._openApiClient.deleteSnapshot({collection_name, snapshot_name, ...args});
         return maybe(response.data.result).orThrow('Delete snapshot API returned empty');
     }
 
@@ -1447,7 +1448,7 @@ export class QdrantClient {
      * @returns List of snapshots
      */
     async listFullSnapshots() {
-        const response = await this._openApiClient.snapshots.listFullSnapshots({});
+        const response = await this._openApiClient.listFullSnapshots({});
         return maybe(response.data.result).orThrow('List full snapshots API returned empty');
     }
 
@@ -1456,7 +1457,7 @@ export class QdrantClient {
      * @returns Snapshot description
      */
     async createFullSnapshot(args?: {wait?: boolean}) {
-        const response = await this._openApiClient.snapshots.createFullSnapshot(args ?? {});
+        const response = await this._openApiClient.createFullSnapshot(args ?? {});
         return maybe(response.data.result).orThrow('Create full snapshot API returned empty');
     }
 
@@ -1466,7 +1467,7 @@ export class QdrantClient {
      * @returns True if the snapshot was deleted
      */
     async deleteFullSnapshot(snapshot_name: string, args?: {wait?: boolean}) {
-        const response = await this._openApiClient.snapshots.deleteFullSnapshot({snapshot_name, ...args});
+        const response = await this._openApiClient.deleteFullSnapshot({snapshot_name, ...args});
         return maybe(response.data.result).orThrow('Delete full snapshot API returned empty');
     }
 
@@ -1492,7 +1493,7 @@ export class QdrantClient {
         collection_name: string,
         {location, priority, checksum, api_key}: SchemaFor<'SnapshotRecover'>,
     ) {
-        const response = await this._openApiClient.snapshots.recoverFromSnapshot({
+        const response = await this._openApiClient.recoverFromSnapshot({
             collection_name,
             location,
             priority,
@@ -1506,7 +1507,7 @@ export class QdrantClient {
      * Lock storage for writing
      */
     async lockStorage(reason: string) {
-        const response = await this._openApiClient.service.postLocks({write: true, error_message: reason});
+        const response = await this._openApiClient.postLocks({write: true, error_message: reason});
         return maybe(response.data.result).orThrow('Lock storage returned empty');
     }
 
@@ -1514,7 +1515,7 @@ export class QdrantClient {
      * Unlock storage for writing.
      */
     async unlockStorage() {
-        const response = await this._openApiClient.service.postLocks({write: false});
+        const response = await this._openApiClient.postLocks({write: false});
         return maybe(response.data.result).orThrow('Post locks returned empty');
     }
 
@@ -1522,7 +1523,7 @@ export class QdrantClient {
      * Get current locks state.
      */
     async getLocks() {
-        const response = await this._openApiClient.service.getLocks({});
+        const response = await this._openApiClient.getLocks({});
         return maybe(response.data.result).orThrow('Get locks returned empty');
     }
 
@@ -1551,7 +1552,7 @@ export class QdrantClient {
             ...operations
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateOperations'>,
     ) {
-        const response = await this._openApiClient.points.batchUpdate({
+        const response = await this._openApiClient.batchUpdate({
             collection_name,
             wait,
             ordering,
@@ -1571,7 +1572,7 @@ export class QdrantClient {
         shard_id: number,
         {wait = true, ...shard_snapshot_recover}: {wait?: boolean} & SchemaFor<'ShardSnapshotRecover'>,
     ) {
-        const response = await this._openApiClient.snapshots.recoverShardFromSnapshot({
+        const response = await this._openApiClient.recoverShardFromSnapshot({
             collection_name,
             shard_id,
             wait,
@@ -1587,7 +1588,7 @@ export class QdrantClient {
      * @returns Operation result
      */
     async listShardSnapshots(collection_name: string, shard_id: number) {
-        const response = await this._openApiClient.snapshots.listShardSnapshots({
+        const response = await this._openApiClient.listShardSnapshots({
             collection_name,
             shard_id,
         });
@@ -1601,7 +1602,7 @@ export class QdrantClient {
      * @returns Operation result
      */
     async createShardSnapshot(collection_name: string, shard_id: number, {wait = true}: {wait?: boolean}) {
-        const response = await this._openApiClient.snapshots.createShardSnapshot({
+        const response = await this._openApiClient.createShardSnapshot({
             collection_name,
             shard_id,
             wait,
@@ -1622,7 +1623,7 @@ export class QdrantClient {
         snapshot_name: string,
         {wait = true}: {wait?: boolean},
     ) {
-        const response = await this._openApiClient.snapshots.deleteShardSnapshot({
+        const response = await this._openApiClient.deleteShardSnapshot({
             collection_name,
             shard_id,
             snapshot_name,
@@ -1652,7 +1653,7 @@ export class QdrantClient {
             timeout,
         }: {timeout?: number} & SchemaFor<'CreateShardingKey'>,
     ) {
-        const response = await this._openApiClient.shards.createShardKey({
+        const response = await this._openApiClient.createShardKey({
             collection_name,
             shard_key,
             shards_number,
@@ -1675,7 +1676,7 @@ export class QdrantClient {
         collection_name: string,
         {shard_key, timeout}: {timeout?: number} & SchemaFor<'DropShardingKey'>,
     ) {
-        const response = await this._openApiClient.shards.deleteShardKey({
+        const response = await this._openApiClient.deleteShardKey({
             collection_name,
             shard_key,
             timeout,
@@ -1728,7 +1729,7 @@ export class QdrantClient {
             lookup_from,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'DiscoverRequest'>,
     ) {
-        const response = await this._openApiClient.points.discoverPoints({
+        const response = await this._openApiClient.discoverPoints({
             collection_name,
             consistency,
             timeout,
@@ -1769,7 +1770,7 @@ export class QdrantClient {
             searches,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'DiscoverRequestBatch'>,
     ) {
-        const response = await this._openApiClient.points.discoverBatchPoints({
+        const response = await this._openApiClient.discoverBatchPoints({
             collection_name,
             consistency,
             timeout,
@@ -1784,7 +1785,7 @@ export class QdrantClient {
      * @returns Operation result
      */
     async versionInfo() {
-        const response = await this._openApiClient.service.root({});
+        const response = await this._openApiClient.root({});
         return maybe(response.data).orThrow('Version Info returned empty');
     }
 
@@ -1795,7 +1796,7 @@ export class QdrantClient {
      * @returns Operation result
      */
     async collectionExists(collection_name: string) {
-        const response = await this._openApiClient.collections.collectionExists({collection_name});
+        const response = await this._openApiClient.collectionExists({collection_name});
         return maybe(response.data.result).orThrow('Collection exists returned empty');
     }
 
@@ -1844,7 +1845,7 @@ export class QdrantClient {
             lookup_from,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'QueryRequest'>,
     ) {
-        const response = await this._openApiClient.points.queryPoints({
+        const response = await this._openApiClient.queryPoints({
             collection_name,
             consistency,
             timeout,
@@ -1887,7 +1888,7 @@ export class QdrantClient {
             searches,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'QueryRequestBatch'>,
     ) {
-        const response = await this._openApiClient.points.queryBatchPoints({
+        const response = await this._openApiClient.queryBatchPoints({
             collection_name,
             consistency,
             timeout,
@@ -1943,7 +1944,7 @@ export class QdrantClient {
             with_lookup,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'QueryGroupsRequest'>,
     ) {
-        const response = await this._openApiClient.points.queryPointsGroups({
+        const response = await this._openApiClient.queryPointsGroups({
             collection_name,
             consistency,
             timeout,
@@ -1995,7 +1996,7 @@ export class QdrantClient {
             exact,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'FacetRequest'>,
     ) {
-        const response = await this._openApiClient.points.facet({
+        const response = await this._openApiClient.facet({
             collection_name,
             consistency,
             timeout,
@@ -2039,7 +2040,7 @@ export class QdrantClient {
             using,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchMatrixRequest'>,
     ) {
-        const response = await this._openApiClient.points.searchMatrixPairs({
+        const response = await this._openApiClient.searchMatrixPairs({
             collection_name,
             consistency,
             timeout,
@@ -2083,7 +2084,7 @@ export class QdrantClient {
             using,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchMatrixRequest'>,
     ) {
-        const response = await this._openApiClient.points.searchMatrixOffsets({
+        const response = await this._openApiClient.searchMatrixOffsets({
             collection_name,
             consistency,
             timeout,

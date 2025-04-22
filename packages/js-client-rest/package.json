@@ -47,7 +47,8 @@
         "bundle": "rollup -c rollup.config.js",
         "lint": "eslint src",
         "clean": "rimraf ./dist",
-        "codegen:openapi-typescript": "openapi-typescript $npm_package_config_openapi_schema_remote --output src/openapi/generated_schema.ts"
+        "codegen:openapi-typescript": "openapi-typescript $npm_package_config_openapi_schema_remote --output src/openapi/generated_schema.ts",
+        "codegen:openapi-client": "tsx scripts/generate_client_construction.ts"
     },
     "config": {
         "openapi_schema_remote": "https://raw.githubusercontent.com/qdrant/qdrant/master/docs/redoc/master/openapi.json"
@@ -65,6 +66,7 @@
         "openapi-typescript": "^6.2.6",
         "semver": "7.6.0",
         "ts-prune": "^0.10.3",
+        "tsx": "^4.19.3",
         "vitest": "^0.31.4"
     },
     "peerDependencies": {
