@@ -1,6 +1,7 @@
 import {test, describe, expect} from 'vitest';
 import semver from 'semver';
 import {QdrantClient} from '../../src/qdrant-client.js';
+import {components} from '../../src/openapi/generated_schema.js';
 
 describe('QdrantClient', () => {
     const semverRegEx =
@@ -199,6 +200,77 @@ describe('QdrantClient', () => {
             with_vector: true,
         });
         expect(result.points).toHaveLength(2);
+    });
+
+    test('query points with formula scoring', async () => {
+        // First, let's add some points with tag payloads
+        await client.upsert(collectionName, {
+            wait: true,
+            points: [
+                {
+                    id: 100,
+                    vector: [0.4, 0.6, 0.3, 0.7],
+                    payload: {tag: 'h1'},
+                },
+                {
+                    id: 101,
+                    vector: [0.4, 0.6, 0.3, 0.7],
+                    payload: {tag: 'p'},
+                },
+                {
+                    id: 102,
+                    vector: [0.4, 0.6, 0.3, 0.7],
+                    payload: {tag: 'li'},
+                },
+            ],
+        });
+
+        const result = await client.query(collectionName, {
+            prefetch: {
+                query: [0.2, 0.8, 0.1, 0.9],
+                limit: 50,
+            },
+            query: {
+                formula: {
+                    sum: [
+                        '$score',
+                        {
+                            mult: [
+                                0.5,
+                                {
+                                    key: 'tag',
+                                    match: {any: ['h1', 'h2', 'h3', 'h4']},
+                                },
+                            ],
+                        },
+                        {
+                            mult: [
+                                0.25,
+                                {
+                                    key: 'tag',
+                                    match: {any: ['p', 'li']},
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
+        });
+
+        expect(result.points).toBeDefined();
+        expect(result.points.length).toBeGreaterThan(0);
+
+        // Verify that points with h1 tag have higher scores than p/li tags
+        const h1Point = result.points.find((p: components['schemas']['ScoredPoint']) => p.payload?.tag === 'h1');
+        const pPoint = result.points.find((p: components['schemas']['ScoredPoint']) => p.payload?.tag === 'p');
+        const liPoint = result.points.find((p: components['schemas']['ScoredPoint']) => p.payload?.tag === 'li');
+
+        if (h1Point && pPoint) {
+            expect(h1Point.score).toBeGreaterThan(pPoint.score);
+        }
+        if (h1Point && liPoint) {
+            expect(h1Point.score).toBeGreaterThan(liPoint.score);
+        }
     });
 
     test('batch query nearest points', async () => {
