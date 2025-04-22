@@ -2065,6 +2065,21 @@ export class StrictModeConfig extends Message<StrictModeConfig> {
    */
   conditionMaxSize?: bigint;
 
+  /**
+   * @generated from field: optional qdrant.StrictModeMultivectorConfig multivector_config = 16;
+   */
+  multivectorConfig?: StrictModeMultivectorConfig;
+
+  /**
+   * @generated from field: optional qdrant.StrictModeSparseConfig sparse_config = 17;
+   */
+  sparseConfig?: StrictModeSparseConfig;
+
+  /**
+   * @generated from field: optional uint64 max_points_count = 18;
+   */
+  maxPointsCount?: bigint;
+
   constructor(data?: PartialMessage<StrictModeConfig>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2088,6 +2103,9 @@ export class StrictModeConfig extends Message<StrictModeConfig> {
     { no: 13, name: "max_collection_payload_size_bytes", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
     { no: 14, name: "filter_max_conditions", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
     { no: 15, name: "condition_max_size", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 16, name: "multivector_config", kind: "message", T: StrictModeMultivectorConfig, opt: true },
+    { no: 17, name: "sparse_config", kind: "message", T: StrictModeSparseConfig, opt: true },
+    { no: 18, name: "max_points_count", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StrictModeConfig {
@@ -2104,6 +2122,154 @@ export class StrictModeConfig extends Message<StrictModeConfig> {
 
   static equals(a: StrictModeConfig | PlainMessage<StrictModeConfig> | undefined, b: StrictModeConfig | PlainMessage<StrictModeConfig> | undefined): boolean {
     return proto3.util.equals(StrictModeConfig, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.StrictModeSparseConfig
+ */
+export class StrictModeSparseConfig extends Message<StrictModeSparseConfig> {
+  /**
+   * @generated from field: map<string, qdrant.StrictModeSparse> sparse_config = 1;
+   */
+  sparseConfig: { [key: string]: StrictModeSparse } = {};
+
+  constructor(data?: PartialMessage<StrictModeSparseConfig>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.StrictModeSparseConfig";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "sparse_config", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: StrictModeSparse} },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StrictModeSparseConfig {
+    return new StrictModeSparseConfig().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StrictModeSparseConfig {
+    return new StrictModeSparseConfig().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StrictModeSparseConfig {
+    return new StrictModeSparseConfig().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: StrictModeSparseConfig | PlainMessage<StrictModeSparseConfig> | undefined, b: StrictModeSparseConfig | PlainMessage<StrictModeSparseConfig> | undefined): boolean {
+    return proto3.util.equals(StrictModeSparseConfig, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.StrictModeSparse
+ */
+export class StrictModeSparse extends Message<StrictModeSparse> {
+  /**
+   * @generated from field: optional uint64 max_length = 10;
+   */
+  maxLength?: bigint;
+
+  constructor(data?: PartialMessage<StrictModeSparse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.StrictModeSparse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 10, name: "max_length", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StrictModeSparse {
+    return new StrictModeSparse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StrictModeSparse {
+    return new StrictModeSparse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StrictModeSparse {
+    return new StrictModeSparse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: StrictModeSparse | PlainMessage<StrictModeSparse> | undefined, b: StrictModeSparse | PlainMessage<StrictModeSparse> | undefined): boolean {
+    return proto3.util.equals(StrictModeSparse, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.StrictModeMultivectorConfig
+ */
+export class StrictModeMultivectorConfig extends Message<StrictModeMultivectorConfig> {
+  /**
+   * @generated from field: map<string, qdrant.StrictModeMultivector> multivector_config = 1;
+   */
+  multivectorConfig: { [key: string]: StrictModeMultivector } = {};
+
+  constructor(data?: PartialMessage<StrictModeMultivectorConfig>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.StrictModeMultivectorConfig";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "multivector_config", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: StrictModeMultivector} },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StrictModeMultivectorConfig {
+    return new StrictModeMultivectorConfig().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StrictModeMultivectorConfig {
+    return new StrictModeMultivectorConfig().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StrictModeMultivectorConfig {
+    return new StrictModeMultivectorConfig().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: StrictModeMultivectorConfig | PlainMessage<StrictModeMultivectorConfig> | undefined, b: StrictModeMultivectorConfig | PlainMessage<StrictModeMultivectorConfig> | undefined): boolean {
+    return proto3.util.equals(StrictModeMultivectorConfig, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.StrictModeMultivector
+ */
+export class StrictModeMultivector extends Message<StrictModeMultivector> {
+  /**
+   * @generated from field: optional uint64 max_vectors = 1;
+   */
+  maxVectors?: bigint;
+
+  constructor(data?: PartialMessage<StrictModeMultivector>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.StrictModeMultivector";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "max_vectors", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StrictModeMultivector {
+    return new StrictModeMultivector().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StrictModeMultivector {
+    return new StrictModeMultivector().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StrictModeMultivector {
+    return new StrictModeMultivector().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: StrictModeMultivector | PlainMessage<StrictModeMultivector> | undefined, b: StrictModeMultivector | PlainMessage<StrictModeMultivector> | undefined): boolean {
+    return proto3.util.equals(StrictModeMultivector, a, b);
   }
 }
 

@@ -1,6 +1,1057 @@
+import {TypedFetch} from '@qdrant/openapi-typescript-fetch';
 import {Client} from '../api-client.js';
+import {components} from '../openapi/generated_schema.js';
 
-export function createPointsApi(client: Client) {
+export type PointsApi = {
+    clearPayload: TypedFetch<{
+        parameters: {
+            query?: {
+                wait?: boolean;
+                ordering?: components['schemas']['WriteOrdering'];
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['PointsSelector'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['UpdateResult'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    countPoints: TypedFetch<{
+        parameters: {
+            query?: {
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['CountRequest'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['CountResult'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    deletePayload: TypedFetch<{
+        parameters: {
+            query?: {
+                wait?: boolean;
+                ordering?: components['schemas']['WriteOrdering'];
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['DeletePayload'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['UpdateResult'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    deletePoints: TypedFetch<{
+        parameters: {
+            query?: {
+                wait?: boolean;
+                ordering?: components['schemas']['WriteOrdering'];
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['PointsSelector'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['UpdateResult'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    updateVectors: TypedFetch<{
+        parameters: {
+            query?: {
+                wait?: boolean;
+                ordering?: components['schemas']['WriteOrdering'];
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['UpdateVectors'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['UpdateResult'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    deleteVectors: TypedFetch<{
+        parameters: {
+            query?: {
+                wait?: boolean;
+                ordering?: components['schemas']['WriteOrdering'];
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['DeleteVectors'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['UpdateResult'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    getPoint: TypedFetch<{
+        parameters: {
+            query?: {
+                consistency?: components['schemas']['ReadConsistency'];
+            };
+            path: {
+                collection_name: string;
+                id: components['schemas']['ExtendedPointId'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['Record'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    getPoints: TypedFetch<{
+        parameters: {
+            query?: {
+                consistency?: components['schemas']['ReadConsistency'];
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['PointRequest'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['Record'][];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    overwritePayload: TypedFetch<{
+        parameters: {
+            query?: {
+                wait?: boolean;
+                ordering?: components['schemas']['WriteOrdering'];
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['SetPayload'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['UpdateResult'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    recommendBatchPoints: TypedFetch<{
+        parameters: {
+            query?: {
+                consistency?: components['schemas']['ReadConsistency'];
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['RecommendRequestBatch'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['ScoredPoint'][][];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    recommendPoints: TypedFetch<{
+        parameters: {
+            query?: {
+                consistency?: components['schemas']['ReadConsistency'];
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['RecommendRequest'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['ScoredPoint'][];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    searchPointGroups: TypedFetch<{
+        parameters: {
+            query?: {
+                consistency?: components['schemas']['ReadConsistency'];
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['SearchGroupsRequest'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['GroupsResult'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    scrollPoints: TypedFetch<{
+        parameters: {
+            query?: {
+                consistency?: components['schemas']['ReadConsistency'];
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['ScrollRequest'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['ScrollResult'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    searchBatchPoints: TypedFetch<{
+        parameters: {
+            query?: {
+                consistency?: components['schemas']['ReadConsistency'];
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['SearchRequestBatch'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['ScoredPoint'][][];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    searchPoints: TypedFetch<{
+        parameters: {
+            query?: {
+                consistency?: components['schemas']['ReadConsistency'];
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['SearchRequest'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['ScoredPoint'][];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    setPayload: TypedFetch<{
+        parameters: {
+            query?: {
+                wait?: boolean;
+                ordering?: components['schemas']['WriteOrdering'];
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['SetPayload'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['UpdateResult'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    upsertPoints: TypedFetch<{
+        parameters: {
+            query?: {
+                wait?: boolean;
+                ordering?: components['schemas']['WriteOrdering'];
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['PointInsertOperations'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['UpdateResult'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    recommendPointGroups: TypedFetch<{
+        parameters: {
+            query?: {
+                consistency?: components['schemas']['ReadConsistency'];
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['RecommendGroupsRequest'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['GroupsResult'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    batchUpdate: TypedFetch<{
+        parameters: {
+            query?: {
+                wait?: boolean;
+                ordering?: components['schemas']['WriteOrdering'];
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['UpdateOperations'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['UpdateResult'][];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    discoverPoints: TypedFetch<{
+        parameters: {
+            query?: {
+                consistency?: components['schemas']['ReadConsistency'];
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['DiscoverRequest'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['ScoredPoint'][];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    discoverBatchPoints: TypedFetch<{
+        parameters: {
+            query?: {
+                consistency?: components['schemas']['ReadConsistency'];
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['DiscoverRequestBatch'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['ScoredPoint'][][];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    queryPoints: TypedFetch<{
+        parameters: {
+            query?: {
+                consistency?: components['schemas']['ReadConsistency'];
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['QueryRequest'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['QueryResponse'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    queryBatchPoints: TypedFetch<{
+        parameters: {
+            query?: {
+                consistency?: components['schemas']['ReadConsistency'];
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['QueryRequestBatch'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['QueryResponse'][];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    queryPointsGroups: TypedFetch<{
+        parameters: {
+            query?: {
+                consistency?: components['schemas']['ReadConsistency'];
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['QueryGroupsRequest'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['GroupsResult'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    facet: TypedFetch<{
+        parameters: {
+            query?: {
+                timeout?: number;
+                consistency?: components['schemas']['ReadConsistency'];
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['FacetRequest'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['FacetResponse'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    searchMatrixPairs: TypedFetch<{
+        parameters: {
+            query?: {
+                consistency?: components['schemas']['ReadConsistency'];
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['SearchMatrixRequest'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['SearchMatrixPairsResponse'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+
+    searchMatrixOffsets: TypedFetch<{
+        parameters: {
+            query?: {
+                consistency?: components['schemas']['ReadConsistency'];
+                timeout?: number;
+            };
+            path: {
+                collection_name: string;
+            };
+        };
+        requestBody?: {
+            content: {
+                'application/json': components['schemas']['SearchMatrixRequest'];
+            };
+        };
+        responses: {
+            200: {
+                content: {
+                    'application/json': {
+                        usage?: components['schemas']['HardwareUsage'] | (Record<string, unknown> | null);
+                        time?: number;
+                        status?: string;
+                        result?: components['schemas']['SearchMatrixOffsetsResponse'];
+                    };
+                };
+            };
+            default: {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+            '4XX': {
+                content: {
+                    'application/json': components['schemas']['ErrorResponse'];
+                };
+            };
+        };
+    }>;
+};
+
+export function createPointsApi(client: Client): PointsApi {
     return {
         /**
          * Remove all payload for specified points

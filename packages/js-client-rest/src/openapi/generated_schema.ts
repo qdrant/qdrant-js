@@ -362,6 +362,7 @@ export interface paths {
   "/collections/{collection_name}/points/search": {
     /**
      * Search points 
+     * @deprecated 
      * @description Retrieve closest points based on vector similarity and given filtering conditions
      */
     post: operations["search_points"];
@@ -369,6 +370,7 @@ export interface paths {
   "/collections/{collection_name}/points/search/batch": {
     /**
      * Search batch points 
+     * @deprecated 
      * @description Retrieve by batch the closest points based on vector similarity and given filtering conditions
      */
     post: operations["search_batch_points"];
@@ -376,6 +378,7 @@ export interface paths {
   "/collections/{collection_name}/points/search/groups": {
     /**
      * Search point groups 
+     * @deprecated 
      * @description Retrieve closest points based on vector similarity and given filtering conditions, grouped by a given payload field
      */
     post: operations["search_point_groups"];
@@ -383,6 +386,7 @@ export interface paths {
   "/collections/{collection_name}/points/recommend": {
     /**
      * Recommend points 
+     * @deprecated 
      * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples.
      */
     post: operations["recommend_points"];
@@ -390,6 +394,7 @@ export interface paths {
   "/collections/{collection_name}/points/recommend/batch": {
     /**
      * Recommend batch points 
+     * @deprecated 
      * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples.
      */
     post: operations["recommend_batch_points"];
@@ -397,6 +402,7 @@ export interface paths {
   "/collections/{collection_name}/points/recommend/groups": {
     /**
      * Recommend point groups 
+     * @deprecated 
      * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples, grouped by a given payload field.
      */
     post: operations["recommend_point_groups"];
@@ -404,6 +410,7 @@ export interface paths {
   "/collections/{collection_name}/points/discover": {
     /**
      * Discover points 
+     * @deprecated 
      * @description Use context and a target to find the most similar points to the target, constrained by the context.
      * When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair.
      * Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0.
@@ -414,6 +421,7 @@ export interface paths {
   "/collections/{collection_name}/points/discover/batch": {
     /**
      * Discover batch points 
+     * @deprecated 
      * @description Look for points based on target and/or positive and negative example pairs, in batch.
      */
     post: operations["discover_batch_points"];
@@ -556,7 +564,7 @@ export interface components {
       wal_config?: components["schemas"]["WalConfig"] | (Record<string, unknown> | null);
       /** @default null */
       quantization_config?: components["schemas"]["QuantizationConfig"] | (Record<string, unknown> | null);
-      strict_mode_config?: components["schemas"]["StrictModeConfig"] | (Record<string, unknown> | null);
+      strict_mode_config?: components["schemas"]["StrictModeConfigOutput"] | (Record<string, unknown> | null);
     };
     CollectionParams: {
       vectors?: components["schemas"]["VectorsConfig"];
@@ -840,7 +848,7 @@ export interface components {
        */
       wal_segments_ahead: number;
     };
-    StrictModeConfig: {
+    StrictModeConfigOutput: {
       /** @description Whether strict mode is enabled for a collection or not. */
       enabled?: boolean | null;
       /**
@@ -853,9 +861,9 @@ export interface components {
        * @description Max allowed `timeout` parameter.
        */
       max_timeout?: number | null;
-      /** @description Allow usage of unindexed fields in retrieval based (eg. search) filters. */
+      /** @description Allow usage of unindexed fields in retrieval based (e.g. search) filters. */
       unindexed_filtering_retrieve?: boolean | null;
-      /** @description Allow usage of unindexed fields in filtered updates (eg. delete by payload). */
+      /** @description Allow usage of unindexed fields in filtered updates (e.g. delete by payload). */
       unindexed_filtering_update?: boolean | null;
       /**
        * Format: uint 
@@ -896,6 +904,11 @@ export interface components {
       max_collection_payload_size_bytes?: number | null;
       /**
        * Format: uint 
+       * @description Max number of points estimated in a collection
+       */
+      max_points_count?: number | null;
+      /**
+       * Format: uint 
        * @description Max conditions a filter can have.
        */
       filter_max_conditions?: number | null;
@@ -904,6 +917,30 @@ export interface components {
        * @description Max size of a condition, eg. items in `MatchAny`.
        */
       condition_max_size?: number | null;
+      /** @description Multivector configuration */
+      multivector_config?: components["schemas"]["StrictModeMultivectorConfigOutput"] | (Record<string, unknown> | null);
+      /** @description Sparse vector configuration */
+      sparse_config?: components["schemas"]["StrictModeSparseConfigOutput"] | (Record<string, unknown> | null);
+    };
+    StrictModeMultivectorConfigOutput: {
+      [key: string]: components["schemas"]["StrictModeMultivectorOutput"] | undefined;
+    };
+    StrictModeMultivectorOutput: {
+      /**
+       * Format: uint 
+       * @description Max number of vectors in a multivector
+       */
+      max_vectors?: number | null;
+    };
+    StrictModeSparseConfigOutput: {
+      [key: string]: components["schemas"]["StrictModeSparseOutput"] | undefined;
+    };
+    StrictModeSparseOutput: {
+      /**
+       * Format: uint 
+       * @description Max length of sparse vector
+       */
+      max_length?: number | null;
     };
     /** @description Display payload field type & index information */
     PayloadIndexInfo: {
@@ -1151,7 +1188,7 @@ export interface components {
       match?: components["schemas"]["Match"] | (Record<string, unknown> | null);
       /** @description Check if points value lies in a given range */
       range?: components["schemas"]["RangeInterface"] | (Record<string, unknown> | null);
-      /** @description Check if points geo location lies in a given area */
+      /** @description Check if points geolocation lies in a given area */
       geo_bounding_box?: components["schemas"]["GeoBoundingBox"] | (Record<string, unknown> | null);
       /** @description Check if geo point is within a given radius */
       geo_radius?: components["schemas"]["GeoRadius"] | (Record<string, unknown> | null);
@@ -1159,6 +1196,10 @@ export interface components {
       geo_polygon?: components["schemas"]["GeoPolygon"] | (Record<string, unknown> | null);
       /** @description Check number of values of the field */
       values_count?: components["schemas"]["ValuesCount"] | (Record<string, unknown> | null);
+      /** @description Check that the field is empty, alternative syntax for `is_empty: "field_name"` */
+      is_empty?: boolean | null;
+      /** @description Check that the field is null, alternative syntax for `is_null: "field_name"` */
+      is_null?: boolean | null;
     };
     /** @description Match filter request */
     Match: components["schemas"]["MatchValue"] | components["schemas"]["MatchText"] | components["schemas"]["MatchAny"] | components["schemas"]["MatchExcept"];
@@ -1473,10 +1514,12 @@ export interface components {
      * 
      * * `average_vector` - Average positive and negative vectors and create a single query with the formula `query = avg_pos + avg_pos - avg_neg`. Then performs normal search.
      * 
-     * * `best_score` - Uses custom search objective. Each candidate is compared against all examples, its score is then chosen from the `max(max_pos_score, max_neg_score)`. If the `max_neg_score` is chosen then it is squared and negated, otherwise it is just the `max_pos_score`. 
+     * * `best_score` - Uses custom search objective. Each candidate is compared against all examples, its score is then chosen from the `max(max_pos_score, max_neg_score)`. If the `max_neg_score` is chosen then it is squared and negated, otherwise it is just the `max_pos_score`.
+     * 
+     * * `sum_scores` - Uses custom search objective. Compares against all inputs, sums all the scores. Scores against positive vectors are added, against negatives are subtracted. 
      * @enum {string}
      */
-    RecommendStrategy: "average_vector" | "best_score";
+    RecommendStrategy: "average_vector" | "best_score" | "sum_scores";
     UsingVector: string;
     /** @description Defines a location to use for looking up the vector. Specifies collection and vector field name. */
     LookupLocation: {
@@ -1689,6 +1732,100 @@ export interface components {
     /** @description Operation for creating new collection and (optionally) specify index params */
     InitFrom: {
       collection: string;
+    };
+    StrictModeConfig: {
+      /** @description Whether strict mode is enabled for a collection or not. */
+      enabled?: boolean | null;
+      /**
+       * Format: uint 
+       * @description Max allowed `limit` parameter for all APIs that don't have their own max limit.
+       */
+      max_query_limit?: number | null;
+      /**
+       * Format: uint 
+       * @description Max allowed `timeout` parameter.
+       */
+      max_timeout?: number | null;
+      /** @description Allow usage of unindexed fields in retrieval based (e.g. search) filters. */
+      unindexed_filtering_retrieve?: boolean | null;
+      /** @description Allow usage of unindexed fields in filtered updates (e.g. delete by payload). */
+      unindexed_filtering_update?: boolean | null;
+      /**
+       * Format: uint 
+       * @description Max HNSW value allowed in search parameters.
+       */
+      search_max_hnsw_ef?: number | null;
+      /** @description Whether exact search is allowed or not. */
+      search_allow_exact?: boolean | null;
+      /**
+       * Format: double 
+       * @description Max oversampling value allowed in search.
+       */
+      search_max_oversampling?: number | null;
+      /**
+       * Format: uint 
+       * @description Max batchsize when upserting
+       */
+      upsert_max_batchsize?: number | null;
+      /**
+       * Format: uint 
+       * @description Max size of a collections vector storage in bytes, ignoring replicas.
+       */
+      max_collection_vector_size_bytes?: number | null;
+      /**
+       * Format: uint 
+       * @description Max number of read operations per minute per replica
+       */
+      read_rate_limit?: number | null;
+      /**
+       * Format: uint 
+       * @description Max number of write operations per minute per replica
+       */
+      write_rate_limit?: number | null;
+      /**
+       * Format: uint 
+       * @description Max size of a collections payload storage in bytes
+       */
+      max_collection_payload_size_bytes?: number | null;
+      /**
+       * Format: uint 
+       * @description Max number of points estimated in a collection
+       */
+      max_points_count?: number | null;
+      /**
+       * Format: uint 
+       * @description Max conditions a filter can have.
+       */
+      filter_max_conditions?: number | null;
+      /**
+       * Format: uint 
+       * @description Max size of a condition, eg. items in `MatchAny`.
+       */
+      condition_max_size?: number | null;
+      /** @description Multivector configuration */
+      multivector_config?: components["schemas"]["StrictModeMultivectorConfig"] | (Record<string, unknown> | null);
+      /** @description Sparse vector configuration */
+      sparse_config?: components["schemas"]["StrictModeSparseConfig"] | (Record<string, unknown> | null);
+    };
+    StrictModeMultivectorConfig: {
+      [key: string]: components["schemas"]["StrictModeMultivector"] | undefined;
+    };
+    StrictModeMultivector: {
+      /**
+       * Format: uint 
+       * @description Max number of vectors in a multivector
+       */
+      max_vectors?: number | null;
+    };
+    StrictModeSparseConfig: {
+      [key: string]: components["schemas"]["StrictModeSparse"] | undefined;
+    };
+    StrictModeSparse: {
+      /**
+       * Format: uint 
+       * @description Max length of sparse vector
+       */
+      max_length?: number | null;
     };
     /** @description Operation for updating parameters of the existing collection */
     UpdateCollection: {
@@ -2176,22 +2313,22 @@ export interface components {
       id: string;
       /** Format: uint64 */
       init_time_ms: number;
-      config: components["schemas"]["CollectionConfigInternal"];
-      shards: (components["schemas"]["ReplicaSetTelemetry"])[];
-      transfers: (components["schemas"]["ShardTransferInfo"])[];
-      resharding: (components["schemas"]["ReshardingInfo"])[];
-      shard_clean_tasks: {
+      config: components["schemas"]["CollectionConfigTelemetry"];
+      shards?: (components["schemas"]["ReplicaSetTelemetry"])[] | null;
+      transfers?: (components["schemas"]["ShardTransferInfo"])[] | null;
+      resharding?: (components["schemas"]["ReshardingInfo"])[] | null;
+      shard_clean_tasks?: ({
         [key: string]: components["schemas"]["ShardCleanStatusTelemetry"] | undefined;
-      };
+      }) | null;
     };
-    CollectionConfigInternal: {
+    CollectionConfigTelemetry: {
       params: components["schemas"]["CollectionParams"];
       hnsw_config: components["schemas"]["HnswConfig"];
       optimizer_config: components["schemas"]["OptimizersConfig"];
       wal_config: components["schemas"]["WalConfig"];
       /** @default null */
       quantization_config?: components["schemas"]["QuantizationConfig"] | (Record<string, unknown> | null);
-      strict_mode_config?: components["schemas"]["StrictModeConfig"] | (Record<string, unknown> | null);
+      strict_mode_config?: components["schemas"]["StrictModeConfigOutput"] | (Record<string, unknown> | null);
       /**
        * Format: uuid 
        * @default null
@@ -2216,7 +2353,27 @@ export interface components {
        * @description Total number of optimized points since the last start.
        */
       total_optimized_points: number;
-      segments: (components["schemas"]["SegmentTelemetry"])[];
+      /**
+       * Format: uint 
+       * @description An ESTIMATION of effective amount of bytes used for vectors Do NOT rely on this number unless you know what you are doing
+       */
+      vectors_size_bytes?: number | null;
+      /**
+       * Format: uint 
+       * @description An estimation of the effective amount of bytes used for payloads Do NOT rely on this number unless you know what you are doing
+       */
+      payloads_size_bytes?: number | null;
+      /**
+       * Format: uint 
+       * @description Sum of segment points This is an approximate number Do NOT rely on this number unless you know what you are doing
+       */
+      num_points?: number | null;
+      /**
+       * Format: uint 
+       * @description Sum of number of vectors in all segments This is an approximate number Do NOT rely on this number unless you know what you are doing
+       */
+      num_vectors?: number | null;
+      segments?: (components["schemas"]["SegmentTelemetry"])[] | null;
       optimizations: components["schemas"]["OptimizerTelemetry"];
       async_scorer?: boolean | null;
     };
@@ -2371,7 +2528,7 @@ export interface components {
       /** Format: uint */
       count: number;
       /** Format: uint */
-      fail_count?: number;
+      fail_count?: number | null;
       /**
        * Format: float 
        * @description The average time taken by 128 latest operations, calculated as a weighted mean.
@@ -2391,12 +2548,13 @@ export interface components {
        * Format: uint64 
        * @description The total duration of all operations in microseconds.
        */
-      total_duration_micros: number;
+      total_duration_micros?: number | null;
       /** Format: date-time */
       last_responded?: string | null;
     };
     PayloadIndexTelemetry: {
       field_name?: string | null;
+      index_type: string;
       /**
        * Format: uint 
        * @description The amount of values indexed for all points.
@@ -2413,7 +2571,7 @@ export interface components {
     OptimizerTelemetry: {
       status: components["schemas"]["OptimizersStatus"];
       optimizations: components["schemas"]["OperationDurationStatistics"];
-      log: (components["schemas"]["TrackerTelemetry"])[];
+      log?: (components["schemas"]["TrackerTelemetry"])[] | null;
     };
     /** @description Tracker object used in telemetry */
     TrackerTelemetry: {
@@ -2562,9 +2720,17 @@ export interface components {
       /** Format: uint */
       cpu: number;
       /** Format: uint */
-      io_read: number;
+      payload_io_read: number;
       /** Format: uint */
-      io_write: number;
+      payload_io_write: number;
+      /** Format: uint */
+      payload_index_io_read: number;
+      /** Format: uint */
+      payload_index_io_write: number;
+      /** Format: uint */
+      vector_io_read: number;
+      /** Format: uint */
+      vector_io_write: number;
     };
     ClusterOperations: components["schemas"]["MoveShardOperation"] | components["schemas"]["ReplicateShardOperation"] | components["schemas"]["AbortTransferOperation"] | components["schemas"]["DropReplicaOperation"] | components["schemas"]["CreateShardingKeyOperation"] | components["schemas"]["DropShardingKeyOperation"] | components["schemas"]["RestartTransferOperation"] | components["schemas"]["StartReshardingOperation"] | components["schemas"]["AbortReshardingOperation"];
     MoveShardOperation: {
@@ -3070,7 +3236,7 @@ export interface components {
     };
     QueryInterface: components["schemas"]["VectorInput"] | components["schemas"]["Query"];
     VectorInput: (number)[] | components["schemas"]["SparseVector"] | ((number)[])[] | components["schemas"]["ExtendedPointId"] | components["schemas"]["Document"] | components["schemas"]["Image"] | components["schemas"]["InferenceObject"];
-    Query: components["schemas"]["NearestQuery"] | components["schemas"]["RecommendQuery"] | components["schemas"]["DiscoverQuery"] | components["schemas"]["ContextQuery"] | components["schemas"]["OrderByQuery"] | components["schemas"]["FusionQuery"] | components["schemas"]["SampleQuery"];
+    Query: components["schemas"]["NearestQuery"] | components["schemas"]["RecommendQuery"] | components["schemas"]["DiscoverQuery"] | components["schemas"]["ContextQuery"] | components["schemas"]["OrderByQuery"] | components["schemas"]["FusionQuery"] | components["schemas"]["FormulaQuery"] | components["schemas"]["SampleQuery"];
     NearestQuery: {
       nearest: components["schemas"]["VectorInput"];
     };
@@ -3116,6 +3282,92 @@ export interface components {
      * @enum {string}
      */
     Fusion: "rrf" | "dbsf";
+    FormulaQuery: {
+      formula: components["schemas"]["Expression"];
+      /** @default {} */
+      defaults?: {
+        [key: string]: unknown;
+      };
+    };
+    Expression: number | string | components["schemas"]["Condition"] | components["schemas"]["GeoDistance"] | components["schemas"]["DatetimeExpression"] | components["schemas"]["DatetimeKeyExpression"] | components["schemas"]["MultExpression"] | components["schemas"]["SumExpression"] | components["schemas"]["NegExpression"] | components["schemas"]["AbsExpression"] | components["schemas"]["DivExpression"] | components["schemas"]["SqrtExpression"] | components["schemas"]["PowExpression"] | components["schemas"]["ExpExpression"] | components["schemas"]["Log10Expression"] | components["schemas"]["LnExpression"] | components["schemas"]["LinDecayExpression"] | components["schemas"]["ExpDecayExpression"] | components["schemas"]["GaussDecayExpression"];
+    GeoDistance: {
+      geo_distance: components["schemas"]["GeoDistanceParams"];
+    };
+    GeoDistanceParams: {
+      origin: components["schemas"]["GeoPoint"];
+      /** @description Payload field with the destination geo point */
+      to: string;
+    };
+    DatetimeExpression: {
+      datetime: string;
+    };
+    DatetimeKeyExpression: {
+      datetime_key: string;
+    };
+    MultExpression: {
+      mult: (components["schemas"]["Expression"])[];
+    };
+    SumExpression: {
+      sum: (components["schemas"]["Expression"])[];
+    };
+    NegExpression: {
+      neg: components["schemas"]["Expression"];
+    };
+    AbsExpression: {
+      abs: components["schemas"]["Expression"];
+    };
+    DivExpression: {
+      div: components["schemas"]["DivParams"];
+    };
+    DivParams: {
+      left: components["schemas"]["Expression"];
+      right: components["schemas"]["Expression"];
+      /** Format: float */
+      by_zero_default?: number | null;
+    };
+    SqrtExpression: {
+      sqrt: components["schemas"]["Expression"];
+    };
+    PowExpression: {
+      pow: components["schemas"]["PowParams"];
+    };
+    PowParams: {
+      base: components["schemas"]["Expression"];
+      exponent: components["schemas"]["Expression"];
+    };
+    ExpExpression: {
+      exp: components["schemas"]["Expression"];
+    };
+    Log10Expression: {
+      log10: components["schemas"]["Expression"];
+    };
+    LnExpression: {
+      ln: components["schemas"]["Expression"];
+    };
+    LinDecayExpression: {
+      lin_decay: components["schemas"]["DecayParamsExpression"];
+    };
+    DecayParamsExpression: {
+      x: components["schemas"]["Expression"];
+      /** @description The target value to start decaying from. Defaults to 0. */
+      target?: components["schemas"]["Expression"] | (Record<string, unknown> | null);
+      /**
+       * Format: float 
+       * @description The scale factor of the decay, in terms of `x`. Defaults to 1.0. Must be a non-zero positive number.
+       */
+      scale?: number | null;
+      /**
+       * Format: float 
+       * @description The midpoint of the decay. Defaults to 0.5. Output will be this value when `|x - target| == scale`.
+       */
+      midpoint?: number | null;
+    };
+    ExpDecayExpression: {
+      exp_decay: components["schemas"]["DecayParamsExpression"];
+    };
+    GaussDecayExpression: {
+      gauss_decay: components["schemas"]["DecayParamsExpression"];
+    };
     SampleQuery: {
       sample: components["schemas"]["Sample"];
     };
@@ -5883,6 +6135,7 @@ export interface operations {
   };
   /**
    * Search points 
+   * @deprecated 
    * @description Retrieve closest points based on vector similarity and given filtering conditions
    */
   search_points: {
@@ -5939,6 +6192,7 @@ export interface operations {
   };
   /**
    * Search batch points 
+   * @deprecated 
    * @description Retrieve by batch the closest points based on vector similarity and given filtering conditions
    */
   search_batch_points: {
@@ -5995,6 +6249,7 @@ export interface operations {
   };
   /**
    * Search point groups 
+   * @deprecated 
    * @description Retrieve closest points based on vector similarity and given filtering conditions, grouped by a given payload field
    */
   search_point_groups: {
@@ -6051,6 +6306,7 @@ export interface operations {
   };
   /**
    * Recommend points 
+   * @deprecated 
    * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples.
    */
   recommend_points: {
@@ -6107,6 +6363,7 @@ export interface operations {
   };
   /**
    * Recommend batch points 
+   * @deprecated 
    * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples.
    */
   recommend_batch_points: {
@@ -6163,6 +6420,7 @@ export interface operations {
   };
   /**
    * Recommend point groups 
+   * @deprecated 
    * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples, grouped by a given payload field.
    */
   recommend_point_groups: {
@@ -6219,6 +6477,7 @@ export interface operations {
   };
   /**
    * Discover points 
+   * @deprecated 
    * @description Use context and a target to find the most similar points to the target, constrained by the context.
    * When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair.
    * Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0.
@@ -6278,6 +6537,7 @@ export interface operations {
   };
   /**
    * Discover batch points 
+   * @deprecated 
    * @description Look for points based on target and/or positive and negative example pairs, in batch.
    */
   discover_batch_points: {

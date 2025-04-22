@@ -170,11 +170,20 @@ export enum RecommendStrategy {
    * @generated from enum value: BestScore = 1;
    */
   BestScore = 1,
+
+  /**
+   * Uses custom search objective. Compares against all inputs, sums all the scores.
+   * Scores against positive vectors are added, against negatives are subtracted.
+   *
+   * @generated from enum value: SumScores = 2;
+   */
+  SumScores = 2,
 }
 // Retrieve enum metadata with: proto3.getEnumType(RecommendStrategy)
 proto3.util.setEnumType(RecommendStrategy, "qdrant.RecommendStrategy", [
   { no: 0, name: "AverageVector" },
   { no: 1, name: "BestScore" },
+  { no: 2, name: "SumScores" },
 ]);
 
 /**
@@ -4119,6 +4128,526 @@ export class ContextInput extends Message<ContextInput> {
 }
 
 /**
+ * @generated from message qdrant.Formula
+ */
+export class Formula extends Message<Formula> {
+  /**
+   * @generated from field: qdrant.Expression expression = 1;
+   */
+  expression?: Expression;
+
+  /**
+   * @generated from field: map<string, qdrant.Value> defaults = 2;
+   */
+  defaults: { [key: string]: Value } = {};
+
+  constructor(data?: PartialMessage<Formula>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.Formula";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "expression", kind: "message", T: Expression },
+    { no: 2, name: "defaults", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: Value} },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Formula {
+    return new Formula().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Formula {
+    return new Formula().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Formula {
+    return new Formula().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Formula | PlainMessage<Formula> | undefined, b: Formula | PlainMessage<Formula> | undefined): boolean {
+    return proto3.util.equals(Formula, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.Expression
+ */
+export class Expression extends Message<Expression> {
+  /**
+   * @generated from oneof qdrant.Expression.variant
+   */
+  variant: {
+    /**
+     * @generated from field: float constant = 1;
+     */
+    value: number;
+    case: "constant";
+  } | {
+    /**
+     * Payload key or reference to score.
+     *
+     * @generated from field: string variable = 2;
+     */
+    value: string;
+    case: "variable";
+  } | {
+    /**
+     * Payload condition. If true, becomes 1.0; otherwise 0.0
+     *
+     * @generated from field: qdrant.Condition condition = 3;
+     */
+    value: Condition;
+    case: "condition";
+  } | {
+    /**
+     * Geographic distance in meters
+     *
+     * @generated from field: qdrant.GeoDistance geo_distance = 4;
+     */
+    value: GeoDistance;
+    case: "geoDistance";
+  } | {
+    /**
+     * Date-time constant
+     *
+     * @generated from field: string datetime = 5;
+     */
+    value: string;
+    case: "datetime";
+  } | {
+    /**
+     * Payload key with date-time values
+     *
+     * @generated from field: string datetime_key = 6;
+     */
+    value: string;
+    case: "datetimeKey";
+  } | {
+    /**
+     * Multiply
+     *
+     * @generated from field: qdrant.MultExpression mult = 7;
+     */
+    value: MultExpression;
+    case: "mult";
+  } | {
+    /**
+     * Sum
+     *
+     * @generated from field: qdrant.SumExpression sum = 8;
+     */
+    value: SumExpression;
+    case: "sum";
+  } | {
+    /**
+     * Divide
+     *
+     * @generated from field: qdrant.DivExpression div = 9;
+     */
+    value: DivExpression;
+    case: "div";
+  } | {
+    /**
+     * Negate
+     *
+     * @generated from field: qdrant.Expression neg = 10;
+     */
+    value: Expression;
+    case: "neg";
+  } | {
+    /**
+     * Absolute value
+     *
+     * @generated from field: qdrant.Expression abs = 11;
+     */
+    value: Expression;
+    case: "abs";
+  } | {
+    /**
+     * Square root
+     *
+     * @generated from field: qdrant.Expression sqrt = 12;
+     */
+    value: Expression;
+    case: "sqrt";
+  } | {
+    /**
+     * Power
+     *
+     * @generated from field: qdrant.PowExpression pow = 13;
+     */
+    value: PowExpression;
+    case: "pow";
+  } | {
+    /**
+     * Exponential
+     *
+     * @generated from field: qdrant.Expression exp = 14;
+     */
+    value: Expression;
+    case: "exp";
+  } | {
+    /**
+     * Logarithm
+     *
+     * @generated from field: qdrant.Expression log10 = 15;
+     */
+    value: Expression;
+    case: "log10";
+  } | {
+    /**
+     * Natural logarithm
+     *
+     * @generated from field: qdrant.Expression ln = 16;
+     */
+    value: Expression;
+    case: "ln";
+  } | {
+    /**
+     * Exponential decay
+     *
+     * @generated from field: qdrant.DecayParamsExpression exp_decay = 17;
+     */
+    value: DecayParamsExpression;
+    case: "expDecay";
+  } | {
+    /**
+     * Gaussian decay
+     *
+     * @generated from field: qdrant.DecayParamsExpression gauss_decay = 18;
+     */
+    value: DecayParamsExpression;
+    case: "gaussDecay";
+  } | {
+    /**
+     * Linear decay
+     *
+     * @generated from field: qdrant.DecayParamsExpression lin_decay = 19;
+     */
+    value: DecayParamsExpression;
+    case: "linDecay";
+  } | { case: undefined; value?: undefined } = { case: undefined };
+
+  constructor(data?: PartialMessage<Expression>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.Expression";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "constant", kind: "scalar", T: 2 /* ScalarType.FLOAT */, oneof: "variant" },
+    { no: 2, name: "variable", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "variant" },
+    { no: 3, name: "condition", kind: "message", T: Condition, oneof: "variant" },
+    { no: 4, name: "geo_distance", kind: "message", T: GeoDistance, oneof: "variant" },
+    { no: 5, name: "datetime", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "variant" },
+    { no: 6, name: "datetime_key", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "variant" },
+    { no: 7, name: "mult", kind: "message", T: MultExpression, oneof: "variant" },
+    { no: 8, name: "sum", kind: "message", T: SumExpression, oneof: "variant" },
+    { no: 9, name: "div", kind: "message", T: DivExpression, oneof: "variant" },
+    { no: 10, name: "neg", kind: "message", T: Expression, oneof: "variant" },
+    { no: 11, name: "abs", kind: "message", T: Expression, oneof: "variant" },
+    { no: 12, name: "sqrt", kind: "message", T: Expression, oneof: "variant" },
+    { no: 13, name: "pow", kind: "message", T: PowExpression, oneof: "variant" },
+    { no: 14, name: "exp", kind: "message", T: Expression, oneof: "variant" },
+    { no: 15, name: "log10", kind: "message", T: Expression, oneof: "variant" },
+    { no: 16, name: "ln", kind: "message", T: Expression, oneof: "variant" },
+    { no: 17, name: "exp_decay", kind: "message", T: DecayParamsExpression, oneof: "variant" },
+    { no: 18, name: "gauss_decay", kind: "message", T: DecayParamsExpression, oneof: "variant" },
+    { no: 19, name: "lin_decay", kind: "message", T: DecayParamsExpression, oneof: "variant" },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Expression {
+    return new Expression().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Expression {
+    return new Expression().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Expression {
+    return new Expression().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Expression | PlainMessage<Expression> | undefined, b: Expression | PlainMessage<Expression> | undefined): boolean {
+    return proto3.util.equals(Expression, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.GeoDistance
+ */
+export class GeoDistance extends Message<GeoDistance> {
+  /**
+   * @generated from field: qdrant.GeoPoint origin = 1;
+   */
+  origin?: GeoPoint;
+
+  /**
+   * @generated from field: string to = 2;
+   */
+  to = "";
+
+  constructor(data?: PartialMessage<GeoDistance>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.GeoDistance";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "origin", kind: "message", T: GeoPoint },
+    { no: 2, name: "to", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GeoDistance {
+    return new GeoDistance().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GeoDistance {
+    return new GeoDistance().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GeoDistance {
+    return new GeoDistance().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GeoDistance | PlainMessage<GeoDistance> | undefined, b: GeoDistance | PlainMessage<GeoDistance> | undefined): boolean {
+    return proto3.util.equals(GeoDistance, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.MultExpression
+ */
+export class MultExpression extends Message<MultExpression> {
+  /**
+   * @generated from field: repeated qdrant.Expression mult = 1;
+   */
+  mult: Expression[] = [];
+
+  constructor(data?: PartialMessage<MultExpression>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.MultExpression";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "mult", kind: "message", T: Expression, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MultExpression {
+    return new MultExpression().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MultExpression {
+    return new MultExpression().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MultExpression {
+    return new MultExpression().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MultExpression | PlainMessage<MultExpression> | undefined, b: MultExpression | PlainMessage<MultExpression> | undefined): boolean {
+    return proto3.util.equals(MultExpression, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.SumExpression
+ */
+export class SumExpression extends Message<SumExpression> {
+  /**
+   * @generated from field: repeated qdrant.Expression sum = 1;
+   */
+  sum: Expression[] = [];
+
+  constructor(data?: PartialMessage<SumExpression>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.SumExpression";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "sum", kind: "message", T: Expression, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SumExpression {
+    return new SumExpression().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SumExpression {
+    return new SumExpression().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SumExpression {
+    return new SumExpression().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SumExpression | PlainMessage<SumExpression> | undefined, b: SumExpression | PlainMessage<SumExpression> | undefined): boolean {
+    return proto3.util.equals(SumExpression, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.DivExpression
+ */
+export class DivExpression extends Message<DivExpression> {
+  /**
+   * @generated from field: qdrant.Expression left = 1;
+   */
+  left?: Expression;
+
+  /**
+   * @generated from field: qdrant.Expression right = 2;
+   */
+  right?: Expression;
+
+  /**
+   * @generated from field: optional float by_zero_default = 3;
+   */
+  byZeroDefault?: number;
+
+  constructor(data?: PartialMessage<DivExpression>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.DivExpression";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "left", kind: "message", T: Expression },
+    { no: 2, name: "right", kind: "message", T: Expression },
+    { no: 3, name: "by_zero_default", kind: "scalar", T: 2 /* ScalarType.FLOAT */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DivExpression {
+    return new DivExpression().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DivExpression {
+    return new DivExpression().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DivExpression {
+    return new DivExpression().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DivExpression | PlainMessage<DivExpression> | undefined, b: DivExpression | PlainMessage<DivExpression> | undefined): boolean {
+    return proto3.util.equals(DivExpression, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.PowExpression
+ */
+export class PowExpression extends Message<PowExpression> {
+  /**
+   * @generated from field: qdrant.Expression base = 1;
+   */
+  base?: Expression;
+
+  /**
+   * @generated from field: qdrant.Expression exponent = 2;
+   */
+  exponent?: Expression;
+
+  constructor(data?: PartialMessage<PowExpression>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.PowExpression";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "base", kind: "message", T: Expression },
+    { no: 2, name: "exponent", kind: "message", T: Expression },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PowExpression {
+    return new PowExpression().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PowExpression {
+    return new PowExpression().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PowExpression {
+    return new PowExpression().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PowExpression | PlainMessage<PowExpression> | undefined, b: PowExpression | PlainMessage<PowExpression> | undefined): boolean {
+    return proto3.util.equals(PowExpression, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.DecayParamsExpression
+ */
+export class DecayParamsExpression extends Message<DecayParamsExpression> {
+  /**
+   * The variable to decay
+   *
+   * @generated from field: qdrant.Expression x = 1;
+   */
+  x?: Expression;
+
+  /**
+   * The target value to start decaying from. Defaults to 0.
+   *
+   * @generated from field: optional qdrant.Expression target = 2;
+   */
+  target?: Expression;
+
+  /**
+   * The scale factor of the decay, in terms of `x`. Defaults to 1.0. Must be a non-zero positive number.
+   *
+   * @generated from field: optional float scale = 3;
+   */
+  scale?: number;
+
+  /**
+   * The midpoint of the decay. Defaults to 0.5. Output will be this value when `|x - target| == scale`.
+   *
+   * @generated from field: optional float midpoint = 4;
+   */
+  midpoint?: number;
+
+  constructor(data?: PartialMessage<DecayParamsExpression>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.DecayParamsExpression";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "x", kind: "message", T: Expression },
+    { no: 2, name: "target", kind: "message", T: Expression, opt: true },
+    { no: 3, name: "scale", kind: "scalar", T: 2 /* ScalarType.FLOAT */, opt: true },
+    { no: 4, name: "midpoint", kind: "scalar", T: 2 /* ScalarType.FLOAT */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DecayParamsExpression {
+    return new DecayParamsExpression().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DecayParamsExpression {
+    return new DecayParamsExpression().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DecayParamsExpression {
+    return new DecayParamsExpression().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DecayParamsExpression | PlainMessage<DecayParamsExpression> | undefined, b: DecayParamsExpression | PlainMessage<DecayParamsExpression> | undefined): boolean {
+    return proto3.util.equals(DecayParamsExpression, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.Query
  */
 export class Query extends Message<Query> {
@@ -4181,6 +4710,14 @@ export class Query extends Message<Query> {
      */
     value: Sample;
     case: "sample";
+  } | {
+    /**
+     * Score boosting via an arbitrary formula
+     *
+     * @generated from field: qdrant.Formula formula = 8;
+     */
+    value: Formula;
+    case: "formula";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<Query>) {
@@ -4198,6 +4735,7 @@ export class Query extends Message<Query> {
     { no: 5, name: "order_by", kind: "message", T: OrderBy, oneof: "variant" },
     { no: 6, name: "fusion", kind: "enum", T: proto3.getEnumType(Fusion), oneof: "variant" },
     { no: 7, name: "sample", kind: "enum", T: proto3.getEnumType(Sample), oneof: "variant" },
+    { no: 8, name: "formula", kind: "message", T: Formula, oneof: "variant" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Query {
@@ -5747,6 +6285,11 @@ export class PointsOperationResponse extends Message<PointsOperationResponse> {
    */
   time = 0;
 
+  /**
+   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   */
+  usage?: HardwareUsage;
+
   constructor(data?: PartialMessage<PointsOperationResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -5757,6 +6300,7 @@ export class PointsOperationResponse extends Message<PointsOperationResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: UpdateResult },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
+    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsOperationResponse {
@@ -6534,6 +7078,11 @@ export class ScrollResponse extends Message<ScrollResponse> {
    */
   time = 0;
 
+  /**
+   * @generated from field: optional qdrant.HardwareUsage usage = 4;
+   */
+  usage?: HardwareUsage;
+
   constructor(data?: PartialMessage<ScrollResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -6545,6 +7094,7 @@ export class ScrollResponse extends Message<ScrollResponse> {
     { no: 1, name: "next_page_offset", kind: "message", T: PointId, opt: true },
     { no: 2, name: "result", kind: "message", T: RetrievedPoint, repeated: true },
     { no: 3, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
+    { no: 4, name: "usage", kind: "message", T: HardwareUsage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ScrollResponse {
@@ -6682,6 +7232,11 @@ export class GetResponse extends Message<GetResponse> {
    */
   time = 0;
 
+  /**
+   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   */
+  usage?: HardwareUsage;
+
   constructor(data?: PartialMessage<GetResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -6692,6 +7247,7 @@ export class GetResponse extends Message<GetResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: RetrievedPoint, repeated: true },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
+    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetResponse {
@@ -7602,6 +8158,20 @@ export class FieldCondition extends Message<FieldCondition> {
    */
   datetimeRange?: DatetimeRange;
 
+  /**
+   * Check if field is empty
+   *
+   * @generated from field: optional bool is_empty = 9;
+   */
+  isEmpty?: boolean;
+
+  /**
+   * Check if field is null
+   *
+   * @generated from field: optional bool is_null = 10;
+   */
+  isNull?: boolean;
+
   constructor(data?: PartialMessage<FieldCondition>) {
     super();
     proto3.util.initPartial(data, this);
@@ -7618,6 +8188,8 @@ export class FieldCondition extends Message<FieldCondition> {
     { no: 6, name: "values_count", kind: "message", T: ValuesCount },
     { no: 7, name: "geo_polygon", kind: "message", T: GeoPolygon },
     { no: 8, name: "datetime_range", kind: "message", T: DatetimeRange },
+    { no: 9, name: "is_empty", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 10, name: "is_null", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FieldCondition {
@@ -8356,14 +8928,34 @@ export class HardwareUsage extends Message<HardwareUsage> {
   cpu = protoInt64.zero;
 
   /**
-   * @generated from field: uint64 io_read = 2;
+   * @generated from field: uint64 payload_io_read = 2;
    */
-  ioRead = protoInt64.zero;
+  payloadIoRead = protoInt64.zero;
 
   /**
-   * @generated from field: uint64 io_write = 3;
+   * @generated from field: uint64 payload_io_write = 3;
    */
-  ioWrite = protoInt64.zero;
+  payloadIoWrite = protoInt64.zero;
+
+  /**
+   * @generated from field: uint64 payload_index_io_read = 4;
+   */
+  payloadIndexIoRead = protoInt64.zero;
+
+  /**
+   * @generated from field: uint64 payload_index_io_write = 5;
+   */
+  payloadIndexIoWrite = protoInt64.zero;
+
+  /**
+   * @generated from field: uint64 vector_io_read = 6;
+   */
+  vectorIoRead = protoInt64.zero;
+
+  /**
+   * @generated from field: uint64 vector_io_write = 7;
+   */
+  vectorIoWrite = protoInt64.zero;
 
   constructor(data?: PartialMessage<HardwareUsage>) {
     super();
@@ -8374,8 +8966,12 @@ export class HardwareUsage extends Message<HardwareUsage> {
   static readonly typeName = "qdrant.HardwareUsage";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "cpu", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 2, name: "io_read", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 3, name: "io_write", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 2, name: "payload_io_read", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 3, name: "payload_io_write", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 4, name: "payload_index_io_read", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 5, name: "payload_index_io_write", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 6, name: "vector_io_read", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 7, name: "vector_io_write", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): HardwareUsage {
