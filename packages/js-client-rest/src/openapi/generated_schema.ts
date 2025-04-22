@@ -2314,12 +2314,12 @@ export interface components {
       /** Format: uint64 */
       init_time_ms: number;
       config: components["schemas"]["CollectionConfigTelemetry"];
-      shards: (components["schemas"]["ReplicaSetTelemetry"])[];
-      transfers: (components["schemas"]["ShardTransferInfo"])[];
-      resharding: (components["schemas"]["ReshardingInfo"])[];
-      shard_clean_tasks: {
+      shards?: (components["schemas"]["ReplicaSetTelemetry"])[] | null;
+      transfers?: (components["schemas"]["ShardTransferInfo"])[] | null;
+      resharding?: (components["schemas"]["ReshardingInfo"])[] | null;
+      shard_clean_tasks?: ({
         [key: string]: components["schemas"]["ShardCleanStatusTelemetry"] | undefined;
-      };
+      }) | null;
     };
     CollectionConfigTelemetry: {
       params: components["schemas"]["CollectionParams"];
@@ -2353,7 +2353,27 @@ export interface components {
        * @description Total number of optimized points since the last start.
        */
       total_optimized_points: number;
-      segments: (components["schemas"]["SegmentTelemetry"])[];
+      /**
+       * Format: uint 
+       * @description An ESTIMATION of effective amount of bytes used for vectors Do NOT rely on this number unless you know what you are doing
+       */
+      vectors_size_bytes?: number | null;
+      /**
+       * Format: uint 
+       * @description An estimation of the effective amount of bytes used for payloads Do NOT rely on this number unless you know what you are doing
+       */
+      payloads_size_bytes?: number | null;
+      /**
+       * Format: uint 
+       * @description Sum of segment points This is an approximate number Do NOT rely on this number unless you know what you are doing
+       */
+      num_points?: number | null;
+      /**
+       * Format: uint 
+       * @description Sum of number of vectors in all segments This is an approximate number Do NOT rely on this number unless you know what you are doing
+       */
+      num_vectors?: number | null;
+      segments?: (components["schemas"]["SegmentTelemetry"])[] | null;
       optimizations: components["schemas"]["OptimizerTelemetry"];
       async_scorer?: boolean | null;
     };
@@ -2508,7 +2528,7 @@ export interface components {
       /** Format: uint */
       count: number;
       /** Format: uint */
-      fail_count?: number;
+      fail_count?: number | null;
       /**
        * Format: float 
        * @description The average time taken by 128 latest operations, calculated as a weighted mean.
@@ -2528,7 +2548,7 @@ export interface components {
        * Format: uint64 
        * @description The total duration of all operations in microseconds.
        */
-      total_duration_micros: number;
+      total_duration_micros?: number | null;
       /** Format: date-time */
       last_responded?: string | null;
     };
@@ -2551,7 +2571,7 @@ export interface components {
     OptimizerTelemetry: {
       status: components["schemas"]["OptimizersStatus"];
       optimizations: components["schemas"]["OperationDurationStatistics"];
-      log: (components["schemas"]["TrackerTelemetry"])[];
+      log?: (components["schemas"]["TrackerTelemetry"])[] | null;
     };
     /** @description Tracker object used in telemetry */
     TrackerTelemetry: {
