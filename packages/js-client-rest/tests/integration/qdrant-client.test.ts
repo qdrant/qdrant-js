@@ -14,7 +14,7 @@ describe('QdrantClient', () => {
     const supportsJSONBigInt = semver.satisfies(process.versions.node, '>=21');
 
     test('Qdrant service check', async () => {
-        const {data} = await client.api('service').telemetry({});
+        const {data} = await client.api().telemetry({});
         expect(data).toMatchObject({
             time: expect.any(Number) as unknown,
             status: 'ok',
@@ -107,7 +107,7 @@ describe('QdrantClient', () => {
     });
 
     test('retrieve point', async () => {
-        const result = (await client.api('points').getPoint({collection_name: collectionName, id: 2})).data.result!;
+        const result = (await client.api().getPoint({collection_name: collectionName, id: 2})).data.result!;
         expect(result).toMatchObject<typeof result>({
             id: 2,
             payload: {city: ['Berlin', 'London']},
@@ -116,8 +116,7 @@ describe('QdrantClient', () => {
     });
 
     test.skipIf(!supportsJSONBigInt)('retrieve point by uint64 id (BigInt)', async () => {
-        const result = (await client.api('points').getPoint({collection_name: collectionName, id: bigInt})).data
-            .result!;
+        const result = (await client.api().getPoint({collection_name: collectionName, id: bigInt})).data.result!;
         expect(result).toMatchObject<typeof result>({
             id: bigInt,
             vector: [0.19, 0.81, 0.75, 0.11],
