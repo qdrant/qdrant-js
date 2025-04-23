@@ -6,7 +6,7 @@ PROJECT_ROOT="$(pwd)/$(dirname "$0")/../"
 
 cd $(mktemp -d)
 
-git clone --sparse --filter=blob:none --depth=1 https://github.com/qdrant/qdrant.git
+git clone --sparse --filter=blob:none --branch=dev --depth=1 https://github.com/qdrant/qdrant.git
 cd qdrant
 git sparse-checkout add lib/api/src/grpc/proto
 

@@ -51,7 +51,7 @@
         "codegen:openapi-client-constructor": "tsx scripts/generate_client_construction.ts"
     },
     "config": {
-        "openapi_schema_remote": "https://raw.githubusercontent.com/qdrant/qdrant/master/docs/redoc/master/openapi.json"
+        "openapi_schema_remote": "https://raw.githubusercontent.com/qdrant/qdrant/dev/docs/redoc/master/openapi.json"
     },
     "dependencies": {
         "@qdrant/openapi-typescript-fetch": "1.2.6",
