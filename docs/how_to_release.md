@@ -124,14 +124,24 @@ examples/node-js-basic/package.json:18:        "@qdrant/qdrant-js": "^1.14.0"   
 To update `.lock` files, run `pnpm install` in the root directory.
 
 
-## Make PR with the changes
+## Commit changes
 
 If something goes wrong, pre-commit hook might complain.
 
-There are a few things is it usually complains about:
-
+For rest client, precommit hook runs theese checks from `js-client-rest` directory:
+```
+pnpm tsc:check
+pnpm tsc:deadcode
+pnpm lint
+pnpm test run
 ```
 
-
+Run each command separately to find the reason of pre-commit hook failure.
+Linter includes a format checker. To run formatter, use this command in `js-client-rest` directory:
+```
+pnpm prettier -w .
 ```
 
+## Make PR with the changes
+
+Like in other clients, new version is published by adding new tag.
