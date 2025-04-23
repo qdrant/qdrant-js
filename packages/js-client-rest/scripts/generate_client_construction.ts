@@ -2,6 +2,36 @@ import * as fs from 'fs';
 
 const openapiFile = fs.readFileSync('./src/openapi/generated_schema.ts', 'utf8');
 
+/// Extract from TS code the substring that contains the interface with name `interfaceName` and all its content.
+/// Example usage:
+/// ```typescript
+/// const tsContent = `
+/// export interface MyInterface {
+///     property1: string;
+///     nested: {
+///         prop: number;
+///     }
+///     method(): void;
+/// }
+///
+/// export interface AnotherInterface {
+///     // ...
+/// }
+/// `;
+///
+/// console.log(extractInterface(tsContent, "MyInterface"));
+/// ```
+///
+/// Output is the string:
+/// ```typescript
+/// export interface MyInterface {
+///     property1: string;
+///      nested: {
+///          prop: number;
+///      }
+///      method(): void;
+///  }
+/// ```
 function extractInterface(content: string, interfaceName: string): string | null {
     const interfaceRegex = new RegExp(`export\\s+interface\\s+${interfaceName}\\s*{`, 'g');
     const match = interfaceRegex.exec(content);
@@ -29,6 +59,28 @@ function extractInterface(content: string, interfaceName: string): string | null
     return null;
 }
 
+/// Extracts from TS code with interface definition the members of the interface as a list of substrings.
+/// Example usage:
+/// ```typescript
+/// const interfaceString = `
+/// export interface MyInterface {
+///     property1: string;
+///     nested: {
+///         prop: number;
+///     };
+///     method(): void;
+/// }
+/// `;
+/// console.log(getInterfaceMembers(interfaceString));
+/// ```
+/// Output is the array:
+/// ```typescript
+/// [
+///     'property1: string;',
+///     'nested: { prop: number; };',
+///     'method(): void;'
+/// ]
+/// ```
 function getInterfaceMembers(interfaceContent: string): string[] {
     const members: string[] = [];
     const braceIndex = interfaceContent.indexOf('{');
@@ -59,6 +111,40 @@ function getInterfaceMembers(interfaceContent: string): string[] {
     return members;
 }
 
+/// Extract from code string with interface member definition the name of the member and its children members.
+/// Example:
+/// ```typescript
+/// const interfaceString = `
+/// export interface MyInterface {
+///     property1: string;
+///     nested: {
+///         prop: number;
+///         subNested: {
+///             subProp: boolean;
+///         };
+///     };
+///     method(): void;
+/// }
+/// `;
+///
+/// const extractedInterface = extractInterface(interfaceString, "MyInterface");
+/// const interfaceMembers = getInterfaceMembers(extractedInterface || '');
+/// const memberNamesAndChildren = getMemberNamesAndChildren(interfaceMembers);
+/// memberNamesAndChildren.forEach((member) => {
+///     console.log(`Member: ${member.name}`);
+///     member.children.forEach((child) => {
+///         console.log(`  Child: ${child.name}`);
+///     });
+/// });
+/// ```
+/// Output in console is:
+/// ```
+/// Member: property1
+/// Member: nested
+///   Child: prop
+///   Child: subNested
+/// Member: method
+/// ```
 function getMemberNamesAndChildren(members: string[]): {name: string; children: {name: string; content: string}[]}[] {
     return members
         .map((member) => {
@@ -86,6 +172,21 @@ function getMemberNamesAndChildren(members: string[]): {name: string; children: 
         .filter((member) => member.name !== '');
 }
 
+/// Takes as input a string with TypeScript code and extracts the names of the members of the `query` object by specific template.
+/// Example:
+/// ```typescript
+///  const tsCode = `
+///  parameters: {
+///            query?: {
+///              timeout?: number;
+///            };
+///            path: {
+///              collection_name: string;
+///            };
+///          };
+///  `;
+///  console.log(extractQueryMembers(tsCode)); // Output: ['timeout']
+/// ```
 function extractQueryMembers(tsString: string): string[] {
     const queryRegex = /query\?:\s*{([^}]*)}/;
     const match = tsString.match(queryRegex);
@@ -106,6 +207,35 @@ function extractQueryMembers(tsString: string): string[] {
     return members;
 }
 
+/// Parses templated TS code to extract HTTP method, comment and path string. See an example below.
+/// Example:
+/// ```typescript
+///  const tsCode = `
+///  "/collections/{collection_name}/points/search": {
+///    /**
+///     * Search points
+///     * @description Retrieve closest points based on vector similarity and given filtering conditions
+///     */
+///    post: operations["search_points"];
+///  };
+///  `;
+///  console.log(extractPathsInfo(tsCode));
+/// ```
+/// Output is:
+/// ```typescript
+/// {
+///     path: '/collections/{collection_name}/points/search',
+///     operations: {
+///       post: {
+///         operation: 'search_points',
+///         comment: '/**\n' +
+///           '     * Search points \n' +
+///           '     * @description Retrieve closest points based on vector similarity and given filtering conditions\n' +
+///           '     */'
+///       }
+///     }
+///   }
+/// ```
 function extractPathsInfo(input: string) {
     const pathRegex = /"([^"]+)":/;
     const commentRegex = /\/\*\*([^*]|(\*+[^*/]))*\*+\//g;
@@ -137,6 +267,7 @@ function snakeToCamel(snake: string): string {
     return snake.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase());
 }
 
+/// Add leading spaces to each line of the input string. Useful for formatting.
 function addLeadingSpaces(input: string, n: number): string {
     const spaces = ' '.repeat(n);
     return input
@@ -145,6 +276,9 @@ function addLeadingSpaces(input: string, n: number): string {
         .join('\n');
 }
 
+// extract the interface `operations` from the generated openapi file.
+// parse the interface to get its members and their children.
+// from each member, extract children members.
 const extractedOperations = extractInterface(openapiFile, 'operations');
 let operationMembers;
 if (extractedOperations) {
@@ -152,9 +286,11 @@ if (extractedOperations) {
 } else {
     throw new Error('Interface `operations` from generated openapi not found.');
 }
-
 const operationMembersWithChildren = getMemberNamesAndChildren(operationMembers);
 
+// extract the interface `paths` from the generated openapi file.
+// parse the interface to get its members and their children.
+// from each member, extract the http path, operation and function name.
 const extractedPaths = extractInterface(openapiFile, 'paths');
 let pathMembers;
 if (extractedPaths) {
@@ -177,6 +313,8 @@ pathMembers.forEach((pathMember) => {
     }
 });
 
+// Start generating the output files.
+// The first file is a type definition for the client API.
 const generatedType = operationMembersWithChildren
     .map((member) => {
         const operation = pathOperations[member.name];
@@ -201,6 +339,8 @@ export type ClientApi = {
 const generatedTypeFile = generatedTypeHeader + addLeadingSpaces(generatedType, 2) + '}\n';
 
 fs.writeFileSync('./src/openapi/generated_client_type.ts', generatedTypeFile);
+
+// second file is a function that creates the client API.
 
 const generatedConstructor = operationMembersWithChildren
     .map((member) => {
