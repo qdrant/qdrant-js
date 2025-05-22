@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
+
 import {Agent} from 'undici';
 
 declare global {
@@ -7,6 +9,7 @@ declare global {
 }
 
 export const createDispatcher = (connections = 25) =>
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     new Agent({
         // timeouts are handled by AbortSignal in our middleware
         bodyTimeout: 0,
