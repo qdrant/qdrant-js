@@ -157,7 +157,7 @@ export class QdrantClient {
      *             'majority' - query all replicas, but return values present in the majority of replicas
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is milliseconds.
      * @returns List of search responses
      */
     async searchBatch(
@@ -221,7 +221,7 @@ export class QdrantClient {
      *              - 'majority' - query all replicas, but return values present in the majority of replicas
      *              - 'quorum' - query the majority of replicas, return values present in all of them
      *              - 'all' - query all replicas, and return values present in all replicas
-     *      - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *      - timeout: If set, overrides global timeout setting for this request. Unit is milliseconds.
      * @example
      *     // Search with filter
      *     client.search(
@@ -290,7 +290,7 @@ export class QdrantClient {
      *             - 'majority' - query all replicas, but return values present in the majority of replicas
      *             - 'quorum' - query the majority of replicas, return values present in all of them
      *             - 'all' - query all replicas, and return values present in all replicas
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is milliseconds.
      * @returns List of recommend responses
      */
     async recommendBatch(
@@ -390,7 +390,7 @@ export class QdrantClient {
      *         - 'majority' - query all replicas, but return values present in the majority of replicas
      *         - 'quorum' - query the majority of replicas, return values present in all of them
      *         - 'all' - query all replicas, and return values present in all replicas
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is milliseconds.
      * @returns List of recommended points with similarity scores.
      */
     async recommend(
@@ -626,7 +626,7 @@ export class QdrantClient {
      *             'majority' - query all replicas, but return values present in the majority of replicas
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is milliseconds.
      *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *     - vector: query search vector
      *     - filter: Look only for points which satisfies this conditions
@@ -684,7 +684,7 @@ export class QdrantClient {
      *             'majority' - query all replicas, but return values present in the majority of replicas
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is milliseconds.
      *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *     - positive: Look for vectors closest to those
      *     - negative: Try to avoid vectors like this
@@ -1642,7 +1642,7 @@ export class QdrantClient {
      *     - shards_number: How many shards to create for this key If not specified, will use the default value from config
      *     - replication_factor: How many replicas to create for each shard If not specified, will use the default value from config
      *     - placement: Placement of shards for this key List of peer ids, that can be used to place shards for this key If not specified, will be randomly placed among all peers
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is milliseconds.
      * @returns Operation result
      */
     async createShardKey(
@@ -1671,7 +1671,7 @@ export class QdrantClient {
      * @param collection_name Name of the collection
      * @param {object} args -
      *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is milliseconds.
      * @returns Operation result
      */
     async deleteShardKey(
@@ -1700,7 +1700,7 @@ export class QdrantClient {
      *             'majority' - query all replicas, but return values present in the majority of replicas
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is milliseconds.
      *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *     - target: Look for vectors closest to this. When using the target (with or without context), the integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target.
      *     - context: Pairs of { positive, negative } examples to constrain the search. When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair. Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0. For discovery search (when including a target), the context part of the score for each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, and -1 otherwise.
@@ -1760,7 +1760,7 @@ export class QdrantClient {
      *             'majority' - query all replicas, but return values present in the majority of replicas
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is milliseconds.
      *     - searches: List of searches
      * @returns Operation result
      */
@@ -1813,7 +1813,7 @@ export class QdrantClient {
      *             'majority' - query all replicas, but return values present in the majority of replicas
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is milliseconds.
      *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards.
      *     - prefetch: Sub-requests to perform first. If present, the query will be performed on the results of the prefetch(es).
      *     - query: Query to perform. If missing without prefetches, returns points ordered by their IDs.
@@ -1878,7 +1878,7 @@ export class QdrantClient {
      *             'majority' - query all replicas, but return values present in the majority of replicas
      *             'quorum' - query the majority of replicas, return values present in all of them
      *             'all' - query all replicas, and return values present in all replicas
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is milliseconds.
      *     - searches: List of queries
      * @returns Operation result
      */
