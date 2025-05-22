@@ -1,5 +1,11 @@
 # @qdrant/js-client-grpc
 
+## 1.14.1
+
+### Minor Changes
+
+-   no changes
+
 ## 1.14.0
 
 ### Minor Changes
