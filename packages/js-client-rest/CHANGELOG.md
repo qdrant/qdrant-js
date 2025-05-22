@@ -1,5 +1,12 @@
 # @qdrant/js-client-rest
 
+## 1.14.1
+
+### Minor Changes
+
+-   Update undici to ^6.0.0
+-   Drop support for Node.js < 18.17.0 (because of undici)
+
 ## 1.14.0
 
 ### Minor Changes
