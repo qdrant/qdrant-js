@@ -279,6 +279,32 @@ proto3.util.setEnumType(CompressionRatio, "qdrant.CompressionRatio", [
 ]);
 
 /**
+ * @generated from enum qdrant.BinaryQuantizationEncoding
+ */
+export enum BinaryQuantizationEncoding {
+  /**
+   * @generated from enum value: OneBit = 0;
+   */
+  OneBit = 0,
+
+  /**
+   * @generated from enum value: TwoBits = 1;
+   */
+  TwoBits = 1,
+
+  /**
+   * @generated from enum value: OneAndHalfBits = 2;
+   */
+  OneAndHalfBits = 2,
+}
+// Retrieve enum metadata with: proto3.getEnumType(BinaryQuantizationEncoding)
+proto3.util.setEnumType(BinaryQuantizationEncoding, "qdrant.BinaryQuantizationEncoding", [
+  { no: 0, name: "OneBit" },
+  { no: 1, name: "TwoBits" },
+  { no: 2, name: "OneAndHalfBits" },
+]);
+
+/**
  * @generated from enum qdrant.ShardingMethod
  */
 export enum ShardingMethod {
@@ -1792,6 +1818,81 @@ export class ProductQuantization extends Message<ProductQuantization> {
 }
 
 /**
+ * @generated from message qdrant.BinaryQuantizationQueryEncoding
+ */
+export class BinaryQuantizationQueryEncoding extends Message<BinaryQuantizationQueryEncoding> {
+  /**
+   * @generated from oneof qdrant.BinaryQuantizationQueryEncoding.variant
+   */
+  variant: {
+    /**
+     * @generated from field: qdrant.BinaryQuantizationQueryEncoding.Setting setting = 4;
+     */
+    value: BinaryQuantizationQueryEncoding_Setting;
+    case: "setting";
+  } | { case: undefined; value?: undefined } = { case: undefined };
+
+  constructor(data?: PartialMessage<BinaryQuantizationQueryEncoding>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.BinaryQuantizationQueryEncoding";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 4, name: "setting", kind: "enum", T: proto3.getEnumType(BinaryQuantizationQueryEncoding_Setting), oneof: "variant" },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BinaryQuantizationQueryEncoding {
+    return new BinaryQuantizationQueryEncoding().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BinaryQuantizationQueryEncoding {
+    return new BinaryQuantizationQueryEncoding().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BinaryQuantizationQueryEncoding {
+    return new BinaryQuantizationQueryEncoding().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: BinaryQuantizationQueryEncoding | PlainMessage<BinaryQuantizationQueryEncoding> | undefined, b: BinaryQuantizationQueryEncoding | PlainMessage<BinaryQuantizationQueryEncoding> | undefined): boolean {
+    return proto3.util.equals(BinaryQuantizationQueryEncoding, a, b);
+  }
+}
+
+/**
+ * @generated from enum qdrant.BinaryQuantizationQueryEncoding.Setting
+ */
+export enum BinaryQuantizationQueryEncoding_Setting {
+  /**
+   * @generated from enum value: Default = 0;
+   */
+  Default = 0,
+
+  /**
+   * @generated from enum value: Binary = 1;
+   */
+  Binary = 1,
+
+  /**
+   * @generated from enum value: Scalar4Bits = 2;
+   */
+  Scalar4Bits = 2,
+
+  /**
+   * @generated from enum value: Scalar8Bits = 3;
+   */
+  Scalar8Bits = 3,
+}
+// Retrieve enum metadata with: proto3.getEnumType(BinaryQuantizationQueryEncoding_Setting)
+proto3.util.setEnumType(BinaryQuantizationQueryEncoding_Setting, "qdrant.BinaryQuantizationQueryEncoding.Setting", [
+  { no: 0, name: "Default" },
+  { no: 1, name: "Binary" },
+  { no: 2, name: "Scalar4Bits" },
+  { no: 3, name: "Scalar8Bits" },
+]);
+
+/**
  * @generated from message qdrant.BinaryQuantization
  */
 export class BinaryQuantization extends Message<BinaryQuantization> {
@@ -1802,6 +1903,22 @@ export class BinaryQuantization extends Message<BinaryQuantization> {
    */
   alwaysRam?: boolean;
 
+  /**
+   * Binary quantization encoding method
+   *
+   * @generated from field: optional qdrant.BinaryQuantizationEncoding encoding = 2;
+   */
+  encoding?: BinaryQuantizationEncoding;
+
+  /**
+   *
+   * Asymmetric quantization configuration allows a query to have different quantization than stored vectors.
+   * It can increase the accuracy of search at the cost of performance.
+   *
+   * @generated from field: optional qdrant.BinaryQuantizationQueryEncoding query_encoding = 3;
+   */
+  queryEncoding?: BinaryQuantizationQueryEncoding;
+
   constructor(data?: PartialMessage<BinaryQuantization>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1811,6 +1928,8 @@ export class BinaryQuantization extends Message<BinaryQuantization> {
   static readonly typeName = "qdrant.BinaryQuantization";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "always_ram", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 2, name: "encoding", kind: "enum", T: proto3.getEnumType(BinaryQuantizationEncoding), opt: true },
+    { no: 3, name: "query_encoding", kind: "message", T: BinaryQuantizationQueryEncoding, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BinaryQuantization {
@@ -2910,28 +3029,28 @@ export class KeywordIndexParams extends Message<KeywordIndexParams> {
  */
 export class IntegerIndexParams extends Message<IntegerIndexParams> {
   /**
-   * If true - support direct lookups.
+   * If true - support direct lookups. Default is true.
    *
    * @generated from field: optional bool lookup = 1;
    */
   lookup?: boolean;
 
   /**
-   * If true - support ranges filters.
+   * If true - support ranges filters. Default is true.
    *
    * @generated from field: optional bool range = 2;
    */
   range?: boolean;
 
   /**
-   * If true - use this key to organize storage of the collection data. This option assumes that this key will be used in majority of filtered requests.
+   * If true - use this key to organize storage of the collection data. This option assumes that this key will be used in majority of filtered requests. Default is false.
    *
    * @generated from field: optional bool is_principal = 3;
    */
   isPrincipal?: boolean;
 
   /**
-   * If true - store index on disk.
+   * If true - store index on disk. Default is false.
    *
    * @generated from field: optional bool on_disk = 4;
    */
@@ -3055,6 +3174,53 @@ export class GeoIndexParams extends Message<GeoIndexParams> {
 }
 
 /**
+ * @generated from message qdrant.StopwordsSet
+ */
+export class StopwordsSet extends Message<StopwordsSet> {
+  /**
+   * List of languages to use stopwords from
+   *
+   * @generated from field: repeated string languages = 1;
+   */
+  languages: string[] = [];
+
+  /**
+   * List of custom stopwords
+   *
+   * @generated from field: repeated string custom = 2;
+   */
+  custom: string[] = [];
+
+  constructor(data?: PartialMessage<StopwordsSet>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.StopwordsSet";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "languages", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 2, name: "custom", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StopwordsSet {
+    return new StopwordsSet().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StopwordsSet {
+    return new StopwordsSet().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StopwordsSet {
+    return new StopwordsSet().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: StopwordsSet | PlainMessage<StopwordsSet> | undefined, b: StopwordsSet | PlainMessage<StopwordsSet> | undefined): boolean {
+    return proto3.util.equals(StopwordsSet, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.TextIndexParams
  */
 export class TextIndexParams extends Message<TextIndexParams> {
@@ -3093,6 +3259,27 @@ export class TextIndexParams extends Message<TextIndexParams> {
    */
   onDisk?: boolean;
 
+  /**
+   * Stopwords for the text index
+   *
+   * @generated from field: optional qdrant.StopwordsSet stopwords = 6;
+   */
+  stopwords?: StopwordsSet;
+
+  /**
+   * If true - support phrase matching.
+   *
+   * @generated from field: optional bool phrase_matching = 7;
+   */
+  phraseMatching?: boolean;
+
+  /**
+   * Set an algorithm for stemming.
+   *
+   * @generated from field: optional qdrant.StemmingAlgorithm stemmer = 8;
+   */
+  stemmer?: StemmingAlgorithm;
+
   constructor(data?: PartialMessage<TextIndexParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -3106,6 +3293,9 @@ export class TextIndexParams extends Message<TextIndexParams> {
     { no: 3, name: "min_token_len", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
     { no: 4, name: "max_token_len", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
     { no: 5, name: "on_disk", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 6, name: "stopwords", kind: "message", T: StopwordsSet, opt: true },
+    { no: 7, name: "phrase_matching", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 8, name: "stemmer", kind: "message", T: StemmingAlgorithm, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TextIndexParams {
@@ -3122,6 +3312,90 @@ export class TextIndexParams extends Message<TextIndexParams> {
 
   static equals(a: TextIndexParams | PlainMessage<TextIndexParams> | undefined, b: TextIndexParams | PlainMessage<TextIndexParams> | undefined): boolean {
     return proto3.util.equals(TextIndexParams, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.StemmingAlgorithm
+ */
+export class StemmingAlgorithm extends Message<StemmingAlgorithm> {
+  /**
+   * @generated from oneof qdrant.StemmingAlgorithm.stemming_params
+   */
+  stemmingParams: {
+    /**
+     * Parameters for snowball stemming
+     *
+     * @generated from field: qdrant.SnowballParams snowball = 1;
+     */
+    value: SnowballParams;
+    case: "snowball";
+  } | { case: undefined; value?: undefined } = { case: undefined };
+
+  constructor(data?: PartialMessage<StemmingAlgorithm>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.StemmingAlgorithm";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "snowball", kind: "message", T: SnowballParams, oneof: "stemming_params" },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StemmingAlgorithm {
+    return new StemmingAlgorithm().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StemmingAlgorithm {
+    return new StemmingAlgorithm().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StemmingAlgorithm {
+    return new StemmingAlgorithm().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: StemmingAlgorithm | PlainMessage<StemmingAlgorithm> | undefined, b: StemmingAlgorithm | PlainMessage<StemmingAlgorithm> | undefined): boolean {
+    return proto3.util.equals(StemmingAlgorithm, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.SnowballParams
+ */
+export class SnowballParams extends Message<SnowballParams> {
+  /**
+   * Which language the algorithm should stem.
+   *
+   * @generated from field: string language = 1;
+   */
+  language = "";
+
+  constructor(data?: PartialMessage<SnowballParams>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.SnowballParams";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "language", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SnowballParams {
+    return new SnowballParams().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SnowballParams {
+    return new SnowballParams().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SnowballParams {
+    return new SnowballParams().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SnowballParams | PlainMessage<SnowballParams> | undefined, b: SnowballParams | PlainMessage<SnowballParams> | undefined): boolean {
+    return proto3.util.equals(SnowballParams, a, b);
   }
 }
 

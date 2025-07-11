@@ -497,10 +497,10 @@ export interface components {
      * @example {
      *   "collections": [
      *     {
-     *       "name": "arivx-title"
+     *       "name": "arxiv-title"
      *     },
      *     {
-     *       "name": "arivx-abstract"
+     *       "name": "arxiv-abstract"
      *     },
      *     {
      *       "name": "medium-title"
@@ -703,7 +703,14 @@ export interface components {
     };
     BinaryQuantizationConfig: {
       always_ram?: boolean | null;
+      encoding?: components["schemas"]["BinaryQuantizationEncoding"] | (Record<string, unknown> | null);
+      /** @description Asymmetric quantization configuration allows a query to have different quantization than stored vectors. It can increase the accuracy of search at the cost of performance. */
+      query_encoding?: components["schemas"]["BinaryQuantizationQueryEncoding"] | (Record<string, unknown> | null);
     };
+    /** @enum {string} */
+    BinaryQuantizationEncoding: "one_bit" | "two_bits" | "one_and_half_bits";
+    /** @enum {string} */
+    BinaryQuantizationQueryEncoding: "default" | "binary" | "scalar4bits" | "scalar8bits";
     /** @enum {string} */
     Datatype: "float32" | "uint8" | "float16";
     MultiVectorConfig: {
@@ -816,7 +823,7 @@ export interface components {
        * Format: uint 
        * @description Maximum size (in kilobytes) of vectors allowed for plain index, exceeding this threshold will enable vector indexing
        * 
-       * Default value is 20,000, based on <https://github.com/google-research/google-research/blob/master/scann/docs/algorithms.md>.
+       * Default value is 10,000, based on experiments and observations.
        * 
        * To disable vector indexing, set to `0`.
        * 
@@ -970,13 +977,13 @@ export interface components {
     KeywordIndexType: "keyword";
     IntegerIndexParams: {
       type: components["schemas"]["IntegerIndexType"];
-      /** @description If true - support direct lookups. */
+      /** @description If true - support direct lookups. Default is true. */
       lookup?: boolean | null;
-      /** @description If true - support ranges filters. */
+      /** @description If true - support ranges filters. Default is true. */
       range?: boolean | null;
-      /** @description If true - use this key to organize storage of the collection data. This option assumes that this key will be used in majority of filtered requests. */
+      /** @description If true - use this key to organize storage of the collection data. This option assumes that this key will be used in majority of filtered requests. Default is false. */
       is_principal?: boolean | null;
-      /** @description If true, store the index on disk. Default: false. */
+      /** @description If true, store the index on disk. Default: false. Default is false. */
       on_disk?: boolean | null;
     };
     /** @enum {string} */
@@ -1012,13 +1019,39 @@ export interface components {
       max_token_len?: number | null;
       /** @description If true, lowercase all tokens. Default: true. */
       lowercase?: boolean | null;
+      /** @description If true, support phrase matching. Default: false. */
+      phrase_matching?: boolean | null;
+      /** @description Ignore this set of tokens. Can select from predefined languages and/or provide a custom set. */
+      stopwords?: components["schemas"]["StopwordsInterface"] | (Record<string, unknown> | null);
       /** @description If true, store the index on disk. Default: false. */
       on_disk?: boolean | null;
+      /** @description Algorithm for stemming. Default: disabled. */
+      stemmer?: components["schemas"]["StemmingAlgorithm"] | (Record<string, unknown> | null);
     };
     /** @enum {string} */
     TextIndexType: "text";
     /** @enum {string} */
     TokenizerType: "prefix" | "whitespace" | "word" | "multilingual";
+    StopwordsInterface: components["schemas"]["Language"] | components["schemas"]["StopwordsSet"];
+    /** @enum {string} */
+    Language: "arabic" | "azerbaijani" | "basque" | "bengali" | "catalan" | "chinese" | "danish" | "dutch" | "english" | "finnish" | "french" | "german" | "greek" | "hebrew" | "hinglish" | "hungarian" | "indonesian" | "italian" | "japanese" | "kazakh" | "nepali" | "norwegian" | "portuguese" | "romanian" | "russian" | "slovene" | "spanish" | "swedish" | "tajik" | "turkish";
+    StopwordsSet: {
+      languages?: (components["schemas"]["Language"])[] | null;
+      custom?: (string)[] | null;
+    };
+    /** @description Different stemming algorithms with their configs. */
+    StemmingAlgorithm: components["schemas"]["SnowballParams"];
+    SnowballParams: {
+      type: components["schemas"]["Snowball"];
+      language: components["schemas"]["SnowballLanguage"];
+    };
+    /** @enum {string} */
+    Snowball: "snowball";
+    /**
+     * @description Languages supported by snowball stemmer. 
+     * @enum {string}
+     */
+    SnowballLanguage: "Arabic" | "Armenian" | "Danish" | "Dutch" | "English" | "Finnish" | "French" | "German" | "Greek" | "Hungarian" | "Italian" | "Norwegian" | "Portuguese" | "Romanian" | "Russian" | "Spanish" | "Swedish" | "Tamil" | "Turkish";
     BoolIndexParams: {
       type: components["schemas"]["BoolIndexType"];
       /** @description If true, store the index on disk. Default: false. */
@@ -1202,7 +1235,7 @@ export interface components {
       is_null?: boolean | null;
     };
     /** @description Match filter request */
-    Match: components["schemas"]["MatchValue"] | components["schemas"]["MatchText"] | components["schemas"]["MatchAny"] | components["schemas"]["MatchExcept"];
+    Match: components["schemas"]["MatchValue"] | components["schemas"]["MatchText"] | components["schemas"]["MatchPhrase"] | components["schemas"]["MatchAny"] | components["schemas"]["MatchExcept"];
     /** @description Exact match of the given value */
     MatchValue: {
       value: components["schemas"]["ValueVariants"];
@@ -1211,6 +1244,10 @@ export interface components {
     /** @description Full-text match of the strings. */
     MatchText: {
       text: string;
+    };
+    /** @description Full-text phrase match of the string. */
+    MatchPhrase: {
+      phrase: string;
     };
     /** @description Exact match on any of the given values */
     MatchAny: {
@@ -2271,6 +2308,8 @@ export interface components {
       name: string;
       version: string;
       features?: components["schemas"]["AppFeaturesTelemetry"] | (Record<string, unknown> | null);
+      runtime_features?: components["schemas"]["FeatureFlags"] | (Record<string, unknown> | null);
+      hnsw_global_config?: components["schemas"]["HnswGlobalConfig"] | (Record<string, unknown> | null);
       system?: components["schemas"]["RunningEnvironmentTelemetry"] | (Record<string, unknown> | null);
       jwt_rbac?: boolean | null;
       hide_jwt_dashboard?: boolean | null;
@@ -2279,10 +2318,70 @@ export interface components {
     };
     AppFeaturesTelemetry: {
       debug: boolean;
-      web_feature: boolean;
       service_debug_feature: boolean;
       recovery_mode: boolean;
       gpu: boolean;
+      rocksdb: boolean;
+    };
+    FeatureFlags: {
+      /**
+       * @description Magic feature flag that enables all features.
+       * 
+       * Note that this will only be applied to all flags when passed into [`init_feature_flags`]. 
+       * @default false
+       */
+      all?: boolean;
+      /**
+       * @description Whether to skip usage of RocksDB in immutable payload indices.
+       * 
+       * First implemented in Qdrant 1.13.5. Enabled by default in Qdrant 1.14.1 
+       * @default true
+       */
+      payload_index_skip_rocksdb?: boolean;
+      /**
+       * @description Whether to skip usage of RocksDB in mutable payload indices. 
+       * @default false
+       */
+      payload_index_skip_mutable_rocksdb?: boolean;
+      /**
+       * @description Whether to skip usage of RocksDB for new payload storages.
+       * 
+       * New on-disk payload storages were already using Gridstore. In-memory payload storages still choose RocksDB when this flag is not set.
+       * 
+       * First implemented in Qdrant 1.15.0. 
+       * @default false
+       */
+      payload_storage_skip_rocksdb?: boolean;
+      /**
+       * @description Whether to use incremental HNSW building.
+       * 
+       * Enabled by default in Qdrant 1.14.1. 
+       * @default true
+       */
+      incremental_hnsw_building?: boolean;
+      /**
+       * @description Whether to actively migrate RocksDB based ID trackers into a new format. 
+       * @default false
+       */
+      migrate_rocksdb_id_tracker?: boolean;
+      /**
+       * @description Whether to actively migrate RocksDB based vector storages into a new format. 
+       * @default false
+       */
+      migrate_rocksdb_vector_storage?: boolean;
+      /**
+       * @description Whether to actively migrate RocksDB based payload storages into a new format. 
+       * @default false
+       */
+      migrate_rocksdb_payload_storage?: boolean;
+    };
+    HnswGlobalConfig: {
+      /**
+       * Format: double 
+       * @description Enable HNSW healing if the ratio of missing points is no more than this value. To disable healing completely, set this value to `0.0`. 
+       * @default 0.3
+       */
+      healing_threshold?: number;
     };
     RunningEnvironmentTelemetry: {
       distribution?: string | null;
@@ -2306,6 +2405,8 @@ export interface components {
     CollectionsTelemetry: {
       /** Format: uint */
       number_of_collections: number;
+      /** Format: uint */
+      max_collections?: number | null;
       collections?: (components["schemas"]["CollectionTelemetryEnum"])[] | null;
     };
     CollectionTelemetryEnum: components["schemas"]["CollectionTelemetry"] | components["schemas"]["CollectionsAggregatedTelemetry"];
@@ -2344,6 +2445,7 @@ export interface components {
       replicate_states: {
         [key: string]: components["schemas"]["ReplicaState"] | undefined;
       };
+      partial_snapshot?: components["schemas"]["PartialSnapshotTelemetry"] | (Record<string, unknown> | null);
     };
     LocalShardTelemetry: {
       variant_name?: string | null;
@@ -2511,6 +2613,9 @@ export interface components {
     }, {
       /** @enum {string} */
       type: "mmap";
+    }, {
+      /** @enum {string} */
+      type: "in_ram_mmap";
     }]>;
     VectorIndexSearchesTelemetry: {
       index_name?: string | null;
@@ -2604,6 +2709,13 @@ export interface components {
       peer_id?: number | null;
       searches: components["schemas"]["OperationDurationStatistics"];
       updates: components["schemas"]["OperationDurationStatistics"];
+    };
+    PartialSnapshotTelemetry: {
+      /** Format: uint */
+      ongoing_create_snapshot_requests: number;
+      is_recovering: boolean;
+      /** Format: uint64 */
+      recovery_timestamp: number;
     };
     ShardCleanStatusTelemetry: OneOf<["started" | "done" | "cancelled", {
       progress: components["schemas"]["ShardCleanStatusProgressTelemetry"];
@@ -3485,6 +3597,20 @@ export interface components {
       count: number;
     };
     FacetValue: string | number | boolean;
+    /** @description Usage of the hardware resources, spent to process the request */
+    Usage: {
+      hardware?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+      inference?: components["schemas"]["InferenceUsage"] | (Record<string, unknown> | null);
+    };
+    InferenceUsage: {
+      models: {
+        [key: string]: components["schemas"]["ModelUsage"] | undefined;
+      };
+    };
+    ModelUsage: {
+      /** Format: uint64 */
+      tokens: number;
+    };
   };
   responses: never;
   parameters: never;
