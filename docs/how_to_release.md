@@ -56,7 +56,7 @@ cd packages/js-client-rest
 pnpm codegen:openapi-typescript
 ```
 
-You should changes in one or multiple of the following files:
+You should see changes in one or multiple of the following files:
 
 ```
 src/openapi/generated_schema.ts
