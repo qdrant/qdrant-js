@@ -4648,6 +4648,112 @@ export class DecayParamsExpression extends Message<DecayParamsExpression> {
 }
 
 /**
+ * @generated from message qdrant.NearestInputWithMmr
+ */
+export class NearestInputWithMmr extends Message<NearestInputWithMmr> {
+  /**
+   * The vector to search for nearest neighbors.
+   *
+   * @generated from field: qdrant.VectorInput nearest = 1;
+   */
+  nearest?: VectorInput;
+
+  /**
+   * Perform MMR (Maximal Marginal Relevance) reranking after search,
+   * using the same vector in this query to calculate relevance.
+   *
+   * @generated from field: qdrant.Mmr mmr = 2;
+   */
+  mmr?: Mmr;
+
+  constructor(data?: PartialMessage<NearestInputWithMmr>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.NearestInputWithMmr";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "nearest", kind: "message", T: VectorInput },
+    { no: 2, name: "mmr", kind: "message", T: Mmr },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): NearestInputWithMmr {
+    return new NearestInputWithMmr().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): NearestInputWithMmr {
+    return new NearestInputWithMmr().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): NearestInputWithMmr {
+    return new NearestInputWithMmr().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: NearestInputWithMmr | PlainMessage<NearestInputWithMmr> | undefined, b: NearestInputWithMmr | PlainMessage<NearestInputWithMmr> | undefined): boolean {
+    return proto3.util.equals(NearestInputWithMmr, a, b);
+  }
+}
+
+/**
+ * Maximal Marginal Relevance (MMR) algorithm for re-ranking the points.
+ *
+ * @generated from message qdrant.Mmr
+ */
+export class Mmr extends Message<Mmr> {
+  /**
+   * Tunable parameter for the MMR algorithm.
+   * Determines the balance between diversity and relevance.
+   *
+   * A higher value favors diversity (dissimilarity to selected results),
+   * while a lower value favors relevance (similarity to the query vector).
+   *
+   * Must be in the range [0, 1].
+   * Default value is 0.5.
+   *
+   * @generated from field: optional float diversity = 2;
+   */
+  diversity?: number;
+
+  /**
+   * The maximum number of candidates to consider for re-ranking.
+   *
+   * If not specified, the `limit` value is used.
+   *
+   * @generated from field: optional uint32 candidates_limit = 3;
+   */
+  candidatesLimit?: number;
+
+  constructor(data?: PartialMessage<Mmr>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.Mmr";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 2, name: "diversity", kind: "scalar", T: 2 /* ScalarType.FLOAT */, opt: true },
+    { no: 3, name: "candidates_limit", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Mmr {
+    return new Mmr().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Mmr {
+    return new Mmr().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Mmr {
+    return new Mmr().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Mmr | PlainMessage<Mmr> | undefined, b: Mmr | PlainMessage<Mmr> | undefined): boolean {
+    return proto3.util.equals(Mmr, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.Query
  */
 export class Query extends Message<Query> {
@@ -4718,6 +4824,14 @@ export class Query extends Message<Query> {
      */
     value: Formula;
     case: "formula";
+  } | {
+    /**
+     * Search nearest neighbors, but re-rank based on the Maximal Marginal Relevance algorithm.
+     *
+     * @generated from field: qdrant.NearestInputWithMmr nearest_with_mmr = 9;
+     */
+    value: NearestInputWithMmr;
+    case: "nearestWithMmr";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<Query>) {
@@ -4736,6 +4850,7 @@ export class Query extends Message<Query> {
     { no: 6, name: "fusion", kind: "enum", T: proto3.getEnumType(Fusion), oneof: "variant" },
     { no: 7, name: "sample", kind: "enum", T: proto3.getEnumType(Sample), oneof: "variant" },
     { no: 8, name: "formula", kind: "message", T: Formula, oneof: "variant" },
+    { no: 9, name: "nearest_with_mmr", kind: "message", T: NearestInputWithMmr, oneof: "variant" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Query {
