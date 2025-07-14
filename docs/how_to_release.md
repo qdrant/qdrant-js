@@ -127,6 +127,8 @@ packages/qdrant-js/scripts/integration-tests.sh:12:QDRANT_LATEST="v1.15.0"      
 pnpm-lock.yaml:134:        specifier: workspace:1.15.0                                    -- NO, automatically updated by pnpm
 pnpm-lock.yaml:137:        specifier: workspace:1.15.0                                    -- NO, automatically updated by pnpm
 examples/node-js-basic/package.json:18:        "@qdrant/qdrant-js": "^1.15.0"             -- YES
+package.json        "@qdrant/js-client-rest": "workspace:1.15.0",                         -- YES
+package.json        "@qdrant/js-client-grpc": "workspace:1.15.0"                          -- YES
 ```
 
 
