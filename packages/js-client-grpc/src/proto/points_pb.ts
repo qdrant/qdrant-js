@@ -4648,6 +4648,112 @@ export class DecayParamsExpression extends Message<DecayParamsExpression> {
 }
 
 /**
+ * @generated from message qdrant.NearestInputWithMmr
+ */
+export class NearestInputWithMmr extends Message<NearestInputWithMmr> {
+  /**
+   * The vector to search for nearest neighbors.
+   *
+   * @generated from field: qdrant.VectorInput nearest = 1;
+   */
+  nearest?: VectorInput;
+
+  /**
+   * Perform MMR (Maximal Marginal Relevance) reranking after search,
+   * using the same vector in this query to calculate relevance.
+   *
+   * @generated from field: qdrant.Mmr mmr = 2;
+   */
+  mmr?: Mmr;
+
+  constructor(data?: PartialMessage<NearestInputWithMmr>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.NearestInputWithMmr";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "nearest", kind: "message", T: VectorInput },
+    { no: 2, name: "mmr", kind: "message", T: Mmr },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): NearestInputWithMmr {
+    return new NearestInputWithMmr().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): NearestInputWithMmr {
+    return new NearestInputWithMmr().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): NearestInputWithMmr {
+    return new NearestInputWithMmr().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: NearestInputWithMmr | PlainMessage<NearestInputWithMmr> | undefined, b: NearestInputWithMmr | PlainMessage<NearestInputWithMmr> | undefined): boolean {
+    return proto3.util.equals(NearestInputWithMmr, a, b);
+  }
+}
+
+/**
+ * Maximal Marginal Relevance (MMR) algorithm for re-ranking the points.
+ *
+ * @generated from message qdrant.Mmr
+ */
+export class Mmr extends Message<Mmr> {
+  /**
+   * Tunable parameter for the MMR algorithm.
+   * Determines the balance between diversity and relevance.
+   *
+   * A higher value favors diversity (dissimilarity to selected results),
+   * while a lower value favors relevance (similarity to the query vector).
+   *
+   * Must be in the range [0, 1].
+   * Default value is 0.5.
+   *
+   * @generated from field: optional float diversity = 2;
+   */
+  diversity?: number;
+
+  /**
+   * The maximum number of candidates to consider for re-ranking.
+   *
+   * If not specified, the `limit` value is used.
+   *
+   * @generated from field: optional uint32 candidates_limit = 3;
+   */
+  candidatesLimit?: number;
+
+  constructor(data?: PartialMessage<Mmr>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.Mmr";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 2, name: "diversity", kind: "scalar", T: 2 /* ScalarType.FLOAT */, opt: true },
+    { no: 3, name: "candidates_limit", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Mmr {
+    return new Mmr().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Mmr {
+    return new Mmr().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Mmr {
+    return new Mmr().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Mmr | PlainMessage<Mmr> | undefined, b: Mmr | PlainMessage<Mmr> | undefined): boolean {
+    return proto3.util.equals(Mmr, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.Query
  */
 export class Query extends Message<Query> {
@@ -4718,6 +4824,14 @@ export class Query extends Message<Query> {
      */
     value: Formula;
     case: "formula";
+  } | {
+    /**
+     * Search nearest neighbors, but re-rank based on the Maximal Marginal Relevance algorithm.
+     *
+     * @generated from field: qdrant.NearestInputWithMmr nearest_with_mmr = 9;
+     */
+    value: NearestInputWithMmr;
+    case: "nearestWithMmr";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<Query>) {
@@ -4736,6 +4850,7 @@ export class Query extends Message<Query> {
     { no: 6, name: "fusion", kind: "enum", T: proto3.getEnumType(Fusion), oneof: "variant" },
     { no: 7, name: "sample", kind: "enum", T: proto3.getEnumType(Sample), oneof: "variant" },
     { no: 8, name: "formula", kind: "message", T: Formula, oneof: "variant" },
+    { no: 9, name: "nearest_with_mmr", kind: "message", T: NearestInputWithMmr, oneof: "variant" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Query {
@@ -6286,9 +6401,9 @@ export class PointsOperationResponse extends Message<PointsOperationResponse> {
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   * @generated from field: optional qdrant.Usage usage = 3;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<PointsOperationResponse>) {
     super();
@@ -6300,7 +6415,7 @@ export class PointsOperationResponse extends Message<PointsOperationResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: UpdateResult },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsOperationResponse {
@@ -6678,9 +6793,9 @@ export class SearchResponse extends Message<SearchResponse> {
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   * @generated from field: optional qdrant.Usage usage = 3;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<SearchResponse>) {
     super();
@@ -6692,7 +6807,7 @@ export class SearchResponse extends Message<SearchResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: ScoredPoint, repeated: true },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchResponse {
@@ -6729,9 +6844,9 @@ export class QueryResponse extends Message<QueryResponse> {
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   * @generated from field: optional qdrant.Usage usage = 3;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<QueryResponse>) {
     super();
@@ -6743,7 +6858,7 @@ export class QueryResponse extends Message<QueryResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: ScoredPoint, repeated: true },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryResponse {
@@ -6780,9 +6895,9 @@ export class QueryBatchResponse extends Message<QueryBatchResponse> {
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   * @generated from field: optional qdrant.Usage usage = 3;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<QueryBatchResponse>) {
     super();
@@ -6794,7 +6909,7 @@ export class QueryBatchResponse extends Message<QueryBatchResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: BatchResult, repeated: true },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryBatchResponse {
@@ -6831,9 +6946,9 @@ export class QueryGroupsResponse extends Message<QueryGroupsResponse> {
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   * @generated from field: optional qdrant.Usage usage = 3;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<QueryGroupsResponse>) {
     super();
@@ -6845,7 +6960,7 @@ export class QueryGroupsResponse extends Message<QueryGroupsResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: GroupsResult },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGroupsResponse {
@@ -6919,9 +7034,9 @@ export class SearchBatchResponse extends Message<SearchBatchResponse> {
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   * @generated from field: optional qdrant.Usage usage = 3;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<SearchBatchResponse>) {
     super();
@@ -6933,7 +7048,7 @@ export class SearchBatchResponse extends Message<SearchBatchResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: BatchResult, repeated: true },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchBatchResponse {
@@ -6970,9 +7085,9 @@ export class SearchGroupsResponse extends Message<SearchGroupsResponse> {
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   * @generated from field: optional qdrant.Usage usage = 3;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<SearchGroupsResponse>) {
     super();
@@ -6984,7 +7099,7 @@ export class SearchGroupsResponse extends Message<SearchGroupsResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: GroupsResult },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchGroupsResponse {
@@ -7021,9 +7136,9 @@ export class CountResponse extends Message<CountResponse> {
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   * @generated from field: optional qdrant.Usage usage = 3;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<CountResponse>) {
     super();
@@ -7035,7 +7150,7 @@ export class CountResponse extends Message<CountResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: CountResult },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CountResponse {
@@ -7079,9 +7194,9 @@ export class ScrollResponse extends Message<ScrollResponse> {
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 4;
+   * @generated from field: optional qdrant.Usage usage = 4;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<ScrollResponse>) {
     super();
@@ -7094,7 +7209,7 @@ export class ScrollResponse extends Message<ScrollResponse> {
     { no: 1, name: "next_page_offset", kind: "message", T: PointId, opt: true },
     { no: 2, name: "result", kind: "message", T: RetrievedPoint, repeated: true },
     { no: 3, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 4, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 4, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ScrollResponse {
@@ -7233,9 +7348,9 @@ export class GetResponse extends Message<GetResponse> {
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   * @generated from field: optional qdrant.Usage usage = 3;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<GetResponse>) {
     super();
@@ -7247,7 +7362,7 @@ export class GetResponse extends Message<GetResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: RetrievedPoint, repeated: true },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetResponse {
@@ -7284,9 +7399,9 @@ export class RecommendResponse extends Message<RecommendResponse> {
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   * @generated from field: optional qdrant.Usage usage = 3;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<RecommendResponse>) {
     super();
@@ -7298,7 +7413,7 @@ export class RecommendResponse extends Message<RecommendResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: ScoredPoint, repeated: true },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RecommendResponse {
@@ -7335,9 +7450,9 @@ export class RecommendBatchResponse extends Message<RecommendBatchResponse> {
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   * @generated from field: optional qdrant.Usage usage = 3;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<RecommendBatchResponse>) {
     super();
@@ -7349,7 +7464,7 @@ export class RecommendBatchResponse extends Message<RecommendBatchResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: BatchResult, repeated: true },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RecommendBatchResponse {
@@ -7386,9 +7501,9 @@ export class DiscoverResponse extends Message<DiscoverResponse> {
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   * @generated from field: optional qdrant.Usage usage = 3;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<DiscoverResponse>) {
     super();
@@ -7400,7 +7515,7 @@ export class DiscoverResponse extends Message<DiscoverResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: ScoredPoint, repeated: true },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DiscoverResponse {
@@ -7437,9 +7552,9 @@ export class DiscoverBatchResponse extends Message<DiscoverBatchResponse> {
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   * @generated from field: optional qdrant.Usage usage = 3;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<DiscoverBatchResponse>) {
     super();
@@ -7451,7 +7566,7 @@ export class DiscoverBatchResponse extends Message<DiscoverBatchResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: BatchResult, repeated: true },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DiscoverBatchResponse {
@@ -7488,9 +7603,9 @@ export class RecommendGroupsResponse extends Message<RecommendGroupsResponse> {
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   * @generated from field: optional qdrant.Usage usage = 3;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<RecommendGroupsResponse>) {
     super();
@@ -7502,7 +7617,7 @@ export class RecommendGroupsResponse extends Message<RecommendGroupsResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: GroupsResult },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RecommendGroupsResponse {
@@ -7538,6 +7653,11 @@ export class UpdateBatchResponse extends Message<UpdateBatchResponse> {
    */
   time = 0;
 
+  /**
+   * @generated from field: optional qdrant.Usage usage = 3;
+   */
+  usage?: Usage;
+
   constructor(data?: PartialMessage<UpdateBatchResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -7548,6 +7668,7 @@ export class UpdateBatchResponse extends Message<UpdateBatchResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: UpdateResult, repeated: true },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateBatchResponse {
@@ -7629,9 +7750,9 @@ export class SearchMatrixPairsResponse extends Message<SearchMatrixPairsResponse
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   * @generated from field: optional qdrant.Usage usage = 3;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<SearchMatrixPairsResponse>) {
     super();
@@ -7643,7 +7764,7 @@ export class SearchMatrixPairsResponse extends Message<SearchMatrixPairsResponse
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: SearchMatrixPairs },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchMatrixPairsResponse {
@@ -7680,9 +7801,9 @@ export class SearchMatrixOffsetsResponse extends Message<SearchMatrixOffsetsResp
   time = 0;
 
   /**
-   * @generated from field: optional qdrant.HardwareUsage usage = 3;
+   * @generated from field: optional qdrant.Usage usage = 3;
    */
-  usage?: HardwareUsage;
+  usage?: Usage;
 
   constructor(data?: PartialMessage<SearchMatrixOffsetsResponse>) {
     super();
@@ -7694,7 +7815,7 @@ export class SearchMatrixOffsetsResponse extends Message<SearchMatrixOffsetsResp
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "result", kind: "message", T: SearchMatrixOffsets },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
-    { no: 3, name: "usage", kind: "message", T: HardwareUsage, opt: true },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchMatrixOffsetsResponse {
@@ -8280,6 +8401,14 @@ export class Match extends Message<Match> {
      */
     value: RepeatedStrings;
     case: "exceptKeywords";
+  } | {
+    /**
+     * Match phrase text
+     *
+     * @generated from field: string phrase = 9;
+     */
+    value: string;
+    case: "phrase";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<Match>) {
@@ -8298,6 +8427,7 @@ export class Match extends Message<Match> {
     { no: 6, name: "integers", kind: "message", T: RepeatedIntegers, oneof: "match_value" },
     { no: 7, name: "except_integers", kind: "message", T: RepeatedIntegers, oneof: "match_value" },
     { no: 8, name: "except_keywords", kind: "message", T: RepeatedStrings, oneof: "match_value" },
+    { no: 9, name: "phrase", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "match_value" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Match {
@@ -8915,6 +9045,127 @@ export class GeoPoint extends Message<GeoPoint> {
 
   static equals(a: GeoPoint | PlainMessage<GeoPoint> | undefined, b: GeoPoint | PlainMessage<GeoPoint> | undefined): boolean {
     return proto3.util.equals(GeoPoint, a, b);
+  }
+}
+
+/**
+ * ---------------------------------------------
+ * ----------- Measurements collector ----------
+ * ---------------------------------------------
+ *
+ * @generated from message qdrant.Usage
+ */
+export class Usage extends Message<Usage> {
+  /**
+   * @generated from field: optional qdrant.HardwareUsage hardware = 1;
+   */
+  hardware?: HardwareUsage;
+
+  /**
+   * @generated from field: optional qdrant.InferenceUsage inference = 2;
+   */
+  inference?: InferenceUsage;
+
+  constructor(data?: PartialMessage<Usage>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.Usage";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "hardware", kind: "message", T: HardwareUsage, opt: true },
+    { no: 2, name: "inference", kind: "message", T: InferenceUsage, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Usage {
+    return new Usage().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Usage {
+    return new Usage().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Usage {
+    return new Usage().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Usage | PlainMessage<Usage> | undefined, b: Usage | PlainMessage<Usage> | undefined): boolean {
+    return proto3.util.equals(Usage, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.InferenceUsage
+ */
+export class InferenceUsage extends Message<InferenceUsage> {
+  /**
+   * @generated from field: map<string, qdrant.ModelUsage> models = 1;
+   */
+  models: { [key: string]: ModelUsage } = {};
+
+  constructor(data?: PartialMessage<InferenceUsage>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.InferenceUsage";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "models", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: ModelUsage} },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): InferenceUsage {
+    return new InferenceUsage().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): InferenceUsage {
+    return new InferenceUsage().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): InferenceUsage {
+    return new InferenceUsage().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: InferenceUsage | PlainMessage<InferenceUsage> | undefined, b: InferenceUsage | PlainMessage<InferenceUsage> | undefined): boolean {
+    return proto3.util.equals(InferenceUsage, a, b);
+  }
+}
+
+/**
+ * @generated from message qdrant.ModelUsage
+ */
+export class ModelUsage extends Message<ModelUsage> {
+  /**
+   * @generated from field: uint64 tokens = 1;
+   */
+  tokens = protoInt64.zero;
+
+  constructor(data?: PartialMessage<ModelUsage>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.ModelUsage";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "tokens", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ModelUsage {
+    return new ModelUsage().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ModelUsage {
+    return new ModelUsage().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ModelUsage {
+    return new ModelUsage().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ModelUsage | PlainMessage<ModelUsage> | undefined, b: ModelUsage | PlainMessage<ModelUsage> | undefined): boolean {
+    return proto3.util.equals(ModelUsage, a, b);
   }
 }
 
