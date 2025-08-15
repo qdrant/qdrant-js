@@ -3,23 +3,24 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import {HealthCheckReply, HealthCheckRequest} from './qdrant_pb.js';
-import {MethodKind} from '@bufbuild/protobuf';
+import { HealthCheckReply, HealthCheckRequest } from "./qdrant_pb.js";
+import { MethodKind } from "@bufbuild/protobuf";
 
 /**
  * @generated from service qdrant.Qdrant
  */
 export const Qdrant = {
-    typeName: 'qdrant.Qdrant',
-    methods: {
-        /**
-         * @generated from rpc qdrant.Qdrant.HealthCheck
-         */
-        healthCheck: {
-            name: 'HealthCheck',
-            I: HealthCheckRequest,
-            O: HealthCheckReply,
-            kind: MethodKind.Unary,
-        },
+  typeName: "qdrant.Qdrant",
+  methods: {
+    /**
+     * @generated from rpc qdrant.Qdrant.HealthCheck
+     */
+    healthCheck: {
+      name: "HealthCheck",
+      I: HealthCheckRequest,
+      O: HealthCheckReply,
+      kind: MethodKind.Unary,
     },
+  }
 } as const;
+

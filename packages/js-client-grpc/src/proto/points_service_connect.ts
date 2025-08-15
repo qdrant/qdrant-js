@@ -3,410 +3,365 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import {
-    ClearPayloadPoints,
-    CountPoints,
-    CountResponse,
-    CreateFieldIndexCollection,
-    DeleteFieldIndexCollection,
-    DeletePayloadPoints,
-    DeletePoints,
-    DeletePointVectors,
-    DiscoverBatchPoints,
-    DiscoverBatchResponse,
-    DiscoverPoints,
-    DiscoverResponse,
-    FacetCounts,
-    FacetResponse,
-    GetPoints,
-    GetResponse,
-    PointsOperationResponse,
-    QueryBatchPoints,
-    QueryBatchResponse,
-    QueryGroupsResponse,
-    QueryPointGroups,
-    QueryPoints,
-    QueryResponse,
-    RecommendBatchPoints,
-    RecommendBatchResponse,
-    RecommendGroupsResponse,
-    RecommendPointGroups,
-    RecommendPoints,
-    RecommendResponse,
-    ScrollPoints,
-    ScrollResponse,
-    SearchBatchPoints,
-    SearchBatchResponse,
-    SearchGroupsResponse,
-    SearchMatrixOffsetsResponse,
-    SearchMatrixPairsResponse,
-    SearchMatrixPoints,
-    SearchPointGroups,
-    SearchPoints,
-    SearchResponse,
-    SetPayloadPoints,
-    UpdateBatchPoints,
-    UpdateBatchResponse,
-    UpdatePointVectors,
-    UpsertPoints,
-} from './points_pb.js';
-import {MethodKind} from '@bufbuild/protobuf';
+import { ClearPayloadPoints, CountPoints, CountResponse, CreateFieldIndexCollection, DeleteFieldIndexCollection, DeletePayloadPoints, DeletePoints, DeletePointVectors, DiscoverBatchPoints, DiscoverBatchResponse, DiscoverPoints, DiscoverResponse, FacetCounts, FacetResponse, GetPoints, GetResponse, PointsOperationResponse, QueryBatchPoints, QueryBatchResponse, QueryGroupsResponse, QueryPointGroups, QueryPoints, QueryResponse, RecommendBatchPoints, RecommendBatchResponse, RecommendGroupsResponse, RecommendPointGroups, RecommendPoints, RecommendResponse, ScrollPoints, ScrollResponse, SearchBatchPoints, SearchBatchResponse, SearchGroupsResponse, SearchMatrixOffsetsResponse, SearchMatrixPairsResponse, SearchMatrixPoints, SearchPointGroups, SearchPoints, SearchResponse, SetPayloadPoints, UpdateBatchPoints, UpdateBatchResponse, UpdatePointVectors, UpsertPoints } from "./points_pb.js";
+import { MethodKind } from "@bufbuild/protobuf";
 
 /**
  * @generated from service qdrant.Points
  */
 export const Points = {
-    typeName: 'qdrant.Points',
-    methods: {
-        /**
-         *
-         * Perform insert + updates on points. If a point with a given ID already exists - it will be overwritten.
-         *
-         * @generated from rpc qdrant.Points.Upsert
-         */
-        upsert: {
-            name: 'Upsert',
-            I: UpsertPoints,
-            O: PointsOperationResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Delete points
-         *
-         * @generated from rpc qdrant.Points.Delete
-         */
-        delete: {
-            name: 'Delete',
-            I: DeletePoints,
-            O: PointsOperationResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Retrieve points
-         *
-         * @generated from rpc qdrant.Points.Get
-         */
-        get: {
-            name: 'Get',
-            I: GetPoints,
-            O: GetResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Update named vectors for point
-         *
-         * @generated from rpc qdrant.Points.UpdateVectors
-         */
-        updateVectors: {
-            name: 'UpdateVectors',
-            I: UpdatePointVectors,
-            O: PointsOperationResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Delete named vectors for points
-         *
-         * @generated from rpc qdrant.Points.DeleteVectors
-         */
-        deleteVectors: {
-            name: 'DeleteVectors',
-            I: DeletePointVectors,
-            O: PointsOperationResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Set payload for points
-         *
-         * @generated from rpc qdrant.Points.SetPayload
-         */
-        setPayload: {
-            name: 'SetPayload',
-            I: SetPayloadPoints,
-            O: PointsOperationResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Overwrite payload for points
-         *
-         * @generated from rpc qdrant.Points.OverwritePayload
-         */
-        overwritePayload: {
-            name: 'OverwritePayload',
-            I: SetPayloadPoints,
-            O: PointsOperationResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Delete specified key payload for points
-         *
-         * @generated from rpc qdrant.Points.DeletePayload
-         */
-        deletePayload: {
-            name: 'DeletePayload',
-            I: DeletePayloadPoints,
-            O: PointsOperationResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Remove all payload for specified points
-         *
-         * @generated from rpc qdrant.Points.ClearPayload
-         */
-        clearPayload: {
-            name: 'ClearPayload',
-            I: ClearPayloadPoints,
-            O: PointsOperationResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Create index for field in collection
-         *
-         * @generated from rpc qdrant.Points.CreateFieldIndex
-         */
-        createFieldIndex: {
-            name: 'CreateFieldIndex',
-            I: CreateFieldIndexCollection,
-            O: PointsOperationResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Delete field index for collection
-         *
-         * @generated from rpc qdrant.Points.DeleteFieldIndex
-         */
-        deleteFieldIndex: {
-            name: 'DeleteFieldIndex',
-            I: DeleteFieldIndexCollection,
-            O: PointsOperationResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Retrieve closest points based on vector similarity and given filtering conditions
-         *
-         * @generated from rpc qdrant.Points.Search
-         */
-        search: {
-            name: 'Search',
-            I: SearchPoints,
-            O: SearchResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Retrieve closest points based on vector similarity and given filtering conditions
-         *
-         * @generated from rpc qdrant.Points.SearchBatch
-         */
-        searchBatch: {
-            name: 'SearchBatch',
-            I: SearchBatchPoints,
-            O: SearchBatchResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Retrieve closest points based on vector similarity and given filtering conditions, grouped by a given field
-         *
-         * @generated from rpc qdrant.Points.SearchGroups
-         */
-        searchGroups: {
-            name: 'SearchGroups',
-            I: SearchPointGroups,
-            O: SearchGroupsResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Iterate over all or filtered points
-         *
-         * @generated from rpc qdrant.Points.Scroll
-         */
-        scroll: {
-            name: 'Scroll',
-            I: ScrollPoints,
-            O: ScrollResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Look for the points which are closer to stored positive examples and at the same time further to negative examples.
-         *
-         * @generated from rpc qdrant.Points.Recommend
-         */
-        recommend: {
-            name: 'Recommend',
-            I: RecommendPoints,
-            O: RecommendResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Look for the points which are closer to stored positive examples and at the same time further to negative examples.
-         *
-         * @generated from rpc qdrant.Points.RecommendBatch
-         */
-        recommendBatch: {
-            name: 'RecommendBatch',
-            I: RecommendBatchPoints,
-            O: RecommendBatchResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Look for the points which are closer to stored positive examples and at the same time further to negative examples, grouped by a given field
-         *
-         * @generated from rpc qdrant.Points.RecommendGroups
-         */
-        recommendGroups: {
-            name: 'RecommendGroups',
-            I: RecommendPointGroups,
-            O: RecommendGroupsResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Use context and a target to find the most similar points to the target, constrained by the context.
-         *
-         * When using only the context (without a target), a special search - called context search - is performed where
-         * pairs of points are used to generate a loss that guides the search towards the zone where
-         * most positive examples overlap. This means that the score minimizes the scenario of
-         * finding a point closer to a negative than to a positive part of a pair.
-         *
-         * Since the score of a context relates to loss, the maximum score a point can get is 0.0,
-         * and it becomes normal that many points can have a score of 0.0.
-         *
-         * When using target (with or without context), the score behaves a little different: The
-         * integer part of the score represents the rank with respect to the context, while the
-         * decimal part of the score relates to the distance to the target. The context part of the score for
-         * each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair,
-         * and -1 otherwise.
-         *
-         * @generated from rpc qdrant.Points.Discover
-         */
-        discover: {
-            name: 'Discover',
-            I: DiscoverPoints,
-            O: DiscoverResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Batch request points based on { positive, negative } pairs of examples, and/or a target
-         *
-         * @generated from rpc qdrant.Points.DiscoverBatch
-         */
-        discoverBatch: {
-            name: 'DiscoverBatch',
-            I: DiscoverBatchPoints,
-            O: DiscoverBatchResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Count points in collection with given filtering conditions
-         *
-         * @generated from rpc qdrant.Points.Count
-         */
-        count: {
-            name: 'Count',
-            I: CountPoints,
-            O: CountResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Perform multiple update operations in one request
-         *
-         * @generated from rpc qdrant.Points.UpdateBatch
-         */
-        updateBatch: {
-            name: 'UpdateBatch',
-            I: UpdateBatchPoints,
-            O: UpdateBatchResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Universally query points. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
-         *
-         * @generated from rpc qdrant.Points.Query
-         */
-        query: {
-            name: 'Query',
-            I: QueryPoints,
-            O: QueryResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Universally query points in a batch fashion. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
-         *
-         * @generated from rpc qdrant.Points.QueryBatch
-         */
-        queryBatch: {
-            name: 'QueryBatch',
-            I: QueryBatchPoints,
-            O: QueryBatchResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Universally query points in a group fashion. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
-         *
-         * @generated from rpc qdrant.Points.QueryGroups
-         */
-        queryGroups: {
-            name: 'QueryGroups',
-            I: QueryPointGroups,
-            O: QueryGroupsResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Perform facet counts. For each value in the field, count the number of points that have this value and match the conditions.
-         *
-         * @generated from rpc qdrant.Points.Facet
-         */
-        facet: {
-            name: 'Facet',
-            I: FacetCounts,
-            O: FacetResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Compute distance matrix for sampled points with a pair based output format
-         *
-         * @generated from rpc qdrant.Points.SearchMatrixPairs
-         */
-        searchMatrixPairs: {
-            name: 'SearchMatrixPairs',
-            I: SearchMatrixPoints,
-            O: SearchMatrixPairsResponse,
-            kind: MethodKind.Unary,
-        },
-        /**
-         *
-         * Compute distance matrix for sampled points with an offset based output format
-         *
-         * @generated from rpc qdrant.Points.SearchMatrixOffsets
-         */
-        searchMatrixOffsets: {
-            name: 'SearchMatrixOffsets',
-            I: SearchMatrixPoints,
-            O: SearchMatrixOffsetsResponse,
-            kind: MethodKind.Unary,
-        },
+  typeName: "qdrant.Points",
+  methods: {
+    /**
+     *
+     * Perform insert + updates on points. If a point with a given ID already exists - it will be overwritten.
+     *
+     * @generated from rpc qdrant.Points.Upsert
+     */
+    upsert: {
+      name: "Upsert",
+      I: UpsertPoints,
+      O: PointsOperationResponse,
+      kind: MethodKind.Unary,
     },
+    /**
+     *
+     * Delete points
+     *
+     * @generated from rpc qdrant.Points.Delete
+     */
+    delete: {
+      name: "Delete",
+      I: DeletePoints,
+      O: PointsOperationResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Retrieve points
+     *
+     * @generated from rpc qdrant.Points.Get
+     */
+    get: {
+      name: "Get",
+      I: GetPoints,
+      O: GetResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Update named vectors for point
+     *
+     * @generated from rpc qdrant.Points.UpdateVectors
+     */
+    updateVectors: {
+      name: "UpdateVectors",
+      I: UpdatePointVectors,
+      O: PointsOperationResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Delete named vectors for points
+     *
+     * @generated from rpc qdrant.Points.DeleteVectors
+     */
+    deleteVectors: {
+      name: "DeleteVectors",
+      I: DeletePointVectors,
+      O: PointsOperationResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Set payload for points
+     *
+     * @generated from rpc qdrant.Points.SetPayload
+     */
+    setPayload: {
+      name: "SetPayload",
+      I: SetPayloadPoints,
+      O: PointsOperationResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Overwrite payload for points
+     *
+     * @generated from rpc qdrant.Points.OverwritePayload
+     */
+    overwritePayload: {
+      name: "OverwritePayload",
+      I: SetPayloadPoints,
+      O: PointsOperationResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Delete specified key payload for points
+     *
+     * @generated from rpc qdrant.Points.DeletePayload
+     */
+    deletePayload: {
+      name: "DeletePayload",
+      I: DeletePayloadPoints,
+      O: PointsOperationResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Remove all payload for specified points
+     *
+     * @generated from rpc qdrant.Points.ClearPayload
+     */
+    clearPayload: {
+      name: "ClearPayload",
+      I: ClearPayloadPoints,
+      O: PointsOperationResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Create index for field in collection
+     *
+     * @generated from rpc qdrant.Points.CreateFieldIndex
+     */
+    createFieldIndex: {
+      name: "CreateFieldIndex",
+      I: CreateFieldIndexCollection,
+      O: PointsOperationResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Delete field index for collection
+     *
+     * @generated from rpc qdrant.Points.DeleteFieldIndex
+     */
+    deleteFieldIndex: {
+      name: "DeleteFieldIndex",
+      I: DeleteFieldIndexCollection,
+      O: PointsOperationResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Retrieve closest points based on vector similarity and given filtering conditions
+     *
+     * @generated from rpc qdrant.Points.Search
+     */
+    search: {
+      name: "Search",
+      I: SearchPoints,
+      O: SearchResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Retrieve closest points based on vector similarity and given filtering conditions
+     *
+     * @generated from rpc qdrant.Points.SearchBatch
+     */
+    searchBatch: {
+      name: "SearchBatch",
+      I: SearchBatchPoints,
+      O: SearchBatchResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Retrieve closest points based on vector similarity and given filtering conditions, grouped by a given field
+     *
+     * @generated from rpc qdrant.Points.SearchGroups
+     */
+    searchGroups: {
+      name: "SearchGroups",
+      I: SearchPointGroups,
+      O: SearchGroupsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Iterate over all or filtered points
+     *
+     * @generated from rpc qdrant.Points.Scroll
+     */
+    scroll: {
+      name: "Scroll",
+      I: ScrollPoints,
+      O: ScrollResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Look for the points which are closer to stored positive examples and at the same time further to negative examples.
+     *
+     * @generated from rpc qdrant.Points.Recommend
+     */
+    recommend: {
+      name: "Recommend",
+      I: RecommendPoints,
+      O: RecommendResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Look for the points which are closer to stored positive examples and at the same time further to negative examples.
+     *
+     * @generated from rpc qdrant.Points.RecommendBatch
+     */
+    recommendBatch: {
+      name: "RecommendBatch",
+      I: RecommendBatchPoints,
+      O: RecommendBatchResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Look for the points which are closer to stored positive examples and at the same time further to negative examples, grouped by a given field
+     *
+     * @generated from rpc qdrant.Points.RecommendGroups
+     */
+    recommendGroups: {
+      name: "RecommendGroups",
+      I: RecommendPointGroups,
+      O: RecommendGroupsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Use context and a target to find the most similar points to the target, constrained by the context.
+     *
+     * When using only the context (without a target), a special search - called context search - is performed where
+     * pairs of points are used to generate a loss that guides the search towards the zone where
+     * most positive examples overlap. This means that the score minimizes the scenario of
+     * finding a point closer to a negative than to a positive part of a pair.
+     *
+     * Since the score of a context relates to loss, the maximum score a point can get is 0.0,
+     * and it becomes normal that many points can have a score of 0.0.
+     *
+     * When using target (with or without context), the score behaves a little different: The 
+     * integer part of the score represents the rank with respect to the context, while the
+     * decimal part of the score relates to the distance to the target. The context part of the score for 
+     * each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, 
+     * and -1 otherwise.
+     *
+     * @generated from rpc qdrant.Points.Discover
+     */
+    discover: {
+      name: "Discover",
+      I: DiscoverPoints,
+      O: DiscoverResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Batch request points based on { positive, negative } pairs of examples, and/or a target
+     *
+     * @generated from rpc qdrant.Points.DiscoverBatch
+     */
+    discoverBatch: {
+      name: "DiscoverBatch",
+      I: DiscoverBatchPoints,
+      O: DiscoverBatchResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Count points in collection with given filtering conditions
+     *
+     * @generated from rpc qdrant.Points.Count
+     */
+    count: {
+      name: "Count",
+      I: CountPoints,
+      O: CountResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Perform multiple update operations in one request
+     *
+     * @generated from rpc qdrant.Points.UpdateBatch
+     */
+    updateBatch: {
+      name: "UpdateBatch",
+      I: UpdateBatchPoints,
+      O: UpdateBatchResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Universally query points. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+     *
+     * @generated from rpc qdrant.Points.Query
+     */
+    query: {
+      name: "Query",
+      I: QueryPoints,
+      O: QueryResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Universally query points in a batch fashion. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+     *
+     * @generated from rpc qdrant.Points.QueryBatch
+     */
+    queryBatch: {
+      name: "QueryBatch",
+      I: QueryBatchPoints,
+      O: QueryBatchResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Universally query points in a group fashion. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+     *
+     * @generated from rpc qdrant.Points.QueryGroups
+     */
+    queryGroups: {
+      name: "QueryGroups",
+      I: QueryPointGroups,
+      O: QueryGroupsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Perform facet counts. For each value in the field, count the number of points that have this value and match the conditions.
+     *
+     * @generated from rpc qdrant.Points.Facet
+     */
+    facet: {
+      name: "Facet",
+      I: FacetCounts,
+      O: FacetResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Compute distance matrix for sampled points with a pair based output format
+     *
+     * @generated from rpc qdrant.Points.SearchMatrixPairs
+     */
+    searchMatrixPairs: {
+      name: "SearchMatrixPairs",
+      I: SearchMatrixPoints,
+      O: SearchMatrixPairsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     *
+     * Compute distance matrix for sampled points with an offset based output format
+     *
+     * @generated from rpc qdrant.Points.SearchMatrixOffsets
+     */
+    searchMatrixOffsets: {
+      name: "SearchMatrixOffsets",
+      I: SearchMatrixPoints,
+      O: SearchMatrixOffsetsResponse,
+      kind: MethodKind.Unary,
+    },
+  }
 } as const;
+
