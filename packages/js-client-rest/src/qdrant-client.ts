@@ -537,6 +537,35 @@ export class QdrantClient {
     }
 
     /**
+     * Update collection cluster setup
+     * @param collection_name Name of the collection
+     * @param {object} args
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     *     - operation: Cluster operation to perform. Can be one of:
+     *         - move_shard: Move a shard from one peer to another
+     *         - replicate_shard: Replicate a shard to another peer
+     *         - abort_transfer: Abort an ongoing shard transfer
+     *         - drop_replica: Drop a replica from a peer
+     *         - create_sharding_key: Create a new sharding key
+     *         - drop_sharding_key: Drop an existing sharding key
+     *         - restart_transfer: Restart a failed shard transfer
+     *         - start_resharding: Start resharding operation
+     *         - abort_resharding: Abort an ongoing resharding operation
+     * @returns Operation result
+     */
+    async updateCollectionCluster(
+        collection_name: string,
+        {timeout, ...operation}: {timeout?: number} & SchemaFor<'ClusterOperations'>,
+    ) {
+        const response = await this._openApiClient.updateCollectionCluster({
+            collection_name,
+            timeout,
+            ...operation,
+        });
+        return maybe(response.data.result).orThrow('Update collection cluster returned empty');
+    }
+
+    /**
      * Update vectors
      * @param collection_name
      * @param {object} args

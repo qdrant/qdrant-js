@@ -154,6 +154,7 @@ export type ClientApi = {
   
   /**
        * Get lock options 
+       * @deprecated 
        * @description Get lock options. If write is locked, all write operations and collection creation are forbidden
        */
   getLocks: TypedFetch<{
@@ -183,6 +184,7 @@ export type ClientApi = {
   
   /**
        * Set lock options 
+       * @deprecated 
        * @description Set lock options. If write is locked, all write operations and collection creation are forbidden. Returns previous lock options
        */
   postLocks: TypedFetch<{

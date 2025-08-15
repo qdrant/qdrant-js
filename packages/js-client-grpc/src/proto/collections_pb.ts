@@ -1611,6 +1611,8 @@ export class OptimizersConfigDiff extends Message<OptimizersConfigDiff> {
 
   /**
    *
+   * Deprecated:
+   *
    * Do not create segments larger this size (in kilobytes).
    * Large segments might require disproportionately long indexation times,
    * therefore it makes sense to limit the size of segments.
@@ -2467,7 +2469,7 @@ export class CreateCollection extends Message<CreateCollection> {
   writeConsistencyFactor?: number;
 
   /**
-   * Specify name of the other collection to copy data from
+   * Deprecated: specify name of the other collection to copy data from
    *
    * @generated from field: optional string init_from_collection = 13;
    */

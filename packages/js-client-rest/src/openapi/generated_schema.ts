@@ -42,11 +42,13 @@ export interface paths {
   "/locks": {
     /**
      * Get lock options 
+     * @deprecated 
      * @description Get lock options. If write is locked, all write operations and collection creation are forbidden
      */
     get: operations["get_locks"];
     /**
      * Set lock options 
+     * @deprecated 
      * @description Set lock options. If write is locked, all write operations and collection creation are forbidden. Returns previous lock options
      */
     post: operations["post_locks"];
@@ -809,6 +811,7 @@ export interface components {
       max_segment_size?: number | null;
       /**
        * Format: uint 
+       * @deprecated 
        * @description Maximum size (in kilobytes) of vectors to store in-memory per segment. Segments larger than this threshold will be stored as read-only memmapped file.
        * 
        * Memmap storage is disabled by default, to enable it, set this threshold to a reasonable value.
@@ -1051,7 +1054,7 @@ export interface components {
      * @description Languages supported by snowball stemmer. 
      * @enum {string}
      */
-    SnowballLanguage: "Arabic" | "Armenian" | "Danish" | "Dutch" | "English" | "Finnish" | "French" | "German" | "Greek" | "Hungarian" | "Italian" | "Norwegian" | "Portuguese" | "Romanian" | "Russian" | "Spanish" | "Swedish" | "Tamil" | "Turkish";
+    SnowballLanguage: "arabic" | "armenian" | "danish" | "dutch" | "english" | "finnish" | "french" | "german" | "greek" | "hungarian" | "italian" | "norwegian" | "portuguese" | "romanian" | "russian" | "spanish" | "swedish" | "tamil" | "turkish";
     BoolIndexParams: {
       type: components["schemas"]["BoolIndexType"];
       /** @description If true, store the index on disk. Default: false. */
@@ -1680,7 +1683,10 @@ export interface components {
       /** @description Custom params for Optimizers.  If none - values from service configuration file are used. */
       optimizers_config?: components["schemas"]["OptimizersConfigDiff"] | (Record<string, unknown> | null);
       /**
-       * @description Specify other collection to copy data from. 
+       * @deprecated 
+       * @description Specify other collection to copy data from.
+       * 
+       * Deprecated since Qdrant 1.15.0. 
        * @default null
        */
       init_from?: components["schemas"]["InitFrom"] | (Record<string, unknown> | null);
@@ -1735,6 +1741,7 @@ export interface components {
       max_segment_size?: number | null;
       /**
        * Format: uint 
+       * @deprecated 
        * @description Maximum size (in kilobytes) of vectors to store in-memory per segment. Segments larger than this threshold will be stored as read-only memmapped file.
        * 
        * Memmap storage is disabled by default, to enable it, set this threshold to a reasonable value.
@@ -1742,6 +1749,8 @@ export interface components {
        * To disable memmap storage, set this to `0`.
        * 
        * Note: 1Kb = 1 vector of size 256
+       * 
+       * Deprecated since Qdrant 1.15.0
        */
       memmap_threshold?: number | null;
       /**
@@ -2332,52 +2341,54 @@ export interface components {
        */
       all?: boolean;
       /**
-       * @description Whether to skip usage of RocksDB in immutable payload indices.
+       * @description Skip usage of RocksDB in new immutable payload indices.
        * 
        * First implemented in Qdrant 1.13.5. Enabled by default in Qdrant 1.14.1 
        * @default true
        */
       payload_index_skip_rocksdb?: boolean;
       /**
-       * @description Whether to skip usage of RocksDB in mutable payload indices. 
+       * @description Skip usage of RocksDB in new mutable payload indices. 
        * @default false
        */
       payload_index_skip_mutable_rocksdb?: boolean;
       /**
-       * @description Whether to skip usage of RocksDB for new payload storages.
+       * @description Skip usage of RocksDB in new payload storages.
        * 
-       * New on-disk payload storages were already using Gridstore. In-memory payload storages still choose RocksDB when this flag is not set.
+       * On-disk payload storages never use Gridstore.
        * 
        * First implemented in Qdrant 1.15.0. 
        * @default false
        */
       payload_storage_skip_rocksdb?: boolean;
       /**
-       * @description Whether to use incremental HNSW building.
+       * @description Use incremental HNSW building.
        * 
        * Enabled by default in Qdrant 1.14.1. 
        * @default true
        */
       incremental_hnsw_building?: boolean;
       /**
-       * @description Whether to actively migrate RocksDB based ID trackers into a new format. 
-       * @default false
+       * @description Migrate RocksDB based ID trackers into file based ID tracker on start.
+       * 
+       * Enabled by default in Qdrant 1.15.0. 
+       * @default true
        */
       migrate_rocksdb_id_tracker?: boolean;
       /**
-       * @description Whether to actively migrate RocksDB based vector storages into a new format. 
+       * @description Migrate RocksDB based vector storages into new format on start. 
        * @default false
        */
       migrate_rocksdb_vector_storage?: boolean;
       /**
-       * @description Whether to actively migrate RocksDB based payload storages into a new format. 
+       * @description Migrate RocksDB based payload storages into new format on start. 
        * @default false
        */
       migrate_rocksdb_payload_storage?: boolean;
       /**
-       * @description Migrate away from RocksDB based payload indices.
+       * @description Migrate RocksDB based payload indices into new format on start.
        * 
-       * Triggers a payload index rebuild if RocksDB is used. 
+       * Rebuilds a new payload index from scratch. 
        * @default false
        */
       migrate_rocksdb_payload_indices?: boolean;
@@ -3845,6 +3856,7 @@ export interface operations {
   };
   /**
    * Get lock options 
+   * @deprecated 
    * @description Get lock options. If write is locked, all write operations and collection creation are forbidden
    */
   get_locks: {
@@ -3883,6 +3895,7 @@ export interface operations {
   };
   /**
    * Set lock options 
+   * @deprecated 
    * @description Set lock options. If write is locked, all write operations and collection creation are forbidden. Returns previous lock options
    */
   post_locks: {

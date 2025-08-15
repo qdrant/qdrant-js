@@ -55,6 +55,7 @@ export function createClientApi(client: Client) : ClientApi {
     
     /**
          * Get lock options 
+         * @deprecated 
          * @description Get lock options. If write is locked, all write operations and collection creation are forbidden
          */
     getLocks:
@@ -65,6 +66,7 @@ export function createClientApi(client: Client) : ClientApi {
     
     /**
          * Set lock options 
+         * @deprecated 
          * @description Set lock options. If write is locked, all write operations and collection creation are forbidden. Returns previous lock options
          */
     postLocks:

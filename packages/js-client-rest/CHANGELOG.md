@@ -1,5 +1,11 @@
 # @qdrant/js-client-rest
 
+## 1.15.1
+
+### Minor Changes
+
+-   Implement missing `updateCollectionCluster` API
+
 ## 1.15.0
 
 ### Minor Changes
