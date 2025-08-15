@@ -5,8 +5,15 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type {
+    BinaryReadOptions,
+    FieldList,
+    JsonReadOptions,
+    JsonValue,
+    PartialMessage,
+    PlainMessage,
+} from '@bufbuild/protobuf';
+import {Message, proto3} from '@bufbuild/protobuf';
 
 /**
  * `NullValue` is a singleton enumeration to represent the null value for the
@@ -17,17 +24,15 @@ import { Message, proto3 } from "@bufbuild/protobuf";
  * @generated from enum qdrant.NullValue
  */
 export enum NullValue {
-  /**
-   * Null value.
-   *
-   * @generated from enum value: NULL_VALUE = 0;
-   */
-  NULL_VALUE = 0,
+    /**
+     * Null value.
+     *
+     * @generated from enum value: NULL_VALUE = 0;
+     */
+    NULL_VALUE = 0,
 }
 // Retrieve enum metadata with: proto3.getEnumType(NullValue)
-proto3.util.setEnumType(NullValue, "qdrant.NullValue", [
-  { no: 0, name: "NULL_VALUE" },
-]);
+proto3.util.setEnumType(NullValue, 'qdrant.NullValue', [{no: 0, name: 'NULL_VALUE'}]);
 
 /**
  * `Struct` represents a structured data value, consisting of fields
@@ -42,39 +47,39 @@ proto3.util.setEnumType(NullValue, "qdrant.NullValue", [
  * @generated from message qdrant.Struct
  */
 export class Struct extends Message<Struct> {
-  /**
-   * Unordered map of dynamically typed values.
-   *
-   * @generated from field: map<string, qdrant.Value> fields = 1;
-   */
-  fields: { [key: string]: Value } = {};
+    /**
+     * Unordered map of dynamically typed values.
+     *
+     * @generated from field: map<string, qdrant.Value> fields = 1;
+     */
+    fields: {[key: string]: Value} = {};
 
-  constructor(data?: PartialMessage<Struct>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
+    constructor(data?: PartialMessage<Struct>) {
+        super();
+        proto3.util.initPartial(data, this);
+    }
 
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "qdrant.Struct";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "fields", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: Value} },
-  ]);
+    static readonly runtime: typeof proto3 = proto3;
+    static readonly typeName = 'qdrant.Struct';
+    static readonly fields: FieldList = proto3.util.newFieldList(() => [
+        {no: 1, name: 'fields', kind: 'map', K: 9 /* ScalarType.STRING */, V: {kind: 'message', T: Value}},
+    ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Struct {
-    return new Struct().fromBinary(bytes, options);
-  }
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Struct {
+        return new Struct().fromBinary(bytes, options);
+    }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Struct {
-    return new Struct().fromJson(jsonValue, options);
-  }
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Struct {
+        return new Struct().fromJson(jsonValue, options);
+    }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Struct {
-    return new Struct().fromJsonString(jsonString, options);
-  }
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Struct {
+        return new Struct().fromJsonString(jsonString, options);
+    }
 
-  static equals(a: Struct | PlainMessage<Struct> | undefined, b: Struct | PlainMessage<Struct> | undefined): boolean {
-    return proto3.util.equals(Struct, a, b);
-  }
+    static equals(a: Struct | PlainMessage<Struct> | undefined, b: Struct | PlainMessage<Struct> | undefined): boolean {
+        return proto3.util.equals(Struct, a, b);
+    }
 }
 
 /**
@@ -88,101 +93,109 @@ export class Struct extends Message<Struct> {
  * @generated from message qdrant.Value
  */
 export class Value extends Message<Value> {
-  /**
-   * The kind of value.
-   *
-   * @generated from oneof qdrant.Value.kind
-   */
-  kind: {
     /**
-     * Represents a null value.
+     * The kind of value.
      *
-     * @generated from field: qdrant.NullValue null_value = 1;
+     * @generated from oneof qdrant.Value.kind
      */
-    value: NullValue;
-    case: "nullValue";
-  } | {
-    /**
-     * Represents a double value.
-     *
-     * @generated from field: double double_value = 2;
-     */
-    value: number;
-    case: "doubleValue";
-  } | {
-    /**
-     * Represents an integer value
-     *
-     * @generated from field: int64 integer_value = 3;
-     */
-    value: bigint;
-    case: "integerValue";
-  } | {
-    /**
-     * Represents a string value.
-     *
-     * @generated from field: string string_value = 4;
-     */
-    value: string;
-    case: "stringValue";
-  } | {
-    /**
-     * Represents a boolean value.
-     *
-     * @generated from field: bool bool_value = 5;
-     */
-    value: boolean;
-    case: "boolValue";
-  } | {
-    /**
-     * Represents a structured value.
-     *
-     * @generated from field: qdrant.Struct struct_value = 6;
-     */
-    value: Struct;
-    case: "structValue";
-  } | {
-    /**
-     * Represents a repeated `Value`.
-     *
-     * @generated from field: qdrant.ListValue list_value = 7;
-     */
-    value: ListValue;
-    case: "listValue";
-  } | { case: undefined; value?: undefined } = { case: undefined };
+    kind:
+        | {
+              /**
+               * Represents a null value.
+               *
+               * @generated from field: qdrant.NullValue null_value = 1;
+               */
+              value: NullValue;
+              case: 'nullValue';
+          }
+        | {
+              /**
+               * Represents a double value.
+               *
+               * @generated from field: double double_value = 2;
+               */
+              value: number;
+              case: 'doubleValue';
+          }
+        | {
+              /**
+               * Represents an integer value
+               *
+               * @generated from field: int64 integer_value = 3;
+               */
+              value: bigint;
+              case: 'integerValue';
+          }
+        | {
+              /**
+               * Represents a string value.
+               *
+               * @generated from field: string string_value = 4;
+               */
+              value: string;
+              case: 'stringValue';
+          }
+        | {
+              /**
+               * Represents a boolean value.
+               *
+               * @generated from field: bool bool_value = 5;
+               */
+              value: boolean;
+              case: 'boolValue';
+          }
+        | {
+              /**
+               * Represents a structured value.
+               *
+               * @generated from field: qdrant.Struct struct_value = 6;
+               */
+              value: Struct;
+              case: 'structValue';
+          }
+        | {
+              /**
+               * Represents a repeated `Value`.
+               *
+               * @generated from field: qdrant.ListValue list_value = 7;
+               */
+              value: ListValue;
+              case: 'listValue';
+          }
+        | {case: undefined; value?: undefined} = {case: undefined};
 
-  constructor(data?: PartialMessage<Value>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
+    constructor(data?: PartialMessage<Value>) {
+        super();
+        proto3.util.initPartial(data, this);
+    }
 
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "qdrant.Value";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "null_value", kind: "enum", T: proto3.getEnumType(NullValue), oneof: "kind" },
-    { no: 2, name: "double_value", kind: "scalar", T: 1 /* ScalarType.DOUBLE */, oneof: "kind" },
-    { no: 3, name: "integer_value", kind: "scalar", T: 3 /* ScalarType.INT64 */, oneof: "kind" },
-    { no: 4, name: "string_value", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "kind" },
-    { no: 5, name: "bool_value", kind: "scalar", T: 8 /* ScalarType.BOOL */, oneof: "kind" },
-    { no: 6, name: "struct_value", kind: "message", T: Struct, oneof: "kind" },
-    { no: 7, name: "list_value", kind: "message", T: ListValue, oneof: "kind" },
-  ]);
+    static readonly runtime: typeof proto3 = proto3;
+    static readonly typeName = 'qdrant.Value';
+    static readonly fields: FieldList = proto3.util.newFieldList(() => [
+        {no: 1, name: 'null_value', kind: 'enum', T: proto3.getEnumType(NullValue), oneof: 'kind'},
+        {no: 2, name: 'double_value', kind: 'scalar', T: 1 /* ScalarType.DOUBLE */, oneof: 'kind'},
+        {no: 3, name: 'integer_value', kind: 'scalar', T: 3 /* ScalarType.INT64 */, oneof: 'kind'},
+        {no: 4, name: 'string_value', kind: 'scalar', T: 9 /* ScalarType.STRING */, oneof: 'kind'},
+        {no: 5, name: 'bool_value', kind: 'scalar', T: 8 /* ScalarType.BOOL */, oneof: 'kind'},
+        {no: 6, name: 'struct_value', kind: 'message', T: Struct, oneof: 'kind'},
+        {no: 7, name: 'list_value', kind: 'message', T: ListValue, oneof: 'kind'},
+    ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Value {
-    return new Value().fromBinary(bytes, options);
-  }
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Value {
+        return new Value().fromBinary(bytes, options);
+    }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Value {
-    return new Value().fromJson(jsonValue, options);
-  }
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Value {
+        return new Value().fromJson(jsonValue, options);
+    }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Value {
-    return new Value().fromJsonString(jsonString, options);
-  }
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Value {
+        return new Value().fromJsonString(jsonString, options);
+    }
 
-  static equals(a: Value | PlainMessage<Value> | undefined, b: Value | PlainMessage<Value> | undefined): boolean {
-    return proto3.util.equals(Value, a, b);
-  }
+    static equals(a: Value | PlainMessage<Value> | undefined, b: Value | PlainMessage<Value> | undefined): boolean {
+        return proto3.util.equals(Value, a, b);
+    }
 }
 
 /**
@@ -193,38 +206,40 @@ export class Value extends Message<Value> {
  * @generated from message qdrant.ListValue
  */
 export class ListValue extends Message<ListValue> {
-  /**
-   * Repeated field of dynamically typed values.
-   *
-   * @generated from field: repeated qdrant.Value values = 1;
-   */
-  values: Value[] = [];
+    /**
+     * Repeated field of dynamically typed values.
+     *
+     * @generated from field: repeated qdrant.Value values = 1;
+     */
+    values: Value[] = [];
 
-  constructor(data?: PartialMessage<ListValue>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
+    constructor(data?: PartialMessage<ListValue>) {
+        super();
+        proto3.util.initPartial(data, this);
+    }
 
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "qdrant.ListValue";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "values", kind: "message", T: Value, repeated: true },
-  ]);
+    static readonly runtime: typeof proto3 = proto3;
+    static readonly typeName = 'qdrant.ListValue';
+    static readonly fields: FieldList = proto3.util.newFieldList(() => [
+        {no: 1, name: 'values', kind: 'message', T: Value, repeated: true},
+    ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListValue {
-    return new ListValue().fromBinary(bytes, options);
-  }
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListValue {
+        return new ListValue().fromBinary(bytes, options);
+    }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListValue {
-    return new ListValue().fromJson(jsonValue, options);
-  }
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListValue {
+        return new ListValue().fromJson(jsonValue, options);
+    }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListValue {
-    return new ListValue().fromJsonString(jsonString, options);
-  }
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListValue {
+        return new ListValue().fromJsonString(jsonString, options);
+    }
 
-  static equals(a: ListValue | PlainMessage<ListValue> | undefined, b: ListValue | PlainMessage<ListValue> | undefined): boolean {
-    return proto3.util.equals(ListValue, a, b);
-  }
+    static equals(
+        a: ListValue | PlainMessage<ListValue> | undefined,
+        b: ListValue | PlainMessage<ListValue> | undefined,
+    ): boolean {
+        return proto3.util.equals(ListValue, a, b);
+    }
 }
-

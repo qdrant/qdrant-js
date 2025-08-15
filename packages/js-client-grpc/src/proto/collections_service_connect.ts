@@ -3,171 +3,193 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ChangeAliases, CollectionClusterInfoRequest, CollectionClusterInfoResponse, CollectionExistsRequest, CollectionExistsResponse, CollectionOperationResponse, CreateCollection, CreateShardKeyRequest, CreateShardKeyResponse, DeleteCollection, DeleteShardKeyRequest, DeleteShardKeyResponse, GetCollectionInfoRequest, GetCollectionInfoResponse, ListAliasesRequest, ListAliasesResponse, ListCollectionAliasesRequest, ListCollectionsRequest, ListCollectionsResponse, UpdateCollection, UpdateCollectionClusterSetupRequest, UpdateCollectionClusterSetupResponse } from "./collections_pb.js";
-import { MethodKind } from "@bufbuild/protobuf";
+import {
+    ChangeAliases,
+    CollectionClusterInfoRequest,
+    CollectionClusterInfoResponse,
+    CollectionExistsRequest,
+    CollectionExistsResponse,
+    CollectionOperationResponse,
+    CreateCollection,
+    CreateShardKeyRequest,
+    CreateShardKeyResponse,
+    DeleteCollection,
+    DeleteShardKeyRequest,
+    DeleteShardKeyResponse,
+    GetCollectionInfoRequest,
+    GetCollectionInfoResponse,
+    ListAliasesRequest,
+    ListAliasesResponse,
+    ListCollectionAliasesRequest,
+    ListCollectionsRequest,
+    ListCollectionsResponse,
+    UpdateCollection,
+    UpdateCollectionClusterSetupRequest,
+    UpdateCollectionClusterSetupResponse,
+} from './collections_pb.js';
+import {MethodKind} from '@bufbuild/protobuf';
 
 /**
  * @generated from service qdrant.Collections
  */
 export const Collections = {
-  typeName: "qdrant.Collections",
-  methods: {
-    /**
-     *
-     * Get detailed information about specified existing collection
-     *
-     * @generated from rpc qdrant.Collections.Get
-     */
-    get: {
-      name: "Get",
-      I: GetCollectionInfoRequest,
-      O: GetCollectionInfoResponse,
-      kind: MethodKind.Unary,
+    typeName: 'qdrant.Collections',
+    methods: {
+        /**
+         *
+         * Get detailed information about specified existing collection
+         *
+         * @generated from rpc qdrant.Collections.Get
+         */
+        get: {
+            name: 'Get',
+            I: GetCollectionInfoRequest,
+            O: GetCollectionInfoResponse,
+            kind: MethodKind.Unary,
+        },
+        /**
+         *
+         * Get list name of all existing collections
+         *
+         * @generated from rpc qdrant.Collections.List
+         */
+        list: {
+            name: 'List',
+            I: ListCollectionsRequest,
+            O: ListCollectionsResponse,
+            kind: MethodKind.Unary,
+        },
+        /**
+         *
+         * Create new collection with given parameters
+         *
+         * @generated from rpc qdrant.Collections.Create
+         */
+        create: {
+            name: 'Create',
+            I: CreateCollection,
+            O: CollectionOperationResponse,
+            kind: MethodKind.Unary,
+        },
+        /**
+         *
+         * Update parameters of the existing collection
+         *
+         * @generated from rpc qdrant.Collections.Update
+         */
+        update: {
+            name: 'Update',
+            I: UpdateCollection,
+            O: CollectionOperationResponse,
+            kind: MethodKind.Unary,
+        },
+        /**
+         *
+         * Drop collection and all associated data
+         *
+         * @generated from rpc qdrant.Collections.Delete
+         */
+        delete: {
+            name: 'Delete',
+            I: DeleteCollection,
+            O: CollectionOperationResponse,
+            kind: MethodKind.Unary,
+        },
+        /**
+         *
+         * Update Aliases of the existing collection
+         *
+         * @generated from rpc qdrant.Collections.UpdateAliases
+         */
+        updateAliases: {
+            name: 'UpdateAliases',
+            I: ChangeAliases,
+            O: CollectionOperationResponse,
+            kind: MethodKind.Unary,
+        },
+        /**
+         *
+         * Get list of all aliases for a collection
+         *
+         * @generated from rpc qdrant.Collections.ListCollectionAliases
+         */
+        listCollectionAliases: {
+            name: 'ListCollectionAliases',
+            I: ListCollectionAliasesRequest,
+            O: ListAliasesResponse,
+            kind: MethodKind.Unary,
+        },
+        /**
+         *
+         * Get list of all aliases for all existing collections
+         *
+         * @generated from rpc qdrant.Collections.ListAliases
+         */
+        listAliases: {
+            name: 'ListAliases',
+            I: ListAliasesRequest,
+            O: ListAliasesResponse,
+            kind: MethodKind.Unary,
+        },
+        /**
+         *
+         * Get cluster information for a collection
+         *
+         * @generated from rpc qdrant.Collections.CollectionClusterInfo
+         */
+        collectionClusterInfo: {
+            name: 'CollectionClusterInfo',
+            I: CollectionClusterInfoRequest,
+            O: CollectionClusterInfoResponse,
+            kind: MethodKind.Unary,
+        },
+        /**
+         *
+         * Check the existence of a collection
+         *
+         * @generated from rpc qdrant.Collections.CollectionExists
+         */
+        collectionExists: {
+            name: 'CollectionExists',
+            I: CollectionExistsRequest,
+            O: CollectionExistsResponse,
+            kind: MethodKind.Unary,
+        },
+        /**
+         *
+         * Update cluster setup for a collection
+         *
+         * @generated from rpc qdrant.Collections.UpdateCollectionClusterSetup
+         */
+        updateCollectionClusterSetup: {
+            name: 'UpdateCollectionClusterSetup',
+            I: UpdateCollectionClusterSetupRequest,
+            O: UpdateCollectionClusterSetupResponse,
+            kind: MethodKind.Unary,
+        },
+        /**
+         *
+         * Create shard key
+         *
+         * @generated from rpc qdrant.Collections.CreateShardKey
+         */
+        createShardKey: {
+            name: 'CreateShardKey',
+            I: CreateShardKeyRequest,
+            O: CreateShardKeyResponse,
+            kind: MethodKind.Unary,
+        },
+        /**
+         *
+         * Delete shard key
+         *
+         * @generated from rpc qdrant.Collections.DeleteShardKey
+         */
+        deleteShardKey: {
+            name: 'DeleteShardKey',
+            I: DeleteShardKeyRequest,
+            O: DeleteShardKeyResponse,
+            kind: MethodKind.Unary,
+        },
     },
-    /**
-     *
-     * Get list name of all existing collections
-     *
-     * @generated from rpc qdrant.Collections.List
-     */
-    list: {
-      name: "List",
-      I: ListCollectionsRequest,
-      O: ListCollectionsResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     *
-     * Create new collection with given parameters
-     *
-     * @generated from rpc qdrant.Collections.Create
-     */
-    create: {
-      name: "Create",
-      I: CreateCollection,
-      O: CollectionOperationResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     *
-     * Update parameters of the existing collection
-     *
-     * @generated from rpc qdrant.Collections.Update
-     */
-    update: {
-      name: "Update",
-      I: UpdateCollection,
-      O: CollectionOperationResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     *
-     * Drop collection and all associated data
-     *
-     * @generated from rpc qdrant.Collections.Delete
-     */
-    delete: {
-      name: "Delete",
-      I: DeleteCollection,
-      O: CollectionOperationResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     *
-     * Update Aliases of the existing collection
-     *
-     * @generated from rpc qdrant.Collections.UpdateAliases
-     */
-    updateAliases: {
-      name: "UpdateAliases",
-      I: ChangeAliases,
-      O: CollectionOperationResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     *
-     * Get list of all aliases for a collection
-     *
-     * @generated from rpc qdrant.Collections.ListCollectionAliases
-     */
-    listCollectionAliases: {
-      name: "ListCollectionAliases",
-      I: ListCollectionAliasesRequest,
-      O: ListAliasesResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     *
-     * Get list of all aliases for all existing collections
-     *
-     * @generated from rpc qdrant.Collections.ListAliases
-     */
-    listAliases: {
-      name: "ListAliases",
-      I: ListAliasesRequest,
-      O: ListAliasesResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     *
-     * Get cluster information for a collection
-     *
-     * @generated from rpc qdrant.Collections.CollectionClusterInfo
-     */
-    collectionClusterInfo: {
-      name: "CollectionClusterInfo",
-      I: CollectionClusterInfoRequest,
-      O: CollectionClusterInfoResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     *
-     * Check the existence of a collection
-     *
-     * @generated from rpc qdrant.Collections.CollectionExists
-     */
-    collectionExists: {
-      name: "CollectionExists",
-      I: CollectionExistsRequest,
-      O: CollectionExistsResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     *
-     * Update cluster setup for a collection
-     *
-     * @generated from rpc qdrant.Collections.UpdateCollectionClusterSetup
-     */
-    updateCollectionClusterSetup: {
-      name: "UpdateCollectionClusterSetup",
-      I: UpdateCollectionClusterSetupRequest,
-      O: UpdateCollectionClusterSetupResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     *
-     * Create shard key
-     *
-     * @generated from rpc qdrant.Collections.CreateShardKey
-     */
-    createShardKey: {
-      name: "CreateShardKey",
-      I: CreateShardKeyRequest,
-      O: CreateShardKeyResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     *
-     * Delete shard key
-     *
-     * @generated from rpc qdrant.Collections.DeleteShardKey
-     */
-    deleteShardKey: {
-      name: "DeleteShardKey",
-      I: DeleteShardKeyRequest,
-      O: DeleteShardKeyResponse,
-      kind: MethodKind.Unary,
-    },
-  }
 } as const;
-
