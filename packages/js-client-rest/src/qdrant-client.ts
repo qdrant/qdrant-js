@@ -80,8 +80,20 @@ export class QdrantClient {
             }
             const parsedUrl = new URL(url);
             this._host = parsedUrl.hostname;
-            this._port = parsedUrl.port ? Number(parsedUrl.port) : port;
             this._scheme = parsedUrl.protocol.replace(':', '');
+
+            if (parsedUrl.port) {
+                this._port = Number(parsedUrl.port);
+            } else {
+
+                if (this._scheme === 'https') {
+                    this._port = 443;
+                } else if (this._scheme === 'http') {
+                    this._port = 80;
+                } else {
+                    this._port = port;
+                }
+            }
 
             if (this._prefix.length > 0 && parsedUrl.pathname !== '/') {
                 throw new QdrantClientConfigError(
