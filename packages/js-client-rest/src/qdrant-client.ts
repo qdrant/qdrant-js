@@ -52,6 +52,7 @@ export class QdrantClient {
         port = 6333,
         timeout = 300_000,
         checkCompatibility = true,
+        maxConnections = 3,
         ...args
     }: QdrantClientParams = {}) {
         this._https = https ?? typeof apiKey === 'string';
@@ -112,7 +113,9 @@ export class QdrantClient {
 
         const address = this._port ? `${this._host}:${this._port}` : this._host;
         this._restUri = `${this._scheme}://${address}${this._prefix}`;
-        const connections = args.maxConnections;
+
+        const connections = maxConnections;
+
         const restArgs: RestArgs = {headers, timeout, connections};
 
         this._openApiClient = createApis(this._restUri, restArgs);
