@@ -54,11 +54,11 @@ importers:
   packages/js-client-grpc:
     dependencies:
       '@bufbuild/connect':
-        specifier: ^0.10.0
-        version: 0.10.0(@bufbuild/protobuf@1.2.1)
+        specifier: ^0.13.0
+        version: 0.13.0(@bufbuild/protobuf@1.2.1)
       '@bufbuild/connect-node':
-        specifier: ^0.10.0
-        version: 0.10.0(@bufbuild/protobuf@1.2.1)
+        specifier: ^0.13.0
+        version: 0.13.0(@bufbuild/protobuf@1.2.1)
       '@bufbuild/protobuf':
         specifier: ^1.2.1
         version: 1.2.1
@@ -67,8 +67,8 @@ importers:
         version: 5.0.4
     devDependencies:
       '@bufbuild/protoc-gen-connect-es':
-        specifier: ^0.10.0
-        version: 0.10.0(@bufbuild/connect@0.10.0(@bufbuild/protobuf@1.2.1))(@bufbuild/protoc-gen-es@1.2.1(@bufbuild/protobuf@1.2.1))
+        specifier: ^0.13.0
+        version: 0.13.0(@bufbuild/connect@0.13.0(@bufbuild/protobuf@1.2.1))(@bufbuild/protoc-gen-es@1.2.1(@bufbuild/protobuf@1.2.1))
       '@bufbuild/protoc-gen-es':
         specifier: ^1.2.1
         version: 1.2.1(@bufbuild/protobuf@1.2.1)
@@ -154,26 +154,29 @@ packages:
     resolution: {integrity: sha512-u7stbOuYjaPezCuLj29hNW1v64M2Md2qupEKP1fHc7WdOA3DgLh37suiSrZYY7haUB7iBeQZ9P1uiRF359do3g==}
     engines: {node: '>=6.9.0'}
 
-  '@bufbuild/connect-node@0.10.0':
-    resolution: {integrity: sha512-5n/dHbxjur6LA7aFZR9pcA9V3dErxxdfzK36UrHLfjCn+T9f8rMs60hYFabP5pja2gPSWmCewJbwgG5wT7sQpw==}
+  '@bufbuild/connect-node@0.13.0':
+    resolution: {integrity: sha512-l9tYVWTD9qdVr3PD8iTLmJZoWQY4bYl4UXIyKqvNuqoaAm3pZZvrQXrz0ptS5NRWTVUKPV9DZp6Wbbch5/u55Q==}
     engines: {node: '>=16.0.0'}
+    deprecated: Connect has moved to its own org @connectrpc and has a stable v1. Run `npx @connectrpc/connect-migrate@latest` to update. See https://github.com/connectrpc/connect-es/releases/tag/v0.13.1 for details.
     peerDependencies:
       '@bufbuild/protobuf': ^1.2.1
 
-  '@bufbuild/connect@0.10.0':
-    resolution: {integrity: sha512-psNHc7R0DDZ2Dl/HVPw1MF5hGMTEjnRROPSqs9YPCjy+ztCNF97wPOUH3S4Qud2nNw9Hn+vqZd+Y4v9G5J+d1A==}
+  '@bufbuild/connect@0.13.0':
+    resolution: {integrity: sha512-eZSMbVLyUFtXiZNORgCEvv580xKZeYQdMOWj2i/nxOcpXQcrEzTMTA7SZzWv4k4gveWCOSRoWmYDeOhfWXJv0g==}
+    deprecated: Connect has moved to its own org @connectrpc and has a stable v1. Run `npx @connectrpc/connect-migrate@latest` to update. See https://github.com/connectrpc/connect-es/releases/tag/v0.13.1 for details.
     peerDependencies:
       '@bufbuild/protobuf': ^1.2.1
 
   '@bufbuild/protobuf@1.2.1':
     resolution: {integrity: sha512-cwwGvLGqvoaOZmoP5+i4v/rbW+rHkguvTehuZyM2p/xpmaNSdT2h3B7kHw33aiffv35t1XrYHIkdJSEkSEMJuA==}
 
-  '@bufbuild/protoc-gen-connect-es@0.10.0':
-    resolution: {integrity: sha512-gtxe/W3pHz3qOreWn9THSwm3kxqsjmua2WahAY3Vws3GGbJx7p+U0AJ9TUXRoNuRmRyPF3TCQeUfQS0YiIKXKQ==}
+  '@bufbuild/protoc-gen-connect-es@0.13.0':
+    resolution: {integrity: sha512-4HbxWQ799ZLszJJIJsuVMFwkBx8DJ4VEhNDNtKpPJFsTdVUOp1LyFGY66Yjfj9vcuOeH44bS0ALE5pRP3rCxXA==}
     engines: {node: '>=16.0.0'}
+    deprecated: Connect has moved to its own org @connectrpc and has a stable v1. Run `npx @connectrpc/connect-migrate@latest` to update. See https://github.com/connectrpc/connect-es/releases/tag/v0.13.1 for details.
     hasBin: true
     peerDependencies:
-      '@bufbuild/connect': 0.10.0
+      '@bufbuild/connect': 0.13.0
       '@bufbuild/protoc-gen-es': ^1.2.1
     peerDependenciesMeta:
       '@bufbuild/connect':
@@ -1922,24 +1925,24 @@ snapshots:
       chalk: 2.4.2
       js-tokens: 4.0.0
 
-  '@bufbuild/connect-node@0.10.0(@bufbuild/protobuf@1.2.1)':
+  '@bufbuild/connect-node@0.13.0(@bufbuild/protobuf@1.2.1)':
     dependencies:
-      '@bufbuild/connect': 0.10.0(@bufbuild/protobuf@1.2.1)
+      '@bufbuild/connect': 0.13.0(@bufbuild/protobuf@1.2.1)
       '@bufbuild/protobuf': 1.2.1
       headers-polyfill: 3.1.2
 
-  '@bufbuild/connect@0.10.0(@bufbuild/protobuf@1.2.1)':
+  '@bufbuild/connect@0.13.0(@bufbuild/protobuf@1.2.1)':
     dependencies:
       '@bufbuild/protobuf': 1.2.1
 
   '@bufbuild/protobuf@1.2.1': {}
 
-  '@bufbuild/protoc-gen-connect-es@0.10.0(@bufbuild/connect@0.10.0(@bufbuild/protobuf@1.2.1))(@bufbuild/protoc-gen-es@1.2.1(@bufbuild/protobuf@1.2.1))':
+  '@bufbuild/protoc-gen-connect-es@0.13.0(@bufbuild/connect@0.13.0(@bufbuild/protobuf@1.2.1))(@bufbuild/protoc-gen-es@1.2.1(@bufbuild/protobuf@1.2.1))':
     dependencies:
       '@bufbuild/protobuf': 1.2.1
       '@bufbuild/protoplugin': 1.2.1
     optionalDependencies:
-      '@bufbuild/connect': 0.10.0(@bufbuild/protobuf@1.2.1)
+      '@bufbuild/connect': 0.13.0(@bufbuild/protobuf@1.2.1)
       '@bufbuild/protoc-gen-es': 1.2.1(@bufbuild/protobuf@1.2.1)
     transitivePeerDependencies:
       - supports-color
