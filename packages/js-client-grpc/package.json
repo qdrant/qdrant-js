@@ -48,12 +48,12 @@
         "codegen:grpc-typescript": "./scripts/generate-grpc-sources.sh"
     },
     "dependencies": {
-        "@bufbuild/connect": "^0.10.0",
-        "@bufbuild/connect-node": "^0.10.0",
+        "@bufbuild/connect": "^0.13.0",
+        "@bufbuild/connect-node": "^0.13.0",
         "@bufbuild/protobuf": "^1.2.1"
     },
     "devDependencies": {
-        "@bufbuild/protoc-gen-connect-es": "^0.10.0",
+        "@bufbuild/protoc-gen-connect-es": "^0.13.0",
         "@bufbuild/protoc-gen-es": "^1.2.1",
         "@protobuf-ts/protoc": "^2.9.0",
         "@sevinf/maybe": "^0.5.0",
