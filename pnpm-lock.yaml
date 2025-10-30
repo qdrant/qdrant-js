@@ -53,28 +53,25 @@ importers:
 
   packages/js-client-grpc:
     dependencies:
-      '@bufbuild/connect':
-        specifier: ^0.13.0
-        version: 0.13.0(@bufbuild/protobuf@1.2.1)
-      '@bufbuild/connect-node':
-        specifier: ^0.13.0
-        version: 0.13.0(@bufbuild/protobuf@1.2.1)
       '@bufbuild/protobuf':
-        specifier: ^1.2.1
-        version: 1.2.1
+        specifier: ^2.2.2
+        version: 2.10.0
+      '@connectrpc/connect':
+        specifier: ^2.0.0
+        version: 2.1.0(@bufbuild/protobuf@2.10.0)
+      '@connectrpc/connect-node':
+        specifier: ^2.0.0
+        version: 2.1.0(@bufbuild/protobuf@2.10.0)(@connectrpc/connect@2.1.0(@bufbuild/protobuf@2.10.0))
       typescript:
         specifier: '>=4.1'
         version: 5.0.4
     devDependencies:
-      '@bufbuild/protoc-gen-connect-es':
-        specifier: ^0.13.0
-        version: 0.13.0(@bufbuild/connect@0.13.0(@bufbuild/protobuf@1.2.1))(@bufbuild/protoc-gen-es@1.2.1(@bufbuild/protobuf@1.2.1))
+      '@bufbuild/buf':
+        specifier: 1.59.0
+        version: 1.59.0
       '@bufbuild/protoc-gen-es':
-        specifier: ^1.2.1
-        version: 1.2.1(@bufbuild/protobuf@1.2.1)
-      '@protobuf-ts/protoc':
-        specifier: ^2.9.0
-        version: 2.9.0
+        specifier: ^2.10.0
+        version: 2.10.0(@bufbuild/protobuf@2.10.0)
       '@sevinf/maybe':
         specifier: ^0.5.0
         version: 0.5.0
@@ -151,48 +148,80 @@ packages:
     resolution: {integrity: sha512-u7stbOuYjaPezCuLj29hNW1v64M2Md2qupEKP1fHc7WdOA3DgLh37suiSrZYY7haUB7iBeQZ9P1uiRF359do3g==}
     engines: {node: '>=6.9.0'}
 
-  '@bufbuild/connect-node@0.13.0':
-    resolution: {integrity: sha512-l9tYVWTD9qdVr3PD8iTLmJZoWQY4bYl4UXIyKqvNuqoaAm3pZZvrQXrz0ptS5NRWTVUKPV9DZp6Wbbch5/u55Q==}
-    engines: {node: '>=16.0.0'}
-    deprecated: Connect has moved to its own org @connectrpc and has a stable v1. Run `npx @connectrpc/connect-migrate@latest` to update. See https://github.com/connectrpc/connect-es/releases/tag/v0.13.1 for details.
-    peerDependencies:
-      '@bufbuild/protobuf': ^1.2.1
+  '@bufbuild/buf-darwin-arm64@1.59.0':
+    resolution: {integrity: sha512-d3JTxBCibC+C94JU0jwLMgo/WBhaAHBIRzZXaZ3Y8KREjTj3jhzAlelGZmCtQJyyE0l6DFSm3lQgMblJ5qlq/w==}
+    engines: {node: '>=12'}
+    cpu: [arm64]
+    os: [darwin]
 
-  '@bufbuild/connect@0.13.0':
-    resolution: {integrity: sha512-eZSMbVLyUFtXiZNORgCEvv580xKZeYQdMOWj2i/nxOcpXQcrEzTMTA7SZzWv4k4gveWCOSRoWmYDeOhfWXJv0g==}
-    deprecated: Connect has moved to its own org @connectrpc and has a stable v1. Run `npx @connectrpc/connect-migrate@latest` to update. See https://github.com/connectrpc/connect-es/releases/tag/v0.13.1 for details.
-    peerDependencies:
-      '@bufbuild/protobuf': ^1.2.1
+  '@bufbuild/buf-darwin-x64@1.59.0':
+    resolution: {integrity: sha512-eFnFB96GM6KjP5S8QFqjufjlMF41CVnXjkR8cIfR5jUXdwl1vf5S82Zv+cK1+Uogqhmt7AVBntd5Z+xmz4NKaw==}
+    engines: {node: '>=12'}
+    cpu: [x64]
+    os: [darwin]
 
-  '@bufbuild/protobuf@1.2.1':
-    resolution: {integrity: sha512-cwwGvLGqvoaOZmoP5+i4v/rbW+rHkguvTehuZyM2p/xpmaNSdT2h3B7kHw33aiffv35t1XrYHIkdJSEkSEMJuA==}
+  '@bufbuild/buf-linux-aarch64@1.59.0':
+    resolution: {integrity: sha512-g6DxTcJM29SBvqe42ll7HpkmTfecuG+PZYTysaxON9Y59fwtflhuLDpNqGhxWehHMkH11bFfpNeCGKjpGbVvkw==}
+    engines: {node: '>=12'}
+    cpu: [arm64]
+    os: [linux]
 
-  '@bufbuild/protoc-gen-connect-es@0.13.0':
-    resolution: {integrity: sha512-4HbxWQ799ZLszJJIJsuVMFwkBx8DJ4VEhNDNtKpPJFsTdVUOp1LyFGY66Yjfj9vcuOeH44bS0ALE5pRP3rCxXA==}
-    engines: {node: '>=16.0.0'}
-    deprecated: Connect has moved to its own org @connectrpc and has a stable v1. Run `npx @connectrpc/connect-migrate@latest` to update. See https://github.com/connectrpc/connect-es/releases/tag/v0.13.1 for details.
+  '@bufbuild/buf-linux-armv7@1.59.0':
+    resolution: {integrity: sha512-C92s+gmKnAyCzN7MdbtukRXOiW7e0hkeQrOie17vF6qWXPk2r9ix0WXZvg5gZr9R4zD8pOYwRVwYiB9zFXZOaA==}
+    engines: {node: '>=12'}
+    cpu: [arm]
+    os: [linux]
+
+  '@bufbuild/buf-linux-x64@1.59.0':
+    resolution: {integrity: sha512-Pzc3TFm1t2fZ5uT7jkYBjyuLNKo5ji/wRl/lLLvOlTFRyqsSZBkFNQcJGHoHSej1yDWau16VMrAh0GN1rZfvAg==}
+    engines: {node: '>=12'}
+    cpu: [x64]
+    os: [linux]
+
+  '@bufbuild/buf-win32-arm64@1.59.0':
+    resolution: {integrity: sha512-hS5VThgYNqbMFgY9SibDA/RXBdegw12jgrT2H+Tzaa2rvlSADck9ZAq9rwf2H0IvFJOqtR75Lejb+5Fx2rThpQ==}
+    engines: {node: '>=12'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@bufbuild/buf-win32-x64@1.59.0':
+    resolution: {integrity: sha512-JAGSF3oaKC2L/TelqvjB1N7oB5pTiviVr8mxiaxHyv4HpvcxCVdiO+iw0goRhZb4QHhYYswk2gLMezWHBxtR/g==}
+    engines: {node: '>=12'}
+    cpu: [x64]
+    os: [win32]
+
+  '@bufbuild/buf@1.59.0':
+    resolution: {integrity: sha512-VdLuGnFp1OKJaiMevlLow6Jcvv9omOyM02Qa1zexl8dBB4Ac2ggz6bpT3Zb06tmCnqd8tFrI/Im1fbom3CznlQ==}
+    engines: {node: '>=12'}
+    hasBin: true
+
+  '@bufbuild/protobuf@2.10.0':
+    resolution: {integrity: sha512-fdRs9PSrBF7QUntpZpq6BTw58fhgGJojgg39m9oFOJGZT+nip9b0so5cYY1oWl5pvemDLr0cPPsH46vwThEbpQ==}
+
+  '@bufbuild/protoc-gen-es@2.10.0':
+    resolution: {integrity: sha512-g3xtuxeMkbacn8/qWQ8NbHBA8unLAvGD7sjcXV1/lfO4iCfd6hYL1Z+rn2yLQZE/JEkG+GPZoIs7m5KI5VYaMw==}
+    engines: {node: '>=20'}
     hasBin: true
     peerDependencies:
-      '@bufbuild/connect': 0.13.0
-      '@bufbuild/protoc-gen-es': ^1.2.1
-    peerDependenciesMeta:
-      '@bufbuild/connect':
-        optional: true
-      '@bufbuild/protoc-gen-es':
-        optional: true
-
-  '@bufbuild/protoc-gen-es@1.2.1':
-    resolution: {integrity: sha512-Nfg4ZTYciAgzqrbuGtRHR2TV4tueP10cRSD/joe57EeT0hfiXT0oQzH4OO3CzqqZvMxfkxpO4jgJgtwdQd941g==}
-    engines: {node: '>=14'}
-    hasBin: true
-    peerDependencies:
-      '@bufbuild/protobuf': 1.2.1
+      '@bufbuild/protobuf': 2.10.0
     peerDependenciesMeta:
       '@bufbuild/protobuf':
         optional: true
 
-  '@bufbuild/protoplugin@1.2.1':
-    resolution: {integrity: sha512-7VtPgJGXcOszidMpQRQK9wm8QlKqC80Uc5XR9+Ej+DN4Ur64dAW1djZ7kLZ3ij6Z9IY4FteGQT+ubUNxzcW2NA==}
+  '@bufbuild/protoplugin@2.10.0':
+    resolution: {integrity: sha512-GPJOZ1Gp9/Ci3MXP3yI7+q4G7IhB5cSpbLjsfnBILxtNx69I9+ix3r9P7JfewHvqMjtPe6L+YWX1LPBGNfZMGw==}
+
+  '@connectrpc/connect-node@2.1.0':
+    resolution: {integrity: sha512-6akCXZSX5uWHLR654ne9Tnq7AnPUkLS65NvgsI5885xBkcuVy2APBd8sA4sLqaplUt84cVEr6LhjEFNx6W1KtQ==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@bufbuild/protobuf': ^2.7.0
+      '@connectrpc/connect': 2.1.0
+
+  '@connectrpc/connect@2.1.0':
+    resolution: {integrity: sha512-xhiwnYlJNHzmFsRw+iSPIwXR/xweTvTw8x5HiwWp10sbVtd4OpOXbRgE7V58xs1EC17fzusF1f5uOAy24OkBuA==}
+    peerDependencies:
+      '@bufbuild/protobuf': ^2.7.0
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -566,10 +595,6 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@protobuf-ts/protoc@2.9.0':
-    resolution: {integrity: sha512-8mQmw+OVqrpaHgmErle8heE5Z1ktX2vmWJmvFORSTcHxMfqHLv8RKTRroC9pkBQRgUaSGSXmy7n4ItdZnz41dw==}
-    hasBin: true
-
   '@qdrant/openapi-typescript-fetch@1.2.6':
     resolution: {integrity: sha512-oQG/FejNpItrxRHoyctYvT3rwGZOnK4jr3JdppO/c78ktDvkWiPXPHNsrDf33K9sZdRb6PR7gi4noIapu5q4HA==}
     engines: {node: '>=18.0.0', pnpm: '>=8'}
@@ -725,8 +750,10 @@ packages:
     resolution: {integrity: sha512-07ny+LHRzQXepkGg6w0mFY41fVUNBrL2Roj/++7V1txKugfjm/Ci/qSND03r2RhlJhJYMcTn9AhhSSqQp0Ysyw==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
-  '@typescript/vfs@1.4.0':
-    resolution: {integrity: sha512-Pood7yv5YWMIX+yCHo176OnF8WUlKGImFG7XlsuH14Zb1YN5+dYD3uUtS7lqZtsH7tAveNUi2NzdpQCN0yRbaw==}
+  '@typescript/vfs@1.6.2':
+    resolution: {integrity: sha512-hoBwJwcbKHmvd2QVebiytN1aELvpk9B74B4L1mFm/XT1Q/VOYAWl2vQ9AWRFtQq8zmz6enTpfTV8WRc4ATjW/g==}
+    peerDependencies:
+      typescript: '*'
 
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
@@ -1149,9 +1176,6 @@ packages:
   hasown@2.0.2:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
-
-  headers-polyfill@3.1.2:
-    resolution: {integrity: sha512-tWCK4biJ6hcLqTviLXVR9DTRfYGQMXEIUj3gwJ2rZ5wO/at3XtkI4g8mCvFdUF9l1KMBNCfmNAdnahm1cgavQA==}
 
   human-signals@4.3.1:
     resolution: {integrity: sha512-nZXjEF2nbo7lIw3mgYjItAfgQXog3OjJogSbKa2CQIIvSGWcKgeJnQlNXip6NglNzYH45nSRiEVimMvYL8DDqQ==}
@@ -1756,14 +1780,14 @@ packages:
     resolution: {integrity: sha512-yGSza74xk0UG8k+pLh5oeoYirvIiWo5t0/o3zHHAO2tRDiZcxWP7fywNlXhqb6/r6sWvwi+RsyQMWhVLe4BVuA==}
     engines: {node: '>=10'}
 
-  typescript@4.5.2:
-    resolution: {integrity: sha512-5BlMof9H1yGt0P8/WF+wPNw6GfctgGjXp5hkblpyT+8rkASSmkUKMXrxR0Xg8ThVCi/JnHQiKXeBaEwCeQwMFw==}
-    engines: {node: '>=4.2.0'}
-    hasBin: true
-
   typescript@5.0.4:
     resolution: {integrity: sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==}
     engines: {node: '>=12.20'}
+    hasBin: true
+
+  typescript@5.4.5:
+    resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
+    engines: {node: '>=14.17'}
     hasBin: true
 
   typescript@5.8.3:
@@ -1922,43 +1946,63 @@ snapshots:
       chalk: 2.4.2
       js-tokens: 4.0.0
 
-  '@bufbuild/connect-node@0.13.0(@bufbuild/protobuf@1.2.1)':
-    dependencies:
-      '@bufbuild/connect': 0.13.0(@bufbuild/protobuf@1.2.1)
-      '@bufbuild/protobuf': 1.2.1
-      headers-polyfill: 3.1.2
+  '@bufbuild/buf-darwin-arm64@1.59.0':
+    optional: true
 
-  '@bufbuild/connect@0.13.0(@bufbuild/protobuf@1.2.1)':
-    dependencies:
-      '@bufbuild/protobuf': 1.2.1
+  '@bufbuild/buf-darwin-x64@1.59.0':
+    optional: true
 
-  '@bufbuild/protobuf@1.2.1': {}
+  '@bufbuild/buf-linux-aarch64@1.59.0':
+    optional: true
 
-  '@bufbuild/protoc-gen-connect-es@0.13.0(@bufbuild/connect@0.13.0(@bufbuild/protobuf@1.2.1))(@bufbuild/protoc-gen-es@1.2.1(@bufbuild/protobuf@1.2.1))':
-    dependencies:
-      '@bufbuild/protobuf': 1.2.1
-      '@bufbuild/protoplugin': 1.2.1
+  '@bufbuild/buf-linux-armv7@1.59.0':
+    optional: true
+
+  '@bufbuild/buf-linux-x64@1.59.0':
+    optional: true
+
+  '@bufbuild/buf-win32-arm64@1.59.0':
+    optional: true
+
+  '@bufbuild/buf-win32-x64@1.59.0':
+    optional: true
+
+  '@bufbuild/buf@1.59.0':
     optionalDependencies:
-      '@bufbuild/connect': 0.13.0(@bufbuild/protobuf@1.2.1)
-      '@bufbuild/protoc-gen-es': 1.2.1(@bufbuild/protobuf@1.2.1)
-    transitivePeerDependencies:
-      - supports-color
+      '@bufbuild/buf-darwin-arm64': 1.59.0
+      '@bufbuild/buf-darwin-x64': 1.59.0
+      '@bufbuild/buf-linux-aarch64': 1.59.0
+      '@bufbuild/buf-linux-armv7': 1.59.0
+      '@bufbuild/buf-linux-x64': 1.59.0
+      '@bufbuild/buf-win32-arm64': 1.59.0
+      '@bufbuild/buf-win32-x64': 1.59.0
 
-  '@bufbuild/protoc-gen-es@1.2.1(@bufbuild/protobuf@1.2.1)':
+  '@bufbuild/protobuf@2.10.0': {}
+
+  '@bufbuild/protoc-gen-es@2.10.0(@bufbuild/protobuf@2.10.0)':
     dependencies:
-      '@bufbuild/protoplugin': 1.2.1
+      '@bufbuild/protoplugin': 2.10.0
     optionalDependencies:
-      '@bufbuild/protobuf': 1.2.1
+      '@bufbuild/protobuf': 2.10.0
     transitivePeerDependencies:
       - supports-color
 
-  '@bufbuild/protoplugin@1.2.1':
+  '@bufbuild/protoplugin@2.10.0':
     dependencies:
-      '@bufbuild/protobuf': 1.2.1
-      '@typescript/vfs': 1.4.0
-      typescript: 4.5.2
+      '@bufbuild/protobuf': 2.10.0
+      '@typescript/vfs': 1.6.2(typescript@5.4.5)
+      typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
+
+  '@connectrpc/connect-node@2.1.0(@bufbuild/protobuf@2.10.0)(@connectrpc/connect@2.1.0(@bufbuild/protobuf@2.10.0))':
+    dependencies:
+      '@bufbuild/protobuf': 2.10.0
+      '@connectrpc/connect': 2.1.0(@bufbuild/protobuf@2.10.0)
+
+  '@connectrpc/connect@2.1.0(@bufbuild/protobuf@2.10.0)':
+    dependencies:
+      '@bufbuild/protobuf': 2.10.0
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
@@ -2197,8 +2241,6 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@protobuf-ts/protoc@2.9.0': {}
-
   '@qdrant/openapi-typescript-fetch@1.2.6': {}
 
   '@rollup/plugin-commonjs@24.1.0(rollup@3.29.5)':
@@ -2370,9 +2412,10 @@ snapshots:
       '@typescript-eslint/types': 5.62.0
       eslint-visitor-keys: 3.4.3
 
-  '@typescript/vfs@1.4.0':
+  '@typescript/vfs@1.6.2(typescript@5.4.5)':
     dependencies:
-      debug: 4.3.4
+      debug: 4.4.1
+      typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
 
@@ -2870,8 +2913,6 @@ snapshots:
   hasown@2.0.2:
     dependencies:
       function-bind: 1.1.2
-
-  headers-polyfill@3.1.2: {}
 
   human-signals@4.3.1: {}
 
@@ -3404,9 +3445,9 @@ snapshots:
 
   type-fest@1.4.0: {}
 
-  typescript@4.5.2: {}
-
   typescript@5.0.4: {}
+
+  typescript@5.4.5: {}
 
   typescript@5.8.3: {}
 

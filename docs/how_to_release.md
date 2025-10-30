@@ -3,7 +3,7 @@
 ## Pre-requisites
 
 -   Install Node.js 18 or higher
--   Insall `pnpm` 9. With never versions, it won't work! Download the binary directly from here: https://github.com/pnpm/pnpm/releases/tag/v9.15.9
+-   Insall `pnpm` 10
 
 Install dependencies using `pnpm`:
 

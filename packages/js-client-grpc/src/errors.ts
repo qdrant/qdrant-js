@@ -1,4 +1,4 @@
-import {Code, ConnectError} from '@bufbuild/connect';
+import {Code, ConnectError} from '@connectrpc/connect';
 
 class CustomError extends Error {
     constructor(message: string) {
