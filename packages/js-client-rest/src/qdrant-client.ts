@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
-
-import {maybe} from '@sevinf/maybe';
 import {OpenApiClient, createApis} from './api-client.js';
 import {QdrantClientConfigError} from './errors.js';
 import {RestArgs, SchemaFor} from './types.js';
 import {PACKAGE_VERSION, ClientVersion} from './client-version.js';
 import {ClientApi} from './openapi/generated_client_type.js';
+import {components} from './openapi/generated_schema.js';
 
 export type QdrantClientParams = {
     port?: number | null;
@@ -169,14 +167,19 @@ export class QdrantClient {
         }: Pick<SchemaFor<'SearchRequestBatch'>, 'searches'> & {consistency?: SchemaFor<'ReadConsistency'>} & {
             timeout?: number;
         },
-    ) {
+    ): Promise<components['schemas']['ScoredPoint'][][]> {
         const response = await this._openApiClient.searchBatchPoints({
             collection_name,
             consistency,
             timeout,
             searches,
         });
-        return maybe(response.data.result).orThrow('Search batch returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -260,7 +263,7 @@ export class QdrantClient {
             Omit<SchemaFor<'SearchRequest'>, 'limit'> & {
                 consistency?: SchemaFor<'ReadConsistency'>;
             } & {timeout?: number},
-    ) {
+    ): Promise<components['schemas']['ScoredPoint'][]> {
         const response = await this._openApiClient.searchPoints({
             collection_name,
             consistency,
@@ -275,7 +278,12 @@ export class QdrantClient {
             with_vector,
             score_threshold,
         });
-        return maybe(response.data.result).orThrow('Search returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -300,14 +308,14 @@ export class QdrantClient {
             consistency,
             timeout,
         }: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
-    ) {
+    ): Promise<components['schemas']['ScoredPoint'][][]> {
         const response = await this._openApiClient.recommendBatchPoints({
             collection_name,
             searches,
             consistency,
             timeout,
         });
-        return maybe(response.data.result).orElse([]);
+        return response.data.result ?? [];
     }
 
     /**
@@ -320,14 +328,14 @@ export class QdrantClient {
             consistency,
             timeout,
         }: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
-    ) {
+    ): Promise<components['schemas']['ScoredPoint'][][]> {
         const response = await this._openApiClient.recommendBatchPoints({
             collection_name,
             searches,
             consistency,
             timeout,
         });
-        return maybe(response.data.result).orElse([]);
+        return response.data.result ?? [];
     }
 
     /**
@@ -415,7 +423,7 @@ export class QdrantClient {
             Partial<Pick<SchemaFor<'RecommendRequest'>, 'limit'>> & {consistency?: SchemaFor<'ReadConsistency'>} & {
                 timeout?: number;
             },
-    ) {
+    ): Promise<components['schemas']['ScoredPoint'][]> {
         const response = await this._openApiClient.recommendPoints({
             collection_name,
             limit,
@@ -434,7 +442,12 @@ export class QdrantClient {
             consistency,
             timeout,
         });
-        return maybe(response.data.result).orThrow('Recommend points API returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -483,7 +496,7 @@ export class QdrantClient {
             with_vector = false,
             order_by,
         }: SchemaFor<'ScrollRequest'> & {timeout?: number} & {consistency?: SchemaFor<'ReadConsistency'>} = {},
-    ) {
+    ): Promise<components['schemas']['ScrollResult']> {
         const response = await this._openApiClient.scrollPoints({
             collection_name,
             shard_key,
@@ -496,7 +509,12 @@ export class QdrantClient {
             consistency,
             timeout,
         });
-        return maybe(response.data.result).orThrow('Scroll points API returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -515,7 +533,7 @@ export class QdrantClient {
     async count(
         collection_name: string,
         {shard_key, filter, exact = true, timeout}: SchemaFor<'CountRequest'> & {timeout?: number} = {},
-    ) {
+    ): Promise<components['schemas']['CountResult']> {
         const response = await this._openApiClient.countPoints({
             collection_name,
             shard_key,
@@ -523,7 +541,12 @@ export class QdrantClient {
             exact,
             timeout,
         });
-        return maybe(response.data.result).orThrow('Count points returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -531,9 +554,14 @@ export class QdrantClient {
      * @param collection_name
      * @returns Operation result
      */
-    async collectionClusterInfo(collection_name: string) {
+    async collectionClusterInfo(collection_name: string): Promise<components['schemas']['CollectionClusterInfo']> {
         const response = await this._openApiClient.collectionClusterInfo({collection_name});
-        return maybe(response.data.result).orThrow('Collection cluster info returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -556,13 +584,18 @@ export class QdrantClient {
     async updateCollectionCluster(
         collection_name: string,
         {timeout, ...operation}: {timeout?: number} & SchemaFor<'ClusterOperations'>,
-    ) {
+    ): Promise<boolean> {
         const response = await this._openApiClient.updateCollectionCluster({
             collection_name,
             timeout,
             ...operation,
         });
-        return maybe(response.data.result).orThrow('Update collection cluster returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -591,7 +624,7 @@ export class QdrantClient {
             points,
             shard_key,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateVectors'>,
-    ) {
+    ): Promise<components['schemas']['UpdateResult']> {
         const response = await this._openApiClient.updateVectors({
             collection_name,
             wait,
@@ -599,7 +632,12 @@ export class QdrantClient {
             points,
             shard_key,
         });
-        return maybe(response.data.result).orThrow('Update vectors returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -632,7 +670,7 @@ export class QdrantClient {
             vector,
             shard_key,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'DeleteVectors'>,
-    ) {
+    ): Promise<components['schemas']['UpdateResult']> {
         const response = await this._openApiClient.deleteVectors({
             collection_name,
             wait,
@@ -642,7 +680,12 @@ export class QdrantClient {
             vector,
             shard_key,
         });
-        return maybe(response.data.result).orThrow('Delete vectors returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -684,7 +727,7 @@ export class QdrantClient {
             group_size,
             limit,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchGroupsRequest'>,
-    ) {
+    ): Promise<components['schemas']['GroupsResult']> {
         const response = await this._openApiClient.searchPointGroups({
             collection_name,
             consistency,
@@ -700,7 +743,12 @@ export class QdrantClient {
             group_size,
             limit,
         });
-        return maybe(response.data.result).orThrow('Search point groups returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -750,7 +798,7 @@ export class QdrantClient {
             group_size,
             limit,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'RecommendGroupsRequest'>,
-    ) {
+    ): Promise<components['schemas']['GroupsResult']> {
         const response = await this._openApiClient.recommendPointGroups({
             collection_name,
             consistency,
@@ -770,7 +818,12 @@ export class QdrantClient {
             group_size,
             limit,
         });
-        return maybe(response.data.result).orThrow('Recommend point groups API returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -797,14 +850,19 @@ export class QdrantClient {
             ordering,
             ...points_or_batch
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointInsertOperations'>,
-    ) {
+    ): Promise<components['schemas']['UpdateResult']> {
         const response = await this._openApiClient.upsertPoints({
             collection_name,
             wait,
             ordering,
             ...points_or_batch,
         });
-        return maybe(response.data.result).orThrow('Upsert returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -844,7 +902,7 @@ export class QdrantClient {
             consistency,
             timeout,
         }: SchemaFor<'PointRequest'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
-    ) {
+    ): Promise<components['schemas']['Record'][]> {
         const response = await this._openApiClient.getPoints({
             collection_name,
             shard_key,
@@ -854,7 +912,12 @@ export class QdrantClient {
             consistency,
             timeout,
         });
-        return maybe(response.data.result).orThrow('Retrieve API returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -894,14 +957,19 @@ export class QdrantClient {
             ordering,
             ...points_selector
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'>,
-    ) {
+    ): Promise<components['schemas']['UpdateResult']> {
         const response = await this._openApiClient.deletePoints({
             collection_name,
             wait,
             ordering,
             ...points_selector,
         });
-        return maybe(response.data.result).orThrow('Delete points returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -948,7 +1016,7 @@ export class QdrantClient {
             ordering,
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'SetPayload'>,
-    ) {
+    ): Promise<components['schemas']['UpdateResult']> {
         const response = await this._openApiClient.setPayload({
             collection_name,
             payload,
@@ -959,7 +1027,12 @@ export class QdrantClient {
             wait,
             ordering,
         });
-        return maybe(response.data.result).orThrow('Set payload returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1008,7 +1081,7 @@ export class QdrantClient {
             key,
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'SetPayload'>,
-    ) {
+    ): Promise<components['schemas']['UpdateResult']> {
         const response = await this._openApiClient.overwritePayload({
             collection_name,
             payload,
@@ -1019,7 +1092,12 @@ export class QdrantClient {
             wait,
             ordering,
         });
-        return maybe(response.data.result).orThrow('Overwrite payload returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1065,7 +1143,7 @@ export class QdrantClient {
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'> &
             SchemaFor<'DeletePayload'>,
-    ) {
+    ): Promise<components['schemas']['UpdateResult']> {
         const response = await this._openApiClient.deletePayload({
             collection_name,
             keys,
@@ -1075,7 +1153,12 @@ export class QdrantClient {
             wait,
             ordering,
         });
-        return maybe(response.data.result).orThrow('Delete payload returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1115,14 +1198,19 @@ export class QdrantClient {
             wait = true,
             ...points_selector
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'>,
-    ) {
+    ): Promise<components['schemas']['UpdateResult']> {
         const response = await this._openApiClient.clearPayload({
             collection_name,
             wait,
             ordering,
             ...points_selector,
         });
-        return maybe(response.data.result).orThrow('Clear payload returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1133,9 +1221,17 @@ export class QdrantClient {
      *     - timeout: Wait for operation commit timeout in seconds. If timeout is reached, request will return with service error.
      * @returns Operation result
      */
-    async updateCollectionAliases({actions, timeout}: {timeout?: number} & SchemaFor<'ChangeAliasesOperation'>) {
+    async updateCollectionAliases({
+        actions,
+        timeout,
+    }: {timeout?: number} & SchemaFor<'ChangeAliasesOperation'>): Promise<boolean> {
         const response = await this._openApiClient.updateAliases({actions, timeout});
-        return maybe(response.data.result).orThrow('Update aliases returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1143,27 +1239,42 @@ export class QdrantClient {
      * @param collection_name Name of the collection
      * @returns Collection aliases
      */
-    async getCollectionAliases(collection_name: string) {
+    async getCollectionAliases(collection_name: string): Promise<components['schemas']['CollectionsAliasesResponse']> {
         const response = await this._openApiClient.getCollectionAliases({collection_name});
-        return maybe(response.data.result).orThrow('Get collection aliases returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
      * Get all aliases
      * @returns All aliases of all collections
      */
-    async getAliases() {
+    async getAliases(): Promise<components['schemas']['CollectionsAliasesResponse']> {
         const response = await this._openApiClient.getCollectionsAliases({});
-        return maybe(response.data.result).orThrow('Get aliases returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
      * Get list name of all existing collections
      * @returns List of the collections
      */
-    async getCollections() {
+    async getCollections(): Promise<components['schemas']['CollectionsResponse']> {
         const response = await this._openApiClient.getCollections({});
-        return maybe(response.data.result).orThrow('Get collections returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1172,9 +1283,14 @@ export class QdrantClient {
      * @param collection_name Name of the collection
      * @returns Detailed information about the collection
      */
-    async getCollection(collection_name: string) {
+    async getCollection(collection_name: string): Promise<components['schemas']['CollectionInfo']> {
         const response = await this._openApiClient.getCollection({collection_name});
-        return maybe(response.data.result).orThrow('Get collection returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1187,12 +1303,20 @@ export class QdrantClient {
      *     - timeout: Wait for operation commit timeout in seconds. If timeout is reached, request will return with service error.
      * @returns Operation result
      */
-    async updateCollection(collection_name: string, args?: SchemaFor<'UpdateCollection'> & {timeout?: number}) {
+    async updateCollection(
+        collection_name: string,
+        args?: SchemaFor<'UpdateCollection'> & {timeout?: number},
+    ): Promise<boolean> {
         const response = await this._openApiClient.updateCollection({
             collection_name,
             ...args,
         });
-        return maybe(response.data.result).orThrow('Update collection returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1204,9 +1328,14 @@ export class QdrantClient {
      *         If timeout is reached, request will return with service error.
      * @returns Operation result
      */
-    async deleteCollection(collection_name: string, args?: {timeout?: number}) {
+    async deleteCollection(collection_name: string, args?: {timeout?: number}): Promise<boolean> {
         const response = await this._openApiClient.deleteCollection({collection_name, ...args});
-        return maybe(response.data.result).orThrow('Delete collection returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1264,7 +1393,7 @@ export class QdrantClient {
             sparse_vectors,
             strict_mode_config,
         }: {timeout?: number} & SchemaFor<'CreateCollection'>,
-    ) {
+    ): Promise<boolean> {
         const response = await this._openApiClient.createCollection({
             collection_name,
             timeout,
@@ -1282,7 +1411,12 @@ export class QdrantClient {
             strict_mode_config,
         });
 
-        return maybe(response.data.result).orThrow('Create collection returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1340,15 +1474,15 @@ export class QdrantClient {
             sparse_vectors,
             strict_mode_config,
         }: {timeout?: number} & SchemaFor<'CreateCollection'>,
-    ) {
-        maybe(
-            await this._openApiClient.deleteCollection({
-                collection_name,
-                timeout,
-            }),
-        )
-            .get('ok')
-            .orThrow('Delete collection returned failed');
+    ): Promise<boolean> {
+        const deleteResponse = await this._openApiClient.deleteCollection({
+            collection_name,
+            timeout,
+        });
+
+        if (!deleteResponse.ok) {
+            throw new Error('Delete collection returned failed');
+        }
 
         const response = await this._openApiClient.createCollection({
             collection_name,
@@ -1367,7 +1501,12 @@ export class QdrantClient {
             strict_mode_config,
         });
 
-        return maybe(response).orThrow('Create collection returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1397,7 +1536,7 @@ export class QdrantClient {
             field_name,
             field_schema,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'CreateFieldIndex'>,
-    ) {
+    ): Promise<components['schemas']['UpdateResult']> {
         const response = await this._openApiClient.createFieldIndex({
             collection_name,
             field_name,
@@ -1405,7 +1544,12 @@ export class QdrantClient {
             wait,
             ordering,
         });
-        return maybe(response.data.result).orThrow('Create field index returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1429,14 +1573,19 @@ export class QdrantClient {
         collection_name: string,
         field_name: string,
         {wait = true, ordering}: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} = {},
-    ) {
+    ): Promise<components['schemas']['UpdateResult']> {
         const response = await this._openApiClient.deleteFieldIndex({
             collection_name,
             field_name,
             wait,
             ordering,
         });
-        return maybe(response.data.result).orThrow('Delete field index returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1444,9 +1593,14 @@ export class QdrantClient {
      * @param collection_name Name of the collection
      * @returns List of snapshots
      */
-    async listSnapshots(collection_name: string) {
+    async listSnapshots(collection_name: string): Promise<components['schemas']['SnapshotDescription'][]> {
         const response = await this._openApiClient.listSnapshots({collection_name});
-        return maybe(response.data.result).orThrow('List snapshots API returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1454,9 +1608,12 @@ export class QdrantClient {
      * @param collection_name Name of the collection
      * @returns Snapshot description
      */
-    async createSnapshot(collection_name: string, args?: {wait?: boolean}) {
+    async createSnapshot(
+        collection_name: string,
+        args?: {wait?: boolean},
+    ): Promise<components['schemas']['SnapshotDescription'] | null> {
         const response = await this._openApiClient.createSnapshot({collection_name, ...args});
-        return maybe(response.data.result).orNull();
+        return response.data.result ?? null;
     }
 
     /**
@@ -1465,27 +1622,42 @@ export class QdrantClient {
      * @param snapshot_name Snapshot id
      * @returns True if snapshot was deleted
      */
-    async deleteSnapshot(collection_name: string, snapshot_name: string, args?: {wait?: boolean}) {
+    async deleteSnapshot(collection_name: string, snapshot_name: string, args?: {wait?: boolean}): Promise<boolean> {
         const response = await this._openApiClient.deleteSnapshot({collection_name, snapshot_name, ...args});
-        return maybe(response.data.result).orThrow('Delete snapshot API returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
      * List all snapshots for a whole storage
      * @returns List of snapshots
      */
-    async listFullSnapshots() {
+    async listFullSnapshots(): Promise<components['schemas']['SnapshotDescription'][]> {
         const response = await this._openApiClient.listFullSnapshots({});
-        return maybe(response.data.result).orThrow('List full snapshots API returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
      * Create snapshot for a whole storage
      * @returns Snapshot description
      */
-    async createFullSnapshot(args?: {wait?: boolean}) {
+    async createFullSnapshot(args?: {wait?: boolean}): Promise<components['schemas']['SnapshotDescription']> {
         const response = await this._openApiClient.createFullSnapshot(args ?? {});
-        return maybe(response.data.result).orThrow('Create full snapshot API returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1493,9 +1665,14 @@ export class QdrantClient {
      * @param snapshot_name Snapshot name
      * @returns True if the snapshot was deleted
      */
-    async deleteFullSnapshot(snapshot_name: string, args?: {wait?: boolean}) {
+    async deleteFullSnapshot(snapshot_name: string, args?: {wait?: boolean}): Promise<boolean> {
         const response = await this._openApiClient.deleteFullSnapshot({snapshot_name, ...args});
-        return maybe(response.data.result).orThrow('Delete full snapshot API returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1519,7 +1696,7 @@ export class QdrantClient {
     async recoverSnapshot(
         collection_name: string,
         {location, priority, checksum, api_key}: SchemaFor<'SnapshotRecover'>,
-    ) {
+    ): Promise<boolean> {
         const response = await this._openApiClient.recoverFromSnapshot({
             collection_name,
             location,
@@ -1527,7 +1704,12 @@ export class QdrantClient {
             checksum,
             api_key,
         });
-        return maybe(response.data.result).orThrow('Recover from snapshot API returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1554,14 +1736,19 @@ export class QdrantClient {
             ordering,
             ...operations
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateOperations'>,
-    ) {
+    ): Promise<components['schemas']['UpdateResult'][]> {
         const response = await this._openApiClient.batchUpdate({
             collection_name,
             wait,
             ordering,
             ...operations,
         });
-        return maybe(response.data.result).orThrow('Batch update returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1574,14 +1761,19 @@ export class QdrantClient {
         collection_name: string,
         shard_id: number,
         {wait = true, ...shard_snapshot_recover}: {wait?: boolean} & SchemaFor<'ShardSnapshotRecover'>,
-    ) {
+    ): Promise<boolean> {
         const response = await this._openApiClient.recoverShardFromSnapshot({
             collection_name,
             shard_id,
             wait,
             ...shard_snapshot_recover,
         });
-        return maybe(response.data.result).orThrow('Recover shard from snapshot returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1590,12 +1782,20 @@ export class QdrantClient {
      * @param shard_id Shard ID
      * @returns Operation result
      */
-    async listShardSnapshots(collection_name: string, shard_id: number) {
+    async listShardSnapshots(
+        collection_name: string,
+        shard_id: number,
+    ): Promise<components['schemas']['SnapshotDescription'][]> {
         const response = await this._openApiClient.listShardSnapshots({
             collection_name,
             shard_id,
         });
-        return maybe(response.data.result).orThrow('List shard snapshots returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1604,13 +1804,22 @@ export class QdrantClient {
      * @param shard_id Shard ID
      * @returns Operation result
      */
-    async createShardSnapshot(collection_name: string, shard_id: number, {wait = true}: {wait?: boolean}) {
+    async createShardSnapshot(
+        collection_name: string,
+        shard_id: number,
+        {wait = true}: {wait?: boolean},
+    ): Promise<components['schemas']['SnapshotDescription']> {
         const response = await this._openApiClient.createShardSnapshot({
             collection_name,
             shard_id,
             wait,
         });
-        return maybe(response.data.result).orThrow('Create shard snapshot returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1625,14 +1834,19 @@ export class QdrantClient {
         shard_id: number,
         snapshot_name: string,
         {wait = true}: {wait?: boolean},
-    ) {
+    ): Promise<boolean> {
         const response = await this._openApiClient.deleteShardSnapshot({
             collection_name,
             shard_id,
             snapshot_name,
             wait,
         });
-        return maybe(response.data.result).orThrow('Create shard snapshot returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1655,7 +1869,7 @@ export class QdrantClient {
             placement,
             timeout,
         }: {timeout?: number} & SchemaFor<'CreateShardingKey'>,
-    ) {
+    ): Promise<boolean> {
         const response = await this._openApiClient.createShardKey({
             collection_name,
             shard_key,
@@ -1664,7 +1878,12 @@ export class QdrantClient {
             placement,
             timeout,
         });
-        return maybe(response.data.result).orThrow('Create shard key returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1678,13 +1897,18 @@ export class QdrantClient {
     async deleteShardKey(
         collection_name: string,
         {shard_key, timeout}: {timeout?: number} & SchemaFor<'DropShardingKey'>,
-    ) {
+    ): Promise<boolean> {
         const response = await this._openApiClient.deleteShardKey({
             collection_name,
             shard_key,
             timeout,
         });
-        return maybe(response.data.result).orThrow('Create shard key returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1731,7 +1955,7 @@ export class QdrantClient {
             using,
             lookup_from,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'DiscoverRequest'>,
-    ) {
+    ): Promise<components['schemas']['ScoredPoint'][]> {
         const response = await this._openApiClient.discoverPoints({
             collection_name,
             consistency,
@@ -1747,7 +1971,12 @@ export class QdrantClient {
             using,
             lookup_from,
         });
-        return maybe(response.data.result).orThrow('Discover points returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1772,14 +2001,19 @@ export class QdrantClient {
             timeout,
             searches,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'DiscoverRequestBatch'>,
-    ) {
+    ): Promise<components['schemas']['ScoredPoint'][][]> {
         const response = await this._openApiClient.discoverBatchPoints({
             collection_name,
             consistency,
             timeout,
             searches,
         });
-        return maybe(response.data.result).orThrow('Discover batch points returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1787,9 +2021,9 @@ export class QdrantClient {
      * @description Returns information about the running Qdrant instance like version and commit id
      * @returns Operation result
      */
-    async versionInfo() {
+    async versionInfo(): Promise<components['schemas']['VersionInfo']> {
         const response = await this._openApiClient.root({});
-        return maybe(response.data).orThrow('Version Info returned empty');
+        return response.data;
     }
 
     /**
@@ -1798,9 +2032,14 @@ export class QdrantClient {
      * @description Returns "true" if the given collection name exists, and "false" otherwise
      * @returns Operation result
      */
-    async collectionExists(collection_name: string) {
+    async collectionExists(collection_name: string): Promise<components['schemas']['CollectionExistence']> {
         const response = await this._openApiClient.collectionExists({collection_name});
-        return maybe(response.data.result).orThrow('Collection exists returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1847,7 +2086,7 @@ export class QdrantClient {
             with_payload,
             lookup_from,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'QueryRequest'>,
-    ) {
+    ): Promise<components['schemas']['QueryResponse']> {
         const response = await this._openApiClient.queryPoints({
             collection_name,
             consistency,
@@ -1865,7 +2104,12 @@ export class QdrantClient {
             with_payload,
             lookup_from,
         });
-        return maybe(response.data.result).orThrow('Query points returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1890,14 +2134,19 @@ export class QdrantClient {
             timeout,
             searches,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'QueryRequestBatch'>,
-    ) {
+    ): Promise<components['schemas']['QueryResponse'][]> {
         const response = await this._openApiClient.queryBatchPoints({
             collection_name,
             consistency,
             timeout,
             searches,
         });
-        return maybe(response.data.result).orThrow('Query points returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1946,7 +2195,7 @@ export class QdrantClient {
             limit,
             with_lookup,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'QueryGroupsRequest'>,
-    ) {
+    ): Promise<components['schemas']['GroupsResult']> {
         const response = await this._openApiClient.queryPointsGroups({
             collection_name,
             consistency,
@@ -1965,7 +2214,12 @@ export class QdrantClient {
             limit,
             with_lookup,
         });
-        return maybe(response.data.result).orThrow('Query groups returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -1998,7 +2252,7 @@ export class QdrantClient {
             filter,
             exact,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'FacetRequest'>,
-    ) {
+    ): Promise<components['schemas']['FacetResponse']> {
         const response = await this._openApiClient.facet({
             collection_name,
             consistency,
@@ -2009,7 +2263,12 @@ export class QdrantClient {
             filter,
             exact,
         });
-        return maybe(response.data.result).orThrow('Facet returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -2042,7 +2301,7 @@ export class QdrantClient {
             limit,
             using,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchMatrixRequest'>,
-    ) {
+    ): Promise<components['schemas']['SearchMatrixPairsResponse']> {
         const response = await this._openApiClient.searchMatrixPairs({
             collection_name,
             consistency,
@@ -2053,7 +2312,12 @@ export class QdrantClient {
             limit,
             using,
         });
-        return maybe(response.data.result).orThrow('Search points matrix pairs returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 
     /**
@@ -2086,7 +2350,7 @@ export class QdrantClient {
             limit,
             using,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchMatrixRequest'>,
-    ) {
+    ): Promise<components['schemas']['SearchMatrixOffsetsResponse']> {
         const response = await this._openApiClient.searchMatrixOffsets({
             collection_name,
             consistency,
@@ -2097,6 +2361,11 @@ export class QdrantClient {
             limit,
             using,
         });
-        return maybe(response.data.result).orThrow('Search points matrix offsets returned empty');
+        return (
+            response.data.result ??
+            (() => {
+                throw new Error('result came uninitialized');
+            })()
+        );
     }
 }
