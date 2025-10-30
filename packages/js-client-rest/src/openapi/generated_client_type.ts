@@ -23,7 +23,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: boolean;
@@ -62,7 +62,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: boolean;
@@ -112,7 +112,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["TelemetryData"];
@@ -149,71 +149,6 @@ export type ClientApi = {
             };
           };
           "4XX": never;
-        };
-  }>;
-  
-  /**
-       * Get lock options 
-       * @deprecated 
-       * @description Get lock options. If write is locked, all write operations and collection creation are forbidden
-       */
-  getLocks: TypedFetch<{
-    responses: {
-          200: {
-            content: {
-              "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
-                time?: number;
-                status?: string;
-                result?: components["schemas"]["LocksOption"];
-              };
-            };
-          };
-          default: {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-          "4XX": {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-        };
-  }>;
-  
-  /**
-       * Set lock options 
-       * @deprecated 
-       * @description Set lock options. If write is locked, all write operations and collection creation are forbidden. Returns previous lock options
-       */
-  postLocks: TypedFetch<{
-    requestBody?: {
-          content: {
-            "application/json": components["schemas"]["LocksOption"];
-          };
-        };
-    responses: {
-          200: {
-            content: {
-              "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
-                time?: number;
-                status?: string;
-                result?: components["schemas"]["LocksOption"];
-              };
-            };
-          };
-          default: {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-          "4XX": {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
         };
   }>;
   
@@ -301,7 +236,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["ClusterStatus"];
@@ -327,7 +262,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: boolean;
@@ -354,6 +289,7 @@ export type ClientApi = {
   removePeer: TypedFetch<{
     parameters: {
           query?: {
+            timeout?: number;
             force?: boolean;
           };
           path: {
@@ -364,7 +300,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: boolean;
@@ -393,7 +329,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["CollectionsResponse"];
@@ -427,7 +363,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["CollectionInfo"];
@@ -469,7 +405,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: boolean;
@@ -506,7 +442,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: boolean;
@@ -548,7 +484,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: boolean;
@@ -584,7 +520,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: boolean;
@@ -627,7 +563,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["UpdateResult"];
@@ -661,7 +597,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["CollectionExistence"];
@@ -700,7 +636,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["UpdateResult"];
@@ -734,7 +670,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["CollectionClusterInfo"];
@@ -773,7 +709,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: boolean;
@@ -807,7 +743,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["CollectionsAliasesResponse"];
@@ -836,7 +772,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["CollectionsAliasesResponse"];
@@ -972,7 +908,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: (components["schemas"]["SnapshotDescription"])[];
@@ -1120,7 +1056,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: (components["schemas"]["SnapshotDescription"])[];
@@ -1373,7 +1309,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: (components["schemas"]["SnapshotDescription"])[];
@@ -1533,7 +1469,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["Record"];
@@ -1576,7 +1512,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["UpdateResult"];
@@ -1619,7 +1555,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: (components["schemas"]["Record"])[];
@@ -1662,7 +1598,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["UpdateResult"];
@@ -1705,7 +1641,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["UpdateResult"];
@@ -1748,7 +1684,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["UpdateResult"];
@@ -1791,7 +1727,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["UpdateResult"];
@@ -1834,7 +1770,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["UpdateResult"];
@@ -1877,7 +1813,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["UpdateResult"];
@@ -1920,7 +1856,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["UpdateResult"];
@@ -1963,7 +1899,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: (components["schemas"]["UpdateResult"])[];
@@ -2006,7 +1942,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["ScrollResult"];
@@ -2050,7 +1986,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: (components["schemas"]["ScoredPoint"])[];
@@ -2094,7 +2030,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: ((components["schemas"]["ScoredPoint"])[])[];
@@ -2138,7 +2074,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["GroupsResult"];
@@ -2182,7 +2118,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: (components["schemas"]["ScoredPoint"])[];
@@ -2226,7 +2162,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: ((components["schemas"]["ScoredPoint"])[])[];
@@ -2270,7 +2206,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["GroupsResult"];
@@ -2296,7 +2232,7 @@ export type ClientApi = {
        * @description Use context and a target to find the most similar points to the target, constrained by the context.
        * When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair.
        * Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0.
-       * When using target (with or without context), the score behaves a little different: The  integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target. The context part of the score for  each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair,  and -1 otherwise.
+       * When using target (with or without context), the score behaves a little different: The integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target. The context part of the score for each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, and -1 otherwise.
        */
   discoverPoints: TypedFetch<{
     parameters: {
@@ -2317,7 +2253,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: (components["schemas"]["ScoredPoint"])[];
@@ -2361,7 +2297,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: ((components["schemas"]["ScoredPoint"])[])[];
@@ -2388,6 +2324,7 @@ export type ClientApi = {
   countPoints: TypedFetch<{
     parameters: {
           query?: {
+            consistency?: components["schemas"]["ReadConsistency"];
             timeout?: number;
           };
           path: {
@@ -2403,7 +2340,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["CountResult"];
@@ -2430,8 +2367,8 @@ export type ClientApi = {
   facet: TypedFetch<{
     parameters: {
           query?: {
-            timeout?: number;
             consistency?: components["schemas"]["ReadConsistency"];
+            timeout?: number;
           };
           path: {
             collection_name: string;
@@ -2446,7 +2383,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["FacetResponse"];
@@ -2489,7 +2426,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["QueryResponse"];
@@ -2532,7 +2469,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: (components["schemas"]["QueryResponse"])[];
@@ -2575,7 +2512,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["GroupsResult"];
@@ -2618,7 +2555,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["SearchMatrixPairsResponse"];
@@ -2661,7 +2598,7 @@ export type ClientApi = {
           200: {
             content: {
               "application/json": {
-                usage?: components["schemas"]["HardwareUsage"] | (Record<string, unknown> | null);
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["SearchMatrixOffsetsResponse"];

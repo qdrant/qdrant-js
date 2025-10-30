@@ -1253,7 +1253,6 @@ export class QdrantClient {
             timeout,
             vectors,
             hnsw_config,
-            init_from,
             on_disk_payload,
             optimizers_config,
             quantization_config,
@@ -1271,7 +1270,6 @@ export class QdrantClient {
             timeout,
             vectors,
             hnsw_config,
-            init_from,
             on_disk_payload,
             optimizers_config,
             quantization_config,
@@ -1331,7 +1329,6 @@ export class QdrantClient {
             timeout,
             vectors,
             hnsw_config,
-            init_from,
             on_disk_payload,
             optimizers_config,
             quantization_config,
@@ -1358,7 +1355,6 @@ export class QdrantClient {
             timeout,
             vectors,
             hnsw_config,
-            init_from,
             on_disk_payload,
             optimizers_config,
             quantization_config,
@@ -1532,30 +1528,6 @@ export class QdrantClient {
             api_key,
         });
         return maybe(response.data.result).orThrow('Recover from snapshot API returned empty');
-    }
-
-    /**
-     * Lock storage for writing
-     */
-    async lockStorage(reason: string) {
-        const response = await this._openApiClient.postLocks({write: true, error_message: reason});
-        return maybe(response.data.result).orThrow('Lock storage returned empty');
-    }
-
-    /**
-     * Unlock storage for writing.
-     */
-    async unlockStorage() {
-        const response = await this._openApiClient.postLocks({write: false});
-        return maybe(response.data.result).orThrow('Post locks returned empty');
-    }
-
-    /**
-     * Get current locks state.
-     */
-    async getLocks() {
-        const response = await this._openApiClient.getLocks({});
-        return maybe(response.data.result).orThrow('Get locks returned empty');
     }
 
     /**

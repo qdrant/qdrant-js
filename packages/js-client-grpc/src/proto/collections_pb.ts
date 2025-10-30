@@ -5,6 +5,7 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
+import { Value } from "./json_with_int_pb.js";
 
 /**
  * @generated from enum qdrant.Datatype
@@ -1378,6 +1379,43 @@ export class OptimizerStatus extends Message<OptimizerStatus> {
 }
 
 /**
+ * @generated from message qdrant.CollectionWarning
+ */
+export class CollectionWarning extends Message<CollectionWarning> {
+  /**
+   * @generated from field: string message = 1;
+   */
+  message = "";
+
+  constructor(data?: PartialMessage<CollectionWarning>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.CollectionWarning";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "message", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionWarning {
+    return new CollectionWarning().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CollectionWarning {
+    return new CollectionWarning().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CollectionWarning {
+    return new CollectionWarning().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CollectionWarning | PlainMessage<CollectionWarning> | undefined, b: CollectionWarning | PlainMessage<CollectionWarning> | undefined): boolean {
+    return proto3.util.equals(CollectionWarning, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.HnswConfigDiff
  */
 export class HnswConfigDiff extends Message<HnswConfigDiff> {
@@ -1399,10 +1437,12 @@ export class HnswConfigDiff extends Message<HnswConfigDiff> {
 
   /**
    *
-   * Minimal size (in KiloBytes) of vectors for additional payload-based indexing.
-   * If the payload chunk is smaller than `full_scan_threshold` additional indexing won't be used -
-   * in this case full-scan search should be preferred by query planner and additional indexing is not required.
-   * Note: 1 Kb = 1 vector of size 256
+   * Minimal size threshold (in KiloBytes) below which full-scan is preferred over HNSW search.
+   * This measures the total size of vectors being queried against.
+   * When the maximum estimated amount of points that a condition satisfies is smaller than
+   * `full_scan_threshold`, the query planner will use full-scan search instead of HNSW index
+   * traversal for better performance.
+   * Note: 1Kb = 1 vector of size 256
    *
    * @generated from field: optional uint64 full_scan_threshold = 3;
    */
@@ -1435,6 +1475,17 @@ export class HnswConfigDiff extends Message<HnswConfigDiff> {
    */
   payloadM?: bigint;
 
+  /**
+   *
+   * Store copies of original and quantized vectors within the HNSW index file. Default: false.
+   * Enabling this option will trade the search speed for disk usage by reducing amount of
+   * random seeks during the search.
+   * Requires quantized vectors to be enabled. Multi-vectors are not supported.
+   *
+   * @generated from field: optional bool inline_storage = 7;
+   */
+  inlineStorage?: boolean;
+
   constructor(data?: PartialMessage<HnswConfigDiff>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1449,6 +1500,7 @@ export class HnswConfigDiff extends Message<HnswConfigDiff> {
     { no: 4, name: "max_indexing_threads", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
     { no: 5, name: "on_disk", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 6, name: "payload_m", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 7, name: "inline_storage", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): HnswConfigDiff {
@@ -1545,6 +1597,13 @@ export class WalConfigDiff extends Message<WalConfigDiff> {
    */
   walSegmentsAhead?: bigint;
 
+  /**
+   * Number of closed segments to retain
+   *
+   * @generated from field: optional uint64 wal_retain_closed = 3;
+   */
+  walRetainClosed?: bigint;
+
   constructor(data?: PartialMessage<WalConfigDiff>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1555,6 +1614,7 @@ export class WalConfigDiff extends Message<WalConfigDiff> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "wal_capacity_mb", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
     { no: 2, name: "wal_segments_ahead", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 3, name: "wal_retain_closed", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WalConfigDiff {
@@ -2108,51 +2168,71 @@ export class QuantizationConfigDiff extends Message<QuantizationConfigDiff> {
  */
 export class StrictModeConfig extends Message<StrictModeConfig> {
   /**
+   * Whether strict mode is enabled for a collection or not.
+   *
    * @generated from field: optional bool enabled = 1;
    */
   enabled?: boolean;
 
   /**
+   * Max allowed `limit` parameter for all APIs that don't have their own max limit.
+   *
    * @generated from field: optional uint32 max_query_limit = 2;
    */
   maxQueryLimit?: number;
 
   /**
+   * Max allowed `timeout` parameter.
+   *
    * @generated from field: optional uint32 max_timeout = 3;
    */
   maxTimeout?: number;
 
   /**
+   * Allow usage of unindexed fields in retrieval based (e.g. search) filters.
+   *
    * @generated from field: optional bool unindexed_filtering_retrieve = 4;
    */
   unindexedFilteringRetrieve?: boolean;
 
   /**
+   * Allow usage of unindexed fields in filtered updates (e.g. delete by payload).
+   *
    * @generated from field: optional bool unindexed_filtering_update = 5;
    */
   unindexedFilteringUpdate?: boolean;
 
   /**
+   * Max HNSW ef value allowed in search parameters.
+   *
    * @generated from field: optional uint32 search_max_hnsw_ef = 6;
    */
   searchMaxHnswEf?: number;
 
   /**
+   * Whether exact search is allowed.
+   *
    * @generated from field: optional bool search_allow_exact = 7;
    */
   searchAllowExact?: boolean;
 
   /**
+   * Max oversampling value allowed in search
+   *
    * @generated from field: optional float search_max_oversampling = 8;
    */
   searchMaxOversampling?: number;
 
   /**
+   * Max batchsize when upserting
+   *
    * @generated from field: optional uint64 upsert_max_batchsize = 9;
    */
   upsertMaxBatchsize?: bigint;
 
   /**
+   * Max size of a collections vector storage in bytes, ignoring replicas.
+   *
    * @generated from field: optional uint64 max_collection_vector_size_bytes = 10;
    */
   maxCollectionVectorSizeBytes?: bigint;
@@ -2172,34 +2252,53 @@ export class StrictModeConfig extends Message<StrictModeConfig> {
   writeRateLimit?: number;
 
   /**
+   * Max size of a collections payload storage in bytes, ignoring replicas.
+   *
    * @generated from field: optional uint64 max_collection_payload_size_bytes = 13;
    */
   maxCollectionPayloadSizeBytes?: bigint;
 
   /**
+   * Max conditions a filter can have.
+   *
    * @generated from field: optional uint64 filter_max_conditions = 14;
    */
   filterMaxConditions?: bigint;
 
   /**
+   * Max size of a condition, eg. items in `MatchAny`.
+   *
    * @generated from field: optional uint64 condition_max_size = 15;
    */
   conditionMaxSize?: bigint;
 
   /**
+   * Multivector strict mode configuration
+   *
    * @generated from field: optional qdrant.StrictModeMultivectorConfig multivector_config = 16;
    */
   multivectorConfig?: StrictModeMultivectorConfig;
 
   /**
+   * Sparse vector strict mode configuration
+   *
    * @generated from field: optional qdrant.StrictModeSparseConfig sparse_config = 17;
    */
   sparseConfig?: StrictModeSparseConfig;
 
   /**
+   * Max number of points estimated in a collection
+   *
    * @generated from field: optional uint64 max_points_count = 18;
    */
   maxPointsCount?: bigint;
+
+  /**
+   * Max number of payload indexes in a collection
+   *
+   * @generated from field: optional uint64 max_payload_index_count = 19;
+   */
+  maxPayloadIndexCount?: bigint;
 
   constructor(data?: PartialMessage<StrictModeConfig>) {
     super();
@@ -2227,6 +2326,7 @@ export class StrictModeConfig extends Message<StrictModeConfig> {
     { no: 16, name: "multivector_config", kind: "message", T: StrictModeMultivectorConfig, opt: true },
     { no: 17, name: "sparse_config", kind: "message", T: StrictModeSparseConfig, opt: true },
     { no: 18, name: "max_points_count", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 19, name: "max_payload_index_count", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StrictModeConfig {
@@ -2288,6 +2388,8 @@ export class StrictModeSparseConfig extends Message<StrictModeSparseConfig> {
  */
 export class StrictModeSparse extends Message<StrictModeSparse> {
   /**
+   * Max length of sparse vector
+   *
    * @generated from field: optional uint64 max_length = 10;
    */
   maxLength?: bigint;
@@ -2362,6 +2464,8 @@ export class StrictModeMultivectorConfig extends Message<StrictModeMultivectorCo
  */
 export class StrictModeMultivector extends Message<StrictModeMultivector> {
   /**
+   * Max number of vectors in a multivector
+   *
    * @generated from field: optional uint64 max_vectors = 1;
    */
   maxVectors?: bigint;
@@ -2469,13 +2573,6 @@ export class CreateCollection extends Message<CreateCollection> {
   writeConsistencyFactor?: number;
 
   /**
-   * Deprecated: specify name of the other collection to copy data from
-   *
-   * @generated from field: optional string init_from_collection = 13;
-   */
-  initFromCollection?: string;
-
-  /**
    * Quantization configuration of vector
    *
    * @generated from field: optional qdrant.QuantizationConfig quantization_config = 14;
@@ -2503,6 +2600,13 @@ export class CreateCollection extends Message<CreateCollection> {
    */
   strictModeConfig?: StrictModeConfig;
 
+  /**
+   * Arbitrary JSON metadata for the collection
+   *
+   * @generated from field: map<string, qdrant.Value> metadata = 18;
+   */
+  metadata: { [key: string]: Value } = {};
+
   constructor(data?: PartialMessage<CreateCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2521,11 +2625,11 @@ export class CreateCollection extends Message<CreateCollection> {
     { no: 10, name: "vectors_config", kind: "message", T: VectorsConfig, opt: true },
     { no: 11, name: "replication_factor", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
     { no: 12, name: "write_consistency_factor", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
-    { no: 13, name: "init_from_collection", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 14, name: "quantization_config", kind: "message", T: QuantizationConfig, opt: true },
     { no: 15, name: "sharding_method", kind: "enum", T: proto3.getEnumType(ShardingMethod), opt: true },
     { no: 16, name: "sparse_vectors_config", kind: "message", T: SparseVectorConfig, opt: true },
     { no: 17, name: "strict_mode_config", kind: "message", T: StrictModeConfig, opt: true },
+    { no: 18, name: "metadata", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: Value} },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateCollection {
@@ -2612,6 +2716,13 @@ export class UpdateCollection extends Message<UpdateCollection> {
    */
   strictModeConfig?: StrictModeConfig;
 
+  /**
+   * Arbitrary JSON-like metadata for the collection, will be merged with already stored metadata
+   *
+   * @generated from field: map<string, qdrant.Value> metadata = 10;
+   */
+  metadata: { [key: string]: Value } = {};
+
   constructor(data?: PartialMessage<UpdateCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2629,6 +2740,7 @@ export class UpdateCollection extends Message<UpdateCollection> {
     { no: 7, name: "quantization_config", kind: "message", T: QuantizationConfigDiff, opt: true },
     { no: 8, name: "sparse_vectors_config", kind: "message", T: SparseVectorConfig, opt: true },
     { no: 9, name: "strict_mode_config", kind: "message", T: StrictModeConfig, opt: true },
+    { no: 10, name: "metadata", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: Value} },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateCollection {
@@ -2946,6 +3058,13 @@ export class CollectionConfig extends Message<CollectionConfig> {
    */
   strictModeConfig?: StrictModeConfig;
 
+  /**
+   * Arbitrary JSON metadata for the collection
+   *
+   * @generated from field: map<string, qdrant.Value> metadata = 7;
+   */
+  metadata: { [key: string]: Value } = {};
+
   constructor(data?: PartialMessage<CollectionConfig>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2960,6 +3079,7 @@ export class CollectionConfig extends Message<CollectionConfig> {
     { no: 4, name: "wal_config", kind: "message", T: WalConfigDiff },
     { no: 5, name: "quantization_config", kind: "message", T: QuantizationConfig, opt: true },
     { no: 6, name: "strict_mode_config", kind: "message", T: StrictModeConfig, opt: true },
+    { no: 7, name: "metadata", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: Value} },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionConfig {
@@ -3282,6 +3402,13 @@ export class TextIndexParams extends Message<TextIndexParams> {
    */
   stemmer?: StemmingAlgorithm;
 
+  /**
+   * If true, normalize tokens by folding accented characters to ASCII (e.g., "ação" -> "acao"). Default: false.
+   *
+   * @generated from field: optional bool ascii_folding = 9;
+   */
+  asciiFolding?: boolean;
+
   constructor(data?: PartialMessage<TextIndexParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -3298,6 +3425,7 @@ export class TextIndexParams extends Message<TextIndexParams> {
     { no: 6, name: "stopwords", kind: "message", T: StopwordsSet, opt: true },
     { no: 7, name: "phrase_matching", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 8, name: "stemmer", kind: "message", T: StemmingAlgorithm, opt: true },
+    { no: 9, name: "ascii_folding", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TextIndexParams {
@@ -3716,13 +3844,6 @@ export class CollectionInfo extends Message<CollectionInfo> {
   optimizerStatus?: OptimizerStatus;
 
   /**
-   * Approximate number of vectors in the collection
-   *
-   * @generated from field: optional uint64 vectors_count = 3;
-   */
-  vectorsCount?: bigint;
-
-  /**
    * Number of independent segments
    *
    * @generated from field: uint64 segments_count = 4;
@@ -3757,6 +3878,13 @@ export class CollectionInfo extends Message<CollectionInfo> {
    */
   indexedVectorsCount?: bigint;
 
+  /**
+   * Warnings related to the collection
+   *
+   * @generated from field: repeated qdrant.CollectionWarning warnings = 11;
+   */
+  warnings: CollectionWarning[] = [];
+
   constructor(data?: PartialMessage<CollectionInfo>) {
     super();
     proto3.util.initPartial(data, this);
@@ -3767,12 +3895,12 @@ export class CollectionInfo extends Message<CollectionInfo> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "status", kind: "enum", T: proto3.getEnumType(CollectionStatus) },
     { no: 2, name: "optimizer_status", kind: "message", T: OptimizerStatus },
-    { no: 3, name: "vectors_count", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
     { no: 4, name: "segments_count", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
     { no: 7, name: "config", kind: "message", T: CollectionConfig },
     { no: 8, name: "payload_schema", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: PayloadSchemaInfo} },
     { no: 9, name: "points_count", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
     { no: 10, name: "indexed_vectors_count", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 11, name: "warnings", kind: "message", T: CollectionWarning, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionInfo {
