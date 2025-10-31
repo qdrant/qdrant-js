@@ -2,7 +2,6 @@
 import {test, describe, expect} from 'vitest';
 import semver from 'semver';
 import {QdrantClient} from '../../src/qdrant-client.js';
-import {components} from '../../src/openapi/generated_schema.js';
 
 describe('QdrantClient', () => {
     const semverRegEx =
@@ -224,7 +223,7 @@ describe('QdrantClient', () => {
             ],
         });
 
-        const result: components['schemas']['QueryResponse'] = await client.query(collectionName, {
+        const result = await client.query(collectionName, {
             prefetch: {
                 query: [0.2, 0.8, 0.1, 0.9],
                 limit: 50,
@@ -260,9 +259,9 @@ describe('QdrantClient', () => {
         expect(result.points.length).toBeGreaterThan(0);
 
         // Verify that points with h1 tag have higher scores than p/li tags
-        const h1Point = result.points.find((p: components['schemas']['ScoredPoint']) => p.payload?.tag === 'h1');
-        const pPoint = result.points.find((p: components['schemas']['ScoredPoint']) => p.payload?.tag === 'p');
-        const liPoint = result.points.find((p: components['schemas']['ScoredPoint']) => p.payload?.tag === 'li');
+        const h1Point = result.points.find((p) => p.payload?.tag === 'h1');
+        const pPoint = result.points.find((p) => p.payload?.tag === 'p');
+        const liPoint = result.points.find((p) => p.payload?.tag === 'li');
 
         if (h1Point && pPoint) {
             expect(h1Point.score).toBeGreaterThan(pPoint.score);
