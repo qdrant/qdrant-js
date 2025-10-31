@@ -1,9 +1,8 @@
 import {OpenApiClient, createApis} from './api-client.js';
 import {QdrantClientConfigError} from './errors.js';
-import {RestArgs, SchemaFor} from './types.js';
+import {RestArgs, SchemaFor, Schemas} from './types.js';
 import {PACKAGE_VERSION, ClientVersion} from './client-version.js';
 import {ClientApi} from './openapi/generated_client_type.js';
-import {components} from './openapi/generated_schema.js';
 
 const noResultError = (): never => {
     throw new Error('Result came uninitialized');
@@ -171,7 +170,7 @@ export class QdrantClient {
         }: Pick<SchemaFor<'SearchRequestBatch'>, 'searches'> & {consistency?: SchemaFor<'ReadConsistency'>} & {
             timeout?: number;
         },
-    ): Promise<components['schemas']['ScoredPoint'][][]> {
+    ): Promise<Schemas['ScoredPoint'][][]> {
         const response = await this._openApiClient.searchBatchPoints({
             collection_name,
             consistency,
@@ -262,7 +261,7 @@ export class QdrantClient {
             Omit<SchemaFor<'SearchRequest'>, 'limit'> & {
                 consistency?: SchemaFor<'ReadConsistency'>;
             } & {timeout?: number},
-    ): Promise<components['schemas']['ScoredPoint'][]> {
+    ): Promise<Schemas['ScoredPoint'][]> {
         const response = await this._openApiClient.searchPoints({
             collection_name,
             consistency,
@@ -302,7 +301,7 @@ export class QdrantClient {
             consistency,
             timeout,
         }: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
-    ): Promise<components['schemas']['ScoredPoint'][][]> {
+    ): Promise<Schemas['ScoredPoint'][][]> {
         const response = await this._openApiClient.recommendBatchPoints({
             collection_name,
             searches,
@@ -322,7 +321,7 @@ export class QdrantClient {
             consistency,
             timeout,
         }: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
-    ): Promise<components['schemas']['ScoredPoint'][][]> {
+    ): Promise<Schemas['ScoredPoint'][][]> {
         const response = await this._openApiClient.recommendBatchPoints({
             collection_name,
             searches,
@@ -417,7 +416,7 @@ export class QdrantClient {
             Partial<Pick<SchemaFor<'RecommendRequest'>, 'limit'>> & {consistency?: SchemaFor<'ReadConsistency'>} & {
                 timeout?: number;
             },
-    ): Promise<components['schemas']['ScoredPoint'][]> {
+    ): Promise<Schemas['ScoredPoint'][]> {
         const response = await this._openApiClient.recommendPoints({
             collection_name,
             limit,
@@ -485,7 +484,7 @@ export class QdrantClient {
             with_vector = false,
             order_by,
         }: SchemaFor<'ScrollRequest'> & {timeout?: number} & {consistency?: SchemaFor<'ReadConsistency'>} = {},
-    ): Promise<components['schemas']['ScrollResult']> {
+    ): Promise<Schemas['ScrollResult']> {
         const response = await this._openApiClient.scrollPoints({
             collection_name,
             shard_key,
@@ -517,7 +516,7 @@ export class QdrantClient {
     async count(
         collection_name: string,
         {shard_key, filter, exact = true, timeout}: SchemaFor<'CountRequest'> & {timeout?: number} = {},
-    ): Promise<components['schemas']['CountResult']> {
+    ): Promise<Schemas['CountResult']> {
         const response = await this._openApiClient.countPoints({
             collection_name,
             shard_key,
@@ -533,7 +532,7 @@ export class QdrantClient {
      * @param collection_name
      * @returns Operation result
      */
-    async collectionClusterInfo(collection_name: string): Promise<components['schemas']['CollectionClusterInfo']> {
+    async collectionClusterInfo(collection_name: string): Promise<Schemas['CollectionClusterInfo']> {
         const response = await this._openApiClient.collectionClusterInfo({collection_name});
         return response.data.result ?? noResultError();
     }
@@ -593,7 +592,7 @@ export class QdrantClient {
             points,
             shard_key,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateVectors'>,
-    ): Promise<components['schemas']['UpdateResult']> {
+    ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.updateVectors({
             collection_name,
             wait,
@@ -634,7 +633,7 @@ export class QdrantClient {
             vector,
             shard_key,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'DeleteVectors'>,
-    ): Promise<components['schemas']['UpdateResult']> {
+    ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.deleteVectors({
             collection_name,
             wait,
@@ -686,7 +685,7 @@ export class QdrantClient {
             group_size,
             limit,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchGroupsRequest'>,
-    ): Promise<components['schemas']['GroupsResult']> {
+    ): Promise<Schemas['GroupsResult']> {
         const response = await this._openApiClient.searchPointGroups({
             collection_name,
             consistency,
@@ -752,7 +751,7 @@ export class QdrantClient {
             group_size,
             limit,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'RecommendGroupsRequest'>,
-    ): Promise<components['schemas']['GroupsResult']> {
+    ): Promise<Schemas['GroupsResult']> {
         const response = await this._openApiClient.recommendPointGroups({
             collection_name,
             consistency,
@@ -799,7 +798,7 @@ export class QdrantClient {
             ordering,
             ...points_or_batch
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointInsertOperations'>,
-    ): Promise<components['schemas']['UpdateResult']> {
+    ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.upsertPoints({
             collection_name,
             wait,
@@ -846,7 +845,7 @@ export class QdrantClient {
             consistency,
             timeout,
         }: SchemaFor<'PointRequest'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
-    ): Promise<components['schemas']['Record'][]> {
+    ): Promise<Schemas['Record'][]> {
         const response = await this._openApiClient.getPoints({
             collection_name,
             shard_key,
@@ -896,7 +895,7 @@ export class QdrantClient {
             ordering,
             ...points_selector
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'>,
-    ): Promise<components['schemas']['UpdateResult']> {
+    ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.deletePoints({
             collection_name,
             wait,
@@ -950,7 +949,7 @@ export class QdrantClient {
             ordering,
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'SetPayload'>,
-    ): Promise<components['schemas']['UpdateResult']> {
+    ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.setPayload({
             collection_name,
             payload,
@@ -1010,7 +1009,7 @@ export class QdrantClient {
             key,
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'SetPayload'>,
-    ): Promise<components['schemas']['UpdateResult']> {
+    ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.overwritePayload({
             collection_name,
             payload,
@@ -1067,7 +1066,7 @@ export class QdrantClient {
             wait = true,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'> &
             SchemaFor<'DeletePayload'>,
-    ): Promise<components['schemas']['UpdateResult']> {
+    ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.deletePayload({
             collection_name,
             keys,
@@ -1117,7 +1116,7 @@ export class QdrantClient {
             wait = true,
             ...points_selector
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'>,
-    ): Promise<components['schemas']['UpdateResult']> {
+    ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.clearPayload({
             collection_name,
             wait,
@@ -1148,7 +1147,7 @@ export class QdrantClient {
      * @param collection_name Name of the collection
      * @returns Collection aliases
      */
-    async getCollectionAliases(collection_name: string): Promise<components['schemas']['CollectionsAliasesResponse']> {
+    async getCollectionAliases(collection_name: string): Promise<Schemas['CollectionsAliasesResponse']> {
         const response = await this._openApiClient.getCollectionAliases({collection_name});
         return response.data.result ?? noResultError();
     }
@@ -1157,7 +1156,7 @@ export class QdrantClient {
      * Get all aliases
      * @returns All aliases of all collections
      */
-    async getAliases(): Promise<components['schemas']['CollectionsAliasesResponse']> {
+    async getAliases(): Promise<Schemas['CollectionsAliasesResponse']> {
         const response = await this._openApiClient.getCollectionsAliases({});
         return response.data.result ?? noResultError();
     }
@@ -1166,7 +1165,7 @@ export class QdrantClient {
      * Get list name of all existing collections
      * @returns List of the collections
      */
-    async getCollections(): Promise<components['schemas']['CollectionsResponse']> {
+    async getCollections(): Promise<Schemas['CollectionsResponse']> {
         const response = await this._openApiClient.getCollections({});
         return response.data.result ?? noResultError();
     }
@@ -1177,7 +1176,7 @@ export class QdrantClient {
      * @param collection_name Name of the collection
      * @returns Detailed information about the collection
      */
-    async getCollection(collection_name: string): Promise<components['schemas']['CollectionInfo']> {
+    async getCollection(collection_name: string): Promise<Schemas['CollectionInfo']> {
         const response = await this._openApiClient.getCollection({collection_name});
         return response.data.result ?? noResultError();
     }
@@ -1405,7 +1404,7 @@ export class QdrantClient {
             field_name,
             field_schema,
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'CreateFieldIndex'>,
-    ): Promise<components['schemas']['UpdateResult']> {
+    ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.createFieldIndex({
             collection_name,
             field_name,
@@ -1437,7 +1436,7 @@ export class QdrantClient {
         collection_name: string,
         field_name: string,
         {wait = true, ordering}: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} = {},
-    ): Promise<components['schemas']['UpdateResult']> {
+    ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.deleteFieldIndex({
             collection_name,
             field_name,
@@ -1452,7 +1451,7 @@ export class QdrantClient {
      * @param collection_name Name of the collection
      * @returns List of snapshots
      */
-    async listSnapshots(collection_name: string): Promise<components['schemas']['SnapshotDescription'][]> {
+    async listSnapshots(collection_name: string): Promise<Schemas['SnapshotDescription'][]> {
         const response = await this._openApiClient.listSnapshots({collection_name});
         return response.data.result ?? noResultError();
     }
@@ -1465,7 +1464,7 @@ export class QdrantClient {
     async createSnapshot(
         collection_name: string,
         args?: {wait?: boolean},
-    ): Promise<components['schemas']['SnapshotDescription'] | null> {
+    ): Promise<Schemas['SnapshotDescription'] | null> {
         const response = await this._openApiClient.createSnapshot({collection_name, ...args});
         return response.data.result ?? null;
     }
@@ -1485,7 +1484,7 @@ export class QdrantClient {
      * List all snapshots for a whole storage
      * @returns List of snapshots
      */
-    async listFullSnapshots(): Promise<components['schemas']['SnapshotDescription'][]> {
+    async listFullSnapshots(): Promise<Schemas['SnapshotDescription'][]> {
         const response = await this._openApiClient.listFullSnapshots({});
         return response.data.result ?? noResultError();
     }
@@ -1494,7 +1493,7 @@ export class QdrantClient {
      * Create snapshot for a whole storage
      * @returns Snapshot description
      */
-    async createFullSnapshot(args?: {wait?: boolean}): Promise<components['schemas']['SnapshotDescription']> {
+    async createFullSnapshot(args?: {wait?: boolean}): Promise<Schemas['SnapshotDescription']> {
         const response = await this._openApiClient.createFullSnapshot(args ?? {});
         return response.data.result ?? noResultError();
     }
@@ -1565,7 +1564,7 @@ export class QdrantClient {
             ordering,
             ...operations
         }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateOperations'>,
-    ): Promise<components['schemas']['UpdateResult'][]> {
+    ): Promise<Schemas['UpdateResult'][]> {
         const response = await this._openApiClient.batchUpdate({
             collection_name,
             wait,
@@ -1601,10 +1600,7 @@ export class QdrantClient {
      * @param shard_id Shard ID
      * @returns Operation result
      */
-    async listShardSnapshots(
-        collection_name: string,
-        shard_id: number,
-    ): Promise<components['schemas']['SnapshotDescription'][]> {
+    async listShardSnapshots(collection_name: string, shard_id: number): Promise<Schemas['SnapshotDescription'][]> {
         const response = await this._openApiClient.listShardSnapshots({
             collection_name,
             shard_id,
@@ -1622,7 +1618,7 @@ export class QdrantClient {
         collection_name: string,
         shard_id: number,
         {wait = true}: {wait?: boolean},
-    ): Promise<components['schemas']['SnapshotDescription']> {
+    ): Promise<Schemas['SnapshotDescription']> {
         const response = await this._openApiClient.createShardSnapshot({
             collection_name,
             shard_id,
@@ -1749,7 +1745,7 @@ export class QdrantClient {
             using,
             lookup_from,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'DiscoverRequest'>,
-    ): Promise<components['schemas']['ScoredPoint'][]> {
+    ): Promise<Schemas['ScoredPoint'][]> {
         const response = await this._openApiClient.discoverPoints({
             collection_name,
             consistency,
@@ -1790,7 +1786,7 @@ export class QdrantClient {
             timeout,
             searches,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'DiscoverRequestBatch'>,
-    ): Promise<components['schemas']['ScoredPoint'][][]> {
+    ): Promise<Schemas['ScoredPoint'][][]> {
         const response = await this._openApiClient.discoverBatchPoints({
             collection_name,
             consistency,
@@ -1805,7 +1801,7 @@ export class QdrantClient {
      * @description Returns information about the running Qdrant instance like version and commit id
      * @returns Operation result
      */
-    async versionInfo(): Promise<components['schemas']['VersionInfo']> {
+    async versionInfo(): Promise<Schemas['VersionInfo']> {
         const response = await this._openApiClient.root({});
         return response.data;
     }
@@ -1816,7 +1812,7 @@ export class QdrantClient {
      * @description Returns "true" if the given collection name exists, and "false" otherwise
      * @returns Operation result
      */
-    async collectionExists(collection_name: string): Promise<components['schemas']['CollectionExistence']> {
+    async collectionExists(collection_name: string): Promise<Schemas['CollectionExistence']> {
         const response = await this._openApiClient.collectionExists({collection_name});
         return response.data.result ?? noResultError();
     }
@@ -1865,7 +1861,7 @@ export class QdrantClient {
             with_payload,
             lookup_from,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'QueryRequest'>,
-    ): Promise<components['schemas']['QueryResponse']> {
+    ): Promise<Schemas['QueryResponse']> {
         const response = await this._openApiClient.queryPoints({
             collection_name,
             consistency,
@@ -1908,7 +1904,7 @@ export class QdrantClient {
             timeout,
             searches,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'QueryRequestBatch'>,
-    ): Promise<components['schemas']['QueryResponse'][]> {
+    ): Promise<Schemas['QueryResponse'][]> {
         const response = await this._openApiClient.queryBatchPoints({
             collection_name,
             consistency,
@@ -1964,7 +1960,7 @@ export class QdrantClient {
             limit,
             with_lookup,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'QueryGroupsRequest'>,
-    ): Promise<components['schemas']['GroupsResult']> {
+    ): Promise<Schemas['GroupsResult']> {
         const response = await this._openApiClient.queryPointsGroups({
             collection_name,
             consistency,
@@ -2016,7 +2012,7 @@ export class QdrantClient {
             filter,
             exact,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'FacetRequest'>,
-    ): Promise<components['schemas']['FacetResponse']> {
+    ): Promise<Schemas['FacetResponse']> {
         const response = await this._openApiClient.facet({
             collection_name,
             consistency,
@@ -2060,7 +2056,7 @@ export class QdrantClient {
             limit,
             using,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchMatrixRequest'>,
-    ): Promise<components['schemas']['SearchMatrixPairsResponse']> {
+    ): Promise<Schemas['SearchMatrixPairsResponse']> {
         const response = await this._openApiClient.searchMatrixPairs({
             collection_name,
             consistency,
@@ -2104,7 +2100,7 @@ export class QdrantClient {
             limit,
             using,
         }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchMatrixRequest'>,
-    ): Promise<components['schemas']['SearchMatrixOffsetsResponse']> {
+    ): Promise<Schemas['SearchMatrixOffsetsResponse']> {
         const response = await this._openApiClient.searchMatrixOffsets({
             collection_name,
             consistency,
