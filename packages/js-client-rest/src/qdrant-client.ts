@@ -5,6 +5,10 @@ import {PACKAGE_VERSION, ClientVersion} from './client-version.js';
 import {ClientApi} from './openapi/generated_client_type.js';
 import {components} from './openapi/generated_schema.js';
 
+const noResultError = (): never => {
+    throw new Error('Result came uninitialized');
+};
+
 export type QdrantClientParams = {
     port?: number | null;
     apiKey?: string;
@@ -174,12 +178,7 @@ export class QdrantClient {
             timeout,
             searches,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -278,12 +277,7 @@ export class QdrantClient {
             with_vector,
             score_threshold,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -442,12 +436,7 @@ export class QdrantClient {
             consistency,
             timeout,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -509,12 +498,7 @@ export class QdrantClient {
             consistency,
             timeout,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -541,12 +525,7 @@ export class QdrantClient {
             exact,
             timeout,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -556,12 +535,7 @@ export class QdrantClient {
      */
     async collectionClusterInfo(collection_name: string): Promise<components['schemas']['CollectionClusterInfo']> {
         const response = await this._openApiClient.collectionClusterInfo({collection_name});
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -590,12 +564,7 @@ export class QdrantClient {
             timeout,
             ...operation,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -632,12 +601,7 @@ export class QdrantClient {
             points,
             shard_key,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -680,12 +644,7 @@ export class QdrantClient {
             vector,
             shard_key,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -743,12 +702,7 @@ export class QdrantClient {
             group_size,
             limit,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -818,12 +772,7 @@ export class QdrantClient {
             group_size,
             limit,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -857,12 +806,7 @@ export class QdrantClient {
             ordering,
             ...points_or_batch,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -912,12 +856,7 @@ export class QdrantClient {
             consistency,
             timeout,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -964,12 +903,7 @@ export class QdrantClient {
             ordering,
             ...points_selector,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1027,12 +961,7 @@ export class QdrantClient {
             wait,
             ordering,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1092,12 +1021,7 @@ export class QdrantClient {
             wait,
             ordering,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1153,12 +1077,7 @@ export class QdrantClient {
             wait,
             ordering,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1205,12 +1124,7 @@ export class QdrantClient {
             ordering,
             ...points_selector,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1226,12 +1140,7 @@ export class QdrantClient {
         timeout,
     }: {timeout?: number} & SchemaFor<'ChangeAliasesOperation'>): Promise<boolean> {
         const response = await this._openApiClient.updateAliases({actions, timeout});
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1241,12 +1150,7 @@ export class QdrantClient {
      */
     async getCollectionAliases(collection_name: string): Promise<components['schemas']['CollectionsAliasesResponse']> {
         const response = await this._openApiClient.getCollectionAliases({collection_name});
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1255,12 +1159,7 @@ export class QdrantClient {
      */
     async getAliases(): Promise<components['schemas']['CollectionsAliasesResponse']> {
         const response = await this._openApiClient.getCollectionsAliases({});
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1269,12 +1168,7 @@ export class QdrantClient {
      */
     async getCollections(): Promise<components['schemas']['CollectionsResponse']> {
         const response = await this._openApiClient.getCollections({});
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1285,12 +1179,7 @@ export class QdrantClient {
      */
     async getCollection(collection_name: string): Promise<components['schemas']['CollectionInfo']> {
         const response = await this._openApiClient.getCollection({collection_name});
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1311,12 +1200,7 @@ export class QdrantClient {
             collection_name,
             ...args,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1330,12 +1214,7 @@ export class QdrantClient {
      */
     async deleteCollection(collection_name: string, args?: {timeout?: number}): Promise<boolean> {
         const response = await this._openApiClient.deleteCollection({collection_name, ...args});
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1411,12 +1290,7 @@ export class QdrantClient {
             strict_mode_config,
         });
 
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1501,12 +1375,7 @@ export class QdrantClient {
             strict_mode_config,
         });
 
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1544,12 +1413,7 @@ export class QdrantClient {
             wait,
             ordering,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1580,12 +1444,7 @@ export class QdrantClient {
             wait,
             ordering,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1595,12 +1454,7 @@ export class QdrantClient {
      */
     async listSnapshots(collection_name: string): Promise<components['schemas']['SnapshotDescription'][]> {
         const response = await this._openApiClient.listSnapshots({collection_name});
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1624,12 +1478,7 @@ export class QdrantClient {
      */
     async deleteSnapshot(collection_name: string, snapshot_name: string, args?: {wait?: boolean}): Promise<boolean> {
         const response = await this._openApiClient.deleteSnapshot({collection_name, snapshot_name, ...args});
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1638,12 +1487,7 @@ export class QdrantClient {
      */
     async listFullSnapshots(): Promise<components['schemas']['SnapshotDescription'][]> {
         const response = await this._openApiClient.listFullSnapshots({});
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1652,12 +1496,7 @@ export class QdrantClient {
      */
     async createFullSnapshot(args?: {wait?: boolean}): Promise<components['schemas']['SnapshotDescription']> {
         const response = await this._openApiClient.createFullSnapshot(args ?? {});
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1667,12 +1506,7 @@ export class QdrantClient {
      */
     async deleteFullSnapshot(snapshot_name: string, args?: {wait?: boolean}): Promise<boolean> {
         const response = await this._openApiClient.deleteFullSnapshot({snapshot_name, ...args});
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1704,12 +1538,7 @@ export class QdrantClient {
             checksum,
             api_key,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1743,12 +1572,7 @@ export class QdrantClient {
             ordering,
             ...operations,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1768,12 +1592,7 @@ export class QdrantClient {
             wait,
             ...shard_snapshot_recover,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1790,12 +1609,7 @@ export class QdrantClient {
             collection_name,
             shard_id,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1814,12 +1628,7 @@ export class QdrantClient {
             shard_id,
             wait,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1841,12 +1650,7 @@ export class QdrantClient {
             snapshot_name,
             wait,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1878,12 +1682,7 @@ export class QdrantClient {
             placement,
             timeout,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1903,12 +1702,7 @@ export class QdrantClient {
             shard_key,
             timeout,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -1971,12 +1765,7 @@ export class QdrantClient {
             using,
             lookup_from,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -2008,12 +1797,7 @@ export class QdrantClient {
             timeout,
             searches,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -2034,12 +1818,7 @@ export class QdrantClient {
      */
     async collectionExists(collection_name: string): Promise<components['schemas']['CollectionExistence']> {
         const response = await this._openApiClient.collectionExists({collection_name});
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -2104,12 +1883,7 @@ export class QdrantClient {
             with_payload,
             lookup_from,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -2141,12 +1915,7 @@ export class QdrantClient {
             timeout,
             searches,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -2214,12 +1983,7 @@ export class QdrantClient {
             limit,
             with_lookup,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -2263,12 +2027,7 @@ export class QdrantClient {
             filter,
             exact,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -2312,12 +2071,7 @@ export class QdrantClient {
             limit,
             using,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 
     /**
@@ -2361,11 +2115,6 @@ export class QdrantClient {
             limit,
             using,
         });
-        return (
-            response.data.result ??
-            (() => {
-                throw new Error('result came uninitialized');
-            })()
-        );
+        return response.data.result ?? noResultError();
     }
 }
