@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call*/
 import {test, describe, expect} from 'vitest';
 import semver from 'semver';
 import {QdrantClient} from '../../src/qdrant-client.js';
+import {components} from '../../src/openapi/generated_schema.js';
 
 describe('QdrantClient', () => {
     const semverRegEx =
@@ -259,9 +259,9 @@ describe('QdrantClient', () => {
         expect(result.points.length).toBeGreaterThan(0);
 
         // Verify that points with h1 tag have higher scores than p/li tags
-        const h1Point = result.points.find((p) => p.payload?.tag === 'h1');
-        const pPoint = result.points.find((p) => p.payload?.tag === 'p');
-        const liPoint = result.points.find((p) => p.payload?.tag === 'li');
+        const h1Point = result.points.find((p: components['schemas']['ScoredPoint']) => p.payload?.tag === 'h1');
+        const pPoint = result.points.find((p: components['schemas']['ScoredPoint']) => p.payload?.tag === 'p');
+        const liPoint = result.points.find((p: components['schemas']['ScoredPoint']) => p.payload?.tag === 'li');
 
         if (h1Point && pPoint) {
             expect(h1Point.score).toBeGreaterThan(pPoint.score);
