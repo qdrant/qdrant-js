@@ -169,7 +169,7 @@ describe('VectorOutput extensions', () => {
                 },
             });
 
-            expect(vector.getVectorType()).toBe('multi-dense');
+            expect(vector.getVectorType()).toBe('multiDense');
         });
 
         it('should identify dense vector from deprecated field', () => {
@@ -195,7 +195,7 @@ describe('VectorOutput extensions', () => {
                 vectorsCount: 2,
             });
 
-            expect(vector.getVectorType()).toBe('multi-dense');
+            expect(vector.getVectorType()).toBe('multiDense');
         });
 
         it('should return undefined for empty vector', () => {

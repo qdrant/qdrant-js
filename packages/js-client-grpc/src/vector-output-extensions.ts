@@ -28,9 +28,9 @@ declare module './proto/points_pb.js' {
         asMultiDenseVector(): MultiDenseVector | undefined;
 
         /**
-         * Gets the vector type: 'dense', 'sparse', 'multi-dense', or undefined
+         * Gets the vector type: 'dense', 'sparse', 'multiDense', or undefined
          */
-        getVectorType(): 'dense' | 'sparse' | 'multi-dense' | undefined;
+        getVectorType(): 'dense' | 'sparse' | 'multiDense' | undefined;
     }
 }
 
@@ -92,16 +92,16 @@ VectorOutput.prototype.asMultiDenseVector = function (): MultiDenseVector | unde
 };
 
 // Implementation: getVectorType
-VectorOutput.prototype.getVectorType = function (): 'dense' | 'sparse' | 'multi-dense' | undefined {
+VectorOutput.prototype.getVectorType = function (): 'dense' | 'sparse' | 'multiDense' | undefined {
     // Check new fields first
     if (this.vector.case === 'dense') return 'dense';
     if (this.vector.case === 'sparse') return 'sparse';
-    if (this.vector.case === 'multiDense') return 'multi-dense';
+    if (this.vector.case === 'multiDense') return 'multiDense';
 
     // Fall back to deprecated fields
     if (this.data.length > 0) {
         if (this.indices) return 'sparse';
-        if (this.vectorsCount && this.vectorsCount > 0) return 'multi-dense';
+        if (this.vectorsCount && this.vectorsCount > 0) return 'multiDense';
         return 'dense';
     }
 
