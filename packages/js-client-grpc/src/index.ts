@@ -1,3 +1,6 @@
+// Apply proto extensions before re-exporting (must be first)
+import './vector-output-extensions.js';
+
 export {QdrantClient, QdrantClientParams} from './qdrant-client.js';
 export * from './errors.js';
 export {ConnectError, Code as ConnectErrorCode} from '@bufbuild/connect';
