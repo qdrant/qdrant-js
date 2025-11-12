@@ -3,7 +3,7 @@
 ## Pre-requisites
 
 -   Install Node.js 18 or higher
--   Insall `pnpm` 10
+-   Install `pnpm` 10
 
 Install dependencies using `pnpm`:
 

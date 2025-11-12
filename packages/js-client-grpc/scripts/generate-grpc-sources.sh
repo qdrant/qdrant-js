@@ -36,5 +36,5 @@ cat $CLIENT_DIR/qdrant.proto \
   > $CLIENT_DIR/qdrant_tmp.proto
 mv $CLIENT_DIR/qdrant_tmp.proto $CLIENT_DIR/qdrant.proto
 
-# Generate TypeScript files with protoc plugins
+# Generate TypeScript files with buf
 pnpm buf generate
