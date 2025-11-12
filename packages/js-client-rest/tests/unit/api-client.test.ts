@@ -30,14 +30,14 @@ describe('apiClient', () => {
             headers,
         });
 
-        await expect(apis.postLocks({error_message: 'request error', write: true})).resolves.toMatchObject({
+        await expect(apis.collectionExists({collection_name: 'my-collection'})).resolves.toMatchObject({
             data: {error_message: 'response error'},
         });
 
         expect(global.fetch).toBeCalledWith(
-            expect.stringMatching('http://my-domain.com/locks'),
+            expect.stringMatching('http://my-domain.com/collections/my-collection/exists'),
             expect.objectContaining({
-                body: JSON.stringify({error_message: 'request error', write: true}),
+                method: 'GET',
             }),
         );
     });

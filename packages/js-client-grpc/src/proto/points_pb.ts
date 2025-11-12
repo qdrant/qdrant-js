@@ -191,7 +191,7 @@ proto3.util.setEnumType(RecommendStrategy, "qdrant.RecommendStrategy", [
  */
 export enum Fusion {
   /**
-   * Reciprocal Rank Fusion
+   * Reciprocal Rank Fusion (with default parameters)
    *
    * @generated from enum value: RRF = 0;
    */
@@ -618,8 +618,6 @@ export class InferenceObject extends Message<InferenceObject> {
 }
 
 /**
- * Legacy vector format, which determines the vector type by the configuration of its fields.
- *
  * @generated from message qdrant.Vector
  */
 export class Vector extends Message<Vector> {
@@ -1029,6 +1027,11 @@ export class ShardKeySelector extends Message<ShardKeySelector> {
    */
   shardKeys: ShardKey[] = [];
 
+  /**
+   * @generated from field: optional qdrant.ShardKey fallback = 2;
+   */
+  fallback?: ShardKey;
+
   constructor(data?: PartialMessage<ShardKeySelector>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1038,6 +1041,7 @@ export class ShardKeySelector extends Message<ShardKeySelector> {
   static readonly typeName = "qdrant.ShardKeySelector";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "shard_keys", kind: "message", T: ShardKey, repeated: true },
+    { no: 2, name: "fallback", kind: "message", T: ShardKey, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ShardKeySelector {
@@ -1094,6 +1098,13 @@ export class UpsertPoints extends Message<UpsertPoints> {
    */
   shardKeySelector?: ShardKeySelector;
 
+  /**
+   * If specified, only points that match this filter will be updated, others will be inserted
+   *
+   * @generated from field: optional qdrant.Filter update_filter = 6;
+   */
+  updateFilter?: Filter;
+
   constructor(data?: PartialMessage<UpsertPoints>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1107,6 +1118,7 @@ export class UpsertPoints extends Message<UpsertPoints> {
     { no: 3, name: "points", kind: "message", T: PointStruct, repeated: true },
     { no: 4, name: "ordering", kind: "message", T: WriteOrdering, opt: true },
     { no: 5, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+    { no: 6, name: "update_filter", kind: "message", T: Filter, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpsertPoints {
@@ -1323,6 +1335,13 @@ export class UpdatePointVectors extends Message<UpdatePointVectors> {
    */
   shardKeySelector?: ShardKeySelector;
 
+  /**
+   * If specified, only points that match this filter will be updated
+   *
+   * @generated from field: optional qdrant.Filter update_filter = 6;
+   */
+  updateFilter?: Filter;
+
   constructor(data?: PartialMessage<UpdatePointVectors>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1336,6 +1355,7 @@ export class UpdatePointVectors extends Message<UpdatePointVectors> {
     { no: 3, name: "points", kind: "message", T: PointVectors, repeated: true },
     { no: 4, name: "ordering", kind: "message", T: WriteOrdering, opt: true },
     { no: 5, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+    { no: 6, name: "update_filter", kind: "message", T: Filter, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdatePointVectors {
@@ -2329,6 +2349,65 @@ export class QuantizationSearchParams extends Message<QuantizationSearchParams> 
 }
 
 /**
+ * @generated from message qdrant.AcornSearchParams
+ */
+export class AcornSearchParams extends Message<AcornSearchParams> {
+  /**
+   *
+   * If true, then ACORN may be used for the HNSW search based on filters
+   * selectivity.
+   *
+   * Improves search recall for searches with multiple low-selectivity
+   * payload filters, at cost of performance.
+   *
+   * @generated from field: optional bool enable = 1;
+   */
+  enable?: boolean;
+
+  /**
+   *
+   * Maximum selectivity of filters to enable ACORN.
+   *
+   * If estimated filters selectivity is higher than this value,
+   * ACORN will not be used. Selectivity is estimated as:
+   * `estimated number of points satisfying the filters / total number of points`.
+   *
+   * 0.0 for never, 1.0 for always. Default is 0.4.
+   *
+   * @generated from field: optional double max_selectivity = 2;
+   */
+  maxSelectivity?: number;
+
+  constructor(data?: PartialMessage<AcornSearchParams>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.AcornSearchParams";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "enable", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 2, name: "max_selectivity", kind: "scalar", T: 1 /* ScalarType.DOUBLE */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AcornSearchParams {
+    return new AcornSearchParams().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AcornSearchParams {
+    return new AcornSearchParams().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AcornSearchParams {
+    return new AcornSearchParams().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AcornSearchParams | PlainMessage<AcornSearchParams> | undefined, b: AcornSearchParams | PlainMessage<AcornSearchParams> | undefined): boolean {
+    return proto3.util.equals(AcornSearchParams, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.SearchParams
  */
 export class SearchParams extends Message<SearchParams> {
@@ -2367,6 +2446,14 @@ export class SearchParams extends Message<SearchParams> {
    */
   indexedOnly?: boolean;
 
+  /**
+   *
+   * ACORN search params
+   *
+   * @generated from field: optional qdrant.AcornSearchParams acorn = 5;
+   */
+  acorn?: AcornSearchParams;
+
   constructor(data?: PartialMessage<SearchParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2379,6 +2466,7 @@ export class SearchParams extends Message<SearchParams> {
     { no: 2, name: "exact", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 3, name: "quantization", kind: "message", T: QuantizationSearchParams, opt: true },
     { no: 4, name: "indexed_only", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 5, name: "acorn", kind: "message", T: AcornSearchParams, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchParams {
@@ -4610,7 +4698,7 @@ export class DecayParamsExpression extends Message<DecayParamsExpression> {
   scale?: number;
 
   /**
-   * The midpoint of the decay. Defaults to 0.5. Output will be this value when `|x - target| == scale`.
+   * The midpoint of the decay. Should be between 0 and 1. Defaults to 0.5. Output will be this value when `|x - target| == scale`.
    *
    * @generated from field: optional float midpoint = 4;
    */
@@ -4754,6 +4842,47 @@ export class Mmr extends Message<Mmr> {
 }
 
 /**
+ * Parameterized reciprocal rank fusion
+ *
+ * @generated from message qdrant.Rrf
+ */
+export class Rrf extends Message<Rrf> {
+  /**
+   * K parameter for reciprocal rank fusion
+   *
+   * @generated from field: optional uint32 k = 1;
+   */
+  k?: number;
+
+  constructor(data?: PartialMessage<Rrf>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "qdrant.Rrf";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "k", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Rrf {
+    return new Rrf().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Rrf {
+    return new Rrf().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Rrf {
+    return new Rrf().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Rrf | PlainMessage<Rrf> | undefined, b: Rrf | PlainMessage<Rrf> | undefined): boolean {
+    return proto3.util.equals(Rrf, a, b);
+  }
+}
+
+/**
  * @generated from message qdrant.Query
  */
 export class Query extends Message<Query> {
@@ -4832,6 +4961,14 @@ export class Query extends Message<Query> {
      */
     value: NearestInputWithMmr;
     case: "nearestWithMmr";
+  } | {
+    /**
+     * Parameterized reciprocal rank fusion
+     *
+     * @generated from field: qdrant.Rrf rrf = 10;
+     */
+    value: Rrf;
+    case: "rrf";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<Query>) {
@@ -4851,6 +4988,7 @@ export class Query extends Message<Query> {
     { no: 7, name: "sample", kind: "enum", T: proto3.getEnumType(Sample), oneof: "variant" },
     { no: 8, name: "formula", kind: "message", T: Formula, oneof: "variant" },
     { no: 9, name: "nearest_with_mmr", kind: "message", T: NearestInputWithMmr, oneof: "variant" },
+    { no: 10, name: "rrf", kind: "message", T: Rrf, oneof: "variant" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Query {
@@ -5923,6 +6061,13 @@ export class PointsUpdateOperation_PointStructList extends Message<PointsUpdateO
    */
   shardKeySelector?: ShardKeySelector;
 
+  /**
+   * If specified, only points that match this filter will be updated, others will be inserted
+   *
+   * @generated from field: optional qdrant.Filter update_filter = 3;
+   */
+  updateFilter?: Filter;
+
   constructor(data?: PartialMessage<PointsUpdateOperation_PointStructList>) {
     super();
     proto3.util.initPartial(data, this);
@@ -5933,6 +6078,7 @@ export class PointsUpdateOperation_PointStructList extends Message<PointsUpdateO
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "points", kind: "message", T: PointStruct, repeated: true },
     { no: 2, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+    { no: 3, name: "update_filter", kind: "message", T: Filter, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation_PointStructList {
@@ -6145,6 +6291,13 @@ export class PointsUpdateOperation_UpdateVectors extends Message<PointsUpdateOpe
    */
   shardKeySelector?: ShardKeySelector;
 
+  /**
+   * If specified, only points that match this filter will be updated
+   *
+   * @generated from field: optional qdrant.Filter update_filter = 3;
+   */
+  updateFilter?: Filter;
+
   constructor(data?: PartialMessage<PointsUpdateOperation_UpdateVectors>) {
     super();
     proto3.util.initPartial(data, this);
@@ -6155,6 +6308,7 @@ export class PointsUpdateOperation_UpdateVectors extends Message<PointsUpdateOpe
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "points", kind: "message", T: PointVectors, repeated: true },
     { no: 2, name: "shard_key_selector", kind: "message", T: ShardKeySelector, opt: true },
+    { no: 3, name: "update_filter", kind: "message", T: Filter, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PointsUpdateOperation_UpdateVectors {
@@ -7704,6 +7858,11 @@ export class FacetResponse extends Message<FacetResponse> {
    */
   time = 0;
 
+  /**
+   * @generated from field: optional qdrant.Usage usage = 3;
+   */
+  usage?: Usage;
+
   constructor(data?: PartialMessage<FacetResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -7714,6 +7873,7 @@ export class FacetResponse extends Message<FacetResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "hits", kind: "message", T: FacetHit, repeated: true },
     { no: 2, name: "time", kind: "scalar", T: 1 /* ScalarType.DOUBLE */ },
+    { no: 3, name: "usage", kind: "message", T: Usage, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FacetResponse {
@@ -8409,6 +8569,14 @@ export class Match extends Message<Match> {
      */
     value: string;
     case: "phrase";
+  } | {
+    /**
+     * Match any word in the text
+     *
+     * @generated from field: string text_any = 10;
+     */
+    value: string;
+    case: "textAny";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<Match>) {
@@ -8428,6 +8596,7 @@ export class Match extends Message<Match> {
     { no: 7, name: "except_integers", kind: "message", T: RepeatedIntegers, oneof: "match_value" },
     { no: 8, name: "except_keywords", kind: "message", T: RepeatedStrings, oneof: "match_value" },
     { no: 9, name: "phrase", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "match_value" },
+    { no: 10, name: "text_any", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "match_value" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Match {

@@ -54,28 +54,6 @@ export function createClientApi(client: Client) : ClientApi {
       .create(),
     
     /**
-         * Get lock options 
-         * @deprecated 
-         * @description Get lock options. If write is locked, all write operations and collection creation are forbidden
-         */
-    getLocks:
-      client
-      .path('/locks')
-      .method('get')
-      .create(),
-    
-    /**
-         * Set lock options 
-         * @deprecated 
-         * @description Set lock options. If write is locked, all write operations and collection creation are forbidden. Returns previous lock options
-         */
-    postLocks:
-      client
-      .path('/locks')
-      .method('post')
-      .create(),
-    
-    /**
          * Kubernetes healthz endpoint 
          * @description An endpoint for health checking used in Kubernetes.
          */
@@ -151,6 +129,7 @@ export function createClientApi(client: Client) : ClientApi {
       .path('/cluster/peer/{peer_id}')
       .method('delete')
       .create({
+        timeout: true,
         force: true,
       }),
     
@@ -721,7 +700,7 @@ export function createClientApi(client: Client) : ClientApi {
          * @description Use context and a target to find the most similar points to the target, constrained by the context.
          * When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair.
          * Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0.
-         * When using target (with or without context), the score behaves a little different: The  integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target. The context part of the score for  each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair,  and -1 otherwise.
+         * When using target (with or without context), the score behaves a little different: The integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target. The context part of the score for each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, and -1 otherwise.
          */
     discoverPoints:
       client
@@ -755,6 +734,7 @@ export function createClientApi(client: Client) : ClientApi {
       .path('/collections/{collection_name}/points/count')
       .method('post')
       .create({
+        consistency: true,
         timeout: true,
       }),
     
@@ -767,8 +747,8 @@ export function createClientApi(client: Client) : ClientApi {
       .path('/collections/{collection_name}/facet')
       .method('post')
       .create({
-        timeout: true,
         consistency: true,
+        timeout: true,
       }),
     
     /**

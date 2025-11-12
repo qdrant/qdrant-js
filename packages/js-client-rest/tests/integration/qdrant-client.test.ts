@@ -6,7 +6,6 @@ import {components} from '../../src/openapi/generated_schema.js';
 describe('QdrantClient', () => {
     const semverRegEx =
         /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
-    const DIM = 100;
     const client = new QdrantClient();
     const collectionName = 'test_collection';
     const bigInt = BigInt(String(Number.MAX_SAFE_INTEGER + 2)) as unknown as number;
@@ -295,50 +294,5 @@ describe('QdrantClient', () => {
         });
         console.log(result);
         expect(result[0].points).toHaveLength(2);
-    });
-
-    test('locks', async () => {
-        expect(await client.recreateCollection(collectionName, {vectors: {size: DIM, distance: 'Dot'}})).toBeDefined();
-
-        const reason = 'testing reason';
-        expect(await client.lockStorage(reason)).toBeDefined();
-
-        // Try creating a single point when the lock is in place
-        try {
-            await expect(
-                client.upsert(collectionName, {
-                    points: [
-                        {
-                            id: 123,
-                            payload: {test: 'value'},
-                            vector: Array.from({length: DIM}, () => Math.random()),
-                        },
-                    ],
-                    wait: true,
-                }),
-                'Should not be able to insert a point when storage is locked',
-            ).rejects.toThrow();
-        } catch (err) {
-            expect(String(err), 'Should error due to lock (testing reason) in place').toBe('testing reason');
-        }
-
-        const result = await client.getLocks();
-        expect(result).toMatchObject<typeof result>({write: true, error_message: reason});
-
-        await client.unlockStorage();
-
-        // should be fine now
-        expect(
-            await client.upsert(collectionName, {
-                points: [
-                    {
-                        id: 123,
-                        payload: {test: 'value'},
-                        vector: Array.from({length: DIM}, () => Math.random()),
-                    },
-                ],
-                wait: true,
-            }),
-        ).toBeDefined();
     });
 });
