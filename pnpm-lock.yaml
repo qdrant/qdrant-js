@@ -54,14 +54,14 @@ importers:
   packages/js-client-grpc:
     dependencies:
       '@bufbuild/protobuf':
-        specifier: ^2.2.2
-        version: 2.10.0
+        specifier: ^2.10.1
+        version: 2.10.1
       '@connectrpc/connect':
-        specifier: ^2.0.0
-        version: 2.1.0(@bufbuild/protobuf@2.10.0)
+        specifier: ^2.1.0
+        version: 2.1.0(@bufbuild/protobuf@2.10.1)
       '@connectrpc/connect-node':
-        specifier: ^2.0.0
-        version: 2.1.0(@bufbuild/protobuf@2.10.0)(@connectrpc/connect@2.1.0(@bufbuild/protobuf@2.10.0))
+        specifier: ^2.1.0
+        version: 2.1.0(@bufbuild/protobuf@2.10.1)(@connectrpc/connect@2.1.0(@bufbuild/protobuf@2.10.1))
       typescript:
         specifier: '>=4.1'
         version: 5.0.4
@@ -70,11 +70,8 @@ importers:
         specifier: 1.59.0
         version: 1.59.0
       '@bufbuild/protoc-gen-es':
-        specifier: ^2.10.0
-        version: 2.10.0(@bufbuild/protobuf@2.10.0)
-      '@sevinf/maybe':
-        specifier: ^0.5.0
-        version: 0.5.0
+        specifier: ^2.10.1
+        version: 2.10.1(@bufbuild/protobuf@2.10.1)
       ts-prune:
         specifier: ^0.10.3
         version: 0.10.3
@@ -195,21 +192,21 @@ packages:
     engines: {node: '>=12'}
     hasBin: true
 
-  '@bufbuild/protobuf@2.10.0':
-    resolution: {integrity: sha512-fdRs9PSrBF7QUntpZpq6BTw58fhgGJojgg39m9oFOJGZT+nip9b0so5cYY1oWl5pvemDLr0cPPsH46vwThEbpQ==}
+  '@bufbuild/protobuf@2.10.1':
+    resolution: {integrity: sha512-ckS3+vyJb5qGpEYv/s1OebUHDi/xSNtfgw1wqKZo7MR9F2z+qXr0q5XagafAG/9O0QPVIUfST0smluYSTpYFkg==}
 
-  '@bufbuild/protoc-gen-es@2.10.0':
-    resolution: {integrity: sha512-g3xtuxeMkbacn8/qWQ8NbHBA8unLAvGD7sjcXV1/lfO4iCfd6hYL1Z+rn2yLQZE/JEkG+GPZoIs7m5KI5VYaMw==}
+  '@bufbuild/protoc-gen-es@2.10.1':
+    resolution: {integrity: sha512-vsfbWs1X93oX+sMMJ7910/OwIizAYH5IOAArsxnSTifiop1fVgLFPAvJBLiHZoNMI8B/lbqji2SFwvjK0AWO1Q==}
     engines: {node: '>=20'}
     hasBin: true
     peerDependencies:
-      '@bufbuild/protobuf': 2.10.0
+      '@bufbuild/protobuf': 2.10.1
     peerDependenciesMeta:
       '@bufbuild/protobuf':
         optional: true
 
-  '@bufbuild/protoplugin@2.10.0':
-    resolution: {integrity: sha512-GPJOZ1Gp9/Ci3MXP3yI7+q4G7IhB5cSpbLjsfnBILxtNx69I9+ix3r9P7JfewHvqMjtPe6L+YWX1LPBGNfZMGw==}
+  '@bufbuild/protoplugin@2.10.1':
+    resolution: {integrity: sha512-imB8dKEjrOnG5+XqVS+CeYn924WGLU/g3wogKhk11XtX9y9NJ7432OS6h24asuBbLrQcPdEZ6QkfM7KeOCeeyQ==}
 
   '@connectrpc/connect-node@2.1.0':
     resolution: {integrity: sha512-6akCXZSX5uWHLR654ne9Tnq7AnPUkLS65NvgsI5885xBkcuVy2APBd8sA4sLqaplUt84cVEr6LhjEFNx6W1KtQ==}
@@ -643,9 +640,6 @@ packages:
     peerDependenciesMeta:
       rollup:
         optional: true
-
-  '@sevinf/maybe@0.5.0':
-    resolution: {integrity: sha512-ARhyoYDnY1LES3vYI0fiG6e9esWfTNcXcO6+MPJJXcnyMV3bim4lnFt45VXouV7y82F4x3YH8nOQ6VztuvUiWg==}
 
   '@total-typescript/ts-reset@0.4.2':
     resolution: {integrity: sha512-vqd7ZUDSrXFVT1n8b2kc3LnklncDQFPvR58yUS1kEP23/nHPAO9l1lMjUfnPrXYYk4Hj54rrLKMW5ipwk7k09A==}
@@ -1977,32 +1971,32 @@ snapshots:
       '@bufbuild/buf-win32-arm64': 1.59.0
       '@bufbuild/buf-win32-x64': 1.59.0
 
-  '@bufbuild/protobuf@2.10.0': {}
+  '@bufbuild/protobuf@2.10.1': {}
 
-  '@bufbuild/protoc-gen-es@2.10.0(@bufbuild/protobuf@2.10.0)':
+  '@bufbuild/protoc-gen-es@2.10.1(@bufbuild/protobuf@2.10.1)':
     dependencies:
-      '@bufbuild/protoplugin': 2.10.0
+      '@bufbuild/protoplugin': 2.10.1
     optionalDependencies:
-      '@bufbuild/protobuf': 2.10.0
+      '@bufbuild/protobuf': 2.10.1
     transitivePeerDependencies:
       - supports-color
 
-  '@bufbuild/protoplugin@2.10.0':
+  '@bufbuild/protoplugin@2.10.1':
     dependencies:
-      '@bufbuild/protobuf': 2.10.0
+      '@bufbuild/protobuf': 2.10.1
       '@typescript/vfs': 1.6.2(typescript@5.4.5)
       typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
 
-  '@connectrpc/connect-node@2.1.0(@bufbuild/protobuf@2.10.0)(@connectrpc/connect@2.1.0(@bufbuild/protobuf@2.10.0))':
+  '@connectrpc/connect-node@2.1.0(@bufbuild/protobuf@2.10.1)(@connectrpc/connect@2.1.0(@bufbuild/protobuf@2.10.1))':
     dependencies:
-      '@bufbuild/protobuf': 2.10.0
-      '@connectrpc/connect': 2.1.0(@bufbuild/protobuf@2.10.0)
+      '@bufbuild/protobuf': 2.10.1
+      '@connectrpc/connect': 2.1.0(@bufbuild/protobuf@2.10.1)
 
-  '@connectrpc/connect@2.1.0(@bufbuild/protobuf@2.10.0)':
+  '@connectrpc/connect@2.1.0(@bufbuild/protobuf@2.10.1)':
     dependencies:
-      '@bufbuild/protobuf': 2.10.0
+      '@bufbuild/protobuf': 2.10.1
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
@@ -2286,8 +2280,6 @@ snapshots:
       picomatch: 4.0.2
     optionalDependencies:
       rollup: 3.29.5
-
-  '@sevinf/maybe@0.5.0': {}
 
   '@total-typescript/ts-reset@0.4.2': {}
 
