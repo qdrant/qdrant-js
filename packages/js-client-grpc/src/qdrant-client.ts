@@ -11,6 +11,7 @@ export type QdrantClientParams = {
     host?: string;
     timeout?: number;
     checkCompatibility?: boolean;
+    poolSize?: number;
 };
 
 export class QdrantClient {
@@ -19,8 +20,10 @@ export class QdrantClient {
     private _port: number | null;
     private _prefix: string;
     private _host: string;
-    private _grcpClients: GrpcClients;
     private _restUri: string;
+    private _grcpClients: GrpcClients[];
+    private _nextClientIndex: number = 0;
+    private _poolSize: number;
 
     constructor({
         url,
@@ -31,10 +34,15 @@ export class QdrantClient {
         port = 6334,
         timeout = 300_000,
         checkCompatibility = true,
+        poolSize = 3,
     }: QdrantClientParams = {}) {
         this._https = https ?? typeof apiKey === 'string';
         this._scheme = this._https ? 'https' : 'http';
         this._prefix = prefix ?? '';
+
+        // Ensure pool is always >= 1.
+        poolSize = Math.max(poolSize, 1);
+        this._poolSize = poolSize;
 
         if (this._prefix.length > 0 && !this._prefix.startsWith('/')) {
             this._prefix = `/${this._prefix}`;
@@ -81,10 +89,15 @@ export class QdrantClient {
         const address = this._port ? `${this._host}:${this._port}` : this._host;
         this._restUri = `${this._scheme}://${address}${this._prefix}`;
 
-        this._grcpClients = createApis(this._restUri, {apiKey, timeout});
+        // Initialize multiple clients.
+        const clients: GrpcClients[] = [];
+        for (let i = 0; i < poolSize; i++) {
+            clients.push(createApis(this._restUri, {apiKey, timeout}));
+        }
+        this._grcpClients = clients;
 
         if (checkCompatibility) {
-            this._grcpClients.service
+            this._grcpClients[0].service
                 .healthCheck({})
                 .then((response) => {
                     const serverVersion = response.version;
@@ -105,10 +118,17 @@ export class QdrantClient {
     /**
      * API getter
      *
+     * To make use of connection pooling, this function must be called for each request individually.
+     *
      * @param string Name of api
      * @returns An instance of a namespaced API, generated from grpc services.
      */
     api<T extends keyof GrpcClients>(name: T): GrpcClients[T] {
-        return this._grcpClients[name];
+        if (this._poolSize == 1) {
+            return this._grcpClients[0][name];
+        }
+
+        const index = this._nextClientIndex++;
+        return this._grcpClients[index % this._poolSize][name];
     }
 }
