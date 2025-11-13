@@ -53,16 +53,21 @@ function createClients(transport: Transport) {
 type CreateApisParams = {
     timeout: number;
     apiKey?: string;
-    useCompression: boolean;
+    compression: boolean | 'gzip';
 };
 
-export function createApis(baseUrl: string, {timeout, apiKey, useCompression}: CreateApisParams): GrpcClients {
-    // Use gzip compression by default
+export function createApis(baseUrl: string, {timeout, apiKey, compression}: CreateApisParams): GrpcClients {
     let sendCompression = undefined;
     let acceptCompression: Compression[] = [];
-    if (useCompression) {
-        sendCompression = compressionGzip;
-        acceptCompression = [compressionGzip];
+    switch (compression) {
+        // Use gzip compression by default
+        case true:
+        case 'gzip':
+            sendCompression = compressionGzip;
+            acceptCompression = [compressionGzip];
+            break;
+        default:
+            break;
     }
 
     const interceptors: Interceptor[] = [
