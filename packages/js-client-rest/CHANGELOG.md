@@ -1,5 +1,15 @@
 # @qdrant/js-client-rest
 
+## 1.16.0
+
+### Minor Changes
+
+-   Qdrant v1.16.0 API
+-   Breaking: removed `/locks` API
+-   Breaking: removed `init_from` parameter from collection creation
+-   Breaking: removed `vectors_count` from collection info
+-   Added explicit return types for all API methods
+
 ## 1.15.1
 
 ### Minor Changes

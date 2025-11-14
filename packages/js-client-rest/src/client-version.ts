@@ -1,4 +1,4 @@
-export const PACKAGE_VERSION = '1.15.1';
+export const PACKAGE_VERSION = '1.16.0';
 
 interface Version {
     major: number;
