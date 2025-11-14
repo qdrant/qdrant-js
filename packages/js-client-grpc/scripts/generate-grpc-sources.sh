@@ -36,13 +36,5 @@ cat $CLIENT_DIR/qdrant.proto \
   > $CLIENT_DIR/qdrant_tmp.proto
 mv $CLIENT_DIR/qdrant_tmp.proto $CLIENT_DIR/qdrant.proto
 
-# Generate TypeScript files with protoc plugins
-mkdir -p src/proto && pnpm protoc \
-  -I ./proto \
-  --plugin=protoc-gen-es=./node_modules/@bufbuild/protoc-gen-es/bin/protoc-gen-es \
-  --es_out=./src/proto \
-  --es_opt=target=ts \
-  --plugin=protoc-gen-connect-es=./node_modules/@bufbuild/protoc-gen-connect-es/bin/protoc-gen-connect-es \
-  --connect-es_out=./src/proto \
-  --connect-es_opt=target=ts \
-  ./proto/*.proto
+# Generate TypeScript files with buf
+pnpm buf generate

@@ -1,14 +1,19 @@
 import {test, describe, expect} from 'vitest';
 import {QdrantClient} from '../../src/qdrant-client.js';
 import {
-    PlainMessage,
     Distance,
     FieldType,
-    SearchPoints,
     UpdateStatus,
     ConnectError,
     ConnectErrorCode,
+    UpdateResult,
+    ListCollectionsResponseSchema,
+    UpdateResultSchema,
+    SearchPointsSchema,
+    CollectionInfoSchema,
+    RetrievedPointSchema,
 } from '../../src/index.js';
+import {create, toJson} from '@bufbuild/protobuf';
 
 describe('QdrantClient', () => {
     const semverRegEx =
@@ -50,7 +55,7 @@ describe('QdrantClient', () => {
     });
 
     test('list collections', async () => {
-        expect((await client.api('collections').list({})).toJson()).toMatchObject({
+        expect(toJson(ListCollectionsResponseSchema, await client.api('collections').list({}))).toMatchObject({
             collections: [{name: collectionName}],
         });
     });
@@ -77,10 +82,12 @@ describe('QdrantClient', () => {
                 fieldType: FieldType.FieldTypeKeyword,
             })
         ).result!;
-        expect(updateResult).toMatchObject<PlainMessage<typeof updateResult>>({
-            operationId: expect.any(BigInt) as bigint,
-            status: UpdateStatus.Acknowledged,
-        });
+        expect(updateResult).toMatchObject<UpdateResult>(
+            create(UpdateResultSchema, {
+                operationId: expect.any(BigInt) as bigint,
+                status: UpdateStatus.Acknowledged,
+            }),
+        );
 
         updateResult = (
             await client.api('points').createFieldIndex({
@@ -89,10 +96,12 @@ describe('QdrantClient', () => {
                 fieldType: FieldType.FieldTypeInteger,
             })
         ).result!;
-        expect(updateResult).toMatchObject<PlainMessage<typeof updateResult>>({
-            operationId: expect.any(BigInt) as bigint,
-            status: UpdateStatus.Acknowledged,
-        });
+        expect(updateResult).toMatchObject<UpdateResult>(
+            create(UpdateResultSchema, {
+                operationId: expect.any(BigInt) as bigint,
+                status: UpdateStatus.Acknowledged,
+            }),
+        );
 
         updateResult = (
             await client.api('points').createFieldIndex({
@@ -102,10 +111,12 @@ describe('QdrantClient', () => {
                 wait: true,
             })
         ).result!;
-        expect(updateResult).toMatchObject<PlainMessage<typeof updateResult>>({
-            operationId: expect.any(BigInt) as bigint,
-            status: UpdateStatus.Completed,
-        });
+        expect(updateResult).toMatchObject<UpdateResult>(
+            create(UpdateResultSchema, {
+                operationId: expect.any(BigInt) as bigint,
+                status: UpdateStatus.Completed,
+            }),
+        );
     });
 
     test('get collection', async () => {
@@ -283,10 +294,12 @@ describe('QdrantClient', () => {
                 ],
             })
         ).result!;
-        expect(updateResult).toMatchObject<PlainMessage<typeof updateResult>>({
-            operationId: expect.any(BigInt) as bigint,
-            status: UpdateStatus.Completed,
-        });
+        expect(updateResult).toMatchObject<UpdateResult>(
+            create(UpdateResultSchema, {
+                operationId: expect.any(BigInt) as bigint,
+                status: UpdateStatus.Completed,
+            }),
+        );
     });
 
     test('retrieve point', async () => {
@@ -303,7 +316,7 @@ describe('QdrantClient', () => {
                 },
             })
         ).result;
-        expect(points[0].toJson()).toMatchObject({
+        expect(toJson(RetrievedPointSchema, points[0])).toMatchObject({
             id: {
                 num: '2',
             },
@@ -335,7 +348,7 @@ describe('QdrantClient', () => {
                 ],
             })
         ).result;
-        expect(points[0].toJson()).toMatchObject({
+        expect(toJson(RetrievedPointSchema, points[0])).toMatchObject({
             id: {
                 num: bigInt.toString(),
             },
@@ -361,7 +374,7 @@ describe('QdrantClient', () => {
 
     test('retrieve all points', async () => {
         const result = (await client.api('collections').get({collectionName})).result!;
-        expect(result.toJson(), 'check failed - 7 points expected').toMatchObject({
+        expect(toJson(CollectionInfoSchema, result), 'check failed - 7 points expected').toMatchObject({
             pointsCount: '7',
         });
     });
@@ -370,7 +383,7 @@ describe('QdrantClient', () => {
         const result = (
             await client
                 .api('points')
-                .search(SearchPoints.fromJson({collectionName, vector: [0.2, 0.1, 0.9, 0.7], limit: 3}))
+                .search(create(SearchPointsSchema, {collectionName, vector: [0.2, 0.1, 0.9, 0.7], limit: BigInt(3)}))
         ).result;
         expect(result).toHaveLength(3);
     });

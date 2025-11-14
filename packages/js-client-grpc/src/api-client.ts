@@ -1,17 +1,17 @@
-import {Code, ConnectError, createPromiseClient, Interceptor, PromiseClient, Transport} from '@bufbuild/connect';
-import {compressionGzip, createGrpcTransport} from '@bufbuild/connect-node';
-import {Collections} from './proto/collections_service_connect.js';
-import {Points} from './proto/points_service_connect.js';
-import {Snapshots} from './proto/snapshots_service_connect.js';
-import {Qdrant} from './proto/qdrant_connect.js';
+import {Code, ConnectError, createClient, Interceptor, Client, Transport} from '@connectrpc/connect';
+import {compressionGzip, createGrpcTransport} from '@connectrpc/connect-node';
+import {Collections} from './proto/collections_service_pb.js';
+import {Points} from './proto/points_service_pb.js';
+import {Snapshots} from './proto/snapshots_service_pb.js';
+import {Qdrant} from './proto/qdrant_pb.js';
 import {PACKAGE_VERSION} from './client-version.js';
 import {QdrantClientResourceExhaustedError} from './errors.js';
 
 type Clients = {
-    collections: PromiseClient<typeof Collections>;
-    points: PromiseClient<typeof Points>;
-    snapshots: PromiseClient<typeof Snapshots>;
-    service: PromiseClient<typeof Qdrant>;
+    collections: Client<typeof Collections>;
+    points: Client<typeof Points>;
+    snapshots: Client<typeof Snapshots>;
+    service: Client<typeof Qdrant>;
 };
 
 export type GrpcClients = Readonly<Clients>;
@@ -24,25 +24,25 @@ function createClients(transport: Transport) {
     return {
         get collections() {
             if (!collections) {
-                collections = createPromiseClient(Collections, transport);
+                collections = createClient(Collections, transport);
             }
             return collections;
         },
         get points() {
             if (!points) {
-                points = createPromiseClient(Points, transport);
+                points = createClient(Points, transport);
             }
             return points;
         },
         get snapshots() {
             if (!snapshots) {
-                snapshots = createPromiseClient(Snapshots, transport);
+                snapshots = createClient(Snapshots, transport);
             }
             return snapshots;
         },
         get service() {
             if (!service) {
-                service = createPromiseClient(Qdrant, transport);
+                service = createClient(Qdrant, transport);
             }
             return service;
         },
@@ -87,8 +87,6 @@ export function createApis(baseUrl: string, {timeout, apiKey}: {timeout: number;
 
     const transport = createGrpcTransport({
         baseUrl,
-        httpVersion: '2',
-        keepSessionAlive: true,
         useBinaryFormat: true,
         sendCompression: compressionGzip,
         acceptCompression: [compressionGzip],
