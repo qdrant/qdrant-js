@@ -6,6 +6,7 @@ import {Snapshots} from './proto/snapshots_service_pb.js';
 import {Qdrant} from './proto/qdrant_pb.js';
 import {PACKAGE_VERSION} from './client-version.js';
 import {QdrantClientResourceExhaustedError} from './errors.js';
+import {Compression} from '@connectrpc/connect/protocol';
 
 type Clients = {
     collections: Client<typeof Collections>;
@@ -49,7 +50,26 @@ function createClients(transport: Transport) {
     } satisfies Clients;
 }
 
-export function createApis(baseUrl: string, {timeout, apiKey}: {timeout: number; apiKey?: string}): GrpcClients {
+type CreateApisParams = {
+    timeout: number;
+    apiKey?: string;
+    compression: boolean | 'gzip';
+};
+
+export function createApis(baseUrl: string, {timeout, apiKey, compression}: CreateApisParams): GrpcClients {
+    let sendCompression = undefined;
+    let acceptCompression: Compression[] = [];
+    switch (compression) {
+        // Use gzip compression by default
+        case true:
+        case 'gzip':
+            sendCompression = compressionGzip;
+            acceptCompression = [compressionGzip];
+            break;
+        default:
+            break;
+    }
+
     const interceptors: Interceptor[] = [
         (next) => (req) => {
             req.header.set('user-agent', 'qdrant-js/' + String(PACKAGE_VERSION));
@@ -88,8 +108,8 @@ export function createApis(baseUrl: string, {timeout, apiKey}: {timeout: number;
     const transport = createGrpcTransport({
         baseUrl,
         useBinaryFormat: true,
-        sendCompression: compressionGzip,
-        acceptCompression: [compressionGzip],
+        sendCompression,
+        acceptCompression,
         interceptors,
     });
 
