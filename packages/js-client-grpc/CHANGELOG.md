@@ -9,7 +9,7 @@
 -   Breaking: removed `init_from` parameter from collection creation
 -   Breaking: removed `vectors_count` from collection info
 -   Updated `@connectrpc/connect` dependency to v2
--   Added option to disable grpc channel compression
+-   Added option to disable gRPC channel compression
 
 ## 1.15.1
 
