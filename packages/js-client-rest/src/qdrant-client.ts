@@ -1657,6 +1657,7 @@ export class QdrantClient {
      *     - shards_number: How many shards to create for this key If not specified, will use the default value from config
      *     - replication_factor: How many replicas to create for each shard If not specified, will use the default value from config
      *     - placement: Placement of shards for this key List of peer ids, that can be used to place shards for this key If not specified, will be randomly placed among all peers
+     *     - initial_state: Initial state of the shards for this key If not specified, will be `Initializing` first and then `Active` Warning: do not change this unless you know what you are doing.
      *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
      * @returns Operation result
      */
@@ -1667,6 +1668,7 @@ export class QdrantClient {
             shards_number,
             replication_factor,
             placement,
+            initial_state,
             timeout,
         }: {timeout?: number} & SchemaFor<'CreateShardingKey'>,
     ): Promise<boolean> {
@@ -1676,6 +1678,7 @@ export class QdrantClient {
             shards_number,
             replication_factor,
             placement,
+            initial_state,
             timeout,
         });
         return response.data.result ?? noResultError();
