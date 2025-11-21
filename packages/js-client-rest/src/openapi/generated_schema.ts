@@ -2319,7 +2319,7 @@ export interface components {
      * @description State of the single shard within a replica set. 
      * @enum {string}
      */
-    ReplicaState: "Active" | "Dead" | "Partial" | "Initializing" | "Listener" | "PartialSnapshot" | "Recovery" | "Resharding" | "ReshardingScaleDown";
+    ReplicaState: "Active" | "Dead" | "Partial" | "Initializing" | "Listener" | "PartialSnapshot" | "Recovery" | "Resharding" | "ReshardingScaleDown" | "ActiveRead";
     RemoteShardInfo: {
       /**
        * Format: uint32 
@@ -2361,7 +2361,18 @@ export interface components {
       /** @description A human-readable report of the transfer progress. Available only on the source peer. */
       comment?: string | null;
     };
-    /** @description Methods for transferring a shard from one node to another. */
+    /**
+     * @description Methods for transferring a shard from one node to another.
+     * 
+     * - `stream_records` - Stream all shard records in batches until the whole shard is transferred.
+     * 
+     * - `snapshot` - Snapshot the shard, transfer and restore it on the receiver.
+     * 
+     * - `wal_delta` - Attempt to transfer shard difference by WAL delta.
+     * 
+     * - `resharding_stream_records` - Shard transfer for resharding: stream all records in batches until all points are transferred. 
+     * @enum {string}
+     */
     ShardTransferMethod: "stream_records" | "snapshot" | "wal_delta" | "resharding_stream_records";
     ReshardingInfo: {
       direction: components["schemas"]["ReshardingDirection"];
@@ -2371,7 +2382,14 @@ export interface components {
       peer_id: number;
       shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
     };
-    /** @description Resharding direction, scale up or down in number of shards */
+    /**
+     * @description Resharding direction, scale up or down in number of shards
+     * 
+     * - `up` - Scale up, add a new shard
+     * 
+     * - `down` - Scale down, remove a shard 
+     * @enum {string}
+     */
     ReshardingDirection: "up" | "down";
     TelemetryData: {
       id: string;
@@ -2447,25 +2465,33 @@ export interface components {
        */
       migrate_rocksdb_id_tracker?: boolean;
       /**
-       * @description Migrate RocksDB based vector storages into new format on start. 
-       * @default false
+       * @description Migrate RocksDB based vector storages into new format on start.
+       * 
+       * Enabled by default in Qdrant 1.16.1. 
+       * @default true
        */
       migrate_rocksdb_vector_storage?: boolean;
       /**
-       * @description Migrate RocksDB based payload storages into new format on start. 
-       * @default false
+       * @description Migrate RocksDB based payload storages into new format on start.
+       * 
+       * Enabled by default in Qdrant 1.16.1. 
+       * @default true
        */
       migrate_rocksdb_payload_storage?: boolean;
       /**
        * @description Migrate RocksDB based payload indices into new format on start.
        * 
-       * Rebuilds a new payload index from scratch. 
-       * @default false
+       * Rebuilds a new payload index from scratch.
+       * 
+       * Enabled by default in Qdrant 1.16.1. 
+       * @default true
        */
       migrate_rocksdb_payload_indices?: boolean;
       /**
-       * @description Use appendable quantization in appendable plain segments. 
-       * @default false
+       * @description Use appendable quantization in appendable plain segments.
+       * 
+       * Enabled by default in Qdrant 1.16.0. 
+       * @default true
        */
       appendable_quantization?: boolean;
     };
@@ -2502,6 +2528,7 @@ export interface components {
       /** Format: uint */
       max_collections?: number | null;
       collections?: (components["schemas"]["CollectionTelemetryEnum"])[] | null;
+      snapshots?: (components["schemas"]["CollectionSnapshotTelemetry"])[] | null;
     };
     CollectionTelemetryEnum: components["schemas"]["CollectionTelemetry"] | components["schemas"]["CollectionsAggregatedTelemetry"];
     CollectionTelemetry: {
@@ -2840,6 +2867,15 @@ export interface components {
       optimizers_status: components["schemas"]["OptimizersStatus"];
       params: components["schemas"]["CollectionParams"];
     };
+    CollectionSnapshotTelemetry: {
+      id: string;
+      /** Format: uint */
+      running_snapshots?: number | null;
+      /** Format: uint */
+      running_snapshot_recovery?: number | null;
+      /** Format: uint */
+      total_snapshot_creations?: number | null;
+    };
     ClusterTelemetry: {
       enabled: boolean;
       status?: components["schemas"]["ClusterStatusTelemetry"] | (Record<string, unknown> | null);
@@ -3021,6 +3057,8 @@ export interface components {
       replication_factor?: number | null;
       /** @description Placement of shards for this key List of peer ids, that can be used to place shards for this key If not specified, will be randomly placed among all peers */
       placement?: (number)[] | null;
+      /** @description Initial state of the shards for this key If not specified, will be `Initializing` first and then `Active` Warning: do not change this unless you know what you are doing */
+      initial_state?: components["schemas"]["ReplicaState"] | (Record<string, unknown> | null);
     };
     DropShardingKeyOperation: {
       drop_sharding_key: components["schemas"]["DropShardingKey"];
