@@ -1,6 +1,6 @@
 import {OpenApiClient, createApis} from './api-client.js';
 import {QdrantClientConfigError} from './errors.js';
-import {RestArgs, SchemaFor, Schemas} from './types.js';
+import {RestArgs, Schemas} from './types.js';
 import {PACKAGE_VERSION, ClientVersion} from './client-version.js';
 import {ClientApi} from './openapi/generated_client_type.js';
 
@@ -167,7 +167,7 @@ export class QdrantClient {
             searches,
             consistency,
             timeout,
-        }: Pick<SchemaFor<'SearchRequestBatch'>, 'searches'> & {consistency?: SchemaFor<'ReadConsistency'>} & {
+        }: Pick<Schemas['SearchRequestBatch'], 'searches'> & {consistency?: Schemas['ReadConsistency']} & {
             timeout?: number;
         },
     ): Promise<Schemas['ScoredPoint'][][]> {
@@ -257,9 +257,9 @@ export class QdrantClient {
             score_threshold,
             consistency,
             timeout,
-        }: Partial<Pick<SchemaFor<'SearchRequest'>, 'limit'>> &
-            Omit<SchemaFor<'SearchRequest'>, 'limit'> & {
-                consistency?: SchemaFor<'ReadConsistency'>;
+        }: Partial<Pick<Schemas['SearchRequest'], 'limit'>> &
+            Omit<Schemas['SearchRequest'], 'limit'> & {
+                consistency?: Schemas['ReadConsistency'];
             } & {timeout?: number},
     ): Promise<Schemas['ScoredPoint'][]> {
         const response = await this._openApiClient.searchPoints({
@@ -300,7 +300,7 @@ export class QdrantClient {
             searches,
             consistency,
             timeout,
-        }: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
+        }: Schemas['RecommendRequestBatch'] & {consistency?: Schemas['ReadConsistency']} & {timeout?: number},
     ): Promise<Schemas['ScoredPoint'][][]> {
         const response = await this._openApiClient.recommendBatchPoints({
             collection_name,
@@ -320,7 +320,7 @@ export class QdrantClient {
             searches,
             consistency,
             timeout,
-        }: SchemaFor<'RecommendRequestBatch'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
+        }: Schemas['RecommendRequestBatch'] & {consistency?: Schemas['ReadConsistency']} & {timeout?: number},
     ): Promise<Schemas['ScoredPoint'][][]> {
         const response = await this._openApiClient.recommendBatchPoints({
             collection_name,
@@ -412,8 +412,8 @@ export class QdrantClient {
             lookup_from,
             consistency,
             timeout,
-        }: Omit<SchemaFor<'RecommendRequest'>, 'limit'> &
-            Partial<Pick<SchemaFor<'RecommendRequest'>, 'limit'>> & {consistency?: SchemaFor<'ReadConsistency'>} & {
+        }: Omit<Schemas['RecommendRequest'], 'limit'> &
+            Partial<Pick<Schemas['RecommendRequest'], 'limit'>> & {consistency?: Schemas['ReadConsistency']} & {
                 timeout?: number;
             },
     ): Promise<Schemas['ScoredPoint'][]> {
@@ -483,7 +483,7 @@ export class QdrantClient {
             with_payload = true,
             with_vector = false,
             order_by,
-        }: SchemaFor<'ScrollRequest'> & {timeout?: number} & {consistency?: SchemaFor<'ReadConsistency'>} = {},
+        }: Schemas['ScrollRequest'] & {timeout?: number} & {consistency?: Schemas['ReadConsistency']} = {},
     ): Promise<Schemas['ScrollResult']> {
         const response = await this._openApiClient.scrollPoints({
             collection_name,
@@ -515,7 +515,7 @@ export class QdrantClient {
      */
     async count(
         collection_name: string,
-        {shard_key, filter, exact = true, timeout}: SchemaFor<'CountRequest'> & {timeout?: number} = {},
+        {shard_key, filter, exact = true, timeout}: Schemas['CountRequest'] & {timeout?: number} = {},
     ): Promise<Schemas['CountResult']> {
         const response = await this._openApiClient.countPoints({
             collection_name,
@@ -556,7 +556,7 @@ export class QdrantClient {
      */
     async updateCollectionCluster(
         collection_name: string,
-        {timeout, ...operation}: {timeout?: number} & SchemaFor<'ClusterOperations'>,
+        {timeout, ...operation}: {timeout?: number} & Schemas['ClusterOperations'],
     ): Promise<boolean> {
         const response = await this._openApiClient.updateCollectionCluster({
             collection_name,
@@ -591,7 +591,7 @@ export class QdrantClient {
             ordering,
             points,
             shard_key,
-        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateVectors'>,
+        }: {wait?: boolean; ordering?: Schemas['WriteOrdering']} & Schemas['UpdateVectors'],
     ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.updateVectors({
             collection_name,
@@ -632,7 +632,7 @@ export class QdrantClient {
             filter,
             vector,
             shard_key,
-        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'DeleteVectors'>,
+        }: {wait?: boolean; ordering?: Schemas['WriteOrdering']} & Schemas['DeleteVectors'],
     ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.deleteVectors({
             collection_name,
@@ -684,7 +684,7 @@ export class QdrantClient {
             group_by,
             group_size,
             limit,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchGroupsRequest'>,
+        }: {consistency?: Schemas['ReadConsistency']} & {timeout?: number} & Schemas['SearchGroupsRequest'],
     ): Promise<Schemas['GroupsResult']> {
         const response = await this._openApiClient.searchPointGroups({
             collection_name,
@@ -750,7 +750,7 @@ export class QdrantClient {
             group_by,
             group_size,
             limit,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'RecommendGroupsRequest'>,
+        }: {consistency?: Schemas['ReadConsistency']} & {timeout?: number} & Schemas['RecommendGroupsRequest'],
     ): Promise<Schemas['GroupsResult']> {
         const response = await this._openApiClient.recommendPointGroups({
             collection_name,
@@ -797,7 +797,7 @@ export class QdrantClient {
             wait = true,
             ordering,
             ...points_or_batch
-        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointInsertOperations'>,
+        }: {wait?: boolean; ordering?: Schemas['WriteOrdering']} & Schemas['PointInsertOperations'],
     ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.upsertPoints({
             collection_name,
@@ -811,7 +811,7 @@ export class QdrantClient {
     /**
      * Retrieve stored points by IDs
      * @param collection_name
-     * @param {object} args
+     * @param {object} args -
      *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
      *     - ids: list of IDs to lookup
      *     - with_payload:
@@ -844,7 +844,7 @@ export class QdrantClient {
             with_vector,
             consistency,
             timeout,
-        }: SchemaFor<'PointRequest'> & {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number},
+        }: Schemas['PointRequest'] & {consistency?: Schemas['ReadConsistency']} & {timeout?: number},
     ): Promise<Schemas['Record'][]> {
         const response = await this._openApiClient.getPoints({
             collection_name,
@@ -861,7 +861,7 @@ export class QdrantClient {
     /**
      * Deletes selected points from collection
      * @param collection_name Name of the collection
-     * @param {object} args
+     * @param {object} args -
      *     - wait: Await for the results to be processed.
      *         - If `true`, result will be returned only when all changes are applied
      *         - If `false`, result will be returned immediately after the confirmation of receiving.
@@ -894,7 +894,7 @@ export class QdrantClient {
             wait,
             ordering,
             ...points_selector
-        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'>,
+        }: {wait?: boolean; ordering?: Schemas['WriteOrdering']} & Schemas['PointsSelector'],
     ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.deletePoints({
             collection_name,
@@ -908,7 +908,7 @@ export class QdrantClient {
     /**
      * Sets payload values for specified points.
      * @param collection_name Name of the collection
-     * @param {object} args
+     * @param {object} args -
      *     - wait: Await for the results to be processed.
      *         - If `true`, result will be returned only when all changes are applied
      *         - If `false`, result will be returned immediately after the confirmation of receiving.
@@ -948,7 +948,7 @@ export class QdrantClient {
             key,
             ordering,
             wait = true,
-        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'SetPayload'>,
+        }: {wait?: boolean; ordering?: Schemas['WriteOrdering']} & Schemas['SetPayload'],
     ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.setPayload({
             collection_name,
@@ -1008,7 +1008,7 @@ export class QdrantClient {
             shard_key,
             key,
             wait = true,
-        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'SetPayload'>,
+        }: {wait?: boolean; ordering?: Schemas['WriteOrdering']} & Schemas['SetPayload'],
     ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.overwritePayload({
             collection_name,
@@ -1064,8 +1064,7 @@ export class QdrantClient {
             filter,
             shard_key,
             wait = true,
-        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'> &
-            SchemaFor<'DeletePayload'>,
+        }: {wait?: boolean; ordering?: Schemas['WriteOrdering']} & Schemas['PointsSelector'] & Schemas['DeletePayload'],
     ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.deletePayload({
             collection_name,
@@ -1115,7 +1114,7 @@ export class QdrantClient {
             ordering,
             wait = true,
             ...points_selector
-        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'PointsSelector'>,
+        }: {wait?: boolean; ordering?: Schemas['WriteOrdering']} & Schemas['PointsSelector'],
     ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.clearPayload({
             collection_name,
@@ -1137,7 +1136,7 @@ export class QdrantClient {
     async updateCollectionAliases({
         actions,
         timeout,
-    }: {timeout?: number} & SchemaFor<'ChangeAliasesOperation'>): Promise<boolean> {
+    }: {timeout?: number} & Schemas['ChangeAliasesOperation']): Promise<boolean> {
         const response = await this._openApiClient.updateAliases({actions, timeout});
         return response.data.result ?? noResultError();
     }
@@ -1193,7 +1192,7 @@ export class QdrantClient {
      */
     async updateCollection(
         collection_name: string,
-        args?: SchemaFor<'UpdateCollection'> & {timeout?: number},
+        args?: Schemas['UpdateCollection'] & {timeout?: number},
     ): Promise<boolean> {
         const response = await this._openApiClient.updateCollection({
             collection_name,
@@ -1270,7 +1269,7 @@ export class QdrantClient {
             write_consistency_factor,
             sparse_vectors,
             strict_mode_config,
-        }: {timeout?: number} & SchemaFor<'CreateCollection'>,
+        }: {timeout?: number} & Schemas['CreateCollection'],
     ): Promise<boolean> {
         const response = await this._openApiClient.createCollection({
             collection_name,
@@ -1346,7 +1345,7 @@ export class QdrantClient {
             write_consistency_factor,
             sparse_vectors,
             strict_mode_config,
-        }: {timeout?: number} & SchemaFor<'CreateCollection'>,
+        }: {timeout?: number} & Schemas['CreateCollection'],
     ): Promise<boolean> {
         const deleteResponse = await this._openApiClient.deleteCollection({
             collection_name,
@@ -1403,7 +1402,7 @@ export class QdrantClient {
             ordering,
             field_name,
             field_schema,
-        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'CreateFieldIndex'>,
+        }: {wait?: boolean; ordering?: Schemas['WriteOrdering']} & Schemas['CreateFieldIndex'],
     ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.createFieldIndex({
             collection_name,
@@ -1435,7 +1434,7 @@ export class QdrantClient {
     async deletePayloadIndex(
         collection_name: string,
         field_name: string,
-        {wait = true, ordering}: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} = {},
+        {wait = true, ordering}: {wait?: boolean; ordering?: Schemas['WriteOrdering']} = {},
     ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.deleteFieldIndex({
             collection_name,
@@ -1528,7 +1527,7 @@ export class QdrantClient {
      */
     async recoverSnapshot(
         collection_name: string,
-        {location, priority, checksum, api_key}: SchemaFor<'SnapshotRecover'>,
+        {location, priority, checksum, api_key}: Schemas['SnapshotRecover'],
     ): Promise<boolean> {
         const response = await this._openApiClient.recoverFromSnapshot({
             collection_name,
@@ -1563,7 +1562,7 @@ export class QdrantClient {
             wait = true,
             ordering,
             ...operations
-        }: {wait?: boolean; ordering?: SchemaFor<'WriteOrdering'>} & SchemaFor<'UpdateOperations'>,
+        }: {wait?: boolean; ordering?: Schemas['WriteOrdering']} & Schemas['UpdateOperations'],
     ): Promise<Schemas['UpdateResult'][]> {
         const response = await this._openApiClient.batchUpdate({
             collection_name,
@@ -1583,7 +1582,7 @@ export class QdrantClient {
     async recoverShardFromSnapshot(
         collection_name: string,
         shard_id: number,
-        {wait = true, ...shard_snapshot_recover}: {wait?: boolean} & SchemaFor<'ShardSnapshotRecover'>,
+        {wait = true, ...shard_snapshot_recover}: {wait?: boolean} & Schemas['ShardSnapshotRecover'],
     ): Promise<boolean> {
         const response = await this._openApiClient.recoverShardFromSnapshot({
             collection_name,
@@ -1657,6 +1656,7 @@ export class QdrantClient {
      *     - shards_number: How many shards to create for this key If not specified, will use the default value from config
      *     - replication_factor: How many replicas to create for each shard If not specified, will use the default value from config
      *     - placement: Placement of shards for this key List of peer ids, that can be used to place shards for this key If not specified, will be randomly placed among all peers
+     *     - initial_state: Initial state of the shards for this key If not specified, will be `Initializing` first and then `Active` Warning: do not change this unless you know what you are doing.
      *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
      * @returns Operation result
      */
@@ -1667,8 +1667,9 @@ export class QdrantClient {
             shards_number,
             replication_factor,
             placement,
+            initial_state,
             timeout,
-        }: {timeout?: number} & SchemaFor<'CreateShardingKey'>,
+        }: {timeout?: number} & Schemas['CreateShardingKey'],
     ): Promise<boolean> {
         const response = await this._openApiClient.createShardKey({
             collection_name,
@@ -1676,6 +1677,7 @@ export class QdrantClient {
             shards_number,
             replication_factor,
             placement,
+            initial_state,
             timeout,
         });
         return response.data.result ?? noResultError();
@@ -1691,7 +1693,7 @@ export class QdrantClient {
      */
     async deleteShardKey(
         collection_name: string,
-        {shard_key, timeout}: {timeout?: number} & SchemaFor<'DropShardingKey'>,
+        {shard_key, timeout}: {timeout?: number} & Schemas['DropShardingKey'],
     ): Promise<boolean> {
         const response = await this._openApiClient.deleteShardKey({
             collection_name,
@@ -1744,7 +1746,7 @@ export class QdrantClient {
             with_vector,
             using,
             lookup_from,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'DiscoverRequest'>,
+        }: {consistency?: Schemas['ReadConsistency']} & {timeout?: number} & Schemas['DiscoverRequest'],
     ): Promise<Schemas['ScoredPoint'][]> {
         const response = await this._openApiClient.discoverPoints({
             collection_name,
@@ -1785,7 +1787,7 @@ export class QdrantClient {
             consistency,
             timeout,
             searches,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'DiscoverRequestBatch'>,
+        }: {consistency?: Schemas['ReadConsistency']} & {timeout?: number} & Schemas['DiscoverRequestBatch'],
     ): Promise<Schemas['ScoredPoint'][][]> {
         const response = await this._openApiClient.discoverBatchPoints({
             collection_name,
@@ -1860,7 +1862,7 @@ export class QdrantClient {
             with_vector,
             with_payload,
             lookup_from,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'QueryRequest'>,
+        }: {consistency?: Schemas['ReadConsistency']} & {timeout?: number} & Schemas['QueryRequest'],
     ): Promise<Schemas['QueryResponse']> {
         const response = await this._openApiClient.queryPoints({
             collection_name,
@@ -1903,7 +1905,7 @@ export class QdrantClient {
             consistency,
             timeout,
             searches,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'QueryRequestBatch'>,
+        }: {consistency?: Schemas['ReadConsistency']} & {timeout?: number} & Schemas['QueryRequestBatch'],
     ): Promise<Schemas['QueryResponse'][]> {
         const response = await this._openApiClient.queryBatchPoints({
             collection_name,
@@ -1959,7 +1961,7 @@ export class QdrantClient {
             group_size,
             limit,
             with_lookup,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'QueryGroupsRequest'>,
+        }: {consistency?: Schemas['ReadConsistency']} & {timeout?: number} & Schemas['QueryGroupsRequest'],
     ): Promise<Schemas['GroupsResult']> {
         const response = await this._openApiClient.queryPointsGroups({
             collection_name,
@@ -2011,7 +2013,7 @@ export class QdrantClient {
             limit,
             filter,
             exact,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'FacetRequest'>,
+        }: {consistency?: Schemas['ReadConsistency']} & {timeout?: number} & Schemas['FacetRequest'],
     ): Promise<Schemas['FacetResponse']> {
         const response = await this._openApiClient.facet({
             collection_name,
@@ -2055,7 +2057,7 @@ export class QdrantClient {
             sample,
             limit,
             using,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchMatrixRequest'>,
+        }: {consistency?: Schemas['ReadConsistency']} & {timeout?: number} & Schemas['SearchMatrixRequest'],
     ): Promise<Schemas['SearchMatrixPairsResponse']> {
         const response = await this._openApiClient.searchMatrixPairs({
             collection_name,
@@ -2099,7 +2101,7 @@ export class QdrantClient {
             sample,
             limit,
             using,
-        }: {consistency?: SchemaFor<'ReadConsistency'>} & {timeout?: number} & SchemaFor<'SearchMatrixRequest'>,
+        }: {consistency?: Schemas['ReadConsistency']} & {timeout?: number} & Schemas['SearchMatrixRequest'],
     ): Promise<Schemas['SearchMatrixOffsetsResponse']> {
         const response = await this._openApiClient.searchMatrixOffsets({
             collection_name,
