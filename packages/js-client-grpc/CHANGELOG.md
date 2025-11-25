@@ -1,5 +1,11 @@
 # @qdrant/js-client-grpc
 
+## 1.16.1
+
+### Patch Changes
+
+-   No changes
+
 ## 1.16.0
 
 ### Minor Changes

@@ -1,5 +1,12 @@
 # @qdrant/js-client-rest
 
+## v1.16.1
+
+### Patch Changes
+
+-   Patch update for Qdrant v1.16.0 API
+-   Use `Schemas["MyType"]` in arguments for better navigability.
+
 ## 1.16.0
 
 ### Minor Changes

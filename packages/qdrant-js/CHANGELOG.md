@@ -1,5 +1,11 @@
 # @qdrant/qdrant-js
 
+## v1.16.1
+
+### Patch Changes
+
+-   rest: Patch update for Qdrant v1.16.0 API
+
 ## 1.16.0
 
 ### Minor Changes
