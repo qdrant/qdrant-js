@@ -95,7 +95,7 @@ export class QdrantClient {
             this._host = host ?? '127.0.0.1';
         }
 
-        const headers = new Headers([['user-agent', 'qdrant-js/' + String(PACKAGE_VERSION)]]);
+        const headers = new Headers([['user-agent', 'javascript-client/' + String(PACKAGE_VERSION)]]);
 
         const metadata = args.headers ?? {};
         Object.keys(metadata).forEach((field) => {
