@@ -11,6 +11,9 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       matrix:
         node-version: [18]
@@ -47,7 +50,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - run: node scripts/prepublish.mjs
-      - run: pnpm publish --no-git-checks --filter '!monorepo'
+      - run: pnpm publish --provenance --no-git-checks --filter '!monorepo'
 
       - name: Archive npm failure logs
         uses: actions/upload-artifact@v4
