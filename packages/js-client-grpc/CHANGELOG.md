@@ -1,5 +1,11 @@
 # @qdrant/js-client-grpc
 
+## 1.16.2
+
+### Patch Changes
+
+-   Add provenance statement for this package
+
 ## 1.16.1
 
 ### Patch Changes

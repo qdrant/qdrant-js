@@ -1,5 +1,11 @@
 # @qdrant/qdrant-js
 
+## v1.16.2
+
+### Patch Changes
+
+-   Add provenance statement for this package
+
 ## v1.16.1
 
 ### Patch Changes
