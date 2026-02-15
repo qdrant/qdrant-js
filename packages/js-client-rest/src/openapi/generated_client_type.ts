@@ -1705,6 +1705,7 @@ export type ClientApi = {
           query?: {
             wait?: boolean;
             ordering?: components["schemas"]["WriteOrdering"];
+            timeout?: number;
           };
           path: {
             collection_name: string;

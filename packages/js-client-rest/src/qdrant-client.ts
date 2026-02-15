@@ -899,13 +899,15 @@ export class QdrantClient {
         {
             wait,
             ordering,
+            timeout,
             ...points_selector
-        }: {wait?: boolean; ordering?: Schemas['WriteOrdering']} & Schemas['PointsSelector'],
+        }: {wait?: boolean; ordering?: Schemas['WriteOrdering']; timeout?: number} & Schemas['PointsSelector'],
     ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.deletePoints({
             collection_name,
             wait,
             ordering,
+            timeout,
             ...points_selector,
         });
         return response.data.result ?? noResultError();
