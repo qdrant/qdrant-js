@@ -55,7 +55,7 @@
     },
     "dependencies": {
         "@qdrant/openapi-typescript-fetch": "1.2.6",
-        "undici": "^6.0.0"
+        "undici": "^6.23.0"
     },
     "devDependencies": {
         "@rollup/plugin-commonjs": "^24.1.0",
