@@ -5,6 +5,13 @@ import {ClientApi} from './generated_client_type.js';
 
 export function createClientApi(client: Client) : ClientApi {
   return {
+    /** List shard keys */
+    listShardKeys:
+      client
+      .path('/collections/{collection_name}/shards')
+      .method('get')
+      .create(),
+    
     /** Create shard key */
     createShardKey:
       client
@@ -110,6 +117,16 @@ export function createClientApi(client: Client) : ClientApi {
     clusterStatus:
       client
       .path('/cluster')
+      .method('get')
+      .create(),
+    
+    /**
+         * Collect cluster telemetry data 
+         * @description Get telemetry data, from the point of view of the cluster. This includes peers info, collections info, shard transfers, and resharding status
+         */
+    clusterTelemetry:
+      client
+      .path('/cluster/telemetry')
       .method('get')
       .create(),
     
@@ -252,6 +269,16 @@ export function createClientApi(client: Client) : ClientApi {
       .create({
         timeout: true,
       }),
+    
+    /**
+         * Get optimization progress 
+         * @description Get progress of ongoing and completed optimizations for a collection
+         */
+    getOptimizations:
+      client
+      .path('/collections/{collection_name}/optimizations')
+      .method('get')
+      .create(),
     
     /**
          * List aliases for collection 
@@ -478,6 +505,7 @@ export function createClientApi(client: Client) : ClientApi {
       .create({
         wait: true,
         ordering: true,
+        timeout: true,
       }),
     
     /**
@@ -517,6 +545,7 @@ export function createClientApi(client: Client) : ClientApi {
       .create({
         wait: true,
         ordering: true,
+        timeout: true,
       }),
     
     /**
@@ -530,6 +559,7 @@ export function createClientApi(client: Client) : ClientApi {
       .create({
         wait: true,
         ordering: true,
+        timeout: true,
       }),
     
     /**
@@ -543,6 +573,7 @@ export function createClientApi(client: Client) : ClientApi {
       .create({
         wait: true,
         ordering: true,
+        timeout: true,
       }),
     
     /**
@@ -556,6 +587,7 @@ export function createClientApi(client: Client) : ClientApi {
       .create({
         wait: true,
         ordering: true,
+        timeout: true,
       }),
     
     /**
@@ -569,6 +601,7 @@ export function createClientApi(client: Client) : ClientApi {
       .create({
         wait: true,
         ordering: true,
+        timeout: true,
       }),
     
     /**
@@ -582,6 +615,7 @@ export function createClientApi(client: Client) : ClientApi {
       .create({
         wait: true,
         ordering: true,
+        timeout: true,
       }),
     
     /**
@@ -595,6 +629,7 @@ export function createClientApi(client: Client) : ClientApi {
       .create({
         wait: true,
         ordering: true,
+        timeout: true,
       }),
     
     /**

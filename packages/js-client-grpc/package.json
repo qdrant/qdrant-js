@@ -1,6 +1,6 @@
 {
     "name": "@qdrant/js-client-grpc",
-    "version": "1.16.2",
+    "version": "1.17.0",
     "engines": {
         "node": ">=18.0.0",
         "pnpm": ">=8"

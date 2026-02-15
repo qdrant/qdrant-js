@@ -4,6 +4,37 @@ import {TypedFetch} from '@qdrant/openapi-typescript-fetch';
 import {components} from '../openapi/generated_schema.js';
 
 export type ClientApi = {
+  /** List shard keys */
+  listShardKeys: TypedFetch<{
+    parameters: {
+          path: {
+            collection_name: string;
+          };
+        };
+    responses: {
+          200: {
+            content: {
+              "application/json": {
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+                time?: number;
+                status?: string;
+                result?: components["schemas"]["ShardKeysResponse"];
+              };
+            };
+          };
+          default: {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+          "4XX": {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+        };
+  }>;
+  
   /** Create shard key */
   createShardKey: TypedFetch<{
     parameters: {
@@ -106,6 +137,7 @@ export type ClientApi = {
           query?: {
             anonymize?: boolean;
             details_level?: number;
+            timeout?: number;
           };
         };
     responses: {
@@ -140,6 +172,7 @@ export type ClientApi = {
     parameters: {
           query?: {
             anonymize?: boolean;
+            timeout?: number;
           };
         };
     responses: {
@@ -220,10 +253,24 @@ export type ClientApi = {
     responses: {
           200: {
             content: {
-              "application/json": boolean;
+              "application/json": {
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+                time?: number;
+                status?: string;
+                result?: boolean;
+              };
             };
           };
-          "4XX": never;
+          default: {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+          "4XX": {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
         };
   }>;
   
@@ -240,6 +287,41 @@ export type ClientApi = {
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["ClusterStatus"];
+              };
+            };
+          };
+          default: {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+          "4XX": {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+        };
+  }>;
+  
+  /**
+       * Collect cluster telemetry data 
+       * @description Get telemetry data, from the point of view of the cluster. This includes peers info, collections info, shard transfers, and resharding status
+       */
+  clusterTelemetry: TypedFetch<{
+    parameters: {
+          query?: {
+            details_level?: number;
+            timeout?: number;
+          };
+        };
+    responses: {
+          200: {
+            content: {
+              "application/json": {
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+                time?: number;
+                status?: string;
+                result?: components["schemas"]["DistributedTelemetryData"];
               };
             };
           };
@@ -713,6 +795,44 @@ export type ClientApi = {
                 time?: number;
                 status?: string;
                 result?: boolean;
+              };
+            };
+          };
+          default: {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+          "4XX": {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+        };
+  }>;
+  
+  /**
+       * Get optimization progress 
+       * @description Get progress of ongoing and completed optimizations for a collection
+       */
+  getOptimizations: TypedFetch<{
+    parameters: {
+          query?: {
+            with?: string;
+            completed_limit?: number;
+          };
+          path: {
+            collection_name: string;
+          };
+        };
+    responses: {
+          200: {
+            content: {
+              "application/json": {
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+                time?: number;
+                status?: string;
+                result?: components["schemas"]["OptimizationsResponse"];
               };
             };
           };
@@ -1498,6 +1618,7 @@ export type ClientApi = {
           query?: {
             wait?: boolean;
             ordering?: components["schemas"]["WriteOrdering"];
+            timeout?: number;
           };
           path: {
             collection_name: string;
@@ -1627,6 +1748,7 @@ export type ClientApi = {
           query?: {
             wait?: boolean;
             ordering?: components["schemas"]["WriteOrdering"];
+            timeout?: number;
           };
           path: {
             collection_name: string;
@@ -1670,6 +1792,7 @@ export type ClientApi = {
           query?: {
             wait?: boolean;
             ordering?: components["schemas"]["WriteOrdering"];
+            timeout?: number;
           };
           path: {
             collection_name: string;
@@ -1713,6 +1836,7 @@ export type ClientApi = {
           query?: {
             wait?: boolean;
             ordering?: components["schemas"]["WriteOrdering"];
+            timeout?: number;
           };
           path: {
             collection_name: string;
@@ -1756,6 +1880,7 @@ export type ClientApi = {
           query?: {
             wait?: boolean;
             ordering?: components["schemas"]["WriteOrdering"];
+            timeout?: number;
           };
           path: {
             collection_name: string;
@@ -1799,6 +1924,7 @@ export type ClientApi = {
           query?: {
             wait?: boolean;
             ordering?: components["schemas"]["WriteOrdering"];
+            timeout?: number;
           };
           path: {
             collection_name: string;
@@ -1842,6 +1968,7 @@ export type ClientApi = {
           query?: {
             wait?: boolean;
             ordering?: components["schemas"]["WriteOrdering"];
+            timeout?: number;
           };
           path: {
             collection_name: string;
@@ -1885,6 +2012,7 @@ export type ClientApi = {
           query?: {
             wait?: boolean;
             ordering?: components["schemas"]["WriteOrdering"];
+            timeout?: number;
           };
           path: {
             collection_name: string;

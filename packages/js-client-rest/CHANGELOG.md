@@ -1,5 +1,15 @@
 # @qdrant/js-client-rest
 
+## v1.17.0
+
+### Minor Changes
+
+-   Qdrant v1.17.0 API
+-   Added `listShardKeys` method
+-   Added `clusterTelemetry` method
+-   Added `getOptimizations` method
+-   Added `timeout` parameter to write operations: `updateVectors`, `deleteVectors`, `setPayload`, `overwritePayload`, `deletePayload`, `clearPayload`, `batchUpdate`
+
 ## v1.16.2
 
 ### Patch Changes

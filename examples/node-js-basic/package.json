@@ -15,6 +15,6 @@
     "author": "Qdrant Team",
     "license": "Apache-2.0",
     "dependencies": {
-        "@qdrant/qdrant-js": "^1.16.2"
+        "@qdrant/qdrant-js": "^1.17.0"
     }
 }

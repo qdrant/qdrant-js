@@ -235,7 +235,6 @@ export const DeleteSnapshotResponseSchema: GenMessage<DeleteSnapshotResponse> = 
  */
 export const Snapshots: GenService<{
   /**
-   *
    * Create collection snapshot
    *
    * @generated from rpc qdrant.Snapshots.Create
@@ -246,7 +245,6 @@ export const Snapshots: GenService<{
     output: typeof CreateSnapshotResponseSchema;
   },
   /**
-   *
    * List collection snapshots
    *
    * @generated from rpc qdrant.Snapshots.List
@@ -257,7 +255,6 @@ export const Snapshots: GenService<{
     output: typeof ListSnapshotsResponseSchema;
   },
   /**
-   *
    * Delete collection snapshot
    *
    * @generated from rpc qdrant.Snapshots.Delete
@@ -268,7 +265,6 @@ export const Snapshots: GenService<{
     output: typeof DeleteSnapshotResponseSchema;
   },
   /**
-   *
    * Create full storage snapshot
    *
    * @generated from rpc qdrant.Snapshots.CreateFull
@@ -279,7 +275,6 @@ export const Snapshots: GenService<{
     output: typeof CreateSnapshotResponseSchema;
   },
   /**
-   *
    * List full storage snapshots
    *
    * @generated from rpc qdrant.Snapshots.ListFull
@@ -290,7 +285,6 @@ export const Snapshots: GenService<{
     output: typeof ListSnapshotsResponseSchema;
   },
   /**
-   *
    * Delete full storage snapshot
    *
    * @generated from rpc qdrant.Snapshots.DeleteFull

@@ -18,8 +18,8 @@ export const file_points_service: GenFile = /*@__PURE__*/
  */
 export const Points: GenService<{
   /**
-   *
-   * Perform insert + updates on points. If a point with a given ID already exists - it will be overwritten.
+   * Perform insert + updates on points.
+   * If a point with a given ID already exists - it will be overwritten.
    *
    * @generated from rpc qdrant.Points.Upsert
    */
@@ -29,7 +29,6 @@ export const Points: GenService<{
     output: typeof PointsOperationResponseSchema;
   },
   /**
-   *
    * Delete points
    *
    * @generated from rpc qdrant.Points.Delete
@@ -40,7 +39,6 @@ export const Points: GenService<{
     output: typeof PointsOperationResponseSchema;
   },
   /**
-   *
    * Retrieve points
    *
    * @generated from rpc qdrant.Points.Get
@@ -51,7 +49,6 @@ export const Points: GenService<{
     output: typeof GetResponseSchema;
   },
   /**
-   *
    * Update named vectors for point
    *
    * @generated from rpc qdrant.Points.UpdateVectors
@@ -62,7 +59,6 @@ export const Points: GenService<{
     output: typeof PointsOperationResponseSchema;
   },
   /**
-   *
    * Delete named vectors for points
    *
    * @generated from rpc qdrant.Points.DeleteVectors
@@ -73,7 +69,6 @@ export const Points: GenService<{
     output: typeof PointsOperationResponseSchema;
   },
   /**
-   *
    * Set payload for points
    *
    * @generated from rpc qdrant.Points.SetPayload
@@ -84,7 +79,6 @@ export const Points: GenService<{
     output: typeof PointsOperationResponseSchema;
   },
   /**
-   *
    * Overwrite payload for points
    *
    * @generated from rpc qdrant.Points.OverwritePayload
@@ -95,7 +89,6 @@ export const Points: GenService<{
     output: typeof PointsOperationResponseSchema;
   },
   /**
-   *
    * Delete specified key payload for points
    *
    * @generated from rpc qdrant.Points.DeletePayload
@@ -106,7 +99,6 @@ export const Points: GenService<{
     output: typeof PointsOperationResponseSchema;
   },
   /**
-   *
    * Remove all payload for specified points
    *
    * @generated from rpc qdrant.Points.ClearPayload
@@ -117,7 +109,6 @@ export const Points: GenService<{
     output: typeof PointsOperationResponseSchema;
   },
   /**
-   *
    * Create index for field in collection
    *
    * @generated from rpc qdrant.Points.CreateFieldIndex
@@ -128,7 +119,6 @@ export const Points: GenService<{
     output: typeof PointsOperationResponseSchema;
   },
   /**
-   *
    * Delete field index for collection
    *
    * @generated from rpc qdrant.Points.DeleteFieldIndex
@@ -139,8 +129,8 @@ export const Points: GenService<{
     output: typeof PointsOperationResponseSchema;
   },
   /**
-   *
-   * Retrieve closest points based on vector similarity and given filtering conditions
+   * Retrieve closest points based on vector similarity and given filtering
+   * conditions
    *
    * @generated from rpc qdrant.Points.Search
    */
@@ -150,8 +140,8 @@ export const Points: GenService<{
     output: typeof SearchResponseSchema;
   },
   /**
-   *
-   * Retrieve closest points based on vector similarity and given filtering conditions
+   * Retrieve closest points based on vector similarity and given filtering
+   * conditions
    *
    * @generated from rpc qdrant.Points.SearchBatch
    */
@@ -161,8 +151,8 @@ export const Points: GenService<{
     output: typeof SearchBatchResponseSchema;
   },
   /**
-   *
-   * Retrieve closest points based on vector similarity and given filtering conditions, grouped by a given field
+   * Retrieve closest points based on vector similarity and given filtering
+   * conditions, grouped by a given field
    *
    * @generated from rpc qdrant.Points.SearchGroups
    */
@@ -172,7 +162,6 @@ export const Points: GenService<{
     output: typeof SearchGroupsResponseSchema;
   },
   /**
-   *
    * Iterate over all or filtered points
    *
    * @generated from rpc qdrant.Points.Scroll
@@ -183,8 +172,8 @@ export const Points: GenService<{
     output: typeof ScrollResponseSchema;
   },
   /**
-   *
-   * Look for the points which are closer to stored positive examples and at the same time further to negative examples.
+   * Look for the points which are closer to stored positive examples and at
+   * the same time further to negative examples.
    *
    * @generated from rpc qdrant.Points.Recommend
    */
@@ -194,8 +183,8 @@ export const Points: GenService<{
     output: typeof RecommendResponseSchema;
   },
   /**
-   *
-   * Look for the points which are closer to stored positive examples and at the same time further to negative examples.
+   * Look for the points which are closer to stored positive examples and at
+   * the same time further to negative examples.
    *
    * @generated from rpc qdrant.Points.RecommendBatch
    */
@@ -205,8 +194,8 @@ export const Points: GenService<{
     output: typeof RecommendBatchResponseSchema;
   },
   /**
-   *
-   * Look for the points which are closer to stored positive examples and at the same time further to negative examples, grouped by a given field
+   * Look for the points which are closer to stored positive examples and at
+   * the same time further to negative examples, grouped by a given field
    *
    * @generated from rpc qdrant.Points.RecommendGroups
    */
@@ -216,22 +205,25 @@ export const Points: GenService<{
     output: typeof RecommendGroupsResponseSchema;
   },
   /**
+   * Use context and a target to find the most similar points to the target,
+   * constrained by the context.
    *
-   * Use context and a target to find the most similar points to the target, constrained by the context.
+   * When using only the context (without a target), a special search - called
+   * context search - is performed where pairs of points are used to generate a
+   * loss that guides the search towards the zone where most positive examples
+   * overlap. This means that the score minimizes the scenario of finding a
+   * point closer to a negative than to a positive part of a pair.
    *
-   * When using only the context (without a target), a special search - called context search - is performed where
-   * pairs of points are used to generate a loss that guides the search towards the zone where
-   * most positive examples overlap. This means that the score minimizes the scenario of
-   * finding a point closer to a negative than to a positive part of a pair.
+   * Since the score of a context relates to loss, the maximum score a point
+   * can get is 0.0, and it becomes normal that many points can have a score of
+   * 0.0.
    *
-   * Since the score of a context relates to loss, the maximum score a point can get is 0.0,
-   * and it becomes normal that many points can have a score of 0.0.
-   *
-   * When using target (with or without context), the score behaves a little different: The 
-   * integer part of the score represents the rank with respect to the context, while the
-   * decimal part of the score relates to the distance to the target. The context part of the score for 
-   * each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, 
-   * and -1 otherwise.
+   * When using target (with or without context), the score behaves a little
+   * different: The integer part of the score represents the rank with respect
+   * to the context, while the decimal part of the score relates to the
+   * distance to the target. The context part of the score for each pair is
+   * calculated +1 if the point is closer to a positive than to a negative part
+   * of a pair, and -1 otherwise.
    *
    * @generated from rpc qdrant.Points.Discover
    */
@@ -241,7 +233,6 @@ export const Points: GenService<{
     output: typeof DiscoverResponseSchema;
   },
   /**
-   *
    * Batch request points based on { positive, negative } pairs of examples, and/or a target
    *
    * @generated from rpc qdrant.Points.DiscoverBatch
@@ -252,7 +243,6 @@ export const Points: GenService<{
     output: typeof DiscoverBatchResponseSchema;
   },
   /**
-   *
    * Count points in collection with given filtering conditions
    *
    * @generated from rpc qdrant.Points.Count
@@ -263,7 +253,6 @@ export const Points: GenService<{
     output: typeof CountResponseSchema;
   },
   /**
-   *
    * Perform multiple update operations in one request
    *
    * @generated from rpc qdrant.Points.UpdateBatch
@@ -274,8 +263,9 @@ export const Points: GenService<{
     output: typeof UpdateBatchResponseSchema;
   },
   /**
-   *
-   * Universally query points. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+   * Universally query points.
+   * This endpoint covers all capabilities of search, recommend, discover, filters.
+   * But also enables hybrid and multi-stage queries.
    *
    * @generated from rpc qdrant.Points.Query
    */
@@ -285,8 +275,9 @@ export const Points: GenService<{
     output: typeof QueryResponseSchema;
   },
   /**
-   *
-   * Universally query points in a batch fashion. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+   * Universally query points in a batch fashion.
+   * This endpoint covers all capabilities of search, recommend, discover, filters.
+   * But also enables hybrid and multi-stage queries.
    *
    * @generated from rpc qdrant.Points.QueryBatch
    */
@@ -296,8 +287,9 @@ export const Points: GenService<{
     output: typeof QueryBatchResponseSchema;
   },
   /**
-   *
-   * Universally query points in a group fashion. This endpoint covers all capabilities of search, recommend, discover, filters. But also enables hybrid and multi-stage queries.
+   * Universally query points in a group fashion.
+   * This endpoint covers all capabilities of search, recommend, discover, filters.
+   * But also enables hybrid and multi-stage queries.
    *
    * @generated from rpc qdrant.Points.QueryGroups
    */
@@ -307,8 +299,9 @@ export const Points: GenService<{
     output: typeof QueryGroupsResponseSchema;
   },
   /**
-   *
-   * Perform facet counts. For each value in the field, count the number of points that have this value and match the conditions.
+   * Perform facet counts.
+   * For each value in the field, count the number of points that have this
+   * value and match the conditions.
    *
    * @generated from rpc qdrant.Points.Facet
    */
@@ -318,7 +311,6 @@ export const Points: GenService<{
     output: typeof FacetResponseSchema;
   },
   /**
-   *
    * Compute distance matrix for sampled points with a pair based output format
    *
    * @generated from rpc qdrant.Points.SearchMatrixPairs
@@ -329,7 +321,6 @@ export const Points: GenService<{
     output: typeof SearchMatrixPairsResponseSchema;
   },
   /**
-   *
    * Compute distance matrix for sampled points with an offset based output format
    *
    * @generated from rpc qdrant.Points.SearchMatrixOffsets

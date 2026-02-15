@@ -4,21 +4,20 @@
 
 import type { GenFile, GenService } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
-import type { ChangeAliasesSchema, CollectionClusterInfoRequestSchema, CollectionClusterInfoResponseSchema, CollectionExistsRequestSchema, CollectionExistsResponseSchema, CollectionOperationResponseSchema, CreateCollectionSchema, CreateShardKeyRequestSchema, CreateShardKeyResponseSchema, DeleteCollectionSchema, DeleteShardKeyRequestSchema, DeleteShardKeyResponseSchema, GetCollectionInfoRequestSchema, GetCollectionInfoResponseSchema, ListAliasesRequestSchema, ListAliasesResponseSchema, ListCollectionAliasesRequestSchema, ListCollectionsRequestSchema, ListCollectionsResponseSchema, UpdateCollectionClusterSetupRequestSchema, UpdateCollectionClusterSetupResponseSchema, UpdateCollectionSchema } from "./collections_pb.js";
+import type { ChangeAliasesSchema, CollectionClusterInfoRequestSchema, CollectionClusterInfoResponseSchema, CollectionExistsRequestSchema, CollectionExistsResponseSchema, CollectionOperationResponseSchema, CreateCollectionSchema, CreateShardKeyRequestSchema, CreateShardKeyResponseSchema, DeleteCollectionSchema, DeleteShardKeyRequestSchema, DeleteShardKeyResponseSchema, GetCollectionInfoRequestSchema, GetCollectionInfoResponseSchema, ListAliasesRequestSchema, ListAliasesResponseSchema, ListCollectionAliasesRequestSchema, ListCollectionsRequestSchema, ListCollectionsResponseSchema, ListShardKeysRequestSchema, ListShardKeysResponseSchema, UpdateCollectionClusterSetupRequestSchema, UpdateCollectionClusterSetupResponseSchema, UpdateCollectionSchema } from "./collections_pb.js";
 import { file_collections } from "./collections_pb.js";
 
 /**
  * Describes the file collections_service.proto.
  */
 export const file_collections_service: GenFile = /*@__PURE__*/
-  fileDesc("Chljb2xsZWN0aW9uc19zZXJ2aWNlLnByb3RvEgZxZHJhbnQy4ggKC0NvbGxlY3Rpb25zEkwKA0dldBIgLnFkcmFudC5HZXRDb2xsZWN0aW9uSW5mb1JlcXVlc3QaIS5xZHJhbnQuR2V0Q29sbGVjdGlvbkluZm9SZXNwb25zZSIAEkkKBExpc3QSHi5xZHJhbnQuTGlzdENvbGxlY3Rpb25zUmVxdWVzdBofLnFkcmFudC5MaXN0Q29sbGVjdGlvbnNSZXNwb25zZSIAEkkKBkNyZWF0ZRIYLnFkcmFudC5DcmVhdGVDb2xsZWN0aW9uGiMucWRyYW50LkNvbGxlY3Rpb25PcGVyYXRpb25SZXNwb25zZSIAEkkKBlVwZGF0ZRIYLnFkcmFudC5VcGRhdGVDb2xsZWN0aW9uGiMucWRyYW50LkNvbGxlY3Rpb25PcGVyYXRpb25SZXNwb25zZSIAEkkKBkRlbGV0ZRIYLnFkcmFudC5EZWxldGVDb2xsZWN0aW9uGiMucWRyYW50LkNvbGxlY3Rpb25PcGVyYXRpb25SZXNwb25zZSIAEk0KDVVwZGF0ZUFsaWFzZXMSFS5xZHJhbnQuQ2hhbmdlQWxpYXNlcxojLnFkcmFudC5Db2xsZWN0aW9uT3BlcmF0aW9uUmVzcG9uc2UiABJcChVMaXN0Q29sbGVjdGlvbkFsaWFzZXMSJC5xZHJhbnQuTGlzdENvbGxlY3Rpb25BbGlhc2VzUmVxdWVzdBobLnFkcmFudC5MaXN0QWxpYXNlc1Jlc3BvbnNlIgASSAoLTGlzdEFsaWFzZXMSGi5xZHJhbnQuTGlzdEFsaWFzZXNSZXF1ZXN0GhsucWRyYW50Lkxpc3RBbGlhc2VzUmVzcG9uc2UiABJmChVDb2xsZWN0aW9uQ2x1c3RlckluZm8SJC5xZHJhbnQuQ29sbGVjdGlvbkNsdXN0ZXJJbmZvUmVxdWVzdBolLnFkcmFudC5Db2xsZWN0aW9uQ2x1c3RlckluZm9SZXNwb25zZSIAElcKEENvbGxlY3Rpb25FeGlzdHMSHy5xZHJhbnQuQ29sbGVjdGlvbkV4aXN0c1JlcXVlc3QaIC5xZHJhbnQuQ29sbGVjdGlvbkV4aXN0c1Jlc3BvbnNlIgASewocVXBkYXRlQ29sbGVjdGlvbkNsdXN0ZXJTZXR1cBIrLnFkcmFudC5VcGRhdGVDb2xsZWN0aW9uQ2x1c3RlclNldHVwUmVxdWVzdBosLnFkcmFudC5VcGRhdGVDb2xsZWN0aW9uQ2x1c3RlclNldHVwUmVzcG9uc2UiABJRCg5DcmVhdGVTaGFyZEtleRIdLnFkcmFudC5DcmVhdGVTaGFyZEtleVJlcXVlc3QaHi5xZHJhbnQuQ3JlYXRlU2hhcmRLZXlSZXNwb25zZSIAElEKDkRlbGV0ZVNoYXJkS2V5Eh0ucWRyYW50LkRlbGV0ZVNoYXJkS2V5UmVxdWVzdBoeLnFkcmFudC5EZWxldGVTaGFyZEtleVJlc3BvbnNlIgBCFaoCElFkcmFudC5DbGllbnQuR3JwY2IGcHJvdG8z", [file_collections]);
+  fileDesc("Chljb2xsZWN0aW9uc19zZXJ2aWNlLnByb3RvEgZxZHJhbnQysgkKC0NvbGxlY3Rpb25zEkwKA0dldBIgLnFkcmFudC5HZXRDb2xsZWN0aW9uSW5mb1JlcXVlc3QaIS5xZHJhbnQuR2V0Q29sbGVjdGlvbkluZm9SZXNwb25zZSIAEkkKBExpc3QSHi5xZHJhbnQuTGlzdENvbGxlY3Rpb25zUmVxdWVzdBofLnFkcmFudC5MaXN0Q29sbGVjdGlvbnNSZXNwb25zZSIAEkkKBkNyZWF0ZRIYLnFkcmFudC5DcmVhdGVDb2xsZWN0aW9uGiMucWRyYW50LkNvbGxlY3Rpb25PcGVyYXRpb25SZXNwb25zZSIAEkkKBlVwZGF0ZRIYLnFkcmFudC5VcGRhdGVDb2xsZWN0aW9uGiMucWRyYW50LkNvbGxlY3Rpb25PcGVyYXRpb25SZXNwb25zZSIAEkkKBkRlbGV0ZRIYLnFkcmFudC5EZWxldGVDb2xsZWN0aW9uGiMucWRyYW50LkNvbGxlY3Rpb25PcGVyYXRpb25SZXNwb25zZSIAEk0KDVVwZGF0ZUFsaWFzZXMSFS5xZHJhbnQuQ2hhbmdlQWxpYXNlcxojLnFkcmFudC5Db2xsZWN0aW9uT3BlcmF0aW9uUmVzcG9uc2UiABJcChVMaXN0Q29sbGVjdGlvbkFsaWFzZXMSJC5xZHJhbnQuTGlzdENvbGxlY3Rpb25BbGlhc2VzUmVxdWVzdBobLnFkcmFudC5MaXN0QWxpYXNlc1Jlc3BvbnNlIgASSAoLTGlzdEFsaWFzZXMSGi5xZHJhbnQuTGlzdEFsaWFzZXNSZXF1ZXN0GhsucWRyYW50Lkxpc3RBbGlhc2VzUmVzcG9uc2UiABJmChVDb2xsZWN0aW9uQ2x1c3RlckluZm8SJC5xZHJhbnQuQ29sbGVjdGlvbkNsdXN0ZXJJbmZvUmVxdWVzdBolLnFkcmFudC5Db2xsZWN0aW9uQ2x1c3RlckluZm9SZXNwb25zZSIAElcKEENvbGxlY3Rpb25FeGlzdHMSHy5xZHJhbnQuQ29sbGVjdGlvbkV4aXN0c1JlcXVlc3QaIC5xZHJhbnQuQ29sbGVjdGlvbkV4aXN0c1Jlc3BvbnNlIgASewocVXBkYXRlQ29sbGVjdGlvbkNsdXN0ZXJTZXR1cBIrLnFkcmFudC5VcGRhdGVDb2xsZWN0aW9uQ2x1c3RlclNldHVwUmVxdWVzdBosLnFkcmFudC5VcGRhdGVDb2xsZWN0aW9uQ2x1c3RlclNldHVwUmVzcG9uc2UiABJRCg5DcmVhdGVTaGFyZEtleRIdLnFkcmFudC5DcmVhdGVTaGFyZEtleVJlcXVlc3QaHi5xZHJhbnQuQ3JlYXRlU2hhcmRLZXlSZXNwb25zZSIAElEKDkRlbGV0ZVNoYXJkS2V5Eh0ucWRyYW50LkRlbGV0ZVNoYXJkS2V5UmVxdWVzdBoeLnFkcmFudC5EZWxldGVTaGFyZEtleVJlc3BvbnNlIgASTgoNTGlzdFNoYXJkS2V5cxIcLnFkcmFudC5MaXN0U2hhcmRLZXlzUmVxdWVzdBodLnFkcmFudC5MaXN0U2hhcmRLZXlzUmVzcG9uc2UiAEIVqgISUWRyYW50LkNsaWVudC5HcnBjYgZwcm90bzM", [file_collections]);
 
 /**
  * @generated from service qdrant.Collections
  */
 export const Collections: GenService<{
   /**
-   *
    * Get detailed information about specified existing collection
    *
    * @generated from rpc qdrant.Collections.Get
@@ -29,8 +28,7 @@ export const Collections: GenService<{
     output: typeof GetCollectionInfoResponseSchema;
   },
   /**
-   *
-   * Get list name of all existing collections
+   * Get list of names of all existing collections
    *
    * @generated from rpc qdrant.Collections.List
    */
@@ -40,7 +38,6 @@ export const Collections: GenService<{
     output: typeof ListCollectionsResponseSchema;
   },
   /**
-   *
    * Create new collection with given parameters
    *
    * @generated from rpc qdrant.Collections.Create
@@ -51,7 +48,6 @@ export const Collections: GenService<{
     output: typeof CollectionOperationResponseSchema;
   },
   /**
-   *
    * Update parameters of the existing collection
    *
    * @generated from rpc qdrant.Collections.Update
@@ -62,7 +58,6 @@ export const Collections: GenService<{
     output: typeof CollectionOperationResponseSchema;
   },
   /**
-   *
    * Drop collection and all associated data
    *
    * @generated from rpc qdrant.Collections.Delete
@@ -73,7 +68,6 @@ export const Collections: GenService<{
     output: typeof CollectionOperationResponseSchema;
   },
   /**
-   *
    * Update Aliases of the existing collection
    *
    * @generated from rpc qdrant.Collections.UpdateAliases
@@ -84,7 +78,6 @@ export const Collections: GenService<{
     output: typeof CollectionOperationResponseSchema;
   },
   /**
-   *
    * Get list of all aliases for a collection
    *
    * @generated from rpc qdrant.Collections.ListCollectionAliases
@@ -95,7 +88,6 @@ export const Collections: GenService<{
     output: typeof ListAliasesResponseSchema;
   },
   /**
-   *
    * Get list of all aliases for all existing collections
    *
    * @generated from rpc qdrant.Collections.ListAliases
@@ -106,7 +98,6 @@ export const Collections: GenService<{
     output: typeof ListAliasesResponseSchema;
   },
   /**
-   *
    * Get cluster information for a collection
    *
    * @generated from rpc qdrant.Collections.CollectionClusterInfo
@@ -117,7 +108,6 @@ export const Collections: GenService<{
     output: typeof CollectionClusterInfoResponseSchema;
   },
   /**
-   *
    * Check the existence of a collection
    *
    * @generated from rpc qdrant.Collections.CollectionExists
@@ -128,7 +118,6 @@ export const Collections: GenService<{
     output: typeof CollectionExistsResponseSchema;
   },
   /**
-   *
    * Update cluster setup for a collection
    *
    * @generated from rpc qdrant.Collections.UpdateCollectionClusterSetup
@@ -139,7 +128,6 @@ export const Collections: GenService<{
     output: typeof UpdateCollectionClusterSetupResponseSchema;
   },
   /**
-   *
    * Create shard key
    *
    * @generated from rpc qdrant.Collections.CreateShardKey
@@ -150,7 +138,6 @@ export const Collections: GenService<{
     output: typeof CreateShardKeyResponseSchema;
   },
   /**
-   *
    * Delete shard key
    *
    * @generated from rpc qdrant.Collections.DeleteShardKey
@@ -159,6 +146,16 @@ export const Collections: GenService<{
     methodKind: "unary";
     input: typeof DeleteShardKeyRequestSchema;
     output: typeof DeleteShardKeyResponseSchema;
+  },
+  /**
+   * List shard keys
+   *
+   * @generated from rpc qdrant.Collections.ListShardKeys
+   */
+  listShardKeys: {
+    methodKind: "unary";
+    input: typeof ListShardKeysRequestSchema;
+    output: typeof ListShardKeysResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_collections_service, 0);

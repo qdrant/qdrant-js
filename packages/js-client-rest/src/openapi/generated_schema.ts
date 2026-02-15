@@ -11,6 +11,8 @@ type OneOf<T extends any[]> = T extends [infer Only] ? Only : T extends [infer A
 
 export interface paths {
   "/collections/{collection_name}/shards": {
+    /** List shard keys */
+    get: operations["list_shard_keys"];
     /** Create shard key */
     put: operations["create_shard_key"];
   };
@@ -78,6 +80,13 @@ export interface paths {
      * @description Get information about the current state and composition of the cluster
      */
     get: operations["cluster_status"];
+  };
+  "/cluster/telemetry": {
+    /**
+     * Collect cluster telemetry data 
+     * @description Get telemetry data, from the point of view of the cluster. This includes peers info, collections info, shard transfers, and resharding status
+     */
+    get: operations["cluster_telemetry"];
   };
   "/cluster/recover": {
     /** Tries to recover current peer Raft state. */
@@ -152,6 +161,13 @@ export interface paths {
     get: operations["collection_cluster_info"];
     /** Update collection cluster setup */
     post: operations["update_collection_cluster"];
+  };
+  "/collections/{collection_name}/optimizations": {
+    /**
+     * Get optimization progress 
+     * @description Get progress of ongoing and completed optimizations for a collection
+     */
+    get: operations["get_optimizations"];
   };
   "/collections/{collection_name}/aliases": {
     /**
@@ -531,6 +547,8 @@ export interface components {
       payload_schema: {
         [key: string]: components["schemas"]["PayloadIndexInfo"] | undefined;
       };
+      /** @description Update queue info */
+      update_queue?: components["schemas"]["UpdateQueueInfo"] | (Record<string, unknown> | null);
     };
     /**
      * @description Current state of the collection. `Green` - all good. `Yellow` - optimization is running, 'Grey' - optimizations are possible but not triggered, `Red` - some operations failed and was not recovered 
@@ -584,6 +602,11 @@ export interface components {
        * @description Defines how many additional replicas should be processing read request at the same time. Default value is Auto, which means that fan-out will be determined automatically based on the busyness of the local replica. Having more than 0 might be useful to smooth latency spikes of individual nodes.
        */
       read_fan_out_factor?: number | null;
+      /**
+       * Format: uint64 
+       * @description Define number of milliseconds to wait before attempting to read from another replica. This setting can help to reduce latency spikes in case of occasional slow replicas. Default is 0, which means delayed fan out request is disabled.
+       */
+      read_fan_out_delay_ms?: number | null;
       /**
        * @description If true - point's payload will not be stored in memory. It will be read from the disk every time it is requested. This setting saves RAM by (slightly) increasing the response time. Note: those payload values that are involved in filtering and are indexed - remain in RAM.
        * 
@@ -838,6 +861,11 @@ export interface components {
        * @default null
        */
       max_optimization_threads?: number | null;
+      /**
+       * @description If this option is set, service will try to prevent creation of large unoptimized segments. When enabled, updates may be blocked at request level if there are unoptimized segments larger than indexing threshold. Updates will be resumed when optimization is completed and segments are optimized below the threshold. Using this option may lead to increased delay between submitting an update and its application. Default is disabled. 
+       * @default null
+       */
+      prevent_unoptimized?: boolean | null;
     };
     WalConfig: {
       /**
@@ -988,6 +1016,8 @@ export interface components {
       is_tenant?: boolean | null;
       /** @description If true, store the index on disk. Default: false. */
       on_disk?: boolean | null;
+      /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
+      enable_hnsw?: boolean | null;
     };
     /** @enum {string} */
     KeywordIndexType: "keyword";
@@ -1001,6 +1031,8 @@ export interface components {
       is_principal?: boolean | null;
       /** @description If true, store the index on disk. Default: false. Default is false. */
       on_disk?: boolean | null;
+      /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
+      enable_hnsw?: boolean | null;
     };
     /** @enum {string} */
     IntegerIndexType: "integer";
@@ -1010,6 +1042,8 @@ export interface components {
       is_principal?: boolean | null;
       /** @description If true, store the index on disk. Default: false. */
       on_disk?: boolean | null;
+      /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
+      enable_hnsw?: boolean | null;
     };
     /** @enum {string} */
     FloatIndexType: "float";
@@ -1017,6 +1051,8 @@ export interface components {
       type: components["schemas"]["GeoIndexType"];
       /** @description If true, store the index on disk. Default: false. */
       on_disk?: boolean | null;
+      /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
+      enable_hnsw?: boolean | null;
     };
     /** @enum {string} */
     GeoIndexType: "geo";
@@ -1045,6 +1081,8 @@ export interface components {
       on_disk?: boolean | null;
       /** @description Algorithm for stemming. Default: disabled. */
       stemmer?: components["schemas"]["StemmingAlgorithm"] | (Record<string, unknown> | null);
+      /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
+      enable_hnsw?: boolean | null;
     };
     /** @enum {string} */
     TextIndexType: "text";
@@ -1076,6 +1114,8 @@ export interface components {
       type: components["schemas"]["BoolIndexType"];
       /** @description If true, store the index on disk. Default: false. */
       on_disk?: boolean | null;
+      /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
+      enable_hnsw?: boolean | null;
     };
     /** @enum {string} */
     BoolIndexType: "bool";
@@ -1085,6 +1125,8 @@ export interface components {
       is_principal?: boolean | null;
       /** @description If true, store the index on disk. Default: false. */
       on_disk?: boolean | null;
+      /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
+      enable_hnsw?: boolean | null;
     };
     /** @enum {string} */
     DatetimeIndexType: "datetime";
@@ -1094,9 +1136,18 @@ export interface components {
       is_tenant?: boolean | null;
       /** @description If true, store the index on disk. Default: false. */
       on_disk?: boolean | null;
+      /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
+      enable_hnsw?: boolean | null;
     };
     /** @enum {string} */
     UuidIndexType: "uuid";
+    UpdateQueueInfo: {
+      /**
+       * Format: uint 
+       * @description Number of elements in the queue
+       */
+      length: number;
+    };
     PointRequest: {
       /** @description Specify in which shards to look for the points, if not specified - look in all shards */
       shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
@@ -1506,10 +1557,10 @@ export interface components {
       status: components["schemas"]["UpdateStatus"];
     };
     /**
-     * @description `Acknowledged` - Request is saved to WAL and will be process in a queue. `Completed` - Request is completed, changes are actual. 
+     * @description `Acknowledged` - Request is saved to WAL and will be process in a queue. `Completed` - Request is completed, changes are actual. `WaitTimeout` - Request is waiting for timeout. 
      * @enum {string}
      */
-    UpdateStatus: "acknowledged" | "completed";
+    UpdateStatus: "acknowledged" | "completed" | "wait_timeout";
     /**
      * @description Recommendation request. Provides positive and negative examples of the vectors, which can be ids of points that are already stored in the collection, raw vectors, or even ids and vectors combined.
      * 
@@ -1789,6 +1840,11 @@ export interface components {
       flush_interval_sec?: number | null;
       /** @description Max number of threads (jobs) for running optimizations per shard. Note: each optimization job will also use `max_indexing_threads` threads by itself for index building. If "auto" - have no limit and choose dynamically to saturate CPU. If 0 - no optimization threads, optimizations will be disabled. */
       max_optimization_threads?: components["schemas"]["MaxOptimizationThreads"] | (Record<string, unknown> | null);
+      /**
+       * @description If this option is set, service will try to prevent creation of large unoptimized segments. When enabled, updates may be blocked at request level if there are unoptimized segments larger than indexing threshold. Updates will be resumed when optimization is completed and segments are optimized below the threshold. Using this option may lead to increased delay between submitting an update and its application. Default is disabled. 
+       * @default null
+       */
+      prevent_unoptimized?: boolean | null;
     };
     MaxOptimizationThreads: components["schemas"]["MaxOptimizationThreadsSetting"] | number;
     /** @enum {string} */
@@ -1949,6 +2005,11 @@ export interface components {
        */
       read_fan_out_factor?: number | null;
       /**
+       * Format: uint64 
+       * @description Delay in milliseconds before sending read requests to remote nodes
+       */
+      read_fan_out_delay_ms?: number | null;
+      /**
        * @description If true - point's payload will not be stored in memory. It will be read from the disk every time it is requested. This setting saves RAM by (slightly) increasing the response time. Note: those payload values that are involved in filtering and are indexed - remain in RAM. 
        * @default null
        */
@@ -2006,8 +2067,10 @@ export interface components {
     PointsBatch: {
       batch: components["schemas"]["Batch"];
       shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
-      /** @description If specified, only points that match this filter will be updated, others will be inserted */
+      /** @description Filter to apply when updating existing points. Only points matching this filter will be updated. Points that don't match will keep their current state. New points will be inserted regardless of the filter. */
       update_filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
+      /** @description Mode of the upsert operation: insert_only, upsert (default), update_only */
+      update_mode?: components["schemas"]["UpdateMode"] | (Record<string, unknown> | null);
     };
     Batch: {
       ids: (components["schemas"]["ExtendedPointId"])[];
@@ -2123,11 +2186,20 @@ export interface components {
         [key: string]: unknown;
       } | null;
     };
+    /**
+     * @description Defines the mode of the upsert operation
+     * 
+     * * `upsert` - default mode, insert new points, update existing points * `insert_only` - only insert new points, do not update existing points * `update_only` - only update existing points, do not insert new points 
+     * @enum {string}
+     */
+    UpdateMode: "upsert" | "insert_only" | "update_only";
     PointsList: {
       points: (components["schemas"]["PointStruct"])[];
       shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
-      /** @description If specified, only points that match this filter will be updated, others will be inserted */
+      /** @description Filter to apply when updating existing points. Only points matching this filter will be updated. Points that don't match will keep their current state. New points will be inserted regardless of the filter. */
       update_filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
+      /** @description Mode of the upsert operation: insert_only, upsert (default), update_only */
+      update_mode?: components["schemas"]["UpdateMode"] | (Record<string, unknown> | null);
     };
     PointStruct: {
       id: components["schemas"]["ExtendedPointId"];
@@ -2319,7 +2391,7 @@ export interface components {
      * @description State of the single shard within a replica set. 
      * @enum {string}
      */
-    ReplicaState: "Active" | "Dead" | "Partial" | "Initializing" | "Listener" | "PartialSnapshot" | "Recovery" | "Resharding" | "ReshardingScaleDown" | "ActiveRead";
+    ReplicaState: "Active" | "Dead" | "Partial" | "Initializing" | "Listener" | "PartialSnapshot" | "Recovery" | "Resharding" | "ReshardingScaleDown" | "ActiveRead" | "ManualRecovery";
     RemoteShardInfo: {
       /**
        * Format: uint32 
@@ -2342,7 +2414,7 @@ export interface components {
        * Format: uint32 
        * @description Target shard ID if different than source shard ID
        * 
-       * Used exclusively with `ReshardStreamRecords` transfer method.
+       * Used exclusively with `ReshardingStreamRecords` transfer method.
        */
       to_shard_id?: number | null;
       /**
@@ -2393,7 +2465,7 @@ export interface components {
     ReshardingDirection: "up" | "down";
     TelemetryData: {
       id: string;
-      app: components["schemas"]["AppBuildTelemetry"];
+      app?: components["schemas"]["AppBuildTelemetry"] | (Record<string, unknown> | null);
       collections: components["schemas"]["CollectionsTelemetry"];
       cluster?: components["schemas"]["ClusterTelemetry"] | (Record<string, unknown> | null);
       requests?: components["schemas"]["RequestsTelemetry"] | (Record<string, unknown> | null);
@@ -2418,6 +2490,7 @@ export interface components {
       recovery_mode: boolean;
       gpu: boolean;
       rocksdb: boolean;
+      staging: boolean;
     };
     FeatureFlags: {
       /**
@@ -2494,6 +2567,13 @@ export interface components {
        * @default true
        */
       appendable_quantization?: boolean;
+      /**
+       * @description Use single-file mmap in-ram vector storage (InRamMmap)
+       * 
+       * Enabled by default in Qdrant 1.17.1+ 
+       * @default false
+       */
+      single_file_mmap_vector_storage?: boolean;
     };
     HnswGlobalConfig: {
       /**
@@ -2534,8 +2614,8 @@ export interface components {
     CollectionTelemetry: {
       id: string;
       /** Format: uint64 */
-      init_time_ms: number;
-      config: components["schemas"]["CollectionConfigTelemetry"];
+      init_time_ms?: number | null;
+      config?: components["schemas"]["CollectionConfigTelemetry"] | (Record<string, unknown> | null);
       shards?: (components["schemas"]["ReplicaSetTelemetry"])[] | null;
       transfers?: (components["schemas"]["ShardTransferInfo"])[] | null;
       resharding?: (components["schemas"]["ReshardingInfo"])[] | null;
@@ -2603,11 +2683,13 @@ export interface components {
         [key: string]: number | undefined;
       }) | null;
       segments?: (components["schemas"]["SegmentTelemetry"])[] | null;
-      optimizations: components["schemas"]["OptimizerTelemetry"];
+      optimizations?: components["schemas"]["OptimizerTelemetry"] | (Record<string, unknown> | null);
       async_scorer?: boolean | null;
       indexed_only_excluded_vectors?: ({
         [key: string]: number | undefined;
       }) | null;
+      /** @description Update queue status */
+      update_queue?: components["schemas"]["ShardUpdateQueueInfo"] | (Record<string, unknown> | null);
     };
     /**
      * @description Current state of the shard (supports same states as the collection)
@@ -2624,6 +2706,8 @@ export interface components {
     };
     /** @description Aggregated information about segment */
     SegmentInfo: {
+      /** Format: uuid */
+      uuid: string;
       segment_type: components["schemas"]["SegmentType"];
       /** Format: uint */
       num_vectors: number;
@@ -2696,7 +2780,7 @@ export interface components {
       datatype?: components["schemas"]["VectorStorageDatatype"] | (Record<string, unknown> | null);
     };
     /** @description Storage types for vectors */
-    VectorStorageType: "Memory" | "Mmap" | "ChunkedMmap" | "InRamChunkedMmap";
+    VectorStorageType: "Memory" | "Mmap" | "ChunkedMmap" | "InRamChunkedMmap" | "InRamMmap";
     /** @description Vector index configuration */
     Indexes: OneOf<[{
       /** @enum {string} */
@@ -2814,8 +2898,15 @@ export interface components {
     TrackerTelemetry: {
       /** @description Name of the optimizer */
       name: string;
-      /** @description Segment IDs being optimized */
+      /**
+       * Format: uuid 
+       * @description UUID of the upcoming segment being created by the optimizer
+       */
+      uuid: string;
+      /** @description Internal segment IDs being optimized. These are local and in-memory, meaning that they can refer to different segments after a service restart. */
       segment_ids: (number)[];
+      /** @description Segment UUIDs being optimized. Refers to same segments as in `segment_ids`, but trackable across restarts, and reflect their directory name. */
+      segment_uuids: (string)[];
       status: components["schemas"]["TrackerStatus"];
       /**
        * Format: date-time 
@@ -2834,13 +2925,25 @@ export interface components {
     }, {
       error: string;
     }]>;
+    ShardUpdateQueueInfo: {
+      /**
+       * Format: uint 
+       * @description Number of elements in the queue
+       */
+      length: number;
+      /**
+       * Format: uint 
+       * @description last operation number processed
+       */
+      op_num?: number | null;
+    };
     RemoteShardTelemetry: {
       /** Format: uint32 */
       shard_id: number;
       /** Format: uint64 */
-      peer_id?: number | null;
-      searches: components["schemas"]["OperationDurationStatistics"];
-      updates: components["schemas"]["OperationDurationStatistics"];
+      peer_id: number;
+      searches?: components["schemas"]["OperationDurationStatistics"] | (Record<string, unknown> | null);
+      updates?: components["schemas"]["OperationDurationStatistics"] | (Record<string, unknown> | null);
     };
     PartialSnapshotTelemetry: {
       /** Format: uint */
@@ -2889,6 +2992,7 @@ export interface components {
       metadata?: {
         [key: string]: unknown;
       } | null;
+      resharding_enabled?: boolean | null;
     };
     ClusterStatusTelemetry: {
       /** Format: uint */
@@ -2941,7 +3045,9 @@ export interface components {
     };
     GrpcTelemetry: {
       responses: {
-        [key: string]: components["schemas"]["OperationDurationStatistics"] | undefined;
+        [key: string]: ({
+          [key: string]: components["schemas"]["OperationDurationStatistics"] | undefined;
+        }) | undefined;
       };
     };
     MemoryTelemetry: {
@@ -3504,7 +3610,7 @@ export interface components {
     };
     QueryInterface: components["schemas"]["VectorInput"] | components["schemas"]["Query"];
     VectorInput: (number)[] | components["schemas"]["SparseVector"] | ((number)[])[] | components["schemas"]["ExtendedPointId"] | components["schemas"]["Document"] | components["schemas"]["Image"] | components["schemas"]["InferenceObject"];
-    Query: components["schemas"]["NearestQuery"] | components["schemas"]["RecommendQuery"] | components["schemas"]["DiscoverQuery"] | components["schemas"]["ContextQuery"] | components["schemas"]["OrderByQuery"] | components["schemas"]["FusionQuery"] | components["schemas"]["RrfQuery"] | components["schemas"]["FormulaQuery"] | components["schemas"]["SampleQuery"];
+    Query: components["schemas"]["NearestQuery"] | components["schemas"]["RecommendQuery"] | components["schemas"]["DiscoverQuery"] | components["schemas"]["ContextQuery"] | components["schemas"]["OrderByQuery"] | components["schemas"]["FusionQuery"] | components["schemas"]["RrfQuery"] | components["schemas"]["FormulaQuery"] | components["schemas"]["SampleQuery"] | components["schemas"]["RelevanceFeedbackQuery"];
     NearestQuery: {
       nearest: components["schemas"]["VectorInput"];
       /** @description Perform MMR (Maximal Marginal Relevance) reranking after search, using the same vector in this query to calculate relevance. */
@@ -3582,6 +3688,8 @@ export interface components {
        * @default null
        */
       k?: number | null;
+      /** @description Weights for each prefetch source. Higher weight gives more influence on the final ranking. If not specified, all prefetches are weighted equally. The number of weights should match the number of prefetches. */
+      weights?: (number)[] | null;
     };
     FormulaQuery: {
       formula: components["schemas"]["Expression"];
@@ -3674,6 +3782,30 @@ export interface components {
     };
     /** @enum {string} */
     Sample: "random";
+    RelevanceFeedbackQuery: {
+      relevance_feedback: components["schemas"]["RelevanceFeedbackInput"];
+    };
+    RelevanceFeedbackInput: {
+      target: components["schemas"]["VectorInput"];
+      feedback: (components["schemas"]["FeedbackItem"])[];
+      strategy: components["schemas"]["FeedbackStrategy"];
+    };
+    FeedbackItem: {
+      example: components["schemas"]["VectorInput"];
+      /** Format: float */
+      score: number;
+    };
+    FeedbackStrategy: {
+      naive: components["schemas"]["NaiveFeedbackStrategy"];
+    };
+    NaiveFeedbackStrategy: {
+      /** Format: float */
+      a: number;
+      /** Format: float */
+      b: number;
+      /** Format: float */
+      c: number;
+    };
     QueryRequestBatch: {
       searches: (components["schemas"]["QueryRequest"])[];
     };
@@ -3800,6 +3932,225 @@ export interface components {
       /** Format: uint64 */
       tokens: number;
     };
+    ShardKeysResponse: {
+      /** @description The existing shard keys. Only available when sharding method is `custom` */
+      shard_keys?: (components["schemas"]["ShardKeyDescription"])[] | null;
+    };
+    ShardKeyDescription: {
+      key: components["schemas"]["ShardKey"];
+    };
+    /** @description Optimizations progress for the collection */
+    OptimizationsResponse: {
+      summary: components["schemas"]["OptimizationsSummary"];
+      /** @description Currently running optimizations. */
+      running: (components["schemas"]["Optimization"])[];
+      /** @description An estimated queue of pending optimizations. Requires `?with=queued`. */
+      queued?: (components["schemas"]["PendingOptimization"])[] | null;
+      /** @description Completed optimizations. Requires `?with=completed`. Limited by `?completed_limit=N`. */
+      completed?: (components["schemas"]["Optimization"])[] | null;
+      /** @description Segments that don't require optimization. Requires `?with=idle_segments`. */
+      idle_segments?: (components["schemas"]["OptimizationSegmentInfo"])[] | null;
+    };
+    OptimizationsSummary: {
+      /**
+       * Format: uint 
+       * @description Number of pending optimizations in the queue. Each optimization will take one or more unoptimized segments and produce one optimized segment.
+       */
+      queued_optimizations: number;
+      /**
+       * Format: uint 
+       * @description Number of unoptimized segments in the queue.
+       */
+      queued_segments: number;
+      /**
+       * Format: uint 
+       * @description Number of points in unoptimized segments in the queue.
+       */
+      queued_points: number;
+      /**
+       * Format: uint 
+       * @description Number of segments that don't require optimization.
+       */
+      idle_segments: number;
+    };
+    Optimization: {
+      /**
+       * Format: uuid 
+       * @description Unique identifier of the optimization process.
+       * 
+       * After the optimization is complete, a new segment will be created with this UUID.
+       */
+      uuid: string;
+      /** @description Name of the optimizer that performed this optimization. */
+      optimizer: string;
+      status: components["schemas"]["TrackerStatus"];
+      /**
+       * @description Segments being optimized.
+       * 
+       * After the optimization is complete, these segments will be replaced by the new optimized segment.
+       */
+      segments: (components["schemas"]["OptimizationSegmentInfo"])[];
+      progress: components["schemas"]["ProgressTree"];
+    };
+    OptimizationSegmentInfo: {
+      /**
+       * Format: uuid 
+       * @description Unique identifier of the segment.
+       */
+      uuid: string;
+      /**
+       * Format: uint 
+       * @description Number of non-deleted points in the segment.
+       */
+      points_count: number;
+    };
+    ProgressTree: {
+      /** @description Name of the operation. */
+      name: string;
+      /**
+       * Format: date-time 
+       * @description When the operation started.
+       */
+      started_at?: string | null;
+      /**
+       * Format: date-time 
+       * @description When the operation finished.
+       */
+      finished_at?: string | null;
+      /**
+       * Format: double 
+       * @description For finished operations, how long they took, in seconds.
+       */
+      duration_sec?: number | null;
+      /**
+       * Format: uint64 
+       * @description Number of completed units of work, if applicable.
+       */
+      done?: number | null;
+      /**
+       * Format: uint64 
+       * @description Total number of units of work, if applicable and known.
+       */
+      total?: number | null;
+      /** @description Child operations. */
+      children?: (components["schemas"]["ProgressTree"])[];
+    };
+    PendingOptimization: {
+      /** @description Name of the optimizer that scheduled this optimization. */
+      optimizer: string;
+      /** @description Segments that will be optimized. */
+      segments: (components["schemas"]["OptimizationSegmentInfo"])[];
+    };
+    DistributedTelemetryData: {
+      collections: {
+        [key: string]: components["schemas"]["DistributedCollectionTelemetry"] | undefined;
+      };
+      cluster?: components["schemas"]["DistributedClusterTelemetry"] | (Record<string, unknown> | null);
+    };
+    DistributedCollectionTelemetry: {
+      /** @description Collection name */
+      id: string;
+      /** @description Shards topology */
+      shards?: (components["schemas"]["DistributedShardTelemetry"])[] | null;
+      /** @description Ongoing resharding operations */
+      reshardings?: (components["schemas"]["ReshardingInfo"])[] | null;
+      /** @description Ongoing shard transfers */
+      shard_transfers?: (components["schemas"]["ShardTransferInfo"])[] | null;
+    };
+    DistributedShardTelemetry: {
+      /**
+       * Format: uint32 
+       * @description Shard ID
+       */
+      id: number;
+      /** @description Optional shard key */
+      key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
+      /** @description Replica information */
+      replicas: (components["schemas"]["DistributedReplicaTelemetry"])[];
+    };
+    DistributedReplicaTelemetry: {
+      /**
+       * Format: uint64 
+       * @description Peer ID hosting this replica
+       */
+      peer_id: number;
+      state: components["schemas"]["ReplicaState"];
+      /** @description Shard status */
+      status?: components["schemas"]["ShardStatus"] | (Record<string, unknown> | null);
+      /**
+       * Format: uint 
+       * @description Total optimized points
+       */
+      total_optimized_points?: number | null;
+      /**
+       * Format: uint 
+       * @description Estimated vectors size in bytes
+       */
+      vectors_size_bytes?: number | null;
+      /**
+       * Format: uint 
+       * @description Estimated payloads size in bytes
+       */
+      payloads_size_bytes?: number | null;
+      /**
+       * Format: uint 
+       * @description Approximate number of points
+       */
+      num_points?: number | null;
+      /**
+       * Format: uint 
+       * @description Approximate number of vectors
+       */
+      num_vectors?: number | null;
+      /** @description Approximate number of vectors by name */
+      num_vectors_by_name?: ({
+        [key: string]: number | undefined;
+      }) | null;
+      /** @description Shard cleaning task status. After a resharding, a cleanup task is performed to remove outdated points from this shard. */
+      shard_cleaning_status?: components["schemas"]["ShardCleanStatusTelemetry"] | (Record<string, unknown> | null);
+      /** @description Partial snapshot telemetry */
+      partial_snapshot?: components["schemas"]["PartialSnapshotTelemetry"] | (Record<string, unknown> | null);
+    };
+    DistributedClusterTelemetry: {
+      enabled: boolean;
+      /** Format: uint64 */
+      number_of_peers?: number | null;
+      peers: {
+        [key: string]: components["schemas"]["DistributedPeerInfo"] | undefined;
+      };
+    };
+    DistributedPeerInfo: {
+      /** @description URI of the peer */
+      uri: string;
+      /** @description Whether this peer responded for this request */
+      responsive: boolean;
+      /** @description If responsive, these details should be available */
+      details?: components["schemas"]["DistributedPeerDetails"] | (Record<string, unknown> | null);
+    };
+    DistributedPeerDetails: {
+      /** @description Qdrant version */
+      version: string;
+      /** @description Consensus role for the peer */
+      role?: components["schemas"]["StateRole"] | (Record<string, unknown> | null);
+      /** @description Whether it can participate in leader elections */
+      is_voter: boolean;
+      /**
+       * Format: uint64 
+       * @description Election term
+       */
+      term: number;
+      /**
+       * Format: uint64 
+       * @description Latest accepted commit
+       */
+      commit: number;
+      /**
+       * Format: uint64 
+       * @description Number of operations pending for being applied
+       */
+      num_pending_operations: number;
+      consensus_thread_status: components["schemas"]["ConsensusThreadStatus"];
+    };
   };
   responses: never;
   parameters: never;
@@ -3812,6 +4163,47 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  /** List shard keys */
+  list_shard_keys: {
+    parameters: {
+      path: {
+        /** @description Name of the collection to list shard keys for */
+        collection_name: string;
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+            /**
+             * Format: float 
+             * @description Time spent to process this request 
+             * @example 0.002
+             */
+            time?: number;
+            /** @example ok */
+            status?: string;
+            result?: components["schemas"]["ShardKeysResponse"];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
   /** Create shard key */
   create_shard_key: {
     parameters: {
@@ -3947,6 +4339,8 @@ export interface operations {
         anonymize?: boolean;
         /** @description Level of details in telemetry data. Minimal level is 0, maximal is infinity */
         details_level?: number;
+        /** @description Timeout for this request */
+        timeout?: number;
       };
     };
     responses: {
@@ -3991,6 +4385,8 @@ export interface operations {
       query?: {
         /** @description If true, anonymize result */
         anonymize?: boolean;
+        /** @description Timeout for this request */
+        timeout?: number;
       };
     };
     responses: {
@@ -4074,14 +4470,36 @@ export interface operations {
    */
   clear_issues: {
     responses: {
-      /** @description Successful response */
+      /** @description successful operation */
       200: {
         content: {
-          "application/json": boolean;
+          "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+            /**
+             * Format: float 
+             * @description Time spent to process this request 
+             * @example 0.002
+             */
+            time?: number;
+            /** @example ok */
+            status?: string;
+            result?: boolean;
+          };
         };
       };
       /** @description error */
-      "4XX": never;
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
     };
   };
   /**
@@ -4105,6 +4523,52 @@ export interface operations {
             /** @example ok */
             status?: string;
             result?: components["schemas"]["ClusterStatus"];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Collect cluster telemetry data 
+   * @description Get telemetry data, from the point of view of the cluster. This includes peers info, collections info, shard transfers, and resharding status
+   */
+  cluster_telemetry: {
+    parameters: {
+      query?: {
+        /** @description The level of detail to include in the response */
+        details_level?: number;
+        /** @description Timeout for this request */
+        timeout?: number;
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+            /**
+             * Format: float 
+             * @description Time spent to process this request 
+             * @example 0.002
+             */
+            time?: number;
+            /** @example ok */
+            status?: string;
+            result?: components["schemas"]["DistributedTelemetryData"];
           };
         };
       };
@@ -4740,6 +5204,62 @@ export interface operations {
             /** @example ok */
             status?: string;
             result?: boolean;
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Get optimization progress 
+   * @description Get progress of ongoing and completed optimizations for a collection
+   */
+  get_optimizations: {
+    parameters: {
+      query?: {
+        /**
+         * @description Comma-separated list of optional fields to include in the response.
+         * Possible values: queued, completed, idle_segments.
+         */
+        with?: string;
+        /**
+         * @description Maximum number of completed optimizations to return.
+         * Ignored if `completed` is not in the `with` parameter.
+         */
+        completed_limit?: number;
+      };
+      path: {
+        /** @description Name of the collection */
+        collection_name: string;
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+            /**
+             * Format: float 
+             * @description Time spent to process this request 
+             * @example 0.002
+             */
+            time?: number;
+            /** @example ok */
+            status?: string;
+            result?: components["schemas"]["OptimizationsResponse"];
           };
         };
       };
@@ -5766,6 +6286,8 @@ export interface operations {
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
         ordering?: components["schemas"]["WriteOrdering"];
+        /** @description Timeout for the operation */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to update from */
@@ -5934,6 +6456,8 @@ export interface operations {
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
         ordering?: components["schemas"]["WriteOrdering"];
+        /** @description Timeout for the operation */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to update from */
@@ -5990,6 +6514,8 @@ export interface operations {
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
         ordering?: components["schemas"]["WriteOrdering"];
+        /** @description Timeout for the operation */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to delete from */
@@ -6046,6 +6572,8 @@ export interface operations {
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
         ordering?: components["schemas"]["WriteOrdering"];
+        /** @description Timeout for the operation */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to set from */
@@ -6102,6 +6630,8 @@ export interface operations {
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
         ordering?: components["schemas"]["WriteOrdering"];
+        /** @description Timeout for the operation */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to set from */
@@ -6158,6 +6688,8 @@ export interface operations {
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
         ordering?: components["schemas"]["WriteOrdering"];
+        /** @description Timeout for the operation */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to delete from */
@@ -6214,6 +6746,8 @@ export interface operations {
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
         ordering?: components["schemas"]["WriteOrdering"];
+        /** @description Timeout for the operation */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to clear payload from */
@@ -6270,6 +6804,8 @@ export interface operations {
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
         ordering?: components["schemas"]["WriteOrdering"];
+        /** @description Timeout for the operation */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to apply operations on */
