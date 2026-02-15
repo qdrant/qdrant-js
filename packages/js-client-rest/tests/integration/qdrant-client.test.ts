@@ -142,6 +142,27 @@ describe('QdrantClient', () => {
         expect(result).toHaveLength(3);
     });
 
+    test('upsert with timeout', async () => {
+        const result = await client.upsert(collectionName, {
+            wait: true,
+            timeout: 10,
+            points: [
+                {
+                    id: 5,
+                    vector: [0.05, 0.61, 0.76, 0.74],
+                    payload: {
+                        city: 'Berlin',
+                        country: 'Germany',
+                        count: 1000000,
+                        square: 12.5,
+                        coords: {lat: 1.0, lon: 2.0},
+                    },
+                },
+            ],
+        });
+        expect(result).toMatchObject<typeof result>({operation_id: expect.any(Number) as number, status: 'completed'});
+    });
+
     test('search points filter', async () => {
         const result = await client.search(collectionName, {
             filter: {

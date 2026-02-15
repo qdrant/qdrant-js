@@ -800,13 +800,15 @@ export class QdrantClient {
         {
             wait = true,
             ordering,
+            timeout,
             ...points_or_batch
-        }: {wait?: boolean; ordering?: Schemas['WriteOrdering']} & Schemas['PointInsertOperations'],
+        }: {wait?: boolean; ordering?: Schemas['WriteOrdering']; timeout?: number} & Schemas['PointInsertOperations'],
     ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.upsertPoints({
             collection_name,
             wait,
             ordering,
+            timeout,
             ...points_or_batch,
         });
         return response.data.result ?? noResultError();
