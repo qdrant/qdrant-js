@@ -415,6 +415,16 @@ export function createClientApi(client: Client) : ClientApi {
       }),
     
     /**
+         * Download shard snapshot 
+         * @description Stream the current state of a shard as a snapshot file
+         */
+    streamShardSnapshot:
+      client
+      .path('/collections/{collection_name}/shards/{shard_id}/snapshot')
+      .method('get')
+      .create(),
+    
+    /**
          * Recover shard from an uploaded snapshot 
          * @description Recover shard of a local collection from an uploaded snapshot. This will overwrite any data, stored on this node, for the collection shard.
          */

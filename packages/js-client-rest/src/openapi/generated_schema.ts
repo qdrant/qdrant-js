@@ -245,6 +245,13 @@ export interface paths {
      */
     delete: operations["delete_full_snapshot"];
   };
+  "/collections/{collection_name}/shards/{shard_id}/snapshot": {
+    /**
+     * Download shard snapshot 
+     * @description Stream the current state of a shard as a snapshot file
+     */
+    get: operations["stream_shard_snapshot"];
+  };
   "/collections/{collection_name}/shards/{shard_id}/snapshots/upload": {
     /**
      * Recover shard from an uploaded snapshot 
@@ -3795,10 +3802,11 @@ export interface components {
       /** Format: float */
       score: number;
     };
-    FeedbackStrategy: {
-      naive: components["schemas"]["NaiveFeedbackStrategy"];
-    };
+    FeedbackStrategy: components["schemas"]["NaiveFeedbackStrategy"];
     NaiveFeedbackStrategy: {
+      naive: components["schemas"]["NaiveFeedbackStrategyParams"];
+    };
+    NaiveFeedbackStrategyParams: {
       /** Format: float */
       a: number;
       /** Format: float */
@@ -5862,6 +5870,40 @@ export interface operations {
             time?: number;
             status?: string;
           };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Download shard snapshot 
+   * @description Stream the current state of a shard as a snapshot file
+   */
+  stream_shard_snapshot: {
+    parameters: {
+      path: {
+        /** @description Name of the collection */
+        collection_name: string;
+        /** @description Id of the shard */
+        shard_id: number;
+      };
+    };
+    responses: {
+      /** @description Snapshot file */
+      200: {
+        content: {
+          "application/octet-stream": string;
         };
       };
       /** @description error */

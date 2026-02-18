@@ -1311,6 +1311,36 @@ export type ClientApi = {
   }>;
   
   /**
+       * Download shard snapshot 
+       * @description Stream the current state of a shard as a snapshot file
+       */
+  streamShardSnapshot: TypedFetch<{
+    parameters: {
+          path: {
+            collection_name: string;
+            shard_id: number;
+          };
+        };
+    responses: {
+          200: {
+            content: {
+              "application/octet-stream": string;
+            };
+          };
+          default: {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+          "4XX": {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+        };
+  }>;
+  
+  /**
        * Recover shard from an uploaded snapshot 
        * @description Recover shard of a local collection from an uploaded snapshot. This will overwrite any data, stored on this node, for the collection shard.
        */
