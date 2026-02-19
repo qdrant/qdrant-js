@@ -226,6 +226,7 @@ export function createClientApi(client: Client) : ClientApi {
       .create({
         wait: true,
         ordering: true,
+        timeout: true,
       }),
     
     /**
@@ -249,6 +250,7 @@ export function createClientApi(client: Client) : ClientApi {
       .create({
         wait: true,
         ordering: true,
+        timeout: true,
       }),
     
     /**

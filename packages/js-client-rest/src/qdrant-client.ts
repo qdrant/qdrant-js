@@ -1417,9 +1417,10 @@ export class QdrantClient {
         {
             wait,
             ordering,
+            timeout,
             field_name,
             field_schema,
-        }: {wait?: boolean; ordering?: Schemas['WriteOrdering']} & Schemas['CreateFieldIndex'],
+        }: {wait?: boolean; ordering?: Schemas['WriteOrdering']; timeout?: number} & Schemas['CreateFieldIndex'],
     ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.createFieldIndex({
             collection_name,
@@ -1427,6 +1428,7 @@ export class QdrantClient {
             field_schema,
             wait,
             ordering,
+            timeout,
         });
         return response.data.result ?? noResultError();
     }
@@ -1451,13 +1453,14 @@ export class QdrantClient {
     async deletePayloadIndex(
         collection_name: string,
         field_name: string,
-        {wait = true, ordering}: {wait?: boolean; ordering?: Schemas['WriteOrdering']} = {},
+        {wait = true, ordering, timeout}: {wait?: boolean; ordering?: Schemas['WriteOrdering']; timeout?: number} = {},
     ): Promise<Schemas['UpdateResult']> {
         const response = await this._openApiClient.deleteFieldIndex({
             collection_name,
             field_name,
             wait,
             ordering,
+            timeout,
         });
         return response.data.result ?? noResultError();
     }

@@ -4990,6 +4990,8 @@ export interface operations {
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
         ordering?: components["schemas"]["WriteOrdering"];
+        /** @description Timeout for the operation */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection */
@@ -5090,6 +5092,8 @@ export interface operations {
         wait?: boolean;
         /** @description define ordering guarantees for the operation */
         ordering?: components["schemas"]["WriteOrdering"];
+        /** @description Timeout for the operation */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection */
