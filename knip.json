@@ -1,0 +1,18 @@
+{
+    "ignore": ["examples/**"],
+    "ignoreBinaries": ["build", "changeset", "pre-check"],
+    "workspaces": {
+        "packages/js-client-rest": {
+            "project": ["src/**/*.ts"],
+            "ignore": ["src/openapi/**"]
+        },
+        "packages/js-client-grpc": {
+            "project": ["src/**/*.ts"],
+            "ignore": ["src/proto/**"],
+            "ignoreDependencies": ["@bufbuild/buf", "@bufbuild/protoc-gen-es"]
+        },
+        "packages/qdrant-js": {
+            "project": ["src/**/*.ts"]
+        }
+    }
+}

@@ -12,8 +12,8 @@
     "extends": [
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
-        "plugin:@typescript-eslint/recommended-requiring-type-checking",
-        "plugin:@typescript-eslint/strict"
+        "plugin:@typescript-eslint/recommended-type-checked",
+        "plugin:@typescript-eslint/strict-type-checked"
     ],
     "rules": {
         "object-shorthand": "warn",
@@ -27,6 +27,10 @@
                 "ignoreRestSiblings": true
             }
         ],
-        "@typescript-eslint/consistent-type-definitions": "off"
+        "@typescript-eslint/consistent-type-definitions": "off",
+        "@typescript-eslint/use-unknown-in-catch-callback-variable": "off",
+        "@typescript-eslint/no-confusing-void-expression": "off",
+        "@typescript-eslint/restrict-template-expressions": ["error", {"allowNumber": true}],
+        "@typescript-eslint/no-redundant-type-constituents": "off"
     }
 }
