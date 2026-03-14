@@ -54,9 +54,10 @@ type CreateApisParams = {
     timeout: number;
     apiKey?: string;
     compression: boolean | 'gzip';
+    headers?: Record<string, string>;
 };
 
-export function createApis(baseUrl: string, {timeout, apiKey, compression}: CreateApisParams): GrpcClients {
+export function createApis(baseUrl: string, {timeout, apiKey, compression, headers}: CreateApisParams): GrpcClients {
     let sendCompression = undefined;
     let acceptCompression: Compression[] = [];
     switch (compression) {
@@ -89,6 +90,12 @@ export function createApis(baseUrl: string, {timeout, apiKey, compression}: Crea
     if (apiKey !== undefined) {
         interceptors.push((next) => (req) => {
             req.header.set('api-key', apiKey);
+            return next(req);
+        });
+    }
+    if (headers) {
+        interceptors.push((next) => (req) => {
+            for (const key in headers) req.header.set(key, headers[key]);
             return next(req);
         });
     }

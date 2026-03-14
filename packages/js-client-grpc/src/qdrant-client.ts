@@ -12,6 +12,7 @@ export type QdrantClientParams = {
     timeout?: number;
     checkCompatibility?: boolean;
     compression?: boolean | 'gzip';
+    headers?: Record<string, string>;
 };
 
 export class QdrantClient {
@@ -33,6 +34,7 @@ export class QdrantClient {
         timeout = 300_000,
         checkCompatibility = true,
         compression = true,
+        headers,
     }: QdrantClientParams = {}) {
         this._https = https ?? typeof apiKey === 'string';
         this._scheme = this._https ? 'https' : 'http';
@@ -83,7 +85,7 @@ export class QdrantClient {
         const address = this._port ? `${this._host}:${this._port}` : this._host;
         this._restUri = `${this._scheme}://${address}${this._prefix}`;
 
-        this._grcpClients = createApis(this._restUri, {apiKey, timeout, compression});
+        this._grcpClients = createApis(this._restUri, {apiKey, timeout, compression, headers});
 
         if (checkCompatibility) {
             this._grcpClients.service
