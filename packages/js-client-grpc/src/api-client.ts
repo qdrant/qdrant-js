@@ -73,7 +73,7 @@ export function createApis(baseUrl: string, {timeout, apiKey, compression, heade
 
     const interceptors: Interceptor[] = [
         (next) => (req) => {
-            req.header.set('user-agent', 'qdrant-js/' + String(PACKAGE_VERSION));
+            req.header.set('user-agent', 'javascript-client/' + String(PACKAGE_VERSION));
             return next(req);
         },
         (next) => (req) =>
