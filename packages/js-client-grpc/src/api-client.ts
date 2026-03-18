@@ -7,6 +7,7 @@ import {Qdrant} from './proto/qdrant_pb.js';
 import {PACKAGE_VERSION} from './client-version.js';
 import {QdrantClientResourceExhaustedError} from './errors.js';
 import {Compression} from '@connectrpc/connect/protocol';
+import {getContextHeaders} from './context-headers.js';
 
 type Clients = {
     collections: Client<typeof Collections>;
@@ -99,6 +100,10 @@ export function createApis(baseUrl: string, {timeout, apiKey, compression, heade
             return next(req);
         });
     }
+    interceptors.push((next) => (req) => {
+        for (const [key, value] of Object.entries(getContextHeaders())) req.header.set(key, value);
+        return next(req);
+    });
     if (Number.isFinite(timeout)) {
         interceptors.push((next) => async (req) => {
             const controller = new AbortController();
