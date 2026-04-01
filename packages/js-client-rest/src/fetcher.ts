@@ -1,5 +1,30 @@
 import {ApiError, Middleware, TypedFetch} from '@qdrant/openapi-typescript-fetch';
 
+let bigintReviver: ((this: unknown, key: string, value: unknown, context: {source: string}) => unknown) | undefined;
+let bigintReplacer: ((this: unknown, key: string, value: unknown) => unknown) | undefined;
+
+if ('rawJSON' in JSON) {
+    bigintReviver = function (_key, value, context) {
+        if (Number.isInteger(value) && !Number.isSafeInteger(value)) {
+            try {
+                return BigInt(context.source);
+            } catch {
+                return value;
+            }
+        }
+
+        return value;
+    };
+
+    bigintReplacer = function (_key, value) {
+        if (typeof value === 'bigint') {
+            return JSON.rawJSON?.(String(value)) ?? String(value);
+        }
+
+        return value;
+    };
+}
+
 type Method = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head' | 'options';
 
 type OpenapiPaths<Paths> = {
@@ -114,7 +139,7 @@ function getBody(method: Method, payload: unknown) {
         return undefined;
     }
 
-    const body = payload instanceof FormData ? payload : JSON.stringify(payload);
+    const body = payload instanceof FormData ? payload : JSON.stringify(payload, bigintReplacer);
     return method === 'delete' && body === '{}' ? undefined : body;
 }
 
@@ -129,9 +154,21 @@ function mergeRequestInit(first?: RequestInit, second?: RequestInit): RequestIni
     return {...first, ...second, headers};
 }
 
-function clonePayload(payload: unknown): Record<string, unknown> | unknown[] {
+function isObjectRecord(payload: unknown): payload is Record<string, unknown> {
+    if (!payload || typeof payload !== 'object') {
+        return false;
+    }
+
+    return !Array.isArray(payload) && !(payload instanceof FormData);
+}
+
+function clonePayload(payload: unknown): Record<string, unknown> | unknown[] | FormData {
     if (!payload || typeof payload !== 'object') {
         return {};
+    }
+
+    if (payload instanceof FormData) {
+        return payload;
     }
 
     return Object.assign(Array.isArray(payload) ? [] : {}, payload) as Record<string, unknown> | unknown[];
@@ -139,12 +176,15 @@ function clonePayload(payload: unknown): Record<string, unknown> | unknown[] {
 
 function getFetchParams(request: RequestDefinition) {
     const payload = clonePayload(request.payload);
-    const pathPayload = payload as Record<string, unknown>;
+    const pathPayload = isObjectRecord(payload) ? payload : {};
     const pathParamKeys = Array.from(request.path.matchAll(/\{([^}]+)\}/g), ([, key]) => key);
-    const requestPayload = omitKeys(pathPayload, pathParamKeys);
+    const requestPayload = isObjectRecord(payload) ? omitKeys(pathPayload, pathParamKeys) : payload;
     const path = getPath(request.path, pathPayload);
-    const query = getQuery(request.method, requestPayload, request.queryParams);
-    const body = getBody(request.method, omitKeys(requestPayload, request.queryParams));
+    const query = isObjectRecord(requestPayload) ? getQuery(request.method, requestPayload, request.queryParams) : '';
+    const body =
+        isObjectRecord(requestPayload) && canSendBody(request.method)
+            ? getBody(request.method, omitKeys(requestPayload, request.queryParams))
+            : getBody(request.method, requestPayload);
     const headers = canSendBody(request.method)
         ? getHeaders(body, request.init?.headers)
         : new Headers(request.init?.headers);
@@ -169,11 +209,17 @@ async function getResponseData(response: Response) {
     const responseText = await response.text();
 
     if (contentType?.includes('application/json')) {
-        return JSON.parse(responseText);
+        return JSON.parse(
+            responseText,
+            bigintReviver as ((this: unknown, key: string, value: unknown) => unknown) | undefined,
+        );
     }
 
     try {
-        return JSON.parse(responseText);
+        return JSON.parse(
+            responseText,
+            bigintReviver as ((this: unknown, key: string, value: unknown) => unknown) | undefined,
+        );
     } catch {
         return responseText;
     }

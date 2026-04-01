@@ -48,7 +48,7 @@ export function createClient(baseUrl: string, {headers, timeout, fetch}: RestArg
             }
         } catch (error) {
             if (error instanceof ApiError && error.status === 429) {
-                const retryAfterHeader = error.headers.get('retry-after')?.[0];
+                const retryAfterHeader = error.headers.get('retry-after');
                 if (retryAfterHeader) {
                     throw new QdrantClientResourceExhaustedError(error.message, retryAfterHeader);
                 }
