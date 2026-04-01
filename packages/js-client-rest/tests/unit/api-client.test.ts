@@ -40,6 +40,9 @@ describe('apiClient', () => {
                 method: 'GET',
             }),
         );
+
+        const [, init] = vi.mocked(global.fetch).mock.calls[0] ?? [];
+        expect(init).not.toHaveProperty('dispatcher');
     });
 
     test('status 400', async () => {
@@ -66,5 +69,23 @@ describe('apiClient', () => {
         const telemetry = client.path('/telemetry').method('get').create();
 
         await expect(telemetry({})).rejects.toThrowError(QdrantClientTimeoutError);
+    });
+
+    test('uses injected fetch implementation when provided', async () => {
+        const customFetch = vi.fn().mockResolvedValue(createFetchResponse(200));
+        global.fetch = vi.fn().mockResolvedValue(createFetchResponse(400));
+
+        const apis = createApis('http://my-domain.com', {
+            timeout: Infinity,
+            headers,
+            fetch: customFetch,
+        });
+
+        await expect(apis.collectionExists({collection_name: 'my-collection'})).resolves.toMatchObject({
+            data: {error_message: 'response error'},
+        });
+
+        expect(customFetch).toHaveBeenCalledOnce();
+        expect(global.fetch).not.toHaveBeenCalled();
     });
 });

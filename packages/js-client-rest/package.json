@@ -54,8 +54,7 @@
         "openapi_schema_remote": "https://raw.githubusercontent.com/qdrant/qdrant/dev/docs/redoc/master/openapi.json"
     },
     "dependencies": {
-        "@qdrant/openapi-typescript-fetch": "1.2.6",
-        "undici": "^6.23.0"
+        "@qdrant/openapi-typescript-fetch": "1.2.6"
     },
     "devDependencies": {
         "@rollup/plugin-commonjs": "^24.1.0",

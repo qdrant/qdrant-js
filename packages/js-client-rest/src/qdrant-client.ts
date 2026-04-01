@@ -3,6 +3,7 @@ import {QdrantClientConfigError} from './errors.js';
 import {RestArgs, Schemas} from './types.js';
 import {PACKAGE_VERSION, ClientVersion} from './client-version.js';
 import {ClientApi} from './openapi/generated_client_type.js';
+import {FetchImplementation} from './fetcher.js';
 
 const noResultError = (): never => {
     throw new Error('Result came uninitialized');
@@ -24,9 +25,13 @@ export type QdrantClientParams = {
      */
     headers?: Record<string, number | string | string[] | undefined>;
     /**
-     * The Node.js fetch API (undici) uses HTTP/1.1 under the hood.
-     * This indicates the maximum number of keep-alive connections
-     * to open simultaneously while building a request pool in memory.
+     * Custom fetch implementation used by the REST transport.
+     */
+    fetch?: FetchImplementation;
+    /**
+     * Deprecated: native fetch is used directly, so connection pooling is
+     * managed by the runtime and this option currently has no effect.
+     * @deprecated
      */
     maxConnections?: number;
     /**
@@ -113,8 +118,7 @@ export class QdrantClient {
 
         const address = this._port ? `${this._host}:${this._port}` : this._host;
         this._restUri = `${this._scheme}://${address}${this._prefix}`;
-        const connections = args.maxConnections;
-        const restArgs: RestArgs = {headers, timeout, connections};
+        const restArgs: RestArgs = {headers, timeout, fetch: args.fetch};
 
         this._openApiClient = createApis(this._restUri, restArgs);
 

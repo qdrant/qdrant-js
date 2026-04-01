@@ -1,6 +1,6 @@
-import {ApiError, Fetcher, Middleware} from '@qdrant/openapi-typescript-fetch';
+import {ApiError, Middleware} from '@qdrant/openapi-typescript-fetch';
 import {paths} from './openapi/generated_schema.js';
-import {createDispatcher} from './dispatcher.js';
+import {createFetcher} from './fetcher.js';
 import {
     QdrantClientResourceExhaustedError,
     QdrantClientTimeoutError,
@@ -10,7 +10,7 @@ import {RestArgs} from './types.js';
 import {createClientApi} from './openapi/generated_api_client.js';
 import {ClientApi} from './openapi/generated_client_type.js';
 
-export type Client = ReturnType<typeof Fetcher.for<paths>>;
+export type Client = ReturnType<typeof createFetcher<paths>>;
 
 export function createApis(baseUrl: string, args: RestArgs): ClientApi {
     const client = createClient(baseUrl, args);
@@ -19,7 +19,7 @@ export function createApis(baseUrl: string, args: RestArgs): ClientApi {
 
 export type OpenApiClient = ReturnType<typeof createApis>;
 
-export function createClient(baseUrl: string, {headers, timeout, connections}: RestArgs): Client {
+export function createClient(baseUrl: string, {headers, timeout, fetch}: RestArgs): Client {
     const use: Middleware[] = [];
     if (Number.isFinite(timeout)) {
         use.push(async (url, init, next) => {
@@ -59,20 +59,13 @@ export function createClient(baseUrl: string, {headers, timeout, connections}: R
         throw QdrantClientUnexpectedResponseError.forResponse(response);
     });
 
-    const client = Fetcher.for<paths>();
-    // Configure client with 'undici' agent which is used in Node 18+
+    const client = createFetcher<paths>();
     client.configure({
         baseUrl,
         init: {
             headers,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            dispatcher:
-                typeof process !== 'undefined' &&
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                process.versions?.node
-                    ? createDispatcher(connections)
-                    : undefined,
         },
+        fetch,
         use,
     });
 
