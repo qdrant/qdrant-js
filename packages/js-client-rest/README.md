@@ -84,7 +84,20 @@ try {
 
 ## Support
 
-The REST implementation relies on the native [fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), which is available in Deno and Node.js (starting on v18.0.0 without experimental flag). The Deno implementation [supports HTTP/2](https://deno.com/blog/every-web-api-in-deno#fetch-request-response-and-headers) whereas Node.js is still lagging on the spec and provide only HTTP 1.1 support (this is due to the fact that under the hood Node.js still relies on [undici](https://github.com/nodejs/undici)).
+The REST implementation relies on the native [fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), which is available in Deno and Node.js (starting on v18.0.0 without experimental flag). This package does not install its own fetch implementation or dispatcher layer, so transport behavior is delegated to the host runtime.
+
+If you need custom transport behavior, you can inject your own `fetch` implementation when constructing the client:
+
+```ts
+import {QdrantClient} from '@qdrant/js-client-rest';
+
+const client = new QdrantClient({
+    url: 'http://localhost:6333',
+    fetch: globalThis.fetch,
+});
+```
+
+This also allows advanced Node.js setups to keep using user-managed transport tooling such as `undici` without making it a dependency of this package.
 
 ## Releases
 
