@@ -254,6 +254,34 @@ export function createClientApi(client: Client) : ClientApi {
       }),
     
     /**
+         * Create named vector 
+         * @description Create a new named vector on an existing collection
+         */
+    createVectorName:
+      client
+      .path('/collections/{collection_name}/vectors/{vector_name}')
+      .method('put')
+      .create({
+        wait: true,
+        ordering: true,
+        timeout: true,
+      }),
+    
+    /**
+         * Delete named vector 
+         * @description Delete a named vector from a collection
+         */
+    deleteVectorName:
+      client
+      .path('/collections/{collection_name}/vectors/{vector_name}')
+      .method('delete')
+      .create({
+        wait: true,
+        ordering: true,
+        timeout: true,
+      }),
+    
+    /**
          * Collection cluster info 
          * @description Get cluster information for a collection
          */
