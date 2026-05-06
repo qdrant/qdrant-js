@@ -1,5 +1,14 @@
 # @qdrant/js-client-rest
 
+## v1.18.0
+
+### Minor Changes
+
+-   Qdrant v1.18.0 API
+-   Added `createVectorName` method
+-   Added `deleteVectorName` method
+-   Added `per_collection` parameter to `clusterTelemetry`
+
 ## v1.17.0
 
 ### Minor Changes
