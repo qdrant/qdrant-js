@@ -9,6 +9,7 @@ import {
 import {RestArgs} from './types.js';
 import {createClientApi} from './openapi/generated_api_client.js';
 import {ClientApi} from './openapi/generated_client_type.js';
+import {getContextHeaders} from './context-headers.js';
 
 export type Client = ReturnType<typeof Fetcher.for<paths>>;
 
@@ -21,6 +22,14 @@ export type OpenApiClient = ReturnType<typeof createApis>;
 
 export function createClient(baseUrl: string, {headers, timeout, connections}: RestArgs): Client {
     const use: Middleware[] = [];
+    use.push((url, init, next) => {
+        const ctx = getContextHeaders();
+        const entries = Object.entries(ctx);
+        if (entries.length === 0) return next(url, init);
+        const merged = new Headers(init.headers as HeadersInit);
+        for (const [key, value] of entries) merged.set(key, value);
+        return next(url, {...init, headers: merged});
+    });
     if (Number.isFinite(timeout)) {
         use.push(async (url, init, next) => {
             const controller = new AbortController();

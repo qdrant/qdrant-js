@@ -1,4 +1,5 @@
 export {QdrantClient, QdrantClientParams} from './qdrant-client.js';
+export {withHeaders} from './context-headers.js';
 export * from './errors.js';
 export {ConnectError, Code as ConnectErrorCode} from '@connectrpc/connect';
 export * from './proto/collections_pb.js';
