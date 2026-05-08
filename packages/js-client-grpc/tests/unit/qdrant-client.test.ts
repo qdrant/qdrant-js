@@ -41,6 +41,22 @@ test('QdrantClient()', () => {
     // @ts-expect-error ts(2341)
     expect(client._restUri).toBe('http://localhost:6334/custom');
 
+    client = new QdrantClient({url: 'https://localhost:443'});
+    // @ts-expect-error ts(2341)
+    expect(client._restUri).toBe('https://localhost:443');
+
+    client = new QdrantClient({url: 'https://localhost'});
+    // @ts-expect-error ts(2341)
+    expect(client._restUri).toBe('https://localhost:6334');
+
+    client = new QdrantClient({url: 'http://localhost:80'});
+    // @ts-expect-error ts(2341)
+    expect(client._restUri).toBe('http://localhost:80');
+
+    client = new QdrantClient({url: 'http://localhost:80', prefix: 'custom'});
+    // @ts-expect-error ts(2341)
+    expect(client._restUri).toBe('http://localhost:80/custom');
+
     expect(() => new QdrantClient({url: 'my-domain.com'})).toThrow(QdrantClientConfigError);
 
     expect(() => new QdrantClient({url: 'my-domain.com:80'})).toThrow(QdrantClientConfigError);
