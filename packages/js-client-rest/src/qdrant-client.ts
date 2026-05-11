@@ -651,6 +651,61 @@ export class QdrantClient {
     }
 
     /**
+     * Create a new named vector on an existing collection.
+     * Only the immutable properties of the vector space are configurable here;
+     * storage, index and quantization are inferred and may be tuned later via {@link updateCollection}.
+     * @param collection_name
+     * @param vector_name Name of the new vector
+     * @param config Vector configuration - either dense or sparse
+     * @param {object} args
+     *     - wait: Await for the results to be processed.
+     *     - ordering: Define strategy for ordering of the operation.
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     * @returns Operation result
+     */
+    async createVectorName(
+        collection_name: string,
+        vector_name: string,
+        config: Schemas['VectorNameConfig'],
+        {wait = true, ordering, timeout}: {wait?: boolean; ordering?: Schemas['WriteOrdering']; timeout?: number} = {},
+    ): Promise<Schemas['UpdateResult']> {
+        const response = await this._openApiClient.createVectorName({
+            collection_name,
+            vector_name,
+            wait,
+            ordering,
+            timeout,
+            ...config,
+        });
+        return response.data.result ?? noResultError();
+    }
+
+    /**
+     * Delete a named vector from a collection.
+     * @param collection_name
+     * @param vector_name Name of the vector to delete
+     * @param {object} args
+     *     - wait: Await for the results to be processed.
+     *     - ordering: Define strategy for ordering of the operation.
+     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
+     * @returns Operation result
+     */
+    async deleteVectorName(
+        collection_name: string,
+        vector_name: string,
+        {wait = true, ordering, timeout}: {wait?: boolean; ordering?: Schemas['WriteOrdering']; timeout?: number} = {},
+    ): Promise<Schemas['UpdateResult']> {
+        const response = await this._openApiClient.deleteVectorName({
+            collection_name,
+            vector_name,
+            wait,
+            ordering,
+            timeout,
+        });
+        return response.data.result ?? noResultError();
+    }
+
+    /**
      * Search point groups
      * @param collection_name
      * @param {object} args -
@@ -1836,11 +1891,13 @@ export class QdrantClient {
      * This includes peers info, collections info, shard transfers, and resharding status.
      * @param {object} args
      *     - details_level: The level of detail to include in the response
+     *     - per_collection: If true, include per-collection request statistics in the response
      *     - timeout: Timeout for this request
      * @returns Cluster telemetry data
      */
     async clusterTelemetry(args?: {
         details_level?: number;
+        per_collection?: boolean;
         timeout?: number;
     }): Promise<Schemas['DistributedTelemetryData']> {
         const response = await this._openApiClient.clusterTelemetry(args ?? {});

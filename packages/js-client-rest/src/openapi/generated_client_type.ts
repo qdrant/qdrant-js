@@ -137,6 +137,7 @@ export type ClientApi = {
           query?: {
             anonymize?: boolean;
             details_level?: number;
+            per_collection?: boolean;
             timeout?: number;
           };
         };
@@ -172,6 +173,7 @@ export type ClientApi = {
     parameters: {
           query?: {
             anonymize?: boolean;
+            per_collection?: boolean;
             timeout?: number;
           };
         };
@@ -714,6 +716,91 @@ export type ClientApi = {
           path: {
             collection_name: string;
             field_name: string;
+          };
+        };
+    responses: {
+          200: {
+            content: {
+              "application/json": {
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+                time?: number;
+                status?: string;
+                result?: components["schemas"]["UpdateResult"];
+              };
+            };
+          };
+          default: {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+          "4XX": {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+        };
+  }>;
+  
+  /**
+       * Create named vector 
+       * @description Create a new named vector on an existing collection
+       */
+  createVectorName: TypedFetch<{
+    parameters: {
+          query?: {
+            wait?: boolean;
+            ordering?: components["schemas"]["WriteOrdering"];
+            timeout?: number;
+          };
+          path: {
+            collection_name: string;
+            vector_name: string;
+          };
+        };
+    requestBody?: {
+          content: {
+            "application/json": components["schemas"]["VectorNameConfig"];
+          };
+        };
+    responses: {
+          200: {
+            content: {
+              "application/json": {
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+                time?: number;
+                status?: string;
+                result?: components["schemas"]["UpdateResult"];
+              };
+            };
+          };
+          default: {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+          "4XX": {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+        };
+  }>;
+  
+  /**
+       * Delete named vector 
+       * @description Delete a named vector from a collection
+       */
+  deleteVectorName: TypedFetch<{
+    parameters: {
+          query?: {
+            wait?: boolean;
+            ordering?: components["schemas"]["WriteOrdering"];
+            timeout?: number;
+          };
+          path: {
+            collection_name: string;
+            vector_name: string;
           };
         };
     responses: {

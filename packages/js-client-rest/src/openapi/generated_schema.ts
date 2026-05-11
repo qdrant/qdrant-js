@@ -153,6 +153,18 @@ export interface paths {
      */
     delete: operations["delete_field_index"];
   };
+  "/collections/{collection_name}/vectors/{vector_name}": {
+    /**
+     * Create named vector 
+     * @description Create a new named vector on an existing collection
+     */
+    put: operations["create_vector_name"];
+    /**
+     * Delete named vector 
+     * @description Delete a named vector from a collection
+     */
+    delete: operations["delete_vector_name"];
+  };
   "/collections/{collection_name}/cluster": {
     /**
      * Collection cluster info 
@@ -696,7 +708,7 @@ export interface components {
       /** @description Store copies of original and quantized vectors within the HNSW index file. Default: false. Enabling this option will trade the search speed for disk usage by reducing amount of random seeks during the search. Requires quantized vectors to be enabled. Multi-vectors are not supported. */
       inline_storage?: boolean | null;
     };
-    QuantizationConfig: components["schemas"]["ScalarQuantization"] | components["schemas"]["ProductQuantization"] | components["schemas"]["BinaryQuantization"];
+    QuantizationConfig: components["schemas"]["ScalarQuantization"] | components["schemas"]["ProductQuantization"] | components["schemas"]["BinaryQuantization"] | components["schemas"]["TurboQuantization"];
     ScalarQuantization: {
       scalar: components["schemas"]["ScalarQuantizationConfig"];
     };
@@ -734,6 +746,15 @@ export interface components {
     BinaryQuantizationEncoding: "one_bit" | "two_bits" | "one_and_half_bits";
     /** @enum {string} */
     BinaryQuantizationQueryEncoding: "default" | "binary" | "scalar4bits" | "scalar8bits";
+    TurboQuantization: {
+      turbo: components["schemas"]["TurboQuantQuantizationConfig"];
+    };
+    TurboQuantQuantizationConfig: {
+      always_ram?: boolean | null;
+      bits?: components["schemas"]["TurboQuantBitSize"] | (Record<string, unknown> | null);
+    };
+    /** @enum {string} */
+    TurboQuantBitSize: "bits1" | "bits1_5" | "bits2" | "bits4";
     /** @enum {string} */
     Datatype: "float32" | "uint8" | "float16";
     MultiVectorConfig: {
@@ -809,14 +830,16 @@ export interface components {
     OptimizersConfig: {
       /**
        * Format: double 
-       * @description The minimal fraction of deleted vectors in a segment, required to perform segment optimization
+       * @description The minimal fraction of deleted vectors in a segment, required to perform segment optimization 
+       * @default 0.2
        */
-      deleted_threshold: number;
+      deleted_threshold?: number;
       /**
        * Format: uint 
-       * @description The minimal number of vectors in a segment, required to perform segment optimization
+       * @description The minimal number of vectors in a segment, required to perform segment optimization 
+       * @default 1000
        */
-      vacuum_min_vector_number: number;
+      vacuum_min_vector_number?: number;
       /**
        * Format: uint 
        * @description Target amount of segments optimizer will try to keep. Real amount of segments may vary depending on multiple parameters: - Amount of stored points - Current write RPS
@@ -928,6 +951,11 @@ export interface components {
       upsert_max_batchsize?: number | null;
       /**
        * Format: uint 
+       * @description Max batchsize when searching
+       */
+      search_max_batchsize?: number | null;
+      /**
+       * Format: uint 
        * @description Max size of a collections vector storage in bytes, ignoring replicas.
        */
       max_collection_vector_size_bytes?: number | null;
@@ -970,6 +998,11 @@ export interface components {
        * @description Max number of payload indexes in a collection
        */
       max_payload_index_count?: number | null;
+      /**
+       * Format: uint8 
+       * @description Reject memory-consuming update operations when resident memory exceeds this percentage of total RAM (1-100)
+       */
+      max_resident_memory_percent?: number | null;
     };
     StrictModeMultivectorConfigOutput: {
       [key: string]: components["schemas"]["StrictModeMultivectorOutput"] | undefined;
@@ -1154,6 +1187,11 @@ export interface components {
        * @description Number of elements in the queue
        */
       length: number;
+      /**
+       * Format: uint 
+       * @description Number of points that are deferred (i.e hidden from search as they're not yet optimized).
+       */
+      deferred_points?: number | null;
     };
     PointRequest: {
       /** @description Specify in which shards to look for the points, if not specified - look in all shards */
@@ -1508,9 +1546,9 @@ export interface components {
        * Format: double 
        * @description Oversampling factor for quantization. Default is 1.0.
        * 
-       * Defines how many extra vectors should be pre-selected using quantized index, and then re-scored using original vectors.
+       * Defines how many extra vectors should be preselected using quantized index, and then re-scored using original vectors.
        * 
-       * For example, if `oversampling` is 2.4 and `limit` is 100, then 240 vectors will be pre-selected using quantized index, and then top-100 will be returned after re-scoring.
+       * For example, if `oversampling` is 2.4 and `limit` is 100, then 240 vectors will be preselected using quantized index, and then top-100 will be returned after re-scoring.
        */
       oversampling?: number | null;
     };
@@ -1892,6 +1930,11 @@ export interface components {
       upsert_max_batchsize?: number | null;
       /**
        * Format: uint 
+       * @description Max batchsize when searching
+       */
+      search_max_batchsize?: number | null;
+      /**
+       * Format: uint 
        * @description Max size of a collections vector storage in bytes, ignoring replicas.
        */
       max_collection_vector_size_bytes?: number | null;
@@ -1934,6 +1977,11 @@ export interface components {
        * @description Max number of payload indexes in a collection
        */
       max_payload_index_count?: number | null;
+      /**
+       * Format: uint8 
+       * @description Reject memory-consuming update operations (e.g. upsert, set payload) when the process resident memory exceeds this percentage of total system memory (or cgroup limit). Value in [1, 100]. Applied uniformly to external and internal (replication) traffic — rejection is deterministic so it does not cause replica divergence. Delete operations are not affected, so callers can still free memory.
+       */
+      max_resident_memory_percent?: number | null;
     };
     StrictModeMultivectorConfig: {
       [key: string]: components["schemas"]["StrictModeMultivector"] | undefined;
@@ -1992,7 +2040,7 @@ export interface components {
       /** @description If true, vectors are served from disk, improving RAM usage at the cost of latency */
       on_disk?: boolean | null;
     };
-    QuantizationConfigDiff: components["schemas"]["ScalarQuantization"] | components["schemas"]["ProductQuantization"] | components["schemas"]["BinaryQuantization"] | components["schemas"]["Disabled"];
+    QuantizationConfigDiff: components["schemas"]["ScalarQuantization"] | components["schemas"]["ProductQuantization"] | components["schemas"]["BinaryQuantization"] | components["schemas"]["TurboQuantization"] | components["schemas"]["Disabled"];
     /** @enum {string} */
     Disabled: "Disabled";
     CollectionParamsDiff: {
@@ -2478,16 +2526,19 @@ export interface components {
       requests?: components["schemas"]["RequestsTelemetry"] | (Record<string, unknown> | null);
       memory?: components["schemas"]["MemoryTelemetry"] | (Record<string, unknown> | null);
       hardware?: components["schemas"]["HardwareTelemetry"] | (Record<string, unknown> | null);
+      search_pool?: components["schemas"]["SearchThreadPoolTelemetry"] | (Record<string, unknown> | null);
     };
     AppBuildTelemetry: {
       name: string;
       version: string;
       features?: components["schemas"]["AppFeaturesTelemetry"] | (Record<string, unknown> | null);
       runtime_features?: components["schemas"]["FeatureFlags"] | (Record<string, unknown> | null);
+      low_memory_mode?: components["schemas"]["LowMemoryMode"] | (Record<string, unknown> | null);
       hnsw_global_config?: components["schemas"]["HnswGlobalConfig"] | (Record<string, unknown> | null);
       system?: components["schemas"]["RunningEnvironmentTelemetry"] | (Record<string, unknown> | null);
       jwt_rbac?: boolean | null;
       hide_jwt_dashboard?: boolean | null;
+      audit?: components["schemas"]["AuditTelemetry"] | (Record<string, unknown> | null);
       /** Format: date-time */
       startup: string;
     };
@@ -2508,65 +2559,12 @@ export interface components {
        */
       all?: boolean;
       /**
-       * @description Skip usage of RocksDB in new immutable payload indices.
-       * 
-       * First implemented in Qdrant 1.13.5. Enabled by default in Qdrant 1.14.1. 
-       * @default true
-       */
-      payload_index_skip_rocksdb?: boolean;
-      /**
-       * @description Skip usage of RocksDB in new mutable payload indices.
-       * 
-       * First implemented in Qdrant 1.15.0. Enabled by default in Qdrant 1.16.0. 
-       * @default true
-       */
-      payload_index_skip_mutable_rocksdb?: boolean;
-      /**
-       * @description Skip usage of RocksDB in new payload storages.
-       * 
-       * On-disk payload storages never use Gridstore.
-       * 
-       * First implemented in Qdrant 1.15.0. Enabled by default in Qdrant 1.16.0. 
-       * @default true
-       */
-      payload_storage_skip_rocksdb?: boolean;
-      /**
        * @description Use incremental HNSW building.
        * 
        * Enabled by default in Qdrant 1.14.1. 
        * @default true
        */
       incremental_hnsw_building?: boolean;
-      /**
-       * @description Migrate RocksDB based ID trackers into file based ID tracker on start.
-       * 
-       * Enabled by default in Qdrant 1.15.0. 
-       * @default true
-       */
-      migrate_rocksdb_id_tracker?: boolean;
-      /**
-       * @description Migrate RocksDB based vector storages into new format on start.
-       * 
-       * Enabled by default in Qdrant 1.16.1. 
-       * @default true
-       */
-      migrate_rocksdb_vector_storage?: boolean;
-      /**
-       * @description Migrate RocksDB based payload storages into new format on start.
-       * 
-       * Enabled by default in Qdrant 1.16.1. 
-       * @default true
-       */
-      migrate_rocksdb_payload_storage?: boolean;
-      /**
-       * @description Migrate RocksDB based payload indices into new format on start.
-       * 
-       * Rebuilds a new payload index from scratch.
-       * 
-       * Enabled by default in Qdrant 1.16.1. 
-       * @default true
-       */
-      migrate_rocksdb_payload_indices?: boolean;
       /**
        * @description Use appendable quantization in appendable plain segments.
        * 
@@ -2582,6 +2580,14 @@ export interface components {
        */
       single_file_mmap_vector_storage?: boolean;
     };
+    /**
+     * @description Controls how segments are loaded on startup to reduce memory pressure.
+     * 
+     * Configured via `storage.low_memory_mode` in the configuration file.
+     * 
+     * This setting only affects *loading* — it never modifies the persisted configuration of any segment. The same data directory will behave differently depending on how this mode is set at startup, which makes it safe to toggle for recovery from out-of-memory crash loops.
+     */
+    LowMemoryMode: "disabled" | "no_resident" | "no_populate";
     HnswGlobalConfig: {
       /**
        * Format: double 
@@ -2596,6 +2602,11 @@ export interface components {
       is_docker: boolean;
       /** Format: uint */
       cores?: number | null;
+      /**
+       * Format: float 
+       * @description Average number of CPU cores used by this process over roughly the last two seconds. `None` on unsupported platforms, before two samples are collected, or on transient failures reading process CPU time.
+       */
+      cpu_cores_used?: number | null;
       /** Format: uint */
       ram_size?: number | null;
       /** Format: uint */
@@ -2608,6 +2619,16 @@ export interface components {
     CpuEndian: "little" | "big" | "other";
     GpuDeviceTelemetry: {
       name: string;
+    };
+    AuditTelemetry: {
+      dir: string;
+      rotation: string;
+      /** Format: uint */
+      max_log_files: number;
+      trust_forwarded_headers: boolean;
+      log_api: boolean;
+      /** Format: uint */
+      dir_size_bytes?: number | null;
     };
     CollectionsTelemetry: {
       /** Format: uint */
@@ -2721,6 +2742,10 @@ export interface components {
       /** Format: uint */
       num_points: number;
       /** Format: uint */
+      num_deferred_points?: number | null;
+      /** Format: uint */
+      num_deleted_deferred_points?: number | null;
+      /** Format: uint */
       num_indexed_vectors: number;
       /** Format: uint */
       num_deleted_vectors: number;
@@ -2745,6 +2770,11 @@ export interface components {
       vector_data: {
         [key: string]: components["schemas"]["VectorDataInfo"] | undefined;
       };
+      /**
+       * Format: uint32 
+       * @description Internal ID from which points are deferred (hidden from reads). Only set for appendable segments.
+       */
+      deferred_internal_id?: number | null;
     };
     /**
      * @description Type of segment 
@@ -2787,7 +2817,7 @@ export interface components {
       datatype?: components["schemas"]["VectorStorageDatatype"] | (Record<string, unknown> | null);
     };
     /** @description Storage types for vectors */
-    VectorStorageType: "Memory" | "Mmap" | "ChunkedMmap" | "InRamChunkedMmap" | "InRamMmap";
+    VectorStorageType: "Memory" | "Mmap" | "ChunkedMmap" | "InRamChunkedMmap" | "InRamMmap" | "Empty";
     /** @description Vector index configuration */
     Indexes: OneOf<[{
       /** @enum {string} */
@@ -2825,15 +2855,9 @@ export interface components {
     };
     /** @description Sparse index types */
     SparseIndexType: "MutableRam" | "ImmutableRam" | "Mmap";
-    SparseVectorStorageType: "on_disk" | "mmap";
+    SparseVectorStorageType: "mmap" | "empty";
     /** @description Type of payload storage */
     PayloadStorageType: OneOf<[{
-      /** @enum {string} */
-      type: "in_memory";
-    }, {
-      /** @enum {string} */
-      type: "on_disk";
-    }, {
       /** @enum {string} */
       type: "mmap";
     }, {
@@ -2943,6 +2967,11 @@ export interface components {
        * @description last operation number processed
        */
       op_num?: number | null;
+      /**
+       * Format: uint 
+       * @description Number of points that are deferred (i.e hidden from search as they're not yet optimized).
+       */
+      deferred_points?: number | null;
     };
     RemoteShardTelemetry: {
       /** Format: uint32 */
@@ -3049,11 +3078,25 @@ export interface components {
           [key: string]: components["schemas"]["OperationDurationStatistics"] | undefined;
         }) | undefined;
       };
+      per_collection_responses?: {
+        [key: string]: ({
+          [key: string]: ({
+            [key: string]: components["schemas"]["OperationDurationStatistics"] | undefined;
+          }) | undefined;
+        }) | undefined;
+      };
     };
     GrpcTelemetry: {
       responses: {
         [key: string]: ({
           [key: string]: components["schemas"]["OperationDurationStatistics"] | undefined;
+        }) | undefined;
+      };
+      per_collection_responses?: {
+        [key: string]: ({
+          [key: string]: ({
+            [key: string]: components["schemas"]["OperationDurationStatistics"] | undefined;
+          }) | undefined;
         }) | undefined;
       };
     };
@@ -3105,6 +3148,25 @@ export interface components {
       vector_io_read: number;
       /** Format: uint */
       vector_io_write: number;
+    };
+    /**
+     * @description Live snapshot of the adaptive search routing.
+     * 
+     * `mode` is the runtime currently selected by [`SearchMode`]; `high_cpu_threads` and `high_io_threads` are the blocking-thread budgets of the two underlying runtimes that the adaptive handle routes between.
+     */
+    SearchThreadPoolTelemetry: {
+      /** @description Currently active mode (`high_cpu` or `high_io`). */
+      mode: string;
+      /**
+       * Format: uint 
+       * @description Blocking-thread count of the high-CPU runtime.
+       */
+      high_cpu_threads: number;
+      /**
+       * Format: uint 
+       * @description Blocking-thread count of the high-IO runtime.
+       */
+      high_io_threads: number;
     };
     ClusterOperations: components["schemas"]["MoveShardOperation"] | components["schemas"]["ReplicateShardOperation"] | components["schemas"]["AbortTransferOperation"] | components["schemas"]["DropReplicaOperation"] | components["schemas"]["CreateShardingKeyOperation"] | components["schemas"]["DropShardingKeyOperation"] | components["schemas"]["RestartTransferOperation"] | components["schemas"]["StartReshardingOperation"] | components["schemas"]["AbortReshardingOperation"] | components["schemas"]["ReplicatePointsOperation"];
     MoveShardOperation: {
@@ -4159,6 +4221,52 @@ export interface components {
       num_pending_operations: number;
       consensus_thread_status: components["schemas"]["ConsensusThreadStatus"];
     };
+    /**
+     * @description Configuration for creating a new named vector.
+     * 
+     * Contains only the immutable properties that define a vector space. Storage type, index, and quantization are determined automatically based on the segment type and can be configured separately later.
+     * 
+     * Example JSON for a dense vector: ```json { "dense": { "size": 768, "distance": "Cosine" } } ```
+     * 
+     * Example JSON for a sparse vector: ```json { "sparse": { "modifier": "Idf" } } ```
+     */
+    VectorNameConfig: components["schemas"]["DenseVectorNameConfig"] | components["schemas"]["SparseVectorNameConfig"];
+    /** @description Wrapper for dense vector creation config. */
+    DenseVectorNameConfig: {
+      dense: components["schemas"]["DenseVectorConfig"];
+    };
+    /**
+     * @description Configuration for creating a new dense named vector.
+     * 
+     * Only includes properties that define the vector space and cannot be changed after creation. Storage type, index type, and quantization are inferred.
+     */
+    DenseVectorConfig: {
+      /**
+       * Format: uint 
+       * @description Dimensionality of the vectors
+       */
+      size: number;
+      distance: components["schemas"]["Distance"];
+      /** @description Configuration for multi-vector points (e.g., ColBERT) */
+      multivector_config?: components["schemas"]["MultiVectorConfig"] | (Record<string, unknown> | null);
+      /** @description Element storage type (Float32, Float16, Uint8) */
+      datatype?: components["schemas"]["VectorStorageDatatype"] | (Record<string, unknown> | null);
+    };
+    /** @description Wrapper for sparse vector creation config. */
+    SparseVectorNameConfig: {
+      sparse: components["schemas"]["SparseVectorConfig"];
+    };
+    /**
+     * @description Configuration for creating a new sparse named vector.
+     * 
+     * Only includes properties that define the vector space and cannot be changed after creation.
+     */
+    SparseVectorConfig: {
+      /** @description Value modifier for sparse vectors (e.g., IDF) */
+      modifier?: components["schemas"]["Modifier"] | (Record<string, unknown> | null);
+      /** @description Datatype used to store weights in the index */
+      datatype?: components["schemas"]["VectorStorageDatatype"] | (Record<string, unknown> | null);
+    };
   };
   responses: never;
   parameters: never;
@@ -4347,6 +4455,8 @@ export interface operations {
         anonymize?: boolean;
         /** @description Level of details in telemetry data. Minimal level is 0, maximal is infinity */
         details_level?: number;
+        /** @description If true, include per-collection request statistics in the response */
+        per_collection?: boolean;
         /** @description Timeout for this request */
         timeout?: number;
       };
@@ -4393,6 +4503,8 @@ export interface operations {
       query?: {
         /** @description If true, anonymize result */
         anonymize?: boolean;
+        /** @description If true, include per-collection request metrics with a collection label instead of global request metrics */
+        per_collection?: boolean;
         /** @description Timeout for this request */
         timeout?: number;
       };
@@ -5100,6 +5212,120 @@ export interface operations {
         collection_name: string;
         /** @description Name of the field where to delete the index */
         field_name: string;
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+            /**
+             * Format: float 
+             * @description Time spent to process this request 
+             * @example 0.002
+             */
+            time?: number;
+            /** @example ok */
+            status?: string;
+            result?: components["schemas"]["UpdateResult"];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Create named vector 
+   * @description Create a new named vector on an existing collection
+   */
+  create_vector_name: {
+    parameters: {
+      query?: {
+        /** @description If true, wait for changes to actually happen */
+        wait?: boolean;
+        /** @description define ordering guarantees for the operation */
+        ordering?: components["schemas"]["WriteOrdering"];
+        /** @description Timeout for the operation */
+        timeout?: number;
+      };
+      path: {
+        /** @description Name of the collection */
+        collection_name: string;
+        /** @description Name of the vector to create */
+        vector_name: string;
+      };
+    };
+    /** @description Vector configuration - dense or sparse */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["VectorNameConfig"];
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+            /**
+             * Format: float 
+             * @description Time spent to process this request 
+             * @example 0.002
+             */
+            time?: number;
+            /** @example ok */
+            status?: string;
+            result?: components["schemas"]["UpdateResult"];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Delete named vector 
+   * @description Delete a named vector from a collection
+   */
+  delete_vector_name: {
+    parameters: {
+      query?: {
+        /** @description If true, wait for changes to actually happen */
+        wait?: boolean;
+        /** @description define ordering guarantees for the operation */
+        ordering?: components["schemas"]["WriteOrdering"];
+        /** @description Timeout for the operation */
+        timeout?: number;
+      };
+      path: {
+        /** @description Name of the collection */
+        collection_name: string;
+        /** @description Name of the vector to delete */
+        vector_name: string;
       };
     };
     responses: {

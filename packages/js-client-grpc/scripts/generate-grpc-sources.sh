@@ -27,6 +27,7 @@ rm $CLIENT_DIR/qdrant_internal_service.proto
 rm $CLIENT_DIR/health_check.proto
 rm $CLIENT_DIR/shard_snapshots_service.proto
 rm $CLIENT_DIR/telemetry_internal.proto
+rm $CLIENT_DIR/storage_read_service.proto
 cat $CLIENT_DIR/qdrant.proto \
  | grep -v 'collections_internal_service.proto' \
  | grep -v 'points_internal_service.proto' \
@@ -35,6 +36,7 @@ cat $CLIENT_DIR/qdrant.proto \
  | grep -v 'health_check.proto' \
  | grep -v 'shard_snapshots_service.proto' \
  | grep -v 'telemetry_internal.proto' \
+ | grep -v 'storage_read_service.proto' \
   > $CLIENT_DIR/qdrant_tmp.proto
 mv $CLIENT_DIR/qdrant_tmp.proto $CLIENT_DIR/qdrant.proto
 
