@@ -18,7 +18,7 @@ jobs:
       matrix:
         node-version: [18]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - uses: pnpm/action-setup@v2
         with:
@@ -26,7 +26,7 @@ jobs:
           run_install: false
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
           scope: "@qdrant"
           node-version: ${{ matrix.node-version }}
@@ -53,7 +53,7 @@ jobs:
       - run: pnpm publish --provenance --no-git-checks --filter '!monorepo'
 
       - name: Archive npm failure logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ failure() }}
         with:
           name: npm-logs
