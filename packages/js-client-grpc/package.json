@@ -38,9 +38,9 @@
         "build": "pnpm tsc:build && node scripts/post-build.js",
         "test": "vitest",
         "test:integration": "vitest run --config vitest.integration.config.ts",
-        "pre-check": "pnpm tsc:check && pnpm tsc:deadcode && pnpm lint && pnpm test run",
-        "pre-commit": "pnpm tsc:check && pnpm tsc:deadcode && pnpm lint-staged && pnpm test run",
-        "tsc:deadcode": "ts-prune -e -i 'src/proto|src/index.ts|vitest.config.ts|vitest.integration.config.ts'",
+        "pre-check": "pnpm tsc:check && pnpm knip && pnpm lint && pnpm test run",
+        "pre-commit": "pnpm tsc:check && pnpm knip && pnpm -w exec lint-staged && pnpm test run",
+        "knip": "pnpm -w exec knip --workspace @qdrant/js-client-grpc",
         "tsc:check": "tsc --noEmit",
         "tsc:build": "pnpm clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
         "lint": "eslint src",
@@ -55,8 +55,7 @@
     "devDependencies": {
         "@bufbuild/buf": "1.59.0",
         "@bufbuild/protoc-gen-es": "^2.10.1",
-        "ts-prune": "^0.10.3",
-        "vitest": "^0.31.4"
+        "vitest": "^3.0.0"
     },
     "peerDependencies": {
         "typescript": ">=4.1"

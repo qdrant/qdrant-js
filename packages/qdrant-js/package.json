@@ -49,7 +49,7 @@
     "scripts": {
         "build": "pnpm tsc:build && pnpm bundle",
         "pre-check": "pnpm tsc:check && pnpm lint",
-        "pre-commit": "pnpm tsc:check && pnpm lint-staged",
+        "pre-commit": "pnpm tsc:check && pnpm -w exec lint-staged",
         "tsc:check": "tsc --noEmit",
         "tsc:build": "pnpm clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
         "bundle": "rollup -c rollup.config.js",
