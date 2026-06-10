@@ -33,6 +33,6 @@
         "rimraf": "^5.0.10",
         "rollup": "^3.29.5",
         "ts-node": "^10.9.2",
-        "typescript": "^5.8.3"
+        "typescript": "^6.0.3"
     }
 }
