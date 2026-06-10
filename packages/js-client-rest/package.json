@@ -60,12 +60,12 @@
     "devDependencies": {
         "@rollup/plugin-commonjs": "^24.1.0",
         "@rollup/plugin-replace": "^5.0.2",
-        "@total-typescript/ts-reset": "^0.4.2",
-        "@types/semver": "7.5.7",
+        "@total-typescript/ts-reset": "^0.6.1",
+        "@types/semver": "7.7.1",
         "openapi-typescript": "^6.2.6",
-        "semver": "7.6.0",
+        "semver": "7.8.4",
         "ts-prune": "^0.10.3",
-        "tsx": "^4.19.3",
+        "tsx": "^4.22.4",
         "vitest": "^0.31.4"
     },
     "peerDependencies": {
