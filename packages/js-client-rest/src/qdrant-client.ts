@@ -1,6 +1,6 @@
 import {OpenApiClient, createApis} from './api-client.js';
 import {QdrantClientConfigError} from './errors.js';
-import {RestArgs, Schemas} from './types.js';
+import {FetchFn, RestArgs, Schemas} from './types.js';
 import {PACKAGE_VERSION, ClientVersion} from './client-version.js';
 import {ClientApi} from './openapi/generated_client_type.js';
 
@@ -33,6 +33,12 @@ export type QdrantClientParams = {
      * Check compatibility with the server version. Default: `true`
      */
     checkCompatibility?: boolean;
+    /**
+     * Custom `fetch` implementation. When provided it is used for every request
+     * instead of the built-in transport. Useful to supply `undici`'s own `fetch`,
+     * a proxy-aware fetch, or a fetch with a custom dispatcher/Agent.
+     */
+    fetch?: FetchFn;
 };
 
 export class QdrantClient {
@@ -114,7 +120,7 @@ export class QdrantClient {
         const address = this._port ? `${this._host}:${this._port}` : this._host;
         this._restUri = `${this._scheme}://${address}${this._prefix}`;
         const connections = args.maxConnections;
-        const restArgs: RestArgs = {headers, timeout, connections};
+        const restArgs: RestArgs = {headers, timeout, connections, fetch: args.fetch};
 
         this._openApiClient = createApis(this._restUri, restArgs);
 

@@ -49,6 +49,20 @@ Or directly using an endpoint from the API:
 await client.api('collections').getCollections();
 ```
 
+### Custom `fetch`
+
+By default the client uses [`undici`](https://github.com/nodejs/undici)'s `fetch` on Node.js
+(with a connection pool you can size via `maxConnections`) and the platform's global `fetch`
+elsewhere. You can override the transport entirely by passing your own `fetch` — useful for
+proxies, custom dispatchers/agents, or to guarantee that the `fetch` and its dispatcher come
+from the same `undici` version:
+
+```ts
+import {fetch} from 'undici';
+
+const client = new QdrantClient({url: 'http://127.0.0.1:6333', fetch});
+```
+
 ### Typed Error Handling
 
 A non-ok fetch response throws a generic `ApiError`

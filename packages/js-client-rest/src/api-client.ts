@@ -1,6 +1,7 @@
 import {ApiError, Fetcher, Middleware} from '@qdrant/openapi-typescript-fetch';
 import {paths} from './openapi/generated_schema.js';
-import {createDispatcher} from './dispatcher.js';
+import {createTransport} from './transport.js';
+import {createNodeFetch} from './node-fetch.js';
 import {
     QdrantClientResourceExhaustedError,
     QdrantClientTimeoutError,
@@ -20,7 +21,7 @@ export function createApis(baseUrl: string, args: RestArgs): ClientApi {
 
 export type OpenApiClient = ReturnType<typeof createApis>;
 
-export function createClient(baseUrl: string, {headers, timeout, connections}: RestArgs): Client {
+export function createClient(baseUrl: string, {headers, timeout, connections, fetch}: RestArgs): Client {
     const use: Middleware[] = [];
     use.push((url, init, next) => {
         const ctx = getContextHeaders();
@@ -68,19 +69,25 @@ export function createClient(baseUrl: string, {headers, timeout, connections}: R
         throw QdrantClientUnexpectedResponseError.forResponse(response);
     });
 
+    // Terminal middleware: performs the actual request. Must be last so its
+    // `next` sits closest to the transport and the middlewares above can wrap it.
+    //
+    // Fetch selection (kept as a ternary at the call site so the `undici` branch
+    // is tree-shaken from browser bundles, where `process` becomes `undefined`):
+    //   A. a caller-supplied `fetch`;
+    //   B. on Node, undici's fetch + Agent from the same package (fixes #134);
+    //   C. otherwise, the global `fetch` (handled inside `createTransport`).
+    const fetchImpl =
+        fetch ??
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        (typeof process !== 'undefined' && process.versions?.node ? createNodeFetch(connections) : undefined);
+    use.push(createTransport(fetchImpl));
+
     const client = Fetcher.for<paths>();
-    // Configure client with 'undici' agent which is used in Node 18+
     client.configure({
         baseUrl,
         init: {
             headers,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            dispatcher:
-                typeof process !== 'undefined' &&
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                process.versions?.node
-                    ? createDispatcher(connections)
-                    : undefined,
         },
         use,
     });
