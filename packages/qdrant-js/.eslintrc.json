@@ -1,6 +1,0 @@
-{
-    "ignorePatterns": ["dist/*"],
-    "parserOptions": {
-        "project": ["./tsconfig.json"]
-    }
-}
