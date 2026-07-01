@@ -16,13 +16,13 @@ jobs:
       id-token: write # Required for provenance statement
     strategy:
       matrix:
-        node-version: [18]
+        node-version: [24]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
         with:
-          version: 9.15.9
+          version: 11.9.0
           run_install: false
 
       - name: Use Node.js ${{ matrix.node-version }}

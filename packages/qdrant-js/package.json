@@ -2,8 +2,7 @@
     "name": "@qdrant/qdrant-js",
     "version": "1.18.0",
     "engines": {
-        "node": ">=18.17.0",
-        "pnpm": ">=8"
+        "node": ">=22.0.0"
     },
     "repository": {
         "type": "git",
@@ -43,13 +42,16 @@
     "files": [
         "dist"
     ],
+    "devDependencies": {
+        "typescript": "^5.9.3"
+    },
     "publishConfig": {
         "access": "public"
     },
     "scripts": {
         "build": "pnpm tsc:build && pnpm bundle",
         "pre-check": "pnpm tsc:check && pnpm lint",
-        "pre-commit": "pnpm tsc:check && pnpm lint-staged",
+        "pre-commit": "pnpm tsc:check",
         "tsc:check": "tsc --noEmit",
         "tsc:build": "pnpm clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
         "bundle": "rollup -c rollup.config.js",

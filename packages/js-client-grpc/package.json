@@ -2,8 +2,7 @@
     "name": "@qdrant/js-client-grpc",
     "version": "1.18.0",
     "engines": {
-        "node": ">=18.0.0",
-        "pnpm": ">=8"
+        "node": ">=22.0.0"
     },
     "repository": {
         "type": "git",
@@ -39,8 +38,8 @@
         "test": "vitest",
         "test:integration": "vitest run --config vitest.integration.config.ts",
         "pre-check": "pnpm tsc:check && pnpm tsc:deadcode && pnpm lint && pnpm test run",
-        "pre-commit": "pnpm tsc:check && pnpm tsc:deadcode && pnpm lint-staged && pnpm test run",
-        "tsc:deadcode": "ts-prune -e -i 'src/proto|src/index.ts|vitest.config.ts|vitest.integration.config.ts'",
+        "pre-commit": "pnpm tsc:check && pnpm tsc:deadcode && pnpm test run",
+        "tsc:deadcode": "knip --include exports,types",
         "tsc:check": "tsc --noEmit",
         "tsc:build": "pnpm clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
         "lint": "eslint src",
@@ -48,15 +47,20 @@
         "codegen:grpc-typescript": "./scripts/generate-grpc-sources.sh"
     },
     "dependencies": {
-        "@bufbuild/protobuf": "^2.10.1",
-        "@connectrpc/connect": "^2.1.0",
-        "@connectrpc/connect-node": "^2.1.0"
+        "@bufbuild/protobuf": "^2.12.1",
+        "@connectrpc/connect": "^2.1.2",
+        "@connectrpc/connect-node": "^2.1.2"
     },
     "devDependencies": {
-        "@bufbuild/buf": "1.59.0",
-        "@bufbuild/protoc-gen-es": "^2.10.1",
-        "ts-prune": "^0.10.3",
-        "vitest": "^0.31.4"
+        "@bufbuild/buf": "1.71.0",
+        "@bufbuild/protoc-gen-es": "^2.12.1",
+        "typescript": "^5.9.3",
+        "vitest": "^4.1.9"
+    },
+    "knip": {
+        "ignore": [
+            "src/proto/**"
+        ]
     },
     "peerDependencies": {
         "typescript": ">=4.1"

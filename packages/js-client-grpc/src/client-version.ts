@@ -17,11 +17,9 @@ export const ClientVersion = {
             throw new Error('Version is null');
         }
 
-        let major = undefined;
-        let minor = undefined;
-        [major, minor] = version.split('.', 2);
-        major = parseInt(major, 10);
-        minor = parseInt(minor, 10);
+        const [majorPart, minorPart] = version.split('.', 2);
+        const major = parseInt(majorPart, 10);
+        const minor = parseInt(minorPart, 10);
         if (isNaN(major) || isNaN(minor)) {
             throw new Error(`Unable to parse version, expected format: x.y[.z], found: ${version}`);
         }

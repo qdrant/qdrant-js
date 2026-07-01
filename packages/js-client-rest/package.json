@@ -2,8 +2,7 @@
     "name": "@qdrant/js-client-rest",
     "version": "1.18.0",
     "engines": {
-        "node": ">=18.17.0",
-        "pnpm": ">=8"
+        "node": ">=22.0.0"
     },
     "repository": {
         "type": "git",
@@ -40,8 +39,8 @@
         "test": "vitest",
         "test:integration": "vitest run --config vitest.integration.config.ts",
         "pre-check": "pnpm tsc:check && pnpm tsc:deadcode && pnpm lint && pnpm test run",
-        "pre-commit": "pnpm tsc:check && pnpm tsc:deadcode && pnpm lint-staged && pnpm test run",
-        "tsc:deadcode": "ts-prune -e -i 'src/openapi|src/index.ts|vitest.config.ts|vitest.integration.config.ts'",
+        "pre-commit": "pnpm tsc:check && pnpm tsc:deadcode && pnpm test run",
+        "tsc:deadcode": "knip --include exports,types",
         "tsc:check": "tsc --noEmit",
         "tsc:build": "pnpm clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
         "bundle": "rollup -c rollup.config.js",
@@ -55,18 +54,23 @@
     },
     "dependencies": {
         "@qdrant/openapi-typescript-fetch": "1.2.6",
-        "undici": "^6.24.0"
+        "undici": "8.5.0"
     },
     "devDependencies": {
-        "@rollup/plugin-commonjs": "^24.1.0",
-        "@rollup/plugin-replace": "^5.0.2",
-        "@total-typescript/ts-reset": "^0.4.2",
-        "@types/semver": "7.5.7",
-        "openapi-typescript": "^6.2.6",
-        "semver": "7.6.0",
-        "ts-prune": "^0.10.3",
-        "tsx": "^4.19.3",
-        "vitest": "^0.31.4"
+        "@rollup/plugin-commonjs": "^29.0.3",
+        "@rollup/plugin-replace": "^6.0.3",
+        "@total-typescript/ts-reset": "^0.6.1",
+        "@types/semver": "7.7.1",
+        "openapi-typescript": "^7.13.0",
+        "semver": "7.8.5",
+        "tsx": "^4.22.4",
+        "typescript": "^5.9.3",
+        "vitest": "^4.1.9"
+    },
+    "knip": {
+        "ignore": [
+            "src/openapi/**"
+        ]
     },
     "peerDependencies": {
         "typescript": ">=4.7"

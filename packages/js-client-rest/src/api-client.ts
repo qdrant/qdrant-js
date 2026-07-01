@@ -26,7 +26,7 @@ export function createClient(baseUrl: string, {headers, timeout, connections}: R
         const ctx = getContextHeaders();
         const entries = Object.entries(ctx);
         if (entries.length === 0) return next(url, init);
-        const merged = new Headers(init.headers as HeadersInit);
+        const merged = new Headers(init.headers);
         for (const [key, value] of entries) merged.set(key, value);
         return next(url, {...init, headers: merged});
     });
