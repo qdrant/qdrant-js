@@ -30,8 +30,8 @@ importers:
         specifier: ^8.0.3
         version: 8.0.3
       is-ci:
-        specifier: ^3.0.1
-        version: 3.0.1
+        specifier: ^4.1.0
+        version: 4.1.0
       lint-staged:
         specifier: ^13.3.0
         version: 13.3.0
@@ -64,7 +64,7 @@ importers:
         version: 2.1.0(@bufbuild/protobuf@2.10.1)(@connectrpc/connect@2.1.0(@bufbuild/protobuf@2.10.1))
       typescript:
         specifier: '>=4.1'
-        version: 5.0.4
+        version: 5.4.5
     devDependencies:
       '@bufbuild/buf':
         specifier: 1.59.0
@@ -751,6 +751,7 @@ packages:
 
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
+    deprecated: Potential CWE-502 - Update to 1.3.1 or higher
 
   '@vitest/expect@0.31.4':
     resolution: {integrity: sha512-tibyx8o7GUyGHZGyPgzwiaPaLDQ9MMuCOrc03BYT0nryUuhLbL7NV2r/q98iv5STlwMgaKuFJkgBW/8iPKwlSg==}
@@ -875,8 +876,8 @@ packages:
   check-error@1.0.2:
     resolution: {integrity: sha512-BrgHpW9NURQgzoNyjfq0Wu6VFO6D7IZEmJNdtgNqpzGG8RuNFHt2jQxWlAs4HMe119chBnv+34syEZtc6IhLtA==}
 
-  ci-info@3.8.0:
-    resolution: {integrity: sha512-eXTggHWSooYhq49F2opQhuHWgzucfF2YgODK4e1566GQs5BIfP30B0oenwBJHfWxAs2fyPB1s7Mg949zLf61Yw==}
+  ci-info@4.4.0:
+    resolution: {integrity: sha512-77PSwercCZU2Fc4sX94eF8k8Pxte6JAwL4/ICZLFjJLqegs7kCuAsqqj/70NQF6TvDpgFjkubQB2FW2ZZddvQg==}
     engines: {node: '>=8'}
 
   cli-cursor@4.0.0:
@@ -1212,8 +1213,8 @@ packages:
   is-arrayish@0.2.1:
     resolution: {integrity: sha512-zz06S8t0ozoDXMG+ube26zeCTNXcKIPJZJi8hBrF4idCLms4CG9QtK7qBl1boi5ODzFpjswb5JPmHCbMpjaYzg==}
 
-  is-ci@3.0.1:
-    resolution: {integrity: sha512-ZYvCgrefwqoQ6yTyYUbQu64HsITZ3NfKX1lzaEYdkTDcfKzzCI/wthRRYKkdjHKFVgNiXKAKm65Zo1pk2as/QQ==}
+  is-ci@4.1.0:
+    resolution: {integrity: sha512-Ab9bQDQ11lWootZUI5qxgN2ZXwxNI5hTwnsvOc1wyxQ7zQ8OkEDw79mI0+9jI3x432NfwbVRru+3noJfXF6lSQ==}
     hasBin: true
 
   is-core-module@2.16.1:
@@ -2541,7 +2542,7 @@ snapshots:
 
   check-error@1.0.2: {}
 
-  ci-info@3.8.0: {}
+  ci-info@4.4.0: {}
 
   cli-cursor@4.0.0:
     dependencies:
@@ -2939,9 +2940,9 @@ snapshots:
 
   is-arrayish@0.2.1: {}
 
-  is-ci@3.0.1:
+  is-ci@4.1.0:
     dependencies:
-      ci-info: 3.8.0
+      ci-info: 4.4.0
 
   is-core-module@2.16.1:
     dependencies:
