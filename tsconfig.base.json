@@ -6,7 +6,7 @@
         "resolveJsonModule": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
-        "moduleResolution": "nodenext",
+        "moduleResolution": "node",
         "strict": true,
         "noImplicitAny": true,
         "noImplicitThis": true,

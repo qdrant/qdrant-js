@@ -1,6 +1,0 @@
-{
-    "ignorePatterns": ["dist/*", "src/proto/*", "scripts/post-build.js"],
-    "parserOptions": {
-        "project": ["./tsconfig.json"]
-    }
-}
