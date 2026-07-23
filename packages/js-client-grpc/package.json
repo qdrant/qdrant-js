@@ -55,7 +55,7 @@
         "@bufbuild/buf": "1.71.0",
         "@bufbuild/protoc-gen-es": "^2.12.1",
         "typescript": "^5.9.3",
-        "vitest": "^4.1.9"
+        "vitest": "^4.1.10"
     },
     "knip": {
         "ignore": [
