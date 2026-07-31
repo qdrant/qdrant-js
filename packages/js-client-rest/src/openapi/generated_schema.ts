@@ -44,21 +44,21 @@ export interface paths {
   "/healthz": {
     /**
      * Kubernetes healthz endpoint 
-     * @description An endpoint for health checking used in Kubernetes.
+     * @description Liveness-style health check. Returns 200 as soon as the HTTP API is serving requests. It does not inspect collections, shards or consensus state, and is identical to `/livez`. Use it only to detect whether the process is up and responsive.
      */
     get: operations["healthz"];
   };
   "/livez": {
     /**
      * Kubernetes livez endpoint 
-     * @description An endpoint for health checking used in Kubernetes.
+     * @description Kubernetes liveness probe. Returns 200 as soon as the HTTP API is serving requests. It does not inspect collections, shards or consensus state, and is identical to `/healthz`. A failure indicates the process is unresponsive and should be restarted.
      */
     get: operations["livez"];
   };
   "/readyz": {
     /**
      * Kubernetes readyz endpoint 
-     * @description An endpoint for health checking used in Kubernetes.
+     * @description Kubernetes readiness probe. Checks the instance and waits out pending data operations to see when it can start accepting traffic. In a distributed deployment it returns 200 only once the node has caught up with the cluster consensus commit and its local shards are healthy; otherwise it returns 503. In a single-node deployment it always returns 200 once the API is up. Use it to decide when to route traffic to the instance.
      */
     get: operations["readyz"];
   };
@@ -382,73 +382,6 @@ export interface paths {
      */
     post: operations["scroll_points"];
   };
-  "/collections/{collection_name}/points/search": {
-    /**
-     * Search points 
-     * @deprecated 
-     * @description Retrieve closest points based on vector similarity and given filtering conditions
-     */
-    post: operations["search_points"];
-  };
-  "/collections/{collection_name}/points/search/batch": {
-    /**
-     * Search batch points 
-     * @deprecated 
-     * @description Retrieve by batch the closest points based on vector similarity and given filtering conditions
-     */
-    post: operations["search_batch_points"];
-  };
-  "/collections/{collection_name}/points/search/groups": {
-    /**
-     * Search point groups 
-     * @deprecated 
-     * @description Retrieve closest points based on vector similarity and given filtering conditions, grouped by a given payload field
-     */
-    post: operations["search_point_groups"];
-  };
-  "/collections/{collection_name}/points/recommend": {
-    /**
-     * Recommend points 
-     * @deprecated 
-     * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples.
-     */
-    post: operations["recommend_points"];
-  };
-  "/collections/{collection_name}/points/recommend/batch": {
-    /**
-     * Recommend batch points 
-     * @deprecated 
-     * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples.
-     */
-    post: operations["recommend_batch_points"];
-  };
-  "/collections/{collection_name}/points/recommend/groups": {
-    /**
-     * Recommend point groups 
-     * @deprecated 
-     * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples, grouped by a given payload field.
-     */
-    post: operations["recommend_point_groups"];
-  };
-  "/collections/{collection_name}/points/discover": {
-    /**
-     * Discover points 
-     * @deprecated 
-     * @description Use context and a target to find the most similar points to the target, constrained by the context.
-     * When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair.
-     * Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0.
-     * When using target (with or without context), the score behaves a little different: The integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target. The context part of the score for each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, and -1 otherwise.
-     */
-    post: operations["discover_points"];
-  };
-  "/collections/{collection_name}/points/discover/batch": {
-    /**
-     * Discover batch points 
-     * @deprecated 
-     * @description Look for points based on target and/or positive and negative example pairs, in batch.
-     */
-    post: operations["discover_batch_points"];
-  };
   "/collections/{collection_name}/points/count": {
     /**
      * Count points 
@@ -627,12 +560,15 @@ export interface components {
        */
       read_fan_out_delay_ms?: number | null;
       /**
-       * @description If true - point's payload will not be stored in memory. It will be read from the disk every time it is requested. This setting saves RAM by (slightly) increasing the response time. Note: those payload values that are involved in filtering and are indexed - remain in RAM.
+       * @deprecated 
+       * @description Deprecated: use `payload.memory` instead. If true - point's payload will not be stored in memory. It will be read from the disk every time it is requested. This setting saves RAM by (slightly) increasing the response time. Note: those payload values that are involved in filtering and are indexed - remain in RAM.
        * 
        * Default: true 
        * @default true
        */
-      on_disk_payload?: boolean;
+      on_disk_payload?: boolean | null;
+      /** @description Configuration of the payload storage */
+      payload?: components["schemas"]["PayloadStorageParams"] | (Record<string, unknown> | null);
       /** @description Configuration of the sparse vector storage */
       sparse_vectors?: ({
         [key: string]: components["schemas"]["SparseVectorParams"] | undefined;
@@ -662,12 +598,17 @@ export interface components {
       hnsw_config?: components["schemas"]["HnswConfigDiff"] | (Record<string, unknown> | null);
       /** @description Custom params for quantization. If none - values from collection configuration are used. */
       quantization_config?: components["schemas"]["QuantizationConfig"] | (Record<string, unknown> | null);
-      /** @description If true, vectors are served from disk, improving RAM usage at the cost of latency Default: false */
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead. If true, vectors are served from disk, improving RAM usage at the cost of latency Default: false
+       */
       on_disk?: boolean | null;
+      /** @description Memory placement of the original vector storage. Overrides the deprecated `on_disk` flag if both are set. `pinned` is not supported for dense vector storage. Default: `cached` (`cold` if `on_disk` is set to true). */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /**
        * @description Defines which datatype should be used to represent vectors in the storage. Choosing different datatypes allows to optimize memory usage and performance vs accuracy.
        * 
-       * - For `float32` datatype - vectors are stored as single-precision floating point numbers, 4 bytes. - For `float16` datatype - vectors are stored as half-precision floating point numbers, 2 bytes. - For `uint8` datatype - vectors are stored as unsigned 8-bit integers, 1 byte. It expects vector elements to be in range `[0, 255]`.
+       * - For `float32` datatype - vectors are stored as single-precision floating point numbers, 4 bytes. - For `float16` datatype - vectors are stored as half-precision floating point numbers, 2 bytes. - For `uint8` datatype - vectors are stored as unsigned 8-bit integers, 1 byte. It expects vector elements to be in range `[0, 255]`. - For `turbo4` datatype - vectors are quantized to 4 bits per element using the TurboQuant algorithm.
        */
       datatype?: components["schemas"]["Datatype"] | (Record<string, unknown> | null);
       multivector_config?: components["schemas"]["MultiVectorConfig"] | (Record<string, unknown> | null);
@@ -698,8 +639,13 @@ export interface components {
        * @description Number of parallel threads used for background index building. If 0 - automatically select from 8 to 16. Best to keep between 8 and 16 to prevent likelihood of building broken/inefficient HNSW graphs. On small CPUs, less threads are used.
        */
       max_indexing_threads?: number | null;
-      /** @description Store HNSW index on disk. If set to false, the index will be stored in RAM. Default: false */
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead. Store HNSW index on disk. If set to false, the index will be stored in RAM. Default: false
+       */
       on_disk?: boolean | null;
+      /** @description Memory placement of the HNSW graph. Overrides the deprecated `on_disk` flag if both are set. Default: `cached` (`cold` if `on_disk` is set to true). */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /**
        * Format: uint 
        * @description Custom M param for additional payload-aware HNSW links. If not set, default M will be used.
@@ -708,6 +654,21 @@ export interface components {
       /** @description Store copies of original and quantized vectors within the HNSW index file. Default: false. Enabling this option will trade the search speed for disk usage by reducing amount of random seeks during the search. Requires quantized vectors to be enabled. Multi-vectors are not supported. */
       inline_storage?: boolean | null;
     };
+    /**
+     * @description Memory placement of a component's data.
+     * 
+     * Data is always persisted on disk regardless of this setting; it only controls how the data is held in RAM.
+     * 
+     * Options:
+     * 
+     * * `Cold` - Data is not pre-loaded from disk to RAM. Preferred for rarely queried components or components larger than RAM size. First request might be slow, but data is cached with usage.
+     * 
+     * * `Cached` - Data is pre-loaded into disk-cache RAM on start. First request is fast, but data may be evicted if there is not enough memory and some other component's data is used more frequently.
+     * 
+     * * `Pinned` - Data is loaded in RAM and never evicted. First request is fast, but the component must fit in RAM at all times. Recommended for frequently queried small components like quantized vectors or primary indexes. 
+     * @enum {string}
+     */
+    Memory: "cold" | "cached" | "pinned";
     QuantizationConfig: components["schemas"]["ScalarQuantization"] | components["schemas"]["ProductQuantization"] | components["schemas"]["BinaryQuantization"] | components["schemas"]["TurboQuantization"];
     ScalarQuantization: {
       scalar: components["schemas"]["ScalarQuantizationConfig"];
@@ -719,8 +680,13 @@ export interface components {
        * @description Quantile for quantization. Expected value range in [0.5, 1.0]. If not set - use the whole range of values
        */
       quantile?: number | null;
-      /** @description If true - quantized vectors always will be stored in RAM, ignoring the config of main storage */
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead. If true - quantized vectors always will be stored in RAM, ignoring the config of main storage
+       */
       always_ram?: boolean | null;
+      /** @description Memory placement of quantized vectors. Overrides the deprecated `always_ram` flag if both are set. Default: follow the memory placement of the original vector storage. */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
     };
     /** @enum {string} */
     ScalarType: "int8";
@@ -729,7 +695,13 @@ export interface components {
     };
     ProductQuantizationConfig: {
       compression: components["schemas"]["CompressionRatio"];
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead.
+       */
       always_ram?: boolean | null;
+      /** @description Memory placement of quantized vectors. Overrides the deprecated `always_ram` flag if both are set. Default: follow the memory placement of the original vector storage. */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
     };
     /** @enum {string} */
     CompressionRatio: "x4" | "x8" | "x16" | "x32" | "x64";
@@ -737,7 +709,13 @@ export interface components {
       binary: components["schemas"]["BinaryQuantizationConfig"];
     };
     BinaryQuantizationConfig: {
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead.
+       */
       always_ram?: boolean | null;
+      /** @description Memory placement of quantized vectors. Overrides the deprecated `always_ram` flag if both are set. Default: follow the memory placement of the original vector storage. */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       encoding?: components["schemas"]["BinaryQuantizationEncoding"] | (Record<string, unknown> | null);
       /** @description Asymmetric quantization configuration allows a query to have different quantization than stored vectors. It can increase the accuracy of search at the cost of performance. */
       query_encoding?: components["schemas"]["BinaryQuantizationQueryEncoding"] | (Record<string, unknown> | null);
@@ -750,13 +728,19 @@ export interface components {
       turbo: components["schemas"]["TurboQuantQuantizationConfig"];
     };
     TurboQuantQuantizationConfig: {
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead.
+       */
       always_ram?: boolean | null;
+      /** @description Memory placement of quantized vectors. Overrides the deprecated `always_ram` flag if both are set. Default: follow the memory placement of the original vector storage. */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       bits?: components["schemas"]["TurboQuantBitSize"] | (Record<string, unknown> | null);
     };
     /** @enum {string} */
     TurboQuantBitSize: "bits1" | "bits1_5" | "bits2" | "bits4";
     /** @enum {string} */
-    Datatype: "float32" | "uint8" | "float16";
+    Datatype: "float32" | "uint8" | "float16" | "turbo4";
     MultiVectorConfig: {
       comparator: components["schemas"]["MultiVectorComparator"];
     };
@@ -764,6 +748,11 @@ export interface components {
     MultiVectorComparator: "max_sim";
     /** @enum {string} */
     ShardingMethod: "auto" | "custom";
+    /** @description Params of the payload storage */
+    PayloadStorageParams: {
+      /** @description Memory placement of the payload storage. Overrides the deprecated `on_disk_payload` flag if both are set. `pinned` is not supported for payload storage. Default: `cold` (`cached` if `on_disk_payload` is set to false). */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
+    };
     /** @description Params of single sparse vector data storage */
     SparseVectorParams: {
       /** @description Custom params for index. If none - values from collection configuration are used. */
@@ -780,8 +769,13 @@ export interface components {
        * Note: this is number of vectors, not KiloBytes.
        */
       full_scan_threshold?: number | null;
-      /** @description Store index on disk. If set to false, the index will be stored in RAM. Default: false */
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead. Store index on disk. If set to false, the index will be stored in RAM. Default: false
+       */
       on_disk?: boolean | null;
+      /** @description Memory placement of the index. Overrides the deprecated `on_disk` flag if both are set. Default: `pinned` (`cold` if `on_disk` is set to true). */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /**
        * @description Defines which datatype should be used for the index. Choosing different datatypes allows to optimize memory usage and performance vs accuracy.
        * 
@@ -817,8 +811,13 @@ export interface components {
        * @default 0
        */
       max_indexing_threads?: number;
-      /** @description Store HNSW index on disk. If set to false, index will be stored in RAM. Default: false */
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead. Store HNSW index on disk. If set to false, index will be stored in RAM. Default: false
+       */
       on_disk?: boolean | null;
+      /** @description Memory placement of the HNSW graph. Overrides the deprecated `on_disk` flag if both are set. Default: `cached` (`cold` if `on_disk` is set to true). */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /**
        * Format: uint 
        * @description Custom M param for hnsw graph built for payload index. If not set, default M will be used.
@@ -892,7 +891,7 @@ export interface components {
        */
       max_optimization_threads?: number | null;
       /**
-       * @description If this option is set, service will try to prevent creation of large unoptimized segments. When enabled, updates may be blocked at request level if there are unoptimized segments larger than indexing threshold. Updates will be resumed when optimization is completed and segments are optimized below the threshold. Using this option may lead to increased delay between submitting an update and its application. Default is disabled. 
+       * @description If enabled, the service will try to prevent the creation of large unoptimized segments. When enabled, new points written to segments larger than the indexing threshold are stored as "deferred points": they are persisted in the WAL and segments, but excluded from read/search results until the corresponding segments are optimized (e.g. indexed, quantized, or moved to mmap storage). Update requests with `wait=true` will only return after the deferred points become visible, which may significantly increase the perceived latency between submitting an update and its completion. Update requests with `wait=false` are not affected. Default is disabled. 
        * @default null
        */
       prevent_unoptimized?: boolean | null;
@@ -1003,6 +1002,11 @@ export interface components {
        * @description Reject memory-consuming update operations when resident memory exceeds this percentage of total RAM (1-100)
        */
       max_resident_memory_percent?: number | null;
+      /**
+       * Format: uint8 
+       * @description Reject disk-consuming update operations when the storage filesystem exceeds this percentage of total capacity (1-100)
+       */
+      max_disk_usage_percent?: number | null;
     };
     StrictModeMultivectorConfigOutput: {
       [key: string]: components["schemas"]["StrictModeMultivectorOutput"] | undefined;
@@ -1054,10 +1058,17 @@ export interface components {
       type: components["schemas"]["KeywordIndexType"];
       /** @description If true - used for tenant optimization. Default: false. */
       is_tenant?: boolean | null;
-      /** @description If true, store the index on disk. Default: false. */
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead. If true, store the index on disk. Default: false.
+       */
       on_disk?: boolean | null;
+      /** @description Memory placement of the index. Overrides the deprecated `on_disk` flag if both are set. Default: `pinned` (`cold` if `on_disk` is set to true). */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
       enable_hnsw?: boolean | null;
+      /** @description If true, enable prefix matching (`match: { "prefix": ... }`) on this field. Default: false. */
+      prefix?: boolean | null;
     };
     /** @enum {string} */
     KeywordIndexType: "keyword";
@@ -1069,8 +1080,13 @@ export interface components {
       range?: boolean | null;
       /** @description If true - use this key to organize storage of the collection data. This option assumes that this key will be used in majority of filtered requests. Default is false. */
       is_principal?: boolean | null;
-      /** @description If true, store the index on disk. Default: false. Default is false. */
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead. If true, store the index on disk. Default: false.
+       */
       on_disk?: boolean | null;
+      /** @description Memory placement of the index. Overrides the deprecated `on_disk` flag if both are set. Default: `pinned` (`cold` if `on_disk` is set to true). */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
       enable_hnsw?: boolean | null;
     };
@@ -1080,8 +1096,13 @@ export interface components {
       type: components["schemas"]["FloatIndexType"];
       /** @description If true - use this key to organize storage of the collection data. This option assumes that this key will be used in majority of filtered requests. */
       is_principal?: boolean | null;
-      /** @description If true, store the index on disk. Default: false. */
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead. If true, store the index on disk. Default: false.
+       */
       on_disk?: boolean | null;
+      /** @description Memory placement of the index. Overrides the deprecated `on_disk` flag if both are set. Default: `pinned` (`cold` if `on_disk` is set to true). */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
       enable_hnsw?: boolean | null;
     };
@@ -1089,8 +1110,13 @@ export interface components {
     FloatIndexType: "float";
     GeoIndexParams: {
       type: components["schemas"]["GeoIndexType"];
-      /** @description If true, store the index on disk. Default: false. */
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead. If true, store the index on disk. Default: false.
+       */
       on_disk?: boolean | null;
+      /** @description Memory placement of the index. Overrides the deprecated `on_disk` flag if both are set. Default: `pinned` (`cold` if `on_disk` is set to true). */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
       enable_hnsw?: boolean | null;
     };
@@ -1117,8 +1143,13 @@ export interface components {
       phrase_matching?: boolean | null;
       /** @description Ignore this set of tokens. Can select from predefined languages and/or provide a custom set. */
       stopwords?: components["schemas"]["StopwordsInterface"] | (Record<string, unknown> | null);
-      /** @description If true, store the index on disk. Default: false. */
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead. If true, store the index on disk. Default: false.
+       */
       on_disk?: boolean | null;
+      /** @description Memory placement of the index. Overrides the deprecated `on_disk` flag if both are set. Default: `pinned` (`cold` if `on_disk` is set to true). */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /** @description Algorithm for stemming. Default: disabled. */
       stemmer?: components["schemas"]["StemmingAlgorithm"] | (Record<string, unknown> | null);
       /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
@@ -1138,7 +1169,7 @@ export interface components {
       custom?: (string)[] | null;
     };
     /** @description Different stemming algorithms with their configs. */
-    StemmingAlgorithm: components["schemas"]["SnowballParams"];
+    StemmingAlgorithm: components["schemas"]["SnowballParams"] | components["schemas"]["DisabledStemmerParams"];
     SnowballParams: {
       type: components["schemas"]["Snowball"];
       language: components["schemas"]["SnowballLanguage"];
@@ -1150,10 +1181,23 @@ export interface components {
      * @enum {string}
      */
     SnowballLanguage: "arabic" | "armenian" | "danish" | "dutch" | "english" | "finnish" | "french" | "german" | "greek" | "hungarian" | "italian" | "norwegian" | "portuguese" | "romanian" | "russian" | "spanish" | "swedish" | "tamil" | "turkish";
+    DisabledStemmerParams: {
+      type: components["schemas"]["NoStemmer"];
+    };
+    /**
+     * @description Tag selecting the explicit "no stemming" algorithm. 
+     * @enum {string}
+     */
+    NoStemmer: "none";
     BoolIndexParams: {
       type: components["schemas"]["BoolIndexType"];
-      /** @description If true, store the index on disk. Default: false. */
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead. If true, store the index on disk. Default: false.
+       */
       on_disk?: boolean | null;
+      /** @description Memory placement of the index. Overrides the deprecated `on_disk` flag if both are set. Default: `pinned` (`cold` if `on_disk` is set to true). */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
       enable_hnsw?: boolean | null;
     };
@@ -1163,8 +1207,13 @@ export interface components {
       type: components["schemas"]["DatetimeIndexType"];
       /** @description If true - use this key to organize storage of the collection data. This option assumes that this key will be used in majority of filtered requests. */
       is_principal?: boolean | null;
-      /** @description If true, store the index on disk. Default: false. */
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead. If true, store the index on disk. Default: false.
+       */
       on_disk?: boolean | null;
+      /** @description Memory placement of the index. Overrides the deprecated `on_disk` flag if both are set. Default: `pinned` (`cold` if `on_disk` is set to true). */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
       enable_hnsw?: boolean | null;
     };
@@ -1174,8 +1223,13 @@ export interface components {
       type: components["schemas"]["UuidIndexType"];
       /** @description If true - used for tenant optimization. */
       is_tenant?: boolean | null;
-      /** @description If true, store the index on disk. Default: false. */
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead. If true, store the index on disk. Default: false.
+       */
       on_disk?: boolean | null;
+      /** @description Memory placement of the index. Overrides the deprecated `on_disk` flag if both are set. Default: `pinned` (`cold` if `on_disk` is set to true). */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
       enable_hnsw?: boolean | null;
     };
@@ -1249,60 +1303,61 @@ export interface components {
       values: (number)[];
     };
     OrderValue: number;
-    /** @description Search request. Holds all conditions and parameters for the search of most similar points by vector similarity given the filtering restrictions. */
-    SearchRequest: {
-      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
-      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
-      vector: components["schemas"]["NamedVectorStruct"];
-      /** @description Look only for points which satisfies this conditions */
-      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
-      /** @description Additional search params */
-      params?: components["schemas"]["SearchParams"] | (Record<string, unknown> | null);
+    /** @description Search result */
+    ScoredPoint: {
+      id: components["schemas"]["ExtendedPointId"];
       /**
-       * Format: uint 
-       * @description Max number of result to return
+       * Format: uint64 
+       * @description Point version 
+       * @example 3
        */
-      limit: number;
-      /**
-       * Format: uint 
-       * @description Offset of the first result to return. May be used to paginate results. Note: large offset values may cause performance issues.
-       */
-      offset?: number | null;
-      /** @description Select which payload to return with the response. Default is false. */
-      with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
-      /**
-       * @description Options for specifying which vectors to include into response. Default is false. 
-       * @default null
-       */
-      with_vector?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
+      version: number;
       /**
        * Format: float 
-       * @description Define a minimal score threshold for the result. If defined, less similar results will not be returned. Score of the returned result might be higher or smaller than the threshold depending on the Distance function used. E.g. for cosine similarity only higher scores will be returned.
+       * @description Points vector distance to the query vector 
+       * @example 0.75
        */
-      score_threshold?: number | null;
+      score: number;
+      /** @description Payload - values assigned to the point */
+      payload?: components["schemas"]["Payload"] | (Record<string, unknown> | null);
+      /** @description Vector of the point */
+      vector?: components["schemas"]["VectorStructOutput"] | (Record<string, unknown> | null);
+      /** @description Shard Key */
+      shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
+      /** @description Order-by value */
+      order_value?: components["schemas"]["OrderValue"] | (Record<string, unknown> | null);
+    };
+    UpdateResult: {
+      /**
+       * Format: uint64 
+       * @description Sequential number of the operation
+       */
+      operation_id?: number | null;
+      status: components["schemas"]["UpdateStatus"];
     };
     /**
-     * @description Vector data separator for named and unnamed modes Unnamed mode:
-     * 
-     * { "vector": [1.0, 2.0, 3.0] }
-     * 
-     * or named mode:
-     * 
-     * { "vector": { "vector": [1.0, 2.0, 3.0], "name": "image-embeddings" } }
+     * @description `Acknowledged` - Request is saved to WAL and will be process in a queue. `Completed` - Request is completed, changes are actual. `WaitTimeout` - Request is waiting for timeout. 
+     * @enum {string}
      */
-    NamedVectorStruct: (number)[] | components["schemas"]["NamedVector"] | components["schemas"]["NamedSparseVector"];
-    /** @description Dense vector data with name */
-    NamedVector: {
-      /** @description Name of vector data */
-      name: string;
-      /** @description Vector data */
-      vector: (number)[];
-    };
-    /** @description Sparse vector data with name */
-    NamedSparseVector: {
-      /** @description Name of vector data */
-      name: string;
-      vector: components["schemas"]["SparseVector"];
+    UpdateStatus: "acknowledged" | "completed" | "wait_timeout";
+    /** @description Scroll request - paginate over all points which matches given condition */
+    ScrollRequest: {
+      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
+      /** @description Start ID to read points from. */
+      offset?: components["schemas"]["ExtendedPointId"] | (Record<string, unknown> | null);
+      /**
+       * Format: uint 
+       * @description Page size. Default: 10
+       */
+      limit?: number | null;
+      /** @description Look only for points which satisfies this conditions. If not provided - all points. */
+      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
+      /** @description Select which payload to return with the response. Default is true. */
+      with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
+      with_vector?: components["schemas"]["WithVector"];
+      /** @description Order the records by a payload field. */
+      order_by?: components["schemas"]["OrderByInterface"] | (Record<string, unknown> | null);
     };
     Filter: {
       /** @description At least one of those conditions should match */
@@ -1314,7 +1369,7 @@ export interface components {
       /** @description All conditions must NOT match */
       must_not?: components["schemas"]["Condition"] | (components["schemas"]["Condition"])[] | (Record<string, unknown> | null);
     };
-    Condition: components["schemas"]["FieldCondition"] | components["schemas"]["IsEmptyCondition"] | components["schemas"]["IsNullCondition"] | components["schemas"]["HasIdCondition"] | components["schemas"]["HasVectorCondition"] | components["schemas"]["NestedCondition"] | components["schemas"]["Filter"];
+    Condition: components["schemas"]["FieldCondition"] | components["schemas"]["IsEmptyCondition"] | components["schemas"]["IsNullCondition"] | components["schemas"]["HasIdCondition"] | components["schemas"]["HasVectorCondition"] | components["schemas"]["SliceCondition"] | components["schemas"]["NestedCondition"] | components["schemas"]["Filter"];
     /** @description All possible payload filtering conditions */
     FieldCondition: {
       /** @description Payload key */
@@ -1337,7 +1392,7 @@ export interface components {
       is_null?: boolean | null;
     };
     /** @description Match filter request */
-    Match: components["schemas"]["MatchValue"] | components["schemas"]["MatchText"] | components["schemas"]["MatchTextAny"] | components["schemas"]["MatchPhrase"] | components["schemas"]["MatchAny"] | components["schemas"]["MatchExcept"];
+    Match: components["schemas"]["MatchValue"] | components["schemas"]["MatchText"] | components["schemas"]["MatchTextAny"] | components["schemas"]["MatchPhrase"] | components["schemas"]["MatchPrefix"] | components["schemas"]["MatchAny"] | components["schemas"]["MatchExcept"];
     /** @description Exact match of the given value */
     MatchValue: {
       value: components["schemas"]["ValueVariants"];
@@ -1354,6 +1409,14 @@ export interface components {
     /** @description Full-text phrase match of the string. */
     MatchPhrase: {
       phrase: string;
+    };
+    /**
+     * @description Match keyword values that start with the given string.
+     * 
+     * Byte-wise (hence, for valid UTF-8, character-wise) and case-sensitive, consistent with exact keyword matching. Served efficiently by a keyword index created with the `prefix` option.
+     */
+    MatchPrefix: {
+      prefix: string;
     };
     /** @description Exact match on any of the given values */
     MatchAny: {
@@ -1498,6 +1561,29 @@ export interface components {
     HasVectorCondition: {
       has_vector: string;
     };
+    /** @description Select points that fall into one of `total` disjoint deterministic slices of the id space, for parallel scans and reproducible sampling. */
+    SliceCondition: {
+      slice: components["schemas"]["Slice"];
+    };
+    /**
+     * @description One of `total` disjoint deterministic slices of the id space.
+     * 
+     * A point belongs to the slice iff `hash(id) % total == index`, where `hash` is SipHash-2-4 with a zero key over the canonical id bytes: 8 little-endian bytes for numeric ids, the 16 RFC 4122 bytes for UUIDs. For a fixed `total`, slices `0..total` are disjoint and together cover all points; membership is uniform regardless of the id scheme and stable across queries, segments, platforms and Qdrant versions.
+     * 
+     * Slices with different `total` values are correlated (same hash, no salt): e.g. slice `0` of `total: 4` is a strict subset of slice `0` of `total: 2`. This keeps a smaller sample contained in a larger one.
+     */
+    Slice: {
+      /**
+       * Format: uint32 
+       * @description Total number of disjoint slices the id space is split into
+       */
+      total: number;
+      /**
+       * Format: uint32 
+       * @description Which slice to select, must be in `0..total`
+       */
+      index: number;
+    };
     NestedCondition: {
       nested: components["schemas"]["Nested"];
     };
@@ -1510,202 +1596,6 @@ export interface components {
       conditions: (components["schemas"]["Condition"])[];
       /** Format: uint */
       min_count: number;
-    };
-    /** @description Additional parameters of the search */
-    SearchParams: {
-      /**
-       * Format: uint 
-       * @description Params relevant to HNSW index Size of the beam in a beam-search. Larger the value - more accurate the result, more time required for search.
-       */
-      hnsw_ef?: number | null;
-      /**
-       * @description Search without approximation. If set to true, search may run long but with exact results. 
-       * @default false
-       */
-      exact?: boolean;
-      /** @description Quantization params */
-      quantization?: components["schemas"]["QuantizationSearchParams"] | (Record<string, unknown> | null);
-      /**
-       * @description If enabled, the engine will only perform search among indexed or small segments. Using this option prevents slow searches in case of delayed index, but does not guarantee that all uploaded vectors will be included in search results 
-       * @default false
-       */
-      indexed_only?: boolean;
-      /** @description ACORN search params */
-      acorn?: components["schemas"]["AcornSearchParams"] | (Record<string, unknown> | null);
-    };
-    /** @description Additional parameters of the search */
-    QuantizationSearchParams: {
-      /**
-       * @description If true, quantized vectors are ignored. Default is false. 
-       * @default false
-       */
-      ignore?: boolean;
-      /** @description If true, use original vectors to re-score top-k results. Might require more time in case if original vectors are stored on disk. If not set, qdrant decides automatically apply rescoring or not. */
-      rescore?: boolean | null;
-      /**
-       * Format: double 
-       * @description Oversampling factor for quantization. Default is 1.0.
-       * 
-       * Defines how many extra vectors should be preselected using quantized index, and then re-scored using original vectors.
-       * 
-       * For example, if `oversampling` is 2.4 and `limit` is 100, then 240 vectors will be preselected using quantized index, and then top-100 will be returned after re-scoring.
-       */
-      oversampling?: number | null;
-    };
-    /** @description ACORN-related search parameters */
-    AcornSearchParams: {
-      /**
-       * @description If true, then ACORN may be used for the HNSW search based on filters selectivity. Improves search recall for searches with multiple low-selectivity payload filters, at cost of performance. 
-       * @default false
-       */
-      enable?: boolean;
-      /**
-       * Format: double 
-       * @description Maximum selectivity of filters to enable ACORN.
-       * 
-       * If estimated filters selectivity is higher than this value, ACORN will not be used. Selectivity is estimated as: `estimated number of points satisfying the filters / total number of points`.
-       * 
-       * 0.0 for never, 1.0 for always. Default is 0.4.
-       */
-      max_selectivity?: number | null;
-    };
-    /** @description Search result */
-    ScoredPoint: {
-      id: components["schemas"]["ExtendedPointId"];
-      /**
-       * Format: uint64 
-       * @description Point version 
-       * @example 3
-       */
-      version: number;
-      /**
-       * Format: float 
-       * @description Points vector distance to the query vector 
-       * @example 0.75
-       */
-      score: number;
-      /** @description Payload - values assigned to the point */
-      payload?: components["schemas"]["Payload"] | (Record<string, unknown> | null);
-      /** @description Vector of the point */
-      vector?: components["schemas"]["VectorStructOutput"] | (Record<string, unknown> | null);
-      /** @description Shard Key */
-      shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
-      /** @description Order-by value */
-      order_value?: components["schemas"]["OrderValue"] | (Record<string, unknown> | null);
-    };
-    UpdateResult: {
-      /**
-       * Format: uint64 
-       * @description Sequential number of the operation
-       */
-      operation_id?: number | null;
-      status: components["schemas"]["UpdateStatus"];
-    };
-    /**
-     * @description `Acknowledged` - Request is saved to WAL and will be process in a queue. `Completed` - Request is completed, changes are actual. `WaitTimeout` - Request is waiting for timeout. 
-     * @enum {string}
-     */
-    UpdateStatus: "acknowledged" | "completed" | "wait_timeout";
-    /**
-     * @description Recommendation request. Provides positive and negative examples of the vectors, which can be ids of points that are already stored in the collection, raw vectors, or even ids and vectors combined.
-     * 
-     * Service should look for the points which are closer to positive examples and at the same time further to negative examples. The concrete way of how to compare negative and positive distances is up to the `strategy` chosen.
-     */
-    RecommendRequest: {
-      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
-      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
-      /**
-       * @description Look for vectors closest to those 
-       * @default []
-       */
-      positive?: (components["schemas"]["RecommendExample"])[];
-      /**
-       * @description Try to avoid vectors like this 
-       * @default []
-       */
-      negative?: (components["schemas"]["RecommendExample"])[];
-      /** @description How to use positive and negative examples to find the results */
-      strategy?: components["schemas"]["RecommendStrategy"] | (Record<string, unknown> | null);
-      /** @description Look only for points which satisfies this conditions */
-      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
-      /** @description Additional search params */
-      params?: components["schemas"]["SearchParams"] | (Record<string, unknown> | null);
-      /**
-       * Format: uint 
-       * @description Max number of result to return
-       */
-      limit: number;
-      /**
-       * Format: uint 
-       * @description Offset of the first result to return. May be used to paginate results. Note: large offset values may cause performance issues.
-       */
-      offset?: number | null;
-      /** @description Select which payload to return with the response. Default is false. */
-      with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
-      /**
-       * @description Options for specifying which vectors to include into response. Default is false. 
-       * @default null
-       */
-      with_vector?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
-      /**
-       * Format: float 
-       * @description Define a minimal score threshold for the result. If defined, less similar results will not be returned. Score of the returned result might be higher or smaller than the threshold depending on the Distance function used. E.g. for cosine similarity only higher scores will be returned.
-       */
-      score_threshold?: number | null;
-      /**
-       * @description Define which vector to use for recommendation, if not specified - try to use default vector 
-       * @default null
-       */
-      using?: components["schemas"]["UsingVector"] | (Record<string, unknown> | null);
-      /**
-       * @description The location used to lookup vectors. If not specified - use current collection. Note: the other collection should have the same vector size as the current collection 
-       * @default null
-       */
-      lookup_from?: components["schemas"]["LookupLocation"] | (Record<string, unknown> | null);
-    };
-    RecommendExample: components["schemas"]["ExtendedPointId"] | (number)[] | components["schemas"]["SparseVector"];
-    /**
-     * @description How to use positive and negative examples to find the results, default is `average_vector`:
-     * 
-     * * `average_vector` - Average positive and negative vectors and create a single query with the formula `query = avg_pos + avg_pos - avg_neg`. Then performs normal search.
-     * 
-     * * `best_score` - Uses custom search objective. Each candidate is compared against all examples, its score is then chosen from the `max(max_pos_score, max_neg_score)`. If the `max_neg_score` is chosen then it is squared and negated, otherwise it is just the `max_pos_score`.
-     * 
-     * * `sum_scores` - Uses custom search objective. Compares against all inputs, sums all the scores. Scores against positive vectors are added, against negatives are subtracted. 
-     * @enum {string}
-     */
-    RecommendStrategy: "average_vector" | "best_score" | "sum_scores";
-    UsingVector: string;
-    /** @description Defines a location to use for looking up the vector. Specifies collection and vector field name. */
-    LookupLocation: {
-      /** @description Name of the collection used for lookup */
-      collection: string;
-      /**
-       * @description Optional name of the vector field within the collection. If not provided, the default vector field will be used. 
-       * @default null
-       */
-      vector?: string | null;
-      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
-      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
-    };
-    /** @description Scroll request - paginate over all points which matches given condition */
-    ScrollRequest: {
-      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
-      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
-      /** @description Start ID to read points from. */
-      offset?: components["schemas"]["ExtendedPointId"] | (Record<string, unknown> | null);
-      /**
-       * Format: uint 
-       * @description Page size. Default: 10
-       */
-      limit?: number | null;
-      /** @description Look only for points which satisfies this conditions. If not provided - all points. */
-      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
-      /** @description Select which payload to return with the response. Default is true. */
-      with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
-      with_vector?: components["schemas"]["WithVector"];
-      /** @description Order the records by a payload field. */
-      order_by?: components["schemas"]["OrderByInterface"] | (Record<string, unknown> | null);
     };
     OrderByInterface: string | components["schemas"]["OrderBy"];
     OrderBy: {
@@ -1785,12 +1675,18 @@ export interface components {
        */
       write_consistency_factor?: number | null;
       /**
-       * @description If true - point's payload will not be stored in memory. It will be read from the disk every time it is requested. This setting saves RAM by (slightly) increasing the response time. Note: those payload values that are involved in filtering and are indexed - remain in RAM.
+       * @deprecated 
+       * @description Deprecated: use `payload.memory` instead. If true - point's payload will not be stored in memory. It will be read from the disk every time it is requested. This setting saves RAM by (slightly) increasing the response time. Note: those payload values that are involved in filtering and are indexed - remain in RAM.
        * 
        * Default: true 
        * @default null
        */
       on_disk_payload?: boolean | null;
+      /**
+       * @description Configuration of the payload storage 
+       * @default null
+       */
+      payload?: components["schemas"]["PayloadStorageParams"] | (Record<string, unknown> | null);
       /** @description Custom params for HNSW index. If none - values from service configuration file are used. */
       hnsw_config?: components["schemas"]["HnswConfigDiff"] | (Record<string, unknown> | null);
       /** @description Custom params for WAL. If none - values from service configuration file are used. */
@@ -1886,7 +1782,7 @@ export interface components {
       /** @description Max number of threads (jobs) for running optimizations per shard. Note: each optimization job will also use `max_indexing_threads` threads by itself for index building. If "auto" - have no limit and choose dynamically to saturate CPU. If 0 - no optimization threads, optimizations will be disabled. */
       max_optimization_threads?: components["schemas"]["MaxOptimizationThreads"] | (Record<string, unknown> | null);
       /**
-       * @description If this option is set, service will try to prevent creation of large unoptimized segments. When enabled, updates may be blocked at request level if there are unoptimized segments larger than indexing threshold. Updates will be resumed when optimization is completed and segments are optimized below the threshold. Using this option may lead to increased delay between submitting an update and its application. Default is disabled. 
+       * @description If enabled, the service will try to prevent the creation of large unoptimized segments. When enabled, new points written to segments larger than the indexing threshold are stored as "deferred points": they are persisted in the WAL and segments, but excluded from read/search results until the corresponding segments are optimized (e.g. indexed, quantized, or moved to mmap storage). Update requests with `wait=true` will only return after the deferred points become visible, which may significantly increase the perceived latency between submitting an update and its completion. Update requests with `wait=false` are not affected. Default is disabled. 
        * @default null
        */
       prevent_unoptimized?: boolean | null;
@@ -1982,6 +1878,11 @@ export interface components {
        * @description Reject memory-consuming update operations (e.g. upsert, set payload) when the process resident memory exceeds this percentage of total system memory (or cgroup limit). Value in [1, 100]. Applied uniformly to external and internal (replication) traffic — rejection is deterministic so it does not cause replica divergence. Delete operations are not affected, so callers can still free memory.
        */
       max_resident_memory_percent?: number | null;
+      /**
+       * Format: uint8 
+       * @description Reject disk-consuming update operations (e.g. upsert, set payload) when the filesystem hosting Qdrant storage is filled above this percentage of its total capacity. Value in [1, 100]. Applied uniformly to external and internal (replication) traffic — rejection is deterministic so it does not cause replica divergence. Delete operations are not affected, so callers can still free disk space. Free space is sampled with a small TTL cache; the gate may take a few seconds to react.
+       */
+      max_disk_usage_percent?: number | null;
     };
     StrictModeMultivectorConfig: {
       [key: string]: components["schemas"]["StrictModeMultivector"] | undefined;
@@ -2021,7 +1922,7 @@ export interface components {
       /** @description Map of sparse vector data parameters to update for each sparse vector. */
       sparse_vectors?: components["schemas"]["SparseVectorsConfig"] | (Record<string, unknown> | null);
       strict_mode_config?: components["schemas"]["StrictModeConfig"] | (Record<string, unknown> | null);
-      /** @description Metadata to update for the collection. If provided, this will merge with existing metadata. To remove metadata, set it to an empty object. */
+      /** @description Metadata to update for the collection. If provided, this will merge with existing metadata. Individual keys can be removed by setting their value to `null`. */
       metadata?: components["schemas"]["Payload"] | (Record<string, unknown> | null);
     };
     /**
@@ -2037,8 +1938,13 @@ export interface components {
       hnsw_config?: components["schemas"]["HnswConfigDiff"] | (Record<string, unknown> | null);
       /** @description Update params for quantization. If none - it is left unchanged. */
       quantization_config?: components["schemas"]["QuantizationConfigDiff"] | (Record<string, unknown> | null);
-      /** @description If true, vectors are served from disk, improving RAM usage at the cost of latency */
+      /**
+       * @deprecated 
+       * @description Deprecated: use `memory` instead. If true, vectors are served from disk, improving RAM usage at the cost of latency
+       */
       on_disk?: boolean | null;
+      /** @description Memory placement of the original vector storage. Overrides the deprecated `on_disk` flag if both are set. `pinned` is not supported for dense vector storage. */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
     };
     QuantizationConfigDiff: components["schemas"]["ScalarQuantization"] | components["schemas"]["ProductQuantization"] | components["schemas"]["BinaryQuantization"] | components["schemas"]["TurboQuantization"] | components["schemas"]["Disabled"];
     /** @enum {string} */
@@ -2065,10 +1971,13 @@ export interface components {
        */
       read_fan_out_delay_ms?: number | null;
       /**
-       * @description If true - point's payload will not be stored in memory. It will be read from the disk every time it is requested. This setting saves RAM by (slightly) increasing the response time. Note: those payload values that are involved in filtering and are indexed - remain in RAM. 
+       * @deprecated 
+       * @description Deprecated: use `payload.memory` instead. If true - point's payload will not be stored in memory. It will be read from the disk every time it is requested. This setting saves RAM by (slightly) increasing the response time. Note: those payload values that are involved in filtering and are indexed - remain in RAM. 
        * @default null
        */
       on_disk_payload?: boolean | null;
+      /** @description Update params of the payload storage. If none - it is left unchanged. */
+      payload?: components["schemas"]["PayloadStorageParams"] | (Record<string, unknown> | null);
     };
     SparseVectorsConfig: {
       [key: string]: components["schemas"]["SparseVectorParams"] | undefined;
@@ -2181,7 +2090,7 @@ export interface components {
        */
       avg_len?: number;
       tokenizer?: components["schemas"]["TokenizerType"];
-      /** @description Defines which language to use for text preprocessing. This parameter is used to construct default stopwords filter and stemmer. To disable language-specific processing, set this to `"language": "none"`. If not specified, English is assumed. */
+      /** @description Defines which language to use for text preprocessing. This parameter is used to construct default stopwords filter and stemmer. To disable language-specific processing, set `stemmer` to `{"type": "none"}` and configure an empty stopword set. The legacy `"language": "none"` hack is deprecated and may be rejected in a future release. If not specified, English is assumed. */
       language?: string | null;
       /** @description Lowercase the text before tokenization. Default is `true`. */
       lowercase?: boolean | null;
@@ -2575,10 +2484,37 @@ export interface components {
       /**
        * @description Use single-file mmap in-ram vector storage (InRamMmap)
        * 
-       * Enabled by default in Qdrant 1.17.1+ 
-       * @default false
+       * Enabled by default in Qdrant 1.18.3+ 
+       * @default true
        */
       single_file_mmap_vector_storage?: boolean;
+      /**
+       * @description Allow the io_uring-based payload storage implementation. When disabled, io_uring payload storage is *never* used. When enabled, payload storage backend is decided based on `storage.performance.io_uring` option and payload storage type. 
+       * @default true
+       */
+      async_payload_storage?: boolean;
+      /**
+       * @description Write a segment manifest (`segments_manifest.json`, next to the `segments/` directory) listing the shard's segments and their state, so out-of-process readers can discover segments without scanning the filesystem. 
+       * @default false
+       */
+      write_segment_manifest?: boolean;
+      /**
+       * @description Build new segments in append-only mode: in-place point mutations become clone-and-tombstone appends instead. Intended for testing the append-only storage path. 
+       * @default false
+       */
+      append_only_mutations?: boolean;
+      /**
+       * @description Persist write-once bitmasks in the compact `StoredBitmask` format instead of raw dense bitslices. Only gates writing: both formats are always readable. 
+       * @default false
+       */
+      compact_bitmask?: boolean;
+      /**
+       * @description Serverless-compatible deployment mode. Automatically enables [`Self::write_segment_manifest`], [`Self::append_only_mutations`] and [`Self::compact_bitmask`].
+       * 
+       * Note that this will only be applied when passed into [`init_feature_flags`]. 
+       * @default false
+       */
+      serverless_compatible?: boolean;
     };
     /**
      * @description Controls how segments are loaded on startup to reduce memory pressure.
@@ -2770,6 +2706,8 @@ export interface components {
       vector_data: {
         [key: string]: components["schemas"]["VectorDataInfo"] | undefined;
       };
+      /** @description Universal I/O backend that payload storage reads files with. Absent if payload storage does not support configurable backends or only supports a single backend type. */
+      payload_storage_io_backend?: components["schemas"]["IoBackend"] | (Record<string, unknown> | null);
       /**
        * Format: uint32 
        * @description Internal ID from which points are deferred (hidden from reads). Only set for appendable segments.
@@ -2788,7 +2726,22 @@ export interface components {
       num_indexed_vectors: number;
       /** Format: uint */
       num_deleted_vectors: number;
+      /** @description Universal I/O backend that this vector storage reads files with. Absent if vector storage does not support configurable backends or only supports a single backend type. */
+      io_backend?: components["schemas"]["IoBackend"] | (Record<string, unknown> | null);
     };
+    /**
+     * @description Universal I/O backend that is used to read files.
+     * 
+     * Decided when the component is opened based on `storage.performance.io_uring` option, component memory placement and kernel io_uring support.
+     * 
+     * Options:
+     * 
+     * * `Mmap` - Reads are served by the page cache through a memory mapping.
+     * 
+     * * `IoUring` - Reads are submitted to the kernel with io_uring. 
+     * @enum {string}
+     */
+    IoBackend: "mmap" | "io_uring";
     SegmentConfig: {
       /** @default {} */
       vector_data?: {
@@ -2832,7 +2785,7 @@ export interface components {
      * @description Storage types for vectors 
      * @enum {string}
      */
-    VectorStorageDatatype: "float32" | "float16" | "uint8";
+    VectorStorageDatatype: "float32" | "float16" | "uint8" | "turbo4";
     /** @description Config of single sparse vector data storage */
     SparseVectorDataConfig: {
       index: components["schemas"]["SparseIndexConfig"];
@@ -2852,6 +2805,12 @@ export interface components {
       index_type: components["schemas"]["SparseIndexType"];
       /** @description Datatype used to store weights in the index. */
       datatype?: components["schemas"]["VectorStorageDatatype"] | (Record<string, unknown> | null);
+      /**
+       * @description Requested memory placement of the index.
+       * 
+       * The structural decision is carried by `index_type`; this field additionally distinguishes `cold` from `cached` for the mmap index variant.
+       */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
     };
     /** @description Sparse index types */
     SparseIndexType: "MutableRam" | "ImmutableRam" | "Mmap";
@@ -3258,8 +3217,12 @@ export interface components {
     };
     StartResharding: {
       direction: components["schemas"]["ReshardingDirection"];
-      /** Format: uint64 */
+      /**
+       * Format: uint64 
+       * @description Peer to create the new shard on, or to migrate points away from when scaling down. If not specified, the least loaded peer is picked when scaling up, a peer holding the removed shard when scaling down.
+       */
       peer_id?: number | null;
+      /** @description Custom shard key to reshard, must already exist. If not specified, shards without a shard key are resharded. */
       shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
     };
     AbortReshardingOperation: {
@@ -3273,12 +3236,6 @@ export interface components {
       filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
       from_shard_key: components["schemas"]["ShardKey"];
       to_shard_key: components["schemas"]["ShardKey"];
-    };
-    SearchRequestBatch: {
-      searches: (components["schemas"]["SearchRequest"])[];
-    };
-    RecommendRequestBatch: {
-      searches: (components["schemas"]["RecommendRequest"])[];
     };
     SnapshotRecover: {
       /**
@@ -3386,115 +3343,6 @@ export interface components {
     };
     /** @description Value of the group_by key, shared across all the hits in the group */
     GroupId: string | number;
-    SearchGroupsRequest: {
-      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
-      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
-      vector: components["schemas"]["NamedVectorStruct"];
-      /** @description Look only for points which satisfies this conditions */
-      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
-      /** @description Additional search params */
-      params?: components["schemas"]["SearchParams"] | (Record<string, unknown> | null);
-      /** @description Select which payload to return with the response. Default is false. */
-      with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
-      /**
-       * @description Options for specifying which vectors to include into response. Default is false. 
-       * @default null
-       */
-      with_vector?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
-      /**
-       * Format: float 
-       * @description Define a minimal score threshold for the result. If defined, less similar results will not be returned. Score of the returned result might be higher or smaller than the threshold depending on the Distance function used. E.g. for cosine similarity only higher scores will be returned.
-       */
-      score_threshold?: number | null;
-      /** @description Payload field to group by, must be a string or number field. If the field contains more than 1 value, all values will be used for grouping. One point can be in multiple groups. */
-      group_by: string;
-      /**
-       * Format: uint32 
-       * @description Maximum amount of points to return per group
-       */
-      group_size: number;
-      /**
-       * Format: uint32 
-       * @description Maximum amount of groups to return
-       */
-      limit: number;
-      /** @description Look for points in another collection using the group ids */
-      with_lookup?: components["schemas"]["WithLookupInterface"] | (Record<string, unknown> | null);
-    };
-    WithLookupInterface: string | components["schemas"]["WithLookup"];
-    WithLookup: {
-      /** @description Name of the collection to use for points lookup */
-      collection: string;
-      /**
-       * @description Options for specifying which payload to include (or not) 
-       * @default true
-       */
-      with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
-      /**
-       * @description Options for specifying which vectors to include (or not) 
-       * @default null
-       */
-      with_vectors?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
-    };
-    RecommendGroupsRequest: {
-      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
-      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
-      /**
-       * @description Look for vectors closest to those 
-       * @default []
-       */
-      positive?: (components["schemas"]["RecommendExample"])[];
-      /**
-       * @description Try to avoid vectors like this 
-       * @default []
-       */
-      negative?: (components["schemas"]["RecommendExample"])[];
-      /**
-       * @description How to use positive and negative examples to find the results 
-       * @default null
-       */
-      strategy?: components["schemas"]["RecommendStrategy"] | (Record<string, unknown> | null);
-      /** @description Look only for points which satisfies this conditions */
-      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
-      /** @description Additional search params */
-      params?: components["schemas"]["SearchParams"] | (Record<string, unknown> | null);
-      /** @description Select which payload to return with the response. Default is false. */
-      with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
-      /**
-       * @description Options for specifying which vectors to include into response. Default is false. 
-       * @default null
-       */
-      with_vector?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
-      /**
-       * Format: float 
-       * @description Define a minimal score threshold for the result. If defined, less similar results will not be returned. Score of the returned result might be higher or smaller than the threshold depending on the Distance function used. E.g. for cosine similarity only higher scores will be returned.
-       */
-      score_threshold?: number | null;
-      /**
-       * @description Define which vector to use for recommendation, if not specified - try to use default vector 
-       * @default null
-       */
-      using?: components["schemas"]["UsingVector"] | (Record<string, unknown> | null);
-      /**
-       * @description The location used to lookup vectors. If not specified - use current collection. Note: the other collection should have the same vector size as the current collection 
-       * @default null
-       */
-      lookup_from?: components["schemas"]["LookupLocation"] | (Record<string, unknown> | null);
-      /** @description Payload field to group by, must be a string or number field. If the field contains more than 1 value, all values will be used for grouping. One point can be in multiple groups. */
-      group_by: string;
-      /**
-       * Format: uint32 
-       * @description Maximum amount of points to return per group
-       */
-      group_size: number;
-      /**
-       * Format: uint32 
-       * @description Maximum amount of groups to return
-       */
-      limit: number;
-      /** @description Look for points in another collection using the group ids */
-      with_lookup?: components["schemas"]["WithLookupInterface"] | (Record<string, unknown> | null);
-    };
     GroupsResult: {
       groups: (components["schemas"]["PointGroup"])[];
     };
@@ -3542,62 +3390,6 @@ export interface components {
       api_key?: string | null;
     };
     ShardSnapshotLocation: string;
-    /** @description Use context and a target to find the most similar points, constrained by the context. */
-    DiscoverRequest: {
-      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
-      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
-      /**
-       * @description Look for vectors closest to this.
-       * 
-       * When using the target (with or without context), the integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target.
-       */
-      target?: components["schemas"]["RecommendExample"] | (Record<string, unknown> | null);
-      /**
-       * @description Pairs of { positive, negative } examples to constrain the search.
-       * 
-       * When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair.
-       * 
-       * Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0.
-       * 
-       * For discovery search (when including a target), the context part of the score for each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, and -1 otherwise.
-       */
-      context?: (components["schemas"]["ContextExamplePair"])[] | null;
-      /** @description Look only for points which satisfies this conditions */
-      filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
-      /** @description Additional search params */
-      params?: components["schemas"]["SearchParams"] | (Record<string, unknown> | null);
-      /**
-       * Format: uint 
-       * @description Max number of result to return
-       */
-      limit: number;
-      /**
-       * Format: uint 
-       * @description Offset of the first result to return. May be used to paginate results. Note: large offset values may cause performance issues.
-       */
-      offset?: number | null;
-      /** @description Select which payload to return with the response. Default is false. */
-      with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
-      /** @description Options for specifying which vectors to include into response. Default is false. */
-      with_vector?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
-      /**
-       * @description Define which vector to use for recommendation, if not specified - try to use default vector 
-       * @default null
-       */
-      using?: components["schemas"]["UsingVector"] | (Record<string, unknown> | null);
-      /**
-       * @description The location used to lookup vectors. If not specified - use current collection. Note: the other collection should have the same vector size as the current collection 
-       * @default null
-       */
-      lookup_from?: components["schemas"]["LookupLocation"] | (Record<string, unknown> | null);
-    };
-    ContextExamplePair: {
-      positive: components["schemas"]["RecommendExample"];
-      negative: components["schemas"]["RecommendExample"];
-    };
-    DiscoverRequestBatch: {
-      searches: (components["schemas"]["DiscoverRequest"])[];
-    };
     VersionInfo: {
       title: string;
       version: string;
@@ -3715,6 +3507,17 @@ export interface components {
       /** @description How to use the provided vectors to find the results */
       strategy?: components["schemas"]["RecommendStrategy"] | (Record<string, unknown> | null);
     };
+    /**
+     * @description How to use positive and negative examples to find the results, default is `average_vector`:
+     * 
+     * * `average_vector` - Average positive and negative vectors and create a single query with the formula `query = avg_pos + avg_pos - avg_neg`. Then performs normal search.
+     * 
+     * * `best_score` - Uses custom search objective. Each candidate is compared against all examples, its score is then chosen from the `max(max_pos_score, max_neg_score)`. If the `max_neg_score` is chosen then it is squared and negated, otherwise it is just the `max_pos_score`.
+     * 
+     * * `sum_scores` - Uses custom search objective. Compares against all inputs, sums all the scores. Scores against positive vectors are added, against negatives are subtracted. 
+     * @enum {string}
+     */
+    RecommendStrategy: "average_vector" | "best_score" | "sum_scores";
     DiscoverQuery: {
       discover: components["schemas"]["DiscoverInput"];
     };
@@ -3876,6 +3679,93 @@ export interface components {
       /** Format: float */
       c: number;
     };
+    /** @description Additional parameters of the search */
+    SearchParams: {
+      /**
+       * Format: uint 
+       * @description Params relevant to HNSW index Size of the beam in a beam-search. Larger the value - more accurate the result, more time required for search.
+       */
+      hnsw_ef?: number | null;
+      /**
+       * @description Search without approximation. If set to true, search may run long but with exact results. 
+       * @default false
+       */
+      exact?: boolean;
+      /** @description Quantization params */
+      quantization?: components["schemas"]["QuantizationSearchParams"] | (Record<string, unknown> | null);
+      /**
+       * @description If enabled, the engine will only perform search among indexed or small segments. Using this option prevents slow searches in case of delayed index, but does not guarantee that all uploaded vectors will be included in search results 
+       * @default false
+       */
+      indexed_only?: boolean;
+      /** @description ACORN search params */
+      acorn?: components["schemas"]["AcornSearchParams"] | (Record<string, unknown> | null);
+      /** @description Which population sparse vector IDF statistics are computed over. By default (or with explicit `"global"`) statistics are collection-wide. Only applicable to sparse vectors with the IDF modifier enabled. */
+      idf?: components["schemas"]["IdfParams"] | (Record<string, unknown> | null);
+    };
+    /** @description Additional parameters of the search */
+    QuantizationSearchParams: {
+      /**
+       * @description If true, quantized vectors are ignored. Default is false. 
+       * @default false
+       */
+      ignore?: boolean;
+      /** @description If true, use original vectors to re-score top-k results. Might require more time in case if original vectors are stored on disk. If not set, qdrant decides automatically apply rescoring or not. */
+      rescore?: boolean | null;
+      /**
+       * Format: double 
+       * @description Oversampling factor for quantization. Default is 1.0.
+       * 
+       * Defines how many extra vectors should be preselected using quantized index, and then re-scored using original vectors.
+       * 
+       * For example, if `oversampling` is 2.4 and `limit` is 100, then 240 vectors will be preselected using quantized index, and then top-100 will be returned after re-scoring.
+       */
+      oversampling?: number | null;
+    };
+    /** @description ACORN-related search parameters */
+    AcornSearchParams: {
+      /**
+       * @description If true, then ACORN may be used for the HNSW search based on filters selectivity. Improves search recall for searches with multiple low-selectivity payload filters, at cost of performance. 
+       * @default false
+       */
+      enable?: boolean;
+      /**
+       * Format: double 
+       * @description Maximum selectivity of filters to enable ACORN.
+       * 
+       * If estimated filters selectivity is higher than this value, ACORN will not be used. Selectivity is estimated as: `estimated number of points satisfying the filters / total number of points`.
+       * 
+       * 0.0 for never, 1.0 for always. Default is 0.4.
+       */
+      max_selectivity?: number | null;
+    };
+    /**
+     * @description Population over which sparse vector IDF statistics are computed for scoring — the *IDF corpus*.
+     * 
+     * - `"global"` — collection-wide statistics, same as omitting the parameter. - `{ "corpus": <filter> }` — document count and per-term document frequencies are computed over the points matching the corpus filter only. The corpus is independent of the retrieval filter and is usually broader than it.
+     */
+    IdfParams: components["schemas"]["IdfScope"] | components["schemas"]["IdfCorpusParams"];
+    /**
+     * @description Named IDF scope without a corpus filter. 
+     * @enum {string}
+     */
+    IdfScope: "global";
+    /** @description IDF statistics computed over the points matching a corpus filter. */
+    IdfCorpusParams: {
+      corpus: components["schemas"]["Filter"];
+    };
+    /** @description Defines a location to use for looking up the vector. Specifies collection and vector field name. */
+    LookupLocation: {
+      /** @description Name of the collection used for lookup */
+      collection: string;
+      /**
+       * @description Optional name of the vector field within the collection. If not provided, the default vector field will be used. 
+       * @default null
+       */
+      vector?: string | null;
+      /** @description Specify in which shards to look for the points, if not specified - look in all shards */
+      shard_key?: components["schemas"]["ShardKeySelector"] | (Record<string, unknown> | null);
+    };
     QueryRequestBatch: {
       searches: (components["schemas"]["QueryRequest"])[];
     };
@@ -3925,6 +3815,21 @@ export interface components {
       limit?: number | null;
       /** @description Look for points in another collection using the group ids */
       with_lookup?: components["schemas"]["WithLookupInterface"] | (Record<string, unknown> | null);
+    };
+    WithLookupInterface: string | components["schemas"]["WithLookup"];
+    WithLookup: {
+      /** @description Name of the collection to use for points lookup */
+      collection: string;
+      /**
+       * @description Options for specifying which payload to include (or not) 
+       * @default true
+       */
+      with_payload?: components["schemas"]["WithPayloadInterface"] | (Record<string, unknown> | null);
+      /**
+       * @description Options for specifying which vectors to include (or not) 
+       * @default null
+       */
+      with_vectors?: components["schemas"]["WithVector"] | (Record<string, unknown> | null);
     };
     SearchMatrixRequest: {
       /** @description Specify in which shards to look for the points, if not specified - look in all shards */
@@ -4249,7 +4154,7 @@ export interface components {
       distance: components["schemas"]["Distance"];
       /** @description Configuration for multi-vector points (e.g., ColBERT) */
       multivector_config?: components["schemas"]["MultiVectorConfig"] | (Record<string, unknown> | null);
-      /** @description Element storage type (Float32, Float16, Uint8) */
+      /** @description Element storage type (Float32, Float16, Uint8, Turbo4) */
       datatype?: components["schemas"]["VectorStorageDatatype"] | (Record<string, unknown> | null);
     };
     /** @description Wrapper for sparse vector creation config. */
@@ -4522,7 +4427,7 @@ export interface operations {
   };
   /**
    * Kubernetes healthz endpoint 
-   * @description An endpoint for health checking used in Kubernetes.
+   * @description Liveness-style health check. Returns 200 as soon as the HTTP API is serving requests. It does not inspect collections, shards or consensus state, and is identical to `/livez`. Use it only to detect whether the process is up and responsive.
    */
   healthz: {
     responses: {
@@ -4538,7 +4443,7 @@ export interface operations {
   };
   /**
    * Kubernetes livez endpoint 
-   * @description An endpoint for health checking used in Kubernetes.
+   * @description Kubernetes liveness probe. Returns 200 as soon as the HTTP API is serving requests. It does not inspect collections, shards or consensus state, and is identical to `/healthz`. A failure indicates the process is unresponsive and should be restarted.
    */
   livez: {
     responses: {
@@ -4554,12 +4459,18 @@ export interface operations {
   };
   /**
    * Kubernetes readyz endpoint 
-   * @description An endpoint for health checking used in Kubernetes.
+   * @description Kubernetes readiness probe. Checks the instance and waits out pending data operations to see when it can start accepting traffic. In a distributed deployment it returns 200 only once the node has caught up with the cluster consensus commit and its local shards are healthy; otherwise it returns 503. In a single-node deployment it always returns 200 once the API is up. Use it to decide when to route traffic to the instance.
    */
   readyz: {
     responses: {
-      /** @description Healthz response */
+      /** @description The instance is ready to accept traffic */
       200: {
+        content: {
+          "text/plain": string;
+        };
+      };
+      /** @description The instance is not ready to accept traffic yet */
+      503: {
         content: {
           "text/plain": string;
         };
@@ -7164,465 +7075,6 @@ export interface operations {
             /** @example ok */
             status?: string;
             result?: components["schemas"]["ScrollResult"];
-          };
-        };
-      };
-      /** @description error */
-      default: {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description error */
-      "4XX": {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-    };
-  };
-  /**
-   * Search points 
-   * @deprecated 
-   * @description Retrieve closest points based on vector similarity and given filtering conditions
-   */
-  search_points: {
-    parameters: {
-      query?: {
-        /** @description Define read consistency guarantees for the operation */
-        consistency?: components["schemas"]["ReadConsistency"];
-        /** @description If set, overrides global timeout for this request. Unit is seconds. */
-        timeout?: number;
-      };
-      path: {
-        /** @description Name of the collection to search in */
-        collection_name: string;
-      };
-    };
-    /** @description Search request with optional filtering */
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["SearchRequest"];
-      };
-    };
-    responses: {
-      /** @description successful operation */
-      200: {
-        content: {
-          "application/json": {
-            /** @default null */
-            usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
-            /**
-             * Format: float 
-             * @description Time spent to process this request 
-             * @example 0.002
-             */
-            time?: number;
-            /** @example ok */
-            status?: string;
-            result?: (components["schemas"]["ScoredPoint"])[];
-          };
-        };
-      };
-      /** @description error */
-      default: {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description error */
-      "4XX": {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-    };
-  };
-  /**
-   * Search batch points 
-   * @deprecated 
-   * @description Retrieve by batch the closest points based on vector similarity and given filtering conditions
-   */
-  search_batch_points: {
-    parameters: {
-      query?: {
-        /** @description Define read consistency guarantees for the operation */
-        consistency?: components["schemas"]["ReadConsistency"];
-        /** @description If set, overrides global timeout for this request. Unit is seconds. */
-        timeout?: number;
-      };
-      path: {
-        /** @description Name of the collection to search in */
-        collection_name: string;
-      };
-    };
-    /** @description Search batch request */
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["SearchRequestBatch"];
-      };
-    };
-    responses: {
-      /** @description successful operation */
-      200: {
-        content: {
-          "application/json": {
-            /** @default null */
-            usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
-            /**
-             * Format: float 
-             * @description Time spent to process this request 
-             * @example 0.002
-             */
-            time?: number;
-            /** @example ok */
-            status?: string;
-            result?: ((components["schemas"]["ScoredPoint"])[])[];
-          };
-        };
-      };
-      /** @description error */
-      default: {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description error */
-      "4XX": {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-    };
-  };
-  /**
-   * Search point groups 
-   * @deprecated 
-   * @description Retrieve closest points based on vector similarity and given filtering conditions, grouped by a given payload field
-   */
-  search_point_groups: {
-    parameters: {
-      query?: {
-        /** @description Define read consistency guarantees for the operation */
-        consistency?: components["schemas"]["ReadConsistency"];
-        /** @description If set, overrides global timeout for this request. Unit is seconds. */
-        timeout?: number;
-      };
-      path: {
-        /** @description Name of the collection to search in */
-        collection_name: string;
-      };
-    };
-    /** @description Search request with optional filtering, grouped by a given payload field */
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["SearchGroupsRequest"];
-      };
-    };
-    responses: {
-      /** @description successful operation */
-      200: {
-        content: {
-          "application/json": {
-            /** @default null */
-            usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
-            /**
-             * Format: float 
-             * @description Time spent to process this request 
-             * @example 0.002
-             */
-            time?: number;
-            /** @example ok */
-            status?: string;
-            result?: components["schemas"]["GroupsResult"];
-          };
-        };
-      };
-      /** @description error */
-      default: {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description error */
-      "4XX": {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-    };
-  };
-  /**
-   * Recommend points 
-   * @deprecated 
-   * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples.
-   */
-  recommend_points: {
-    parameters: {
-      query?: {
-        /** @description Define read consistency guarantees for the operation */
-        consistency?: components["schemas"]["ReadConsistency"];
-        /** @description If set, overrides global timeout for this request. Unit is seconds. */
-        timeout?: number;
-      };
-      path: {
-        /** @description Name of the collection to search in */
-        collection_name: string;
-      };
-    };
-    /** @description Request points based on positive and negative examples. */
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["RecommendRequest"];
-      };
-    };
-    responses: {
-      /** @description successful operation */
-      200: {
-        content: {
-          "application/json": {
-            /** @default null */
-            usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
-            /**
-             * Format: float 
-             * @description Time spent to process this request 
-             * @example 0.002
-             */
-            time?: number;
-            /** @example ok */
-            status?: string;
-            result?: (components["schemas"]["ScoredPoint"])[];
-          };
-        };
-      };
-      /** @description error */
-      default: {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description error */
-      "4XX": {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-    };
-  };
-  /**
-   * Recommend batch points 
-   * @deprecated 
-   * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples.
-   */
-  recommend_batch_points: {
-    parameters: {
-      query?: {
-        /** @description Define read consistency guarantees for the operation */
-        consistency?: components["schemas"]["ReadConsistency"];
-        /** @description If set, overrides global timeout for this request. Unit is seconds. */
-        timeout?: number;
-      };
-      path: {
-        /** @description Name of the collection to search in */
-        collection_name: string;
-      };
-    };
-    /** @description Request points based on positive and negative examples. */
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["RecommendRequestBatch"];
-      };
-    };
-    responses: {
-      /** @description successful operation */
-      200: {
-        content: {
-          "application/json": {
-            /** @default null */
-            usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
-            /**
-             * Format: float 
-             * @description Time spent to process this request 
-             * @example 0.002
-             */
-            time?: number;
-            /** @example ok */
-            status?: string;
-            result?: ((components["schemas"]["ScoredPoint"])[])[];
-          };
-        };
-      };
-      /** @description error */
-      default: {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description error */
-      "4XX": {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-    };
-  };
-  /**
-   * Recommend point groups 
-   * @deprecated 
-   * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples, grouped by a given payload field.
-   */
-  recommend_point_groups: {
-    parameters: {
-      query?: {
-        /** @description Define read consistency guarantees for the operation */
-        consistency?: components["schemas"]["ReadConsistency"];
-        /** @description If set, overrides global timeout for this request. Unit is seconds. */
-        timeout?: number;
-      };
-      path: {
-        /** @description Name of the collection to search in */
-        collection_name: string;
-      };
-    };
-    /** @description Request points based on positive and negative examples, grouped by a payload field. */
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["RecommendGroupsRequest"];
-      };
-    };
-    responses: {
-      /** @description successful operation */
-      200: {
-        content: {
-          "application/json": {
-            /** @default null */
-            usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
-            /**
-             * Format: float 
-             * @description Time spent to process this request 
-             * @example 0.002
-             */
-            time?: number;
-            /** @example ok */
-            status?: string;
-            result?: components["schemas"]["GroupsResult"];
-          };
-        };
-      };
-      /** @description error */
-      default: {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description error */
-      "4XX": {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-    };
-  };
-  /**
-   * Discover points 
-   * @deprecated 
-   * @description Use context and a target to find the most similar points to the target, constrained by the context.
-   * When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair.
-   * Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0.
-   * When using target (with or without context), the score behaves a little different: The integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target. The context part of the score for each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, and -1 otherwise.
-   */
-  discover_points: {
-    parameters: {
-      query?: {
-        /** @description Define read consistency guarantees for the operation */
-        consistency?: components["schemas"]["ReadConsistency"];
-        /** @description If set, overrides global timeout for this request. Unit is seconds. */
-        timeout?: number;
-      };
-      path: {
-        /** @description Name of the collection to search in */
-        collection_name: string;
-      };
-    };
-    /** @description Request points based on {positive, negative} pairs of examples, and/or a target */
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["DiscoverRequest"];
-      };
-    };
-    responses: {
-      /** @description successful operation */
-      200: {
-        content: {
-          "application/json": {
-            /** @default null */
-            usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
-            /**
-             * Format: float 
-             * @description Time spent to process this request 
-             * @example 0.002
-             */
-            time?: number;
-            /** @example ok */
-            status?: string;
-            result?: (components["schemas"]["ScoredPoint"])[];
-          };
-        };
-      };
-      /** @description error */
-      default: {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description error */
-      "4XX": {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-    };
-  };
-  /**
-   * Discover batch points 
-   * @deprecated 
-   * @description Look for points based on target and/or positive and negative example pairs, in batch.
-   */
-  discover_batch_points: {
-    parameters: {
-      query?: {
-        /** @description Define read consistency guarantees for the operation */
-        consistency?: components["schemas"]["ReadConsistency"];
-        /** @description If set, overrides global timeout for this request. Unit is seconds. */
-        timeout?: number;
-      };
-      path: {
-        /** @description Name of the collection to search in */
-        collection_name: string;
-      };
-    };
-    /** @description Batch request points based on { positive, negative } pairs of examples, and/or a target. */
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["DiscoverRequestBatch"];
-      };
-    };
-    responses: {
-      /** @description successful operation */
-      200: {
-        content: {
-          "application/json": {
-            /** @default null */
-            usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
-            /**
-             * Format: float 
-             * @description Time spent to process this request 
-             * @example 0.002
-             */
-            time?: number;
-            /** @example ok */
-            status?: string;
-            result?: ((components["schemas"]["ScoredPoint"])[])[];
           };
         };
       };

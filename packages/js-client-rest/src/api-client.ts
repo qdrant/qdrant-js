@@ -9,13 +9,15 @@ import {
 import {RestArgs} from './types.js';
 import {createClientApi} from './openapi/generated_api_client.js';
 import {ClientApi} from './openapi/generated_client_type.js';
+import {createDeprecatedClientApi, DeprecatedClientApi} from './openapi/deprecated_api_client.js';
+import {deprecatedPaths} from './openapi/deprecated_schema.js';
 import {getContextHeaders} from './context-headers.js';
 
-export type Client = ReturnType<typeof Fetcher.for<paths>>;
+export type Client = ReturnType<typeof Fetcher.for<paths & deprecatedPaths>>;
 
-export function createApis(baseUrl: string, args: RestArgs): ClientApi {
+export function createApis(baseUrl: string, args: RestArgs): ClientApi & DeprecatedClientApi {
     const client = createClient(baseUrl, args);
-    return createClientApi(client);
+    return {...createClientApi(client), ...createDeprecatedClientApi(client)};
 }
 
 export type OpenApiClient = ReturnType<typeof createApis>;
@@ -68,7 +70,7 @@ export function createClient(baseUrl: string, {headers, timeout, connections}: R
         throw QdrantClientUnexpectedResponseError.forResponse(response);
     });
 
-    const client = Fetcher.for<paths>();
+    const client = Fetcher.for<paths & deprecatedPaths>();
     // Configure client with 'undici' agent which is used in Node 18+
     client.configure({
         baseUrl,

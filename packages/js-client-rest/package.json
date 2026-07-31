@@ -1,6 +1,6 @@
 {
     "name": "@qdrant/js-client-rest",
-    "version": "1.18.0",
+    "version": "1.19.0",
     "engines": {
         "node": ">=22.0.0"
     },
@@ -61,7 +61,7 @@
         "@rollup/plugin-replace": "^6.0.3",
         "@total-typescript/ts-reset": "^0.6.1",
         "@types/semver": "7.7.1",
-        "openapi-typescript": "^7.13.0",
+        "openapi-typescript": "6.2.6",
         "semver": "7.8.5",
         "tsx": "^4.22.4",
         "typescript": "^5.9.3",

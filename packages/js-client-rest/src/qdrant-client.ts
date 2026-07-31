@@ -160,6 +160,8 @@ export class QdrantClient {
      *             'all' - query all replicas, and return values present in all replicas
      *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
      * @returns List of search responses
+     * @deprecated The endpoint is no longer part of Qdrant's OpenAPI spec and will be
+     * removed from the server. Use {@link QdrantClient.queryBatch} instead.
      */
     async searchBatch(
         collection_name: string,
@@ -242,6 +244,8 @@ export class QdrantClient {
      *         }
      *     )
      * @returns List of found close points with similarity scores.
+     * @deprecated The endpoint is no longer part of Qdrant's OpenAPI spec and will be
+     * removed from the server. Use {@link QdrantClient.query} instead.
      */
     async search(
         collection_name: string,
@@ -293,6 +297,8 @@ export class QdrantClient {
      *             - 'all' - query all replicas, and return values present in all replicas
      *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
      * @returns List of recommend responses
+     * @deprecated The endpoint is no longer part of Qdrant's OpenAPI spec and will be
+     * removed from the server. Use {@link QdrantClient.queryBatch} with `recommend` queries instead.
      */
     async recommendBatch(
         collection_name: string,
@@ -393,6 +399,8 @@ export class QdrantClient {
      *         - 'all' - query all replicas, and return values present in all replicas
      *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
      * @returns List of recommended points with similarity scores.
+     * @deprecated The endpoint is no longer part of Qdrant's OpenAPI spec and will be
+     * removed from the server. Use {@link QdrantClient.query} with a `recommend` query instead.
      */
     async recommend(
         collection_name: string,
@@ -727,6 +735,8 @@ export class QdrantClient {
      *     - group_size: Maximum amount of points to return per group
      *     - limit: Maximum amount of groups to return
      * @returns Operation result
+     * @deprecated The endpoint is no longer part of Qdrant's OpenAPI spec and will be
+     * removed from the server. Use {@link QdrantClient.queryGroups} instead.
      */
     async searchPointGroups(
         collection_name: string,
@@ -789,6 +799,8 @@ export class QdrantClient {
      *     - group_size: Maximum amount of points to return per group
      *     - limit: Maximum amount of groups to return
      * @returns Operation result
+     * @deprecated The endpoint is no longer part of Qdrant's OpenAPI spec and will be
+     * removed from the server. Use {@link QdrantClient.queryGroups} with a `recommend` query instead.
      */
     async recommendPointGroups(
         collection_name: string,
@@ -1341,6 +1353,8 @@ export class QdrantClient {
             write_consistency_factor,
             sparse_vectors,
             strict_mode_config,
+            payload,
+            metadata,
         }: {timeout?: number} & Schemas['CreateCollection'],
     ): Promise<boolean> {
         const response = await this._openApiClient.createCollection({
@@ -1358,6 +1372,8 @@ export class QdrantClient {
             write_consistency_factor,
             sparse_vectors,
             strict_mode_config,
+            payload,
+            metadata,
         });
 
         return response.data.result ?? noResultError();
@@ -1417,6 +1433,8 @@ export class QdrantClient {
             write_consistency_factor,
             sparse_vectors,
             strict_mode_config,
+            payload,
+            metadata,
         }: {timeout?: number} & Schemas['CreateCollection'],
     ): Promise<boolean> {
         const deleteResponse = await this._openApiClient.deleteCollection({
@@ -1443,6 +1461,8 @@ export class QdrantClient {
             write_consistency_factor,
             sparse_vectors,
             strict_mode_config,
+            payload,
+            metadata,
         });
 
         return response.data.result ?? noResultError();
@@ -1817,6 +1837,8 @@ export class QdrantClient {
      *     - using: Define which vector to use for recommendation, if not specified - try to use default vector
      *     - lookup_from The location used to lookup vectors. If not specified - use current collection. Note: the other collection should have the same vector size as the current collection
      * @returns Operation result
+     * @deprecated The endpoint is no longer part of Qdrant's OpenAPI spec and will be
+     * removed from the server. Use {@link QdrantClient.query} with a `discover` or `context` query instead.
      */
     async discoverPoints(
         collection_name: string,
@@ -1867,6 +1889,8 @@ export class QdrantClient {
      *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
      *     - searches: List of searches
      * @returns Operation result
+     * @deprecated The endpoint is no longer part of Qdrant's OpenAPI spec and will be
+     * removed from the server. Use {@link QdrantClient.queryBatch} with `discover` or `context` queries instead.
      */
     async discoverBatchPoints(
         collection_name: string,

@@ -1,5 +1,12 @@
 # @qdrant/js-client-grpc
 
+## 1.19.0
+
+### Minor Changes
+
+-   Qdrant v1.19.0 API
+-   The `Search`, `SearchBatch`, `SearchGroups`, `Recommend`, `RecommendBatch`, `RecommendGroups`, `Discover` and `DiscoverBatch` RPCs are marked deprecated upstream. Use `Query`, `QueryBatch` and `QueryGroups` instead.
+
 ## 1.18.0
 
 ### Minor Changes

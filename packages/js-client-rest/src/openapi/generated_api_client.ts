@@ -62,7 +62,7 @@ export function createClientApi(client: Client) : ClientApi {
     
     /**
          * Kubernetes healthz endpoint 
-         * @description An endpoint for health checking used in Kubernetes.
+         * @description Liveness-style health check. Returns 200 as soon as the HTTP API is serving requests. It does not inspect collections, shards or consensus state, and is identical to `/livez`. Use it only to detect whether the process is up and responsive.
          */
     healthz:
       client
@@ -72,7 +72,7 @@ export function createClientApi(client: Client) : ClientApi {
     
     /**
          * Kubernetes livez endpoint 
-         * @description An endpoint for health checking used in Kubernetes.
+         * @description Kubernetes liveness probe. Returns 200 as soon as the HTTP API is serving requests. It does not inspect collections, shards or consensus state, and is identical to `/healthz`. A failure indicates the process is unresponsive and should be restarted.
          */
     livez:
       client
@@ -82,7 +82,7 @@ export function createClientApi(client: Client) : ClientApi {
     
     /**
          * Kubernetes readyz endpoint 
-         * @description An endpoint for health checking used in Kubernetes.
+         * @description Kubernetes readiness probe. Checks the instance and waits out pending data operations to see when it can start accepting traffic. In a distributed deployment it returns 200 only once the node has caught up with the cluster consensus commit and its local shards are healthy; otherwise it returns 503. In a single-node deployment it always returns 200 once the API is up. Use it to decide when to route traffic to the instance.
          */
     readyz:
       client
@@ -680,121 +680,6 @@ export function createClientApi(client: Client) : ClientApi {
     scrollPoints:
       client
       .path('/collections/{collection_name}/points/scroll')
-      .method('post')
-      .create({
-        consistency: true,
-        timeout: true,
-      }),
-    
-    /**
-         * Search points 
-         * @deprecated 
-         * @description Retrieve closest points based on vector similarity and given filtering conditions
-         */
-    searchPoints:
-      client
-      .path('/collections/{collection_name}/points/search')
-      .method('post')
-      .create({
-        consistency: true,
-        timeout: true,
-      }),
-    
-    /**
-         * Search batch points 
-         * @deprecated 
-         * @description Retrieve by batch the closest points based on vector similarity and given filtering conditions
-         */
-    searchBatchPoints:
-      client
-      .path('/collections/{collection_name}/points/search/batch')
-      .method('post')
-      .create({
-        consistency: true,
-        timeout: true,
-      }),
-    
-    /**
-         * Search point groups 
-         * @deprecated 
-         * @description Retrieve closest points based on vector similarity and given filtering conditions, grouped by a given payload field
-         */
-    searchPointGroups:
-      client
-      .path('/collections/{collection_name}/points/search/groups')
-      .method('post')
-      .create({
-        consistency: true,
-        timeout: true,
-      }),
-    
-    /**
-         * Recommend points 
-         * @deprecated 
-         * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples.
-         */
-    recommendPoints:
-      client
-      .path('/collections/{collection_name}/points/recommend')
-      .method('post')
-      .create({
-        consistency: true,
-        timeout: true,
-      }),
-    
-    /**
-         * Recommend batch points 
-         * @deprecated 
-         * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples.
-         */
-    recommendBatchPoints:
-      client
-      .path('/collections/{collection_name}/points/recommend/batch')
-      .method('post')
-      .create({
-        consistency: true,
-        timeout: true,
-      }),
-    
-    /**
-         * Recommend point groups 
-         * @deprecated 
-         * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples, grouped by a given payload field.
-         */
-    recommendPointGroups:
-      client
-      .path('/collections/{collection_name}/points/recommend/groups')
-      .method('post')
-      .create({
-        consistency: true,
-        timeout: true,
-      }),
-    
-    /**
-         * Discover points 
-         * @deprecated 
-         * @description Use context and a target to find the most similar points to the target, constrained by the context.
-         * When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair.
-         * Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0.
-         * When using target (with or without context), the score behaves a little different: The integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target. The context part of the score for each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, and -1 otherwise.
-         */
-    discoverPoints:
-      client
-      .path('/collections/{collection_name}/points/discover')
-      .method('post')
-      .create({
-        consistency: true,
-        timeout: true,
-      }),
-    
-    /**
-         * Discover batch points 
-         * @deprecated 
-         * @description Look for points based on target and/or positive and negative example pairs, in batch.
-         */
-    discoverBatchPoints:
-      client
-      .path('/collections/{collection_name}/points/discover/batch')
       .method('post')
       .create({
         consistency: true,

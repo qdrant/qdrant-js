@@ -317,3 +317,106 @@ describe('QdrantClient', () => {
         expect(result[0].points).toHaveLength(2);
     });
 });
+
+describe('Qdrant v1.19 API', () => {
+    const client = new QdrantClient();
+    const collectionName = 'test_collection_v1_19';
+    const sparseCollectionName = 'test_collection_v1_19_sparse';
+
+    test('create collection with memory placement and payload storage params', async () => {
+        await client.deleteCollection(collectionName);
+        expect(
+            await client.createCollection(collectionName, {
+                vectors: {size: 4, distance: 'Dot', memory: 'cached'},
+                hnsw_config: {memory: 'cold'},
+                payload: {memory: 'cold'},
+                metadata: {owner: 'integration-test'},
+                strict_mode_config: {enabled: false, max_disk_usage_percent: 95},
+            }),
+        ).toBe(true);
+
+        const {config} = await client.getCollection(collectionName);
+        expect(config.params.payload).toMatchObject({memory: 'cold'});
+        expect(config.metadata).toMatchObject({owner: 'integration-test'});
+    });
+
+    test('keyword index with prefix matching', async () => {
+        const result = await client.createPayloadIndex(collectionName, {
+            field_name: 'city',
+            field_schema: {type: 'keyword', prefix: true},
+            wait: true,
+        });
+        expect(result.status).toBe('completed');
+
+        await client.upsert(collectionName, {
+            wait: true,
+            points: [
+                {id: 1, vector: [0.05, 0.61, 0.76, 0.74], payload: {city: 'Berlin'}},
+                {id: 2, vector: [0.19, 0.81, 0.75, 0.11], payload: {city: 'Bergamo'}},
+                {id: 3, vector: [0.36, 0.55, 0.47, 0.94], payload: {city: 'Moscow'}},
+                {id: 4, vector: [0.18, 0.01, 0.85, 0.8], payload: {city: 'London'}},
+            ],
+        });
+
+        const {points} = await client.scroll(collectionName, {
+            filter: {must: [{key: 'city', match: {prefix: 'Ber'}}]},
+            limit: 10,
+        });
+        expect(points.map((point) => point.payload?.city).sort()).toEqual(['Bergamo', 'Berlin']);
+    });
+
+    test('slice condition splits the id space', async () => {
+        const slices = await Promise.all(
+            [0, 1].map((index) =>
+                client.scroll(collectionName, {filter: {must: [{slice: {total: 2, index}}]}, limit: 10}),
+            ),
+        );
+        const ids = slices.flatMap(({points}) => points.map((point) => point.id));
+
+        // Slices are disjoint and together cover every point.
+        expect(new Set(ids).size).toBe(ids.length);
+        expect(ids.sort()).toEqual([1, 2, 3, 4]);
+    });
+
+    test('text index with stemming explicitly disabled', async () => {
+        const result = await client.createPayloadIndex(collectionName, {
+            field_name: 'description',
+            field_schema: {type: 'text', stemmer: {type: 'none'}},
+            wait: true,
+        });
+        expect(result.status).toBe('completed');
+    });
+
+    test('per-request IDF corpus', async () => {
+        await client.deleteCollection(sparseCollectionName);
+        await client.createCollection(sparseCollectionName, {
+            vectors: {},
+            sparse_vectors: {text: {modifier: 'idf'}},
+        });
+        await client.upsert(sparseCollectionName, {
+            wait: true,
+            points: [
+                {id: 1, vector: {text: {indices: [1, 3], values: [1.0, 0.5]}}, payload: {city: 'Berlin'}},
+                {id: 2, vector: {text: {indices: [1, 5], values: [0.7, 0.9]}}, payload: {city: 'Moscow'}},
+            ],
+        });
+
+        const query = {indices: [1, 3], values: [1.0, 1.0]};
+        const global = await client.query(sparseCollectionName, {query, using: 'text', params: {idf: 'global'}});
+        const scoped = await client.query(sparseCollectionName, {
+            query,
+            using: 'text',
+            params: {idf: {corpus: {must: [{key: 'city', match: {value: 'Berlin'}}]}}},
+        });
+
+        expect(global.points).toHaveLength(2);
+        expect(scoped.points).toHaveLength(2);
+        // Narrowing the corpus changes the document frequencies, and with them the scores.
+        expect(scoped.points[0].score).not.toBe(global.points[0].score);
+    });
+
+    test('cleanup', async () => {
+        expect(await client.deleteCollection(collectionName)).toBe(true);
+        expect(await client.deleteCollection(sparseCollectionName)).toBe(true);
+    });
+});

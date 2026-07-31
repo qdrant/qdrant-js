@@ -1,5 +1,14 @@
 # @qdrant/js-client-rest
 
+## v1.19.0
+
+### Minor Changes
+
+-   Qdrant v1.19.0 API
+-   Added `payload` (payload storage params) and `metadata` parameters to `createCollection` and `recreateCollection`
+-   Deprecated `search`, `searchBatch`, `searchPointGroups`, `recommend`, `recommendBatch`, `recommendPointGroups`, `discoverPoints` and `discoverBatchPoints`.
+    Qdrant removed these endpoints from its OpenAPI spec, but the server still serves them, so they keep working. Use `query`, `queryBatch` and `queryGroups` instead.
+
 ## v1.18.0
 
 ### Minor Changes

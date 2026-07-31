@@ -57,6 +57,22 @@ src/openapi/genetated_api_client.ts
 
 > Pro tip: if there are some problems with the generated code, our custom script `scripts/generate_client_construction.ts` might require some changes
 
+> Warn: `openapi-typescript` is pinned to `6.2.6` on purpose. Its v7 output shape (`requestBody?: never`,
+> `query?: never`) collapses `OpArgType` to `never` in `@qdrant/openapi-typescript-fetch@1.2.6`, which makes
+> every call in `qdrant-client.ts` fail to typecheck. Later 6.x patches also widen nullable `anyOf` fields
+> (e.g. `ScoredPoint.payload`) to `unknown`, silently erasing types users rely on. Do not bump it without
+> also updating `@qdrant/openapi-typescript-fetch`.
+
+### Endpoints removed from the OpenAPI spec
+
+Qdrant sometimes stops documenting an endpoint before it stops serving it. When that happens, the generator
+drops the endpoint, but the client should keep it until the server actually removes the route.
+
+`src/openapi/deprecated_schema.ts` and `src/openapi/deprecated_api_client.ts` hold those endpoints by hand —
+currently the eight search/recommend/discover ones dropped in Qdrant v1.19 (qdrant/qdrant#9982). They are
+merged into the generated `ClientApi` in `api-client.ts` and into `Schemas` in `types.ts`. When Qdrant removes
+a route for real, delete its entry from those two files and from `qdrant-client.ts`.
+
 ### Modify `packages/js-client-rest/src/qdrant-client.ts` according to generated changes
 
 -   Inspect what changed in `src/openapi/generated_schema.ts` and modify `qdrant-client.ts` according to the changes:
