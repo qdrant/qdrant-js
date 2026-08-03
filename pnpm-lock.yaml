@@ -85,8 +85,8 @@ importers:
         specifier: 1.2.6
         version: 1.2.6
       undici:
-        specifier: 8.6.0
-        version: 8.6.0
+        specifier: 7.29.0
+        version: 7.29.0
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^29.0.3
@@ -1924,9 +1924,9 @@ packages:
   undici-types@7.18.2:
     resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
 
-  undici@8.6.0:
-    resolution: {integrity: sha512-l2FlC6I510GawyEd1qgcE/okihKrzy+BRTEBlu6T0fdbM9m5yxtIH5Oa3ysRsH0zC4EhmWUEaSDsy2QngBeRlw==}
-    engines: {node: '>=22.19.0'}
+  undici@7.29.0:
+    resolution: {integrity: sha512-IDxfleLmmbSskfWSUATiN1nfn2rDuvnMOqb5CWR92iIfojA0Ud+ulOAAEQ57LPr9rWmsreUyf5lwyao+7GNNVw==}
+    engines: {node: '>=20.18.1'}
 
   uri-js-replace@1.0.1:
     resolution: {integrity: sha512-W+C9NWNLFOoBI2QWDp4UT9pv65r2w5Cx+3sTYFvtMdDBxkKt1syCqsUdSFAChbEe1uK5TfS04wt/nGwmaeIQ0g==}
@@ -3629,7 +3629,7 @@ snapshots:
 
   undici-types@7.18.2: {}
 
-  undici@8.6.0: {}
+  undici@7.29.0: {}
 
   uri-js-replace@1.0.1: {}
 

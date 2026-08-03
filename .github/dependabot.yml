@@ -5,6 +5,13 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    ignore:
+      # undici >=8 dropped the legacy dispatch handler protocol, so its Agent
+      # cannot be used as a dispatcher for Node's built-in fetch on Node 22
+      # ("invalid onRequestStart method"). Stay on v7 until the REST client
+      # stops mixing npm undici with the built-in fetch.
+      - dependency-name: "undici"
+        update-types: ["version-update:semver-major"]
     groups:
       security-updates:
         applies-to: security-updates
