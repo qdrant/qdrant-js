@@ -65,13 +65,14 @@ src/openapi/genetated_api_client.ts
 
 ### Endpoints removed from the OpenAPI spec
 
-Qdrant sometimes stops documenting an endpoint before it stops serving it. When that happens, the generator
-drops the endpoint, but the client should keep it until the server actually removes the route.
+Qdrant sometimes stops documenting an endpoint before it stops serving it. The generated client follows the
+spec, so such an endpoint disappears from `generated_client_type.ts` and its request types disappear from
+`Schemas`, which breaks every method in `qdrant-client.ts` that used them.
 
-`src/openapi/deprecated_schema.ts` and `src/openapi/deprecated_api_client.ts` hold those endpoints by hand —
-currently the eight search/recommend/discover ones dropped in Qdrant v1.19 (qdrant/qdrant#9982). They are
-merged into the generated `ClientApi` in `api-client.ts` and into `Schemas` in `types.ts`. When Qdrant removes
-a route for real, delete its entry from those two files and from `qdrant-client.ts`.
+We follow the spec rather than the running server: drop the corresponding methods from `qdrant-client.ts`,
+migrate the tests and `examples/`, and record it under `### Breaking Changes` in the changelog with a mapping
+to the replacement API. This is what v1.19 did with the eight search/recommend/discover endpoints
+(qdrant/qdrant#9982) — note it breaks semver, so it needs to be agreed on before the release.
 
 ### Modify `packages/js-client-rest/src/qdrant-client.ts` according to generated changes
 

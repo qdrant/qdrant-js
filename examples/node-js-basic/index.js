@@ -93,93 +93,55 @@ async function main() {
     //     { id: 2, payload: { city: [Array] }, vector: null }
     //   ]
 
-    // -------- Search ----------------
+    // -------- Query ----------------
     const queryVector = [0.2, 0.1, 0.9, 0.7];
 
-    const res1 = await client.search(collectionName, {
-        vector: queryVector,
+    const res1 = await client.query(collectionName, {
+        query: queryVector,
         limit: 3,
     });
 
-    console.log('search result: ', res1);
+    console.log('query result: ', res1.points);
     // prints:
-    // search result:  [
-    // {
-    //     id: 4,
-    //     version: 3,
-    //     score: 0.99248314,
-    //     payload: { city: [Array] },
-    //     vector: null
-    // },
-    // {
-    //     id: 1,
-    //     version: 3,
-    //     score: 0.89463294,
-    //     payload: {
-    //         city: 'Berlin',
-    //         coords: [Object],
-    //         count: 1000000,
-    //         country: 'Germany',
-    //         square: 12.5
-    //     },
-    //     vector: null
-    // },
-    // {
+    // query result:  [
+    //   { id: 4, version: 7, score: 0.99248314 },
+    //   { id: 1, version: 7, score: 0.89463294 },
+    //   {
     //     id: '98a9a4b1-4ef2-46fb-8315-a97d874fe1d7',
-    //     version: 3,
-    //     score: 0.8543979,
-    //     payload: { count: [Array] },
-    //     vector: null
-    // }
+    //     version: 7,
+    //     score: 0.8543979
+    //   }
     // ]
 
-    const resBatch = await client.searchBatch(collectionName, {
+    const resBatch = await client.queryBatch(collectionName, {
         searches: [
             {
-                vector: queryVector,
+                query: queryVector,
                 limit: 1,
             },
             {
-                vector: queryVector,
+                query: queryVector,
                 limit: 2,
             },
         ],
     });
 
-    console.log('search batch result: ', resBatch);
+    const batchPoints = resBatch.map(({points}) => points);
+
+    console.log('query batch result: ', batchPoints);
     // prints:
-    // search batch result:  [
-    //     [
-    //         {
-    //             id: 4,
-    //             version: 3,
-    //             score: 0.99248314,
-    //             payload: null,
-    //             vector: null
-    //         }
-    //     ],
-    //     [
-    //         {
-    //             id: 4,
-    //             version: 3,
-    //             score: 0.99248314,
-    //             payload: null,
-    //             vector: null
-    //         },
-    //         {
-    //             id: 1,
-    //             version: 3,
-    //             score: 0.89463294,
-    //             payload: null,
-    //             vector: null
-    //         }
-    //     ]
+    // query batch result:  [
+    //   [ { id: 4, version: 7, score: 0.99248314 } ],
+    //   [
+    //     { id: 4, version: 7, score: 0.99248314 },
+    //     { id: 1, version: 7, score: 0.89463294 }
+    //   ]
     // ]
 
-    // -------- Search filters ----------------
+    // -------- Query filters ----------------
 
-    const res2 = await client.search(collectionName, {
-        vector: queryVector,
+    const res2 = await client.query(collectionName, {
+        query: queryVector,
         limit: 3,
         filter: {
             must: [
@@ -193,36 +155,12 @@ async function main() {
         },
     });
 
-    console.log('search result with filter: ', res2);
+    console.log('query result with filter: ', res2.points);
     // prints:
-    // search result with filter:  [
-    //     {
-    //       id: 1,
-    //       version: 3,
-    //       score: 0.89463294,
-    //       payload: {
-    //         city: 'Berlin',
-    //         coords: [Object],
-    //         count: 1000000,
-    //         country: 'Germany',
-    //         square: 12.5
-    //       },
-    //       vector: null
-    //     },
-    //     {
-    //       id: 3,
-    //       version: 3,
-    //       score: 0.83872515,
-    //       payload: { city: [Array] },
-    //       vector: null
-    //     },
-    //     {
-    //       id: 2,
-    //       version: 3,
-    //       score: 0.66603535,
-    //       payload: { city: [Array] },
-    //       vector: null
-    //     }
+    // query result with filter:  [
+    //   { id: 1, version: 7, score: 0.89463294 },
+    //   { id: 3, version: 7, score: 0.83872515 },
+    //   { id: 2, version: 7, score: 0.66603535 }
     // ]
 
     return 0;

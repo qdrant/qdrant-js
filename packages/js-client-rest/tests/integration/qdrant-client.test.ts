@@ -134,12 +134,12 @@ describe('QdrantClient', () => {
         });
     });
 
-    test('search points', async () => {
-        const result = await client.search(collectionName, {
-            vector: [0.2, 0.1, 0.9, 0.7],
+    test('query points without a filter', async () => {
+        const result = await client.query(collectionName, {
+            query: {nearest: [0.2, 0.1, 0.9, 0.7]},
             limit: 3,
         });
-        expect(result).toHaveLength(3);
+        expect(result.points).toHaveLength(3);
     });
 
     test('upsert with timeout', async () => {
@@ -163,34 +163,16 @@ describe('QdrantClient', () => {
         expect(result).toMatchObject<typeof result>({operation_id: expect.any(Number) as number, status: 'completed'});
     });
 
-    test('search points filter', async () => {
-        const result = await client.search(collectionName, {
-            filter: {
-                should: [
-                    {
-                        key: 'city',
-                        match: {
-                            value: 'London',
-                        },
-                    },
-                ],
-            },
-            vector: [0.2, 0.1, 0.9, 0.7],
-            limit: 3,
-        });
-        expect(result).toHaveLength(2);
-    });
-
-    test('search points batch', async () => {
-        const result = await client.searchBatch(collectionName, {
+    test('query points batch', async () => {
+        const result = await client.queryBatch(collectionName, {
             searches: [
                 {
-                    vector: [0.2, 0.1, 0.9, 0.7],
+                    query: {nearest: [0.2, 0.1, 0.9, 0.7]},
                     limit: 3,
                     with_payload: true,
                 },
                 {
-                    vector: [0.2, 0.1, 0.9, 0.7],
+                    query: {nearest: [0.2, 0.1, 0.9, 0.7]},
                     limit: 3,
                     with_payload: true,
                 },

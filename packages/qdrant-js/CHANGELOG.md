@@ -2,6 +2,12 @@
 
 ## v1.19.0
 
+### Breaking Changes
+
+-   The REST client dropped `search`, `searchBatch`, `searchPointGroups`, `recommend`, `recommendBatch`, `recommend_batch`, `recommendPointGroups`,
+    `discoverPoints` and `discoverBatchPoints`. Use `query`, `queryBatch` and `queryGroups` instead — see the `@qdrant/js-client-rest` changelog for
+    the full mapping. The gRPC client still exposes the corresponding RPCs, deprecated but functional.
+
 ### Minor Changes
 
 -   Qdrant v1.19.0 API

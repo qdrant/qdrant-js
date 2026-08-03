@@ -2,12 +2,32 @@
 
 ## v1.19.0
 
+### Breaking Changes
+
+-   Removed `search`, `searchBatch`, `searchPointGroups`, `recommend`, `recommendBatch`, `recommend_batch`, `recommendPointGroups`, `discoverPoints` and `discoverBatchPoints`,
+    following Qdrant dropping the corresponding endpoints from its OpenAPI spec. Use `query`, `queryBatch` and `queryGroups` instead:
+
+    | Removed                | Replacement                                       |
+    | ---------------------- | ------------------------------------------------- |
+    | `search`               | `query`                                           |
+    | `searchBatch`          | `queryBatch`                                      |
+    | `searchPointGroups`    | `queryGroups`                                     |
+    | `recommend`            | `query` with a `recommend` query                  |
+    | `recommendBatch`       | `queryBatch` with `recommend` queries             |
+    | `recommendPointGroups` | `queryGroups` with a `recommend` query            |
+    | `discoverPoints`       | `query` with a `discover` or `context` query      |
+    | `discoverBatchPoints`  | `queryBatch` with `discover` or `context` queries |
+
+    The request types that came with them are gone from `Schemas` as well: `SearchRequest`, `SearchRequestBatch`, `SearchGroupsRequest`, `RecommendRequest`,
+    `RecommendRequestBatch`, `RecommendGroupsRequest`, `DiscoverRequest`, `DiscoverRequestBatch`, `RecommendExample`, `ContextExamplePair`, `NamedVector`,
+    `NamedSparseVector`, `NamedVectorStruct` and `UsingVector`.
+
+    Note that `query` and friends return `{points: [...]}` rather than a bare array.
+
 ### Minor Changes
 
 -   Qdrant v1.19.0 API
 -   Added `payload` (payload storage params) and `metadata` parameters to `createCollection` and `recreateCollection`
--   Deprecated `search`, `searchBatch`, `searchPointGroups`, `recommend`, `recommendBatch`, `recommendPointGroups`, `discoverPoints` and `discoverBatchPoints`.
-    Qdrant removed these endpoints from its OpenAPI spec, but the server still serves them, so they keep working. Use `query`, `queryBatch` and `queryGroups` instead.
 
 ## v1.18.0
 
