@@ -99,6 +99,20 @@ export interface paths {
      */
     delete: operations["remove_peer"];
   };
+  "/quotas": {
+    /**
+     * Get global quotas 
+     * @description Get the cluster-wide resource quota configuration, together with the current utilization it is measured against.
+     * The configuration is the same on every peer, but the reported utilization is for the node serving this request only -
+     * memory and disk are node-local, so query each peer to see where the whole cluster stands.
+     */
+    get: operations["get_quotas"];
+    /**
+     * Set global quotas 
+     * @description Replace the cluster-wide resource quota configuration. The new configuration is propagated to every peer through consensus and persisted, so it survives restarts
+     */
+    put: operations["update_quotas"];
+  };
   "/collections": {
     /**
      * List collections 
@@ -999,14 +1013,10 @@ export interface components {
       max_payload_index_count?: number | null;
       /**
        * Format: uint8 
-       * @description Reject memory-consuming update operations when resident memory exceeds this percentage of total RAM (1-100)
+       * @deprecated 
+       * @description Deprecated: use the node-wide quota config instead. Reject memory-consuming update operations when resident memory exceeds this percentage of total RAM (1-100)
        */
       max_resident_memory_percent?: number | null;
-      /**
-       * Format: uint8 
-       * @description Reject disk-consuming update operations when the storage filesystem exceeds this percentage of total capacity (1-100)
-       */
-      max_disk_usage_percent?: number | null;
     };
     StrictModeMultivectorConfigOutput: {
       [key: string]: components["schemas"]["StrictModeMultivectorOutput"] | undefined;
@@ -1875,14 +1885,12 @@ export interface components {
       max_payload_index_count?: number | null;
       /**
        * Format: uint8 
-       * @description Reject memory-consuming update operations (e.g. upsert, set payload) when the process resident memory exceeds this percentage of total system memory (or cgroup limit). Value in [1, 100]. Applied uniformly to external and internal (replication) traffic — rejection is deterministic so it does not cause replica divergence. Delete operations are not affected, so callers can still free memory.
+       * @deprecated 
+       * @description Deprecated: use the node-wide quota config (`PUT /quotas`) instead, which caps the same resource for every collection. Scheduled for removal in 1.21.
+       * 
+       * Reject memory-consuming update operations (e.g. upsert, set payload) when the process resident memory exceeds this percentage of total system memory (or cgroup limit). Value in [1, 100]. Memory is a node-wide resource, so this only tightens the quota for one collection; it cannot lift it. Delete operations are not affected, so callers can still free memory.
        */
       max_resident_memory_percent?: number | null;
-      /**
-       * Format: uint8 
-       * @description Reject disk-consuming update operations (e.g. upsert, set payload) when the filesystem hosting Qdrant storage is filled above this percentage of its total capacity. Value in [1, 100]. Applied uniformly to external and internal (replication) traffic — rejection is deterministic so it does not cause replica divergence. Delete operations are not affected, so callers can still free disk space. Free space is sampled with a small TTL cache; the gate may take a few seconds to react.
-       */
-      max_disk_usage_percent?: number | null;
     };
     StrictModeMultivectorConfig: {
       [key: string]: components["schemas"]["StrictModeMultivector"] | undefined;
@@ -2436,6 +2444,8 @@ export interface components {
       memory?: components["schemas"]["MemoryTelemetry"] | (Record<string, unknown> | null);
       hardware?: components["schemas"]["HardwareTelemetry"] | (Record<string, unknown> | null);
       search_pool?: components["schemas"]["SearchThreadPoolTelemetry"] | (Record<string, unknown> | null);
+      /** @description Resource quota this node is enforcing, and whether it is currently over it. The config is whatever this node last persisted, so a peer that missed a consensus update reports what it is actually applying rather than what the cluster agreed on. Absent for a token without global access, which `GET /quotas` requires as well. */
+      quota?: components["schemas"]["QuotaTelemetry"] | (Record<string, unknown> | null);
     };
     AppBuildTelemetry: {
       name: string;
@@ -2543,9 +2553,15 @@ export interface components {
        * @description Average number of CPU cores used by this process over roughly the last two seconds. `None` on unsupported platforms, before two samples are collected, or on transient failures reading process CPU time.
        */
       cpu_cores_used?: number | null;
-      /** Format: uint */
+      /**
+       * Format: uint 
+       * @description Effective total memory for this process in KiB (cgroup limit or host RAM).
+       */
       ram_size?: number | null;
-      /** Format: uint */
+      /**
+       * Format: uint 
+       * @description Size in KiB of the filesystem hosting Qdrant's /storage path (if not available, fallback to host disk size)
+       */
       disk_size?: number | null;
       cpu_flags: string;
       cpu_endian?: components["schemas"]["CpuEndian"] | (Record<string, unknown> | null);
@@ -3126,6 +3142,59 @@ export interface components {
        * @description Blocking-thread count of the high-IO runtime.
        */
       high_io_threads: number;
+    };
+    /**
+     * @description What a node reports about the quota it is enforcing.
+     * 
+     * Carries the verdict rather than the raw utilization, because the point of reporting it is to know whether this node is currently refusing writes — which depends on the limits as well as the readings.
+     */
+    QuotaTelemetry: {
+      config: components["schemas"]["QuotaConfig"];
+      exceeded: components["schemas"]["QuotaExceeded"];
+    };
+    /**
+     * @description Cluster-wide limits on node resources.
+     * 
+     * An unset limit means the corresponding resource is not capped. Limits are only enforced while `enabled` is true.
+     */
+    QuotaConfig: {
+      /**
+       * @description Whether the limits below are enforced. 
+       * @default false
+       */
+      enabled?: boolean;
+      /**
+       * Format: uint8 
+       * @description Reject memory-consuming updates once process resident memory reaches this percentage of total system memory (or of the cgroup limit, if one applies).
+       */
+      max_resident_memory_percent?: number | null;
+      /**
+       * Format: uint8 
+       * @description Reject disk-consuming updates once the filesystem hosting the storage directory is filled to this percentage of its capacity.
+       */
+      max_disk_usage_percent?: number | null;
+      /**
+       * Format: uint8 
+       * @description How many percentage points below its limit a resource has to fall before this node starts accepting work again.
+       * 
+       * Without a margin, a resource resting on its limit crosses it in both directions on the noise between two readings, putting the node in and out of service each time — and restarting a shard recovery with it. Raise it where usage is volatile; `0` disables the margin and releases as soon as usage is back under the limit.
+       * 
+       * Unset leaves the built-in default in force, so a config written today does not pin a number that a later release may want to revise.
+       */
+      release_margin_percent?: number | null;
+    };
+    /**
+     * @description Which of the enforced limits a node is currently refusing work over.
+     * 
+     * Reported per resource because they are freed by different actions: disk by deleting or optimizing, memory by unloading. A single flag would not say which one to go and fix.
+     * 
+     * `true` outlasts the reading that caused it: a resource that reaches its limit stays flagged until it has fallen a margin below, so that one resting near the limit does not flip the node in and out of service. Expect to see it set while the reported utilization is already back under the configured limit.
+     * 
+     * A field is `null` when the node is not enforcing that resource — the quota is disabled, no limit is set for it, or it cannot be measured here. That is deliberately distinct from `false`: a resource that can never trip must not be reported as one that is within its limits, or it invites an alert that can never fire.
+     */
+    QuotaExceeded: {
+      resident_memory?: boolean | null;
+      disk_usage?: boolean | null;
     };
     ClusterOperations: components["schemas"]["MoveShardOperation"] | components["schemas"]["ReplicateShardOperation"] | components["schemas"]["AbortTransferOperation"] | components["schemas"]["DropReplicaOperation"] | components["schemas"]["CreateShardingKeyOperation"] | components["schemas"]["DropShardingKeyOperation"] | components["schemas"]["RestartTransferOperation"] | components["schemas"]["StartReshardingOperation"] | components["schemas"]["AbortReshardingOperation"] | components["schemas"]["ReplicatePointsOperation"];
     MoveShardOperation: {
@@ -4172,6 +4241,55 @@ export interface components {
       /** @description Datatype used to store weights in the index */
       datatype?: components["schemas"]["VectorStorageDatatype"] | (Record<string, unknown> | null);
     };
+    /**
+     * @description Quota configuration in effect, and how close each peer is to it.
+     * 
+     * The configuration is cluster-wide; the utilization is not. `usage` is the node that served the request, and `peers` is what every peer that answered reports about itself — memory and disk are node-local, so one peer being under its limit says nothing about the others.
+     */
+    QuotaStatus: {
+      config: components["schemas"]["QuotaConfig"];
+      usage: components["schemas"]["QuotaUsage"];
+      /**
+       * @description Utilization reported by each peer, keyed by peer ID, including the one that served the request.
+       * 
+       * Only peers that answered are listed: a peer missing from the map could not be reached, which is itself worth seeing. Absent entirely outside distributed mode, where there are no peers to ask.
+       */
+      peers?: ({
+        [key: string]: components["schemas"]["PeerQuotaUsage"] | undefined;
+      }) | null;
+    };
+    /**
+     * @description Utilization of the quota-managed resources **on this node alone** — memory and disk are node-local, so a peer under its limit says nothing about the rest of the cluster.
+     * 
+     * A field is `null` when the platform does not expose the underlying stat.
+     */
+    QuotaUsage: {
+      /**
+       * Format: uint8 
+       * @description Resident memory of this node's process, as a percentage of the memory available to it (cgroup limit if one applies, else total system memory).
+       */
+      resident_memory_percent?: number | null;
+      /**
+       * Format: uint8 
+       * @description Used space of this node's storage filesystem, as a percentage of its capacity.
+       */
+      disk_usage_percent?: number | null;
+    };
+    /** @description What one peer reports about the quota it is enforcing. */
+    PeerQuotaUsage: {
+      /** @description Whether this peer is at or over one of the enforced limits, and so is currently refusing updates. Always false while the quota is disabled. */
+      exceeded: boolean;
+      /**
+       * Format: uint8 
+       * @description Resident memory of this node's process, as a percentage of the memory available to it (cgroup limit if one applies, else total system memory).
+       */
+      resident_memory_percent?: number | null;
+      /**
+       * Format: uint8 
+       * @description Used space of this node's storage filesystem, as a percentage of its capacity.
+       */
+      disk_usage_percent?: number | null;
+    };
   };
   responses: never;
   parameters: never;
@@ -4670,6 +4788,99 @@ export interface operations {
       path: {
         /** @description Id of the peer */
         peer_id: number;
+      };
+    };
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+            /**
+             * Format: float 
+             * @description Time spent to process this request 
+             * @example 0.002
+             */
+            time?: number;
+            /** @example ok */
+            status?: string;
+            result?: boolean;
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Get global quotas 
+   * @description Get the cluster-wide resource quota configuration, together with the current utilization it is measured against.
+   * The configuration is the same on every peer, but the reported utilization is for the node serving this request only -
+   * memory and disk are node-local, so query each peer to see where the whole cluster stands.
+   */
+  get_quotas: {
+    responses: {
+      /** @description successful operation */
+      200: {
+        content: {
+          "application/json": {
+            /** @default null */
+            usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+            /**
+             * Format: float 
+             * @description Time spent to process this request 
+             * @example 0.002
+             */
+            time?: number;
+            /** @example ok */
+            status?: string;
+            result?: components["schemas"]["QuotaStatus"];
+          };
+        };
+      };
+      /** @description error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description error */
+      "4XX": {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * Set global quotas 
+   * @description Replace the cluster-wide resource quota configuration. The new configuration is propagated to every peer through consensus and persisted, so it survives restarts
+   */
+  update_quotas: {
+    parameters: {
+      query?: {
+        /**
+         * @description If true, wait until the new configuration is confirmed by consensus on this peer.
+         * If false - the request returns as soon as the change is proposed.
+         */
+        wait?: boolean;
+      };
+    };
+    /** @description Quota configuration to apply */
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["QuotaConfig"];
       };
     };
     responses: {

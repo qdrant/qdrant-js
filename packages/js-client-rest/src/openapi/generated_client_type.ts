@@ -410,6 +410,76 @@ export type ClientApi = {
   }>;
   
   /**
+       * Get global quotas 
+       * @description Get the cluster-wide resource quota configuration, together with the current utilization it is measured against.
+       * The configuration is the same on every peer, but the reported utilization is for the node serving this request only -
+       * memory and disk are node-local, so query each peer to see where the whole cluster stands.
+       */
+  getQuotas: TypedFetch<{
+    responses: {
+          200: {
+            content: {
+              "application/json": {
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+                time?: number;
+                status?: string;
+                result?: components["schemas"]["QuotaStatus"];
+              };
+            };
+          };
+          default: {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+          "4XX": {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+        };
+  }>;
+  
+  /**
+       * Set global quotas 
+       * @description Replace the cluster-wide resource quota configuration. The new configuration is propagated to every peer through consensus and persisted, so it survives restarts
+       */
+  updateQuotas: TypedFetch<{
+    parameters: {
+          query?: {
+            wait?: boolean;
+          };
+        };
+    requestBody?: {
+          content: {
+            "application/json": components["schemas"]["QuotaConfig"];
+          };
+        };
+    responses: {
+          200: {
+            content: {
+              "application/json": {
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+                time?: number;
+                status?: string;
+                result?: boolean;
+              };
+            };
+          };
+          default: {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+          "4XX": {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+        };
+  }>;
+  
+  /**
        * List collections 
        * @description Get list name of all existing collections
        */

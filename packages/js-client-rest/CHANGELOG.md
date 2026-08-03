@@ -27,7 +27,9 @@
 ### Minor Changes
 
 -   Qdrant v1.19.0 API
+-   Added `getQuotas` and `updateQuotas` for the cluster-wide quota API
 -   Added `payload` (payload storage params) and `metadata` parameters to `createCollection` and `recreateCollection`
+-   `max_disk_usage_percent` moved off `strict_mode_config` — it is now a cluster-wide setting on `updateQuotas`, alongside `max_resident_memory_percent` and `release_margin_percent`
 
 ## v1.18.0
 

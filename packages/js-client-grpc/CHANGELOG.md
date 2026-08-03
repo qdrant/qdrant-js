@@ -6,6 +6,7 @@
 
 -   Qdrant v1.19.0 API
 -   The `Search`, `SearchBatch`, `SearchGroups`, `Recommend`, `RecommendBatch`, `RecommendGroups`, `Discover` and `DiscoverBatch` RPCs are marked deprecated upstream. Use `Query`, `QueryBatch` and `QueryGroups` instead.
+-   `StrictModeConfig.max_disk_usage_percent` is gone, superseded by the cluster-wide quota config, and `max_resident_memory_percent` is deprecated with removal planned for 1.21. The quota API itself is REST-only for now.
 
 ## 1.18.0
 

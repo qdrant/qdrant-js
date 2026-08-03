@@ -151,6 +151,30 @@ export function createClientApi(client: Client) : ClientApi {
       }),
     
     /**
+         * Get global quotas 
+         * @description Get the cluster-wide resource quota configuration, together with the current utilization it is measured against.
+         * The configuration is the same on every peer, but the reported utilization is for the node serving this request only -
+         * memory and disk are node-local, so query each peer to see where the whole cluster stands.
+         */
+    getQuotas:
+      client
+      .path('/quotas')
+      .method('get')
+      .create(),
+    
+    /**
+         * Set global quotas 
+         * @description Replace the cluster-wide resource quota configuration. The new configuration is propagated to every peer through consensus and persisted, so it survives restarts
+         */
+    updateQuotas:
+      client
+      .path('/quotas')
+      .method('put')
+      .create({
+        wait: true,
+      }),
+    
+    /**
          * List collections 
          * @description Get list name of all existing collections
          */

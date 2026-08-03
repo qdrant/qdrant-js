@@ -313,7 +313,7 @@ describe('Qdrant v1.19 API', () => {
                 hnsw_config: {memory: 'cold'},
                 payload: {memory: 'cold'},
                 metadata: {owner: 'integration-test'},
-                strict_mode_config: {enabled: false, max_disk_usage_percent: 95},
+                strict_mode_config: {enabled: false, max_resident_memory_percent: 95},
             }),
         ).toBe(true);
 
@@ -395,6 +395,33 @@ describe('Qdrant v1.19 API', () => {
         expect(scoped.points).toHaveLength(2);
         // Narrowing the corpus changes the document frequencies, and with them the scores.
         expect(scoped.points[0].score).not.toBe(global.points[0].score);
+    });
+
+    test('cluster-wide quotas', async () => {
+        const before = await client.getQuotas();
+        expect(before.config).toBeDefined();
+        expect(before.usage).toBeDefined();
+
+        expect(
+            await client.updateQuotas({
+                enabled: true,
+                max_resident_memory_percent: 95,
+                max_disk_usage_percent: 95,
+                release_margin_percent: 5,
+                wait: true,
+            }),
+        ).toBe(true);
+
+        const after = await client.getQuotas();
+        expect(after.config).toMatchObject({
+            enabled: true,
+            max_resident_memory_percent: 95,
+            max_disk_usage_percent: 95,
+            release_margin_percent: 5,
+        });
+
+        // Put it back so the rest of the suite is not run against an enforcing node.
+        expect(await client.updateQuotas({enabled: false, wait: true})).toBe(true);
     });
 
     test('cleanup', async () => {

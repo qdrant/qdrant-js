@@ -1416,6 +1416,37 @@ export class QdrantClient {
     }
 
     /**
+     * Get the cluster-wide quota configuration and how close each peer is to it
+     * @description The configuration is cluster-wide, the utilization is not: memory and disk are node-local,
+     * so one peer being under its limit says nothing about the others. `usage` describes the node that served
+     * the request, `peers` is what every peer that answered reports about itself.
+     * @returns Quota configuration in effect, and per-peer utilization
+     */
+    async getQuotas(): Promise<Schemas['QuotaStatus']> {
+        const response = await this._openApiClient.getQuotas({});
+        return response.data.result ?? noResultError();
+    }
+
+    /**
+     * Set the cluster-wide limits on node resources
+     * @description An unset limit means the corresponding resource is not capped. Limits are only enforced
+     * while `enabled` is true.
+     * @param {object} args
+     *     - enabled: Whether the limits are enforced
+     *     - max_resident_memory_percent: Reject memory-consuming updates once process resident memory reaches
+     *         this percentage of the memory available to it
+     *     - max_disk_usage_percent: Reject disk-consuming updates once the storage filesystem is filled to
+     *         this percentage of its capacity
+     *     - release_margin_percent: How far below its limit a resource has to fall before updates resume
+     *     - wait: Await for the configuration to be applied cluster-wide
+     * @returns Operation result
+     */
+    async updateQuotas({wait, ...config}: {wait?: boolean} & Schemas['QuotaConfig'] = {}): Promise<boolean> {
+        const response = await this._openApiClient.updateQuotas({wait, ...config});
+        return response.data.result ?? noResultError();
+    }
+
+    /**
      * Returns information about the running Qdrant instance
      * @description Returns information about the running Qdrant instance like version and commit id
      * @returns Operation result
