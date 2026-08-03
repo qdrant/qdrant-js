@@ -300,7 +300,25 @@ describe('QdrantClient', () => {
     });
 });
 
-describe('Qdrant v1.19 API', () => {
+/**
+ * The block below exercises API that a pre-1.19 server does not have. Some of it is rejected there,
+ * but `memory`, `payload` and `params.idf` are silently ignored instead, which turns into confusing
+ * assertion failures rather than honest errors — so the whole block is gated.
+ *
+ * The gate probes `/quotas` rather than comparing versions: it arrived in the same release and
+ * answers 404 on older servers, while the version string cannot be used — Qdrant's `dev` branch
+ * reports `1.18.3-dev` even though it carries the full 1.19 API.
+ */
+const supportsV119 = await new QdrantClient().getQuotas().then(
+    () => true,
+    (error: unknown) => {
+        const status = (error as {status?: unknown} | null)?.status;
+        if (status === 404) return false;
+        throw error;
+    },
+);
+
+describe.skipIf(!supportsV119)('Qdrant v1.19 API', () => {
     const client = new QdrantClient();
     const collectionName = 'test_collection_v1_19';
     const sparseCollectionName = 'test_collection_v1_19_sparse';
