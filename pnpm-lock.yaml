@@ -101,7 +101,7 @@ importers:
         specifier: 7.7.1
         version: 7.7.1
       openapi-typescript:
-        specifier: 6.2.6
+        specifier: ^6.2.6
         version: 6.2.6
       semver:
         specifier: 7.8.5

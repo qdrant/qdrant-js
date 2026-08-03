@@ -57,45 +57,6 @@ src/openapi/genetated_api_client.ts
 
 > Pro tip: if there are some problems with the generated code, our custom script `scripts/generate_client_construction.ts` might require some changes
 
-### Why `openapi-typescript` is pinned to `6.2.6`
-
-Two independent things break when it is bumped. Both were measured against the v1.19 `dev` schema.
-
-**1. v7 is incompatible with our fork of the fetch wrapper.** For every parameter slot an operation does not
-use, v7 emits a placeholder — `query?: never`, `path?: never`. An optional property typed `never` has type
-`undefined`, and `OpArgType` in `@qdrant/openapi-typescript-fetch@1.2.6` intersects the inferred slots:
-`{collection_name: string} & undefined` is `never`. Of 67 operations, 16 become uncallable (`never`) and 11
-more become `undefined`, which rejects the `f({})` calls used throughout `qdrant-client.ts`.
-
-`requestBody?: never` is _not_ part of this — it infers harmlessly.
-
-Upstream `openapi-typescript-fetch` fixed exactly this in 2.x by wrapping each slot in
-`type NonNever<T> = [T] extends [never | undefined] ? unknown : T`. With that guard, all 67 operations
-resolve correctly against v7 output. Our fork is at 1.2.6 (March 2024) and predates it. The fork exists for
-`JSON.rawJSON`-based BigInt point ids, which upstream does not have, so the fix is to port `NonNever` into
-`qdrant/openapi-typescript-fetch` and release it — not to switch to upstream.
-
-**2. `6.7.2` and later erase nullable types.** Qdrant's spec expresses nullable fields as
-`anyOf: [{$ref: ...}, {nullable: true}]`. That second branch has no `type`, so it means "any type" and newer
-generators render it as `unknown` — and `X | unknown` collapses to `unknown`. `6.2.6` instead guessed
-`Record<string, unknown> | null`, which is what preserves the union. The spec has 260 such branches, and 260
-fields lose their types from `6.7.2` onward (`ScoredPoint.payload` becomes plain `unknown`). `6.7.1` is the
-last good version, but it also drops `| undefined` from index signatures, which weakens types for users.
-
-The durable fix here is on the Qdrant side: emit a typed null branch rather than a bare `{nullable: true}`.
-Until then, the pin is what keeps the response types meaningful.
-
-### Endpoints removed from the OpenAPI spec
-
-Qdrant sometimes stops documenting an endpoint before it stops serving it. The generated client follows the
-spec, so such an endpoint disappears from `generated_client_type.ts` and its request types disappear from
-`Schemas`, which breaks every method in `qdrant-client.ts` that used them.
-
-We follow the spec rather than the running server: drop the corresponding methods from `qdrant-client.ts`,
-migrate the tests and `examples/`, and record it under `### Breaking Changes` in the changelog with a mapping
-to the replacement API. This is what v1.19 did with the eight search/recommend/discover endpoints
-(qdrant/qdrant#9982) — note it breaks semver, so it needs to be agreed on before the release.
-
 ### Modify `packages/js-client-rest/src/qdrant-client.ts` according to generated changes
 
 -   Inspect what changed in `src/openapi/generated_schema.ts` and modify `qdrant-client.ts` according to the changes:
