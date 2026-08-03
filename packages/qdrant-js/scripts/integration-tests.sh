@@ -9,7 +9,9 @@ function stop_docker()
   docker stop qdrant_test
 }
 
-QDRANT_LATEST="v1.18.0"
+# The client tracks the `dev` branch of Qdrant until the matching release is tagged, so the tests
+# need a server that has the API they exercise. Switch this to "v1.19.0" once that image is out.
+QDRANT_LATEST="dev"
 QDRANT_VERSION=${QDRANT_VERSION:-"$QDRANT_LATEST"}
 
 QDRANT_HOST='127.0.0.1:6333'

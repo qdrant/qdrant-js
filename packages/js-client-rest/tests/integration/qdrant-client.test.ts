@@ -8,6 +8,8 @@ describe('QdrantClient', () => {
         /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
     const client = new QdrantClient();
     const collectionName = 'test_collection';
+    const paramsCollectionName = 'test_collection_params';
+    const sparseCollectionName = 'test_collection_sparse';
     const bigInt = BigInt(String(Number.MAX_SAFE_INTEGER + 2)) as unknown as number;
     const maxSafeInteger = Number.MAX_SAFE_INTEGER;
     const supportsJSONBigInt = semver.satisfies(process.versions.node, '>=21');
@@ -298,35 +300,11 @@ describe('QdrantClient', () => {
         console.log(result);
         expect(result[0].points).toHaveLength(2);
     });
-});
-
-/**
- * The block below exercises API that a pre-1.19 server does not have. Some of it is rejected there,
- * but `memory`, `payload` and `params.idf` are silently ignored instead, which turns into confusing
- * assertion failures rather than honest errors — so the whole block is gated.
- *
- * The gate probes `/quotas` rather than comparing versions: it arrived in the same release and
- * answers 404 on older servers, while the version string cannot be used — Qdrant's `dev` branch
- * reports `1.18.3-dev` even though it carries the full 1.19 API.
- */
-const supportsV119 = await new QdrantClient().getQuotas().then(
-    () => true,
-    (error: unknown) => {
-        const status = (error as {status?: unknown} | null)?.status;
-        if (status === 404) return false;
-        throw error;
-    },
-);
-
-describe.skipIf(!supportsV119)('Qdrant v1.19 API', () => {
-    const client = new QdrantClient();
-    const collectionName = 'test_collection_v1_19';
-    const sparseCollectionName = 'test_collection_v1_19_sparse';
 
     test('create collection with memory placement and payload storage params', async () => {
-        await client.deleteCollection(collectionName);
+        await client.deleteCollection(paramsCollectionName);
         expect(
-            await client.createCollection(collectionName, {
+            await client.createCollection(paramsCollectionName, {
                 vectors: {size: 4, distance: 'Dot', memory: 'cached'},
                 hnsw_config: {memory: 'cold'},
                 payload: {memory: 'cold'},
@@ -335,20 +313,20 @@ describe.skipIf(!supportsV119)('Qdrant v1.19 API', () => {
             }),
         ).toBe(true);
 
-        const {config} = await client.getCollection(collectionName);
+        const {config} = await client.getCollection(paramsCollectionName);
         expect(config.params.payload).toMatchObject({memory: 'cold'});
         expect(config.metadata).toMatchObject({owner: 'integration-test'});
     });
 
     test('keyword index with prefix matching', async () => {
-        const result = await client.createPayloadIndex(collectionName, {
+        const result = await client.createPayloadIndex(paramsCollectionName, {
             field_name: 'city',
             field_schema: {type: 'keyword', prefix: true},
             wait: true,
         });
         expect(result.status).toBe('completed');
 
-        await client.upsert(collectionName, {
+        await client.upsert(paramsCollectionName, {
             wait: true,
             points: [
                 {id: 1, vector: [0.05, 0.61, 0.76, 0.74], payload: {city: 'Berlin'}},
@@ -358,7 +336,7 @@ describe.skipIf(!supportsV119)('Qdrant v1.19 API', () => {
             ],
         });
 
-        const {points} = await client.scroll(collectionName, {
+        const {points} = await client.scroll(paramsCollectionName, {
             filter: {must: [{key: 'city', match: {prefix: 'Ber'}}]},
             limit: 10,
         });
@@ -368,7 +346,7 @@ describe.skipIf(!supportsV119)('Qdrant v1.19 API', () => {
     test('slice condition splits the id space', async () => {
         const slices = await Promise.all(
             [0, 1].map((index) =>
-                client.scroll(collectionName, {filter: {must: [{slice: {total: 2, index}}]}, limit: 10}),
+                client.scroll(paramsCollectionName, {filter: {must: [{slice: {total: 2, index}}]}, limit: 10}),
             ),
         );
         const ids = slices.flatMap(({points}) => points.map((point) => point.id));
@@ -379,7 +357,7 @@ describe.skipIf(!supportsV119)('Qdrant v1.19 API', () => {
     });
 
     test('text index with stemming explicitly disabled', async () => {
-        const result = await client.createPayloadIndex(collectionName, {
+        const result = await client.createPayloadIndex(paramsCollectionName, {
             field_name: 'description',
             field_schema: {type: 'text', stemmer: {type: 'none'}},
             wait: true,
@@ -443,7 +421,7 @@ describe.skipIf(!supportsV119)('Qdrant v1.19 API', () => {
     });
 
     test('cleanup', async () => {
-        expect(await client.deleteCollection(collectionName)).toBe(true);
+        expect(await client.deleteCollection(paramsCollectionName)).toBe(true);
         expect(await client.deleteCollection(sparseCollectionName)).toBe(true);
     });
 });
