@@ -1,5 +1,5 @@
-import restClient from '../packages/js-client-rest/package.json' assert {type: 'json'};
-import grpcClient from '../packages/js-client-grpc/package.json' assert {type: 'json'};
+import restClient from '../packages/js-client-rest/package.json' with {type: 'json'};
+import grpcClient from '../packages/js-client-grpc/package.json' with {type: 'json'};
 import {promisify} from 'node:util';
 import {exec} from 'node:child_process';
 
