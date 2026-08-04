@@ -1,5 +1,36 @@
 # @qdrant/js-client-rest
 
+## v1.19.0
+
+### Breaking Changes
+
+-   Removed `search`, `searchBatch`, `searchPointGroups`, `recommend`, `recommendBatch`, `recommend_batch`, `recommendPointGroups`, `discoverPoints` and `discoverBatchPoints`,
+    following Qdrant dropping the corresponding endpoints from its OpenAPI spec. Use `query`, `queryBatch` and `queryGroups` instead:
+
+    | Removed                | Replacement                                       |
+    | ---------------------- | ------------------------------------------------- |
+    | `search`               | `query`                                           |
+    | `searchBatch`          | `queryBatch`                                      |
+    | `searchPointGroups`    | `queryGroups`                                     |
+    | `recommend`            | `query` with a `recommend` query                  |
+    | `recommendBatch`       | `queryBatch` with `recommend` queries             |
+    | `recommendPointGroups` | `queryGroups` with a `recommend` query            |
+    | `discoverPoints`       | `query` with a `discover` or `context` query      |
+    | `discoverBatchPoints`  | `queryBatch` with `discover` or `context` queries |
+
+    The request types that came with them are gone from `Schemas` as well: `SearchRequest`, `SearchRequestBatch`, `SearchGroupsRequest`, `RecommendRequest`,
+    `RecommendRequestBatch`, `RecommendGroupsRequest`, `DiscoverRequest`, `DiscoverRequestBatch`, `RecommendExample`, `ContextExamplePair`, `NamedVector`,
+    `NamedSparseVector`, `NamedVectorStruct` and `UsingVector`.
+
+    Note that `query` and friends return `{points: [...]}` rather than a bare array.
+
+### Minor Changes
+
+-   Qdrant v1.19.0 API
+-   Added `getQuotas` and `updateQuotas` for the cluster-wide quota API
+-   Added `payload` (payload storage params) and `metadata` parameters to `createCollection` and `recreateCollection`
+-   `max_disk_usage_percent` moved off `strict_mode_config` — it is now a cluster-wide setting on `updateQuotas`, alongside `max_resident_memory_percent` and `release_margin_percent`
+
 ## v1.18.0
 
 ### Minor Changes

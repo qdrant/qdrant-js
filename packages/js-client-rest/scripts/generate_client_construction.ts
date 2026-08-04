@@ -88,8 +88,40 @@ function getInterfaceMembers(interfaceContent: string): string[] {
 
     let currentMember = '';
     let braceCount = 0;
+    // Doc comments carry API descriptions verbatim, and those contain semicolons. Splitting inside
+    // one would cut a member in half, so comments are copied over without being inspected.
+    let inBlockComment = false;
+    let inLineComment = false;
 
-    for (const char of contentInsideBraces) {
+    for (let i = 0; i < contentInsideBraces.length; i++) {
+        const char = contentInsideBraces[i];
+        const nextChar = contentInsideBraces[i + 1];
+
+        if (inBlockComment) {
+            currentMember += char;
+            if (char === '*' && nextChar === '/') {
+                currentMember += nextChar;
+                i++;
+                inBlockComment = false;
+            }
+            continue;
+        }
+
+        if (inLineComment) {
+            currentMember += char;
+            if (char === '\n') {
+                inLineComment = false;
+            }
+            continue;
+        }
+
+        if (char === '/' && (nextChar === '*' || nextChar === '/')) {
+            inBlockComment = nextChar === '*';
+            inLineComment = nextChar === '/';
+            currentMember += char;
+            continue;
+        }
+
         if (char === '{') {
             braceCount++;
         } else if (char === '}') {

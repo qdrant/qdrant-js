@@ -147,298 +147,6 @@ export class QdrantClient {
     }
 
     /**
-     * Search for points in multiple collections
-     *
-     * @param collectionName Name of the collection
-     * @param {object} args -
-     *     - searches: List of search requests
-     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
-     *         Values:
-     *             number - number of replicas to query, values should present in all queried replicas
-     *             'majority' - query all replicas, but return values present in the majority of replicas
-     *             'quorum' - query the majority of replicas, return values present in all of them
-     *             'all' - query all replicas, and return values present in all replicas
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
-     * @returns List of search responses
-     */
-    async searchBatch(
-        collection_name: string,
-        {
-            searches,
-            consistency,
-            timeout,
-        }: Pick<Schemas['SearchRequestBatch'], 'searches'> & {consistency?: Schemas['ReadConsistency']} & {
-            timeout?: number;
-        },
-    ): Promise<Schemas['ScoredPoint'][][]> {
-        const response = await this._openApiClient.searchBatchPoints({
-            collection_name,
-            consistency,
-            timeout,
-            searches,
-        });
-        return response.data.result ?? noResultError();
-    }
-
-    /**
-     * Search for closest vectors in collection taking into account filtering conditions
-     *
-     * @param collection_name Collection to search in
-     * @param {object} args -
-     *      - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
-     *      - vector:
-     *          Search for vectors closest to this.
-     *          Can be either a vector itself, or a named vector, or a tuple of vector name and vector itself
-     *      - filter:
-     *          - Exclude vectors which doesn't fit given conditions.
-     *          - If `None` - search among all vectors
-     *      - params: Additional search params
-     *      - limit: How many results return
-     *      - offset:
-     *          Offset of the first result to return.
-     *          May be used to paginate results.
-     *          Note: large offset values may cause performance issues.
-     *      - with_payload:
-     *          - Specify which stored payload should be attached to the result.
-     *          - If `True` - attach all payload
-     *          - If `False` - do not attach any payload
-     *          - If List of string - include only specified fields
-     *          - If `PayloadSelector` - use explicit rules
-     *      - with_vector:
-     *          - If `True` - Attach stored vector to the search result.
-     *          - If `False` - Do not attach vector.
-     *          - If List of string - include only specified fields
-     *          - Default: `False`
-     *      - score_threshold:
-     *          Define a minimal score threshold for the result.
-     *          If defined, less similar results will not be returned.
-     *          Score of the returned result might be higher or smaller than the threshold depending
-     *          on the Distance function used.
-     *          E.g. for cosine similarity only higher scores will be returned.
-     *      - consistency:
-     *          Read consistency of the search. Defines how many replicas should be queried before returning the result.
-     *          Values:
-     *              - int - number of replicas to query, values should present in all queried replicas
-     *              - 'majority' - query all replicas, but return values present in the majority of replicas
-     *              - 'quorum' - query the majority of replicas, return values present in all of them
-     *              - 'all' - query all replicas, and return values present in all replicas
-     *      - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
-     * @example
-     *     // Search with filter
-     *     client.search(
-     *         "test_collection",
-     *         {
-     *             vector: [1.0, 0.1, 0.2, 0.7],
-     *             filter: {
-     *                 must: [
-     *                     {
-     *                         key: 'color',
-     *                         range: {
-     *                             color: 'red'
-     *                         }
-     *                     }
-     *                 ]
-     *             )
-     *         }
-     *     )
-     * @returns List of found close points with similarity scores.
-     */
-    async search(
-        collection_name: string,
-        {
-            shard_key,
-            vector,
-            limit = 10,
-            offset = 0,
-            filter,
-            params,
-            with_payload = true,
-            with_vector = false,
-            score_threshold,
-            consistency,
-            timeout,
-        }: Partial<Pick<Schemas['SearchRequest'], 'limit'>> &
-            Omit<Schemas['SearchRequest'], 'limit'> & {
-                consistency?: Schemas['ReadConsistency'];
-            } & {timeout?: number},
-    ): Promise<Schemas['ScoredPoint'][]> {
-        const response = await this._openApiClient.searchPoints({
-            collection_name,
-            consistency,
-            timeout,
-            shard_key,
-            vector,
-            limit,
-            offset,
-            filter,
-            params,
-            with_payload,
-            with_vector,
-            score_threshold,
-        });
-        return response.data.result ?? noResultError();
-    }
-
-    /**
-     * Perform multiple recommend requests in batch mode
-     * @param collection_name Name of the collection
-     * @param {object} args
-     *     - searches: List of recommend requests
-     *     - consistency:
-     *         Read consistency of the search. Defines how many replicas should be queried before returning the result.
-     *         Values:
-     *             - number - number of replicas to query, values should present in all queried replicas
-     *             - 'majority' - query all replicas, but return values present in the majority of replicas
-     *             - 'quorum' - query the majority of replicas, return values present in all of them
-     *             - 'all' - query all replicas, and return values present in all replicas
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
-     * @returns List of recommend responses
-     */
-    async recommendBatch(
-        collection_name: string,
-        {
-            searches,
-            consistency,
-            timeout,
-        }: Schemas['RecommendRequestBatch'] & {consistency?: Schemas['ReadConsistency']} & {timeout?: number},
-    ): Promise<Schemas['ScoredPoint'][][]> {
-        const response = await this._openApiClient.recommendBatchPoints({
-            collection_name,
-            searches,
-            consistency,
-            timeout,
-        });
-        return response.data.result ?? [];
-    }
-
-    /**
-     * @alias recommendBatch
-     */
-    async recommend_batch(
-        collection_name: string,
-        {
-            searches,
-            consistency,
-            timeout,
-        }: Schemas['RecommendRequestBatch'] & {consistency?: Schemas['ReadConsistency']} & {timeout?: number},
-    ): Promise<Schemas['ScoredPoint'][][]> {
-        const response = await this._openApiClient.recommendBatchPoints({
-            collection_name,
-            searches,
-            consistency,
-            timeout,
-        });
-        return response.data.result ?? [];
-    }
-
-    /**
-     * Recommendation request. Provides positive and negative examples of the vectors,
-     * which can be ids of points that are already stored in the collection, raw vectors, or even ids and vectors combined.
-     * Service should look for the points which are closer to positive examples and at the same time further to negative examples.
-     * The concrete way of how to compare negative and positive distances is up to the `strategy` chosen.
-     * @param collection_name Collection to search in
-     * @param {object} args
-     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
-     *     - positive:
-     *         List of stored point IDs, which should be used as reference for similarity search.
-     *         If there is only one ID provided - this request is equivalent to the regular search with vector of that point.
-     *         If there are more than one IDs, Qdrant will attempt to search for similar to all of them.
-     *         Recommendation for multiple vectors is experimental. Its behaviour may change in the future.
-     *     - negative:
-     *         List of stored point IDs, which should be dissimilar to the search result.
-     *         Negative examples is an experimental functionality. Its behaviour may change in the future.
-     *     - strategy:
-     *         How to use positive and negative examples to find the results.
-     *     - query_filter:
-     *         - Exclude vectors which doesn't fit given conditions.
-     *         - If `None` - search among all vectors
-     *     - search_params: Additional search params
-     *     - limit: How many results return
-     *         - Default: `10`
-     *     - offset:
-     *         Offset of the first result to return.
-     *         May be used to paginate results.
-     *         Note: large offset values may cause performance issues.
-     *         - Default: `0`
-     *     - with_payload:
-     *         - Specify which stored payload should be attached to the result.
-     *         - If `True` - attach all payload
-     *         - If `False` - do not attach any payload
-     *         - If List of string - include only specified fields
-     *         - If `PayloadSelector` - use explicit rules
-     *         - Default: `true`
-     *     - with_vector:
-     *         - If `True` - Attach stored vector to the search result.
-     *         - If `False` - Do not attach vector.
-     *         - If List of string - include only specified fields
-     *         - Default: `false`
-     *     - score_threshold:
-     *         Define a minimal score threshold for the result.
-     *         If defined, less similar results will not be returned.
-     *         Score of the returned result might be higher or smaller than the threshold depending
-     *         on the Distance function used.
-     *         E.g. for cosine similarity only higher scores will be returned.
-     *     - using:
-     *         Name of the vectors to use for recommendations.
-     *         If `None` - use default vectors.
-     *     - lookupFrom:
-     *         Defines a location (collection and vector field name), used to lookup vectors for recommendations.
-     *         If `None` - use current collection will be used.
-     *     - consistency:
-     *         Read consistency of the search. Defines how many replicas should be queried before returning the result.
-     *         Values:
-     *         - int - number of replicas to query, values should present in all queried replicas
-     *         - 'majority' - query all replicas, but return values present in the majority of replicas
-     *         - 'quorum' - query the majority of replicas, return values present in all of them
-     *         - 'all' - query all replicas, and return values present in all replicas
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
-     * @returns List of recommended points with similarity scores.
-     */
-    async recommend(
-        collection_name: string,
-        {
-            shard_key,
-            positive,
-            negative,
-            strategy,
-            filter,
-            params,
-            limit = 10,
-            offset = 0,
-            with_payload = true,
-            with_vector = false,
-            score_threshold,
-            using,
-            lookup_from,
-            consistency,
-            timeout,
-        }: Omit<Schemas['RecommendRequest'], 'limit'> &
-            Partial<Pick<Schemas['RecommendRequest'], 'limit'>> & {consistency?: Schemas['ReadConsistency']} & {
-                timeout?: number;
-            },
-    ): Promise<Schemas['ScoredPoint'][]> {
-        const response = await this._openApiClient.recommendPoints({
-            collection_name,
-            limit,
-            shard_key,
-            positive,
-            negative,
-            strategy,
-            filter,
-            params,
-            offset,
-            with_payload,
-            with_vector,
-            score_threshold,
-            using,
-            lookup_from,
-            consistency,
-            timeout,
-        });
-        return response.data.result ?? noResultError();
-    }
-
-    /**
      * Scroll over all (matching) points in the collection.
      * @param collection_name Name of the collection
      * @param {object} args
@@ -701,134 +409,6 @@ export class QdrantClient {
             wait,
             ordering,
             timeout,
-        });
-        return response.data.result ?? noResultError();
-    }
-
-    /**
-     * Search point groups
-     * @param collection_name
-     * @param {object} args -
-     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
-     *         Values:
-     *             number - number of replicas to query, values should present in all queried replicas
-     *             'majority' - query all replicas, but return values present in the majority of replicas
-     *             'quorum' - query the majority of replicas, return values present in all of them
-     *             'all' - query all replicas, and return values present in all replicas
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
-     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
-     *     - vector: query search vector
-     *     - filter: Look only for points which satisfies this conditions
-     *     - params: Additional search params
-     *     - with_payload: Select which payload to return with the response
-     *     - with_vector: Whether to return the point vector with the result?
-     *     - score_threshold: Define a minimal score threshold for the result. If defined, less similar results will not be returned. Score of the returned result might be higher or smaller than the threshold depending on the Distance function used. E.g. for cosine similarity only higher scores will be returned.
-     *     - group_by: Payload field to group by, must be a string or number field. If the field contains more than 1 value, all values will be used for grouping. One point can be in multiple groups.
-     *     - group_size: Maximum amount of points to return per group
-     *     - limit: Maximum amount of groups to return
-     * @returns Operation result
-     */
-    async searchPointGroups(
-        collection_name: string,
-        {
-            consistency,
-            timeout,
-            shard_key,
-            vector,
-            filter,
-            params,
-            with_payload = null,
-            with_vector = null,
-            score_threshold,
-            group_by,
-            group_size,
-            limit,
-        }: {consistency?: Schemas['ReadConsistency']} & {timeout?: number} & Schemas['SearchGroupsRequest'],
-    ): Promise<Schemas['GroupsResult']> {
-        const response = await this._openApiClient.searchPointGroups({
-            collection_name,
-            consistency,
-            timeout,
-            shard_key,
-            vector,
-            filter,
-            params,
-            with_payload,
-            with_vector,
-            score_threshold,
-            group_by,
-            group_size,
-            limit,
-        });
-        return response.data.result ?? noResultError();
-    }
-
-    /**
-     * Recommend point groups
-     * @param collection_name
-     * @param {object} args -
-     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
-     *         Values:
-     *             number - number of replicas to query, values should present in all queried replicas
-     *             'majority' - query all replicas, but return values present in the majority of replicas
-     *             'quorum' - query the majority of replicas, return values present in all of them
-     *             'all' - query all replicas, and return values present in all replicas
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
-     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
-     *     - positive: Look for vectors closest to those
-     *     - negative: Try to avoid vectors like this
-     *     - strategy: How to use positive and negative examples to find the results
-     *     - filter: Look only for points which satisfies this conditions
-     *     - params: Additional search params
-     *     - with_payload: Select which payload to return with the response
-     *     - with_vector: Whether to return the point vector with the result?
-     *     - score_threshold: Define a minimal score threshold for the result. If defined, less similar results will not be returned. Score of the returned result might be higher or smaller than the threshold depending on the Distance function used. E.g. for cosine similarity only higher scores will be returned.
-     *     - using: Define which vector to use for recommendation, if not specified - try to use default vector
-     *     - lookup_from: The location used to lookup vectors. If not specified - use current collection. Note: the other collection should have the same vector size as the current collection
-     *     - group_by: Payload field to group by, must be a string or number field. If the field contains more than 1 value, all values will be used for grouping. One point can be in multiple groups.
-     *     - group_size: Maximum amount of points to return per group
-     *     - limit: Maximum amount of groups to return
-     * @returns Operation result
-     */
-    async recommendPointGroups(
-        collection_name: string,
-        {
-            consistency,
-            timeout,
-            shard_key,
-            positive,
-            strategy,
-            negative = [],
-            filter,
-            params,
-            with_payload = null,
-            with_vector = null,
-            score_threshold,
-            using = null,
-            lookup_from = null,
-            group_by,
-            group_size,
-            limit,
-        }: {consistency?: Schemas['ReadConsistency']} & {timeout?: number} & Schemas['RecommendGroupsRequest'],
-    ): Promise<Schemas['GroupsResult']> {
-        const response = await this._openApiClient.recommendPointGroups({
-            collection_name,
-            consistency,
-            timeout,
-            shard_key,
-            positive,
-            negative,
-            strategy,
-            filter,
-            params,
-            with_payload,
-            with_vector,
-            score_threshold,
-            using,
-            lookup_from,
-            group_by,
-            group_size,
-            limit,
         });
         return response.data.result ?? noResultError();
     }
@@ -1341,6 +921,8 @@ export class QdrantClient {
             write_consistency_factor,
             sparse_vectors,
             strict_mode_config,
+            payload,
+            metadata,
         }: {timeout?: number} & Schemas['CreateCollection'],
     ): Promise<boolean> {
         const response = await this._openApiClient.createCollection({
@@ -1358,6 +940,8 @@ export class QdrantClient {
             write_consistency_factor,
             sparse_vectors,
             strict_mode_config,
+            payload,
+            metadata,
         });
 
         return response.data.result ?? noResultError();
@@ -1417,6 +1001,8 @@ export class QdrantClient {
             write_consistency_factor,
             sparse_vectors,
             strict_mode_config,
+            payload,
+            metadata,
         }: {timeout?: number} & Schemas['CreateCollection'],
     ): Promise<boolean> {
         const deleteResponse = await this._openApiClient.deleteCollection({
@@ -1443,6 +1029,8 @@ export class QdrantClient {
             write_consistency_factor,
             sparse_vectors,
             strict_mode_config,
+            payload,
+            metadata,
         });
 
         return response.data.result ?? noResultError();
@@ -1791,101 +1379,6 @@ export class QdrantClient {
     }
 
     /**
-     * Discover points
-     * @description Use context and a target to find the most similar points to the target, constrained by the context.
-     * When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair.
-     * Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0.
-     * When using target (with or without context), the score behaves a little different: The  integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target. The context part of the score for  each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair,  and -1 otherwise.
-     * @param collection_name Name of the collection
-     * @param {object} args -
-     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
-     *         Values:
-     *             number - number of replicas to query, values should present in all queried replicas
-     *             'majority' - query all replicas, but return values present in the majority of replicas
-     *             'quorum' - query the majority of replicas, return values present in all of them
-     *             'all' - query all replicas, and return values present in all replicas
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
-     *     - shard_key: Specify in which shards to look for the points, if not specified - look in all shards
-     *     - target: Look for vectors closest to this. When using the target (with or without context), the integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target.
-     *     - context: Pairs of { positive, negative } examples to constrain the search. When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair. Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0. For discovery search (when including a target), the context part of the score for each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, and -1 otherwise.
-     *     - filter: Look only for points which satisfies this conditions
-     *     - params: Additional search params
-     *     - limit: Max number of result to return
-     *     - offset: Offset of the first result to return. May be used to paginate results. Note: large offset values may cause performance issues.
-     *     - with_payload: Select which payload to return with the response
-     *     - with_vector: Whether to return the point vector with the result?
-     *     - using: Define which vector to use for recommendation, if not specified - try to use default vector
-     *     - lookup_from The location used to lookup vectors. If not specified - use current collection. Note: the other collection should have the same vector size as the current collection
-     * @returns Operation result
-     */
-    async discoverPoints(
-        collection_name: string,
-        {
-            consistency,
-            timeout,
-            shard_key,
-            target,
-            context,
-            params,
-            limit,
-            offset,
-            with_payload,
-            with_vector,
-            using,
-            lookup_from,
-        }: {consistency?: Schemas['ReadConsistency']} & {timeout?: number} & Schemas['DiscoverRequest'],
-    ): Promise<Schemas['ScoredPoint'][]> {
-        const response = await this._openApiClient.discoverPoints({
-            collection_name,
-            consistency,
-            timeout,
-            shard_key,
-            target,
-            context,
-            params,
-            limit,
-            offset,
-            with_payload,
-            with_vector,
-            using,
-            lookup_from,
-        });
-        return response.data.result ?? noResultError();
-    }
-
-    /**
-     * Discover batch points
-     * @description Look for points based on target and/or positive and negative example pairs, in batch.
-     * @param collection_name Name of the collection
-     * @param {object} args -
-     *     - consistency: Read consistency of the search. Defines how many replicas should be queried before returning the result.
-     *         Values:
-     *             number - number of replicas to query, values should present in all queried replicas
-     *             'majority' - query all replicas, but return values present in the majority of replicas
-     *             'quorum' - query the majority of replicas, return values present in all of them
-     *             'all' - query all replicas, and return values present in all replicas
-     *     - timeout: If set, overrides global timeout setting for this request. Unit is seconds.
-     *     - searches: List of searches
-     * @returns Operation result
-     */
-    async discoverBatchPoints(
-        collection_name: string,
-        {
-            consistency,
-            timeout,
-            searches,
-        }: {consistency?: Schemas['ReadConsistency']} & {timeout?: number} & Schemas['DiscoverRequestBatch'],
-    ): Promise<Schemas['ScoredPoint'][][]> {
-        const response = await this._openApiClient.discoverBatchPoints({
-            collection_name,
-            consistency,
-            timeout,
-            searches,
-        });
-        return response.data.result ?? noResultError();
-    }
-
-    /**
      * Collect cluster telemetry data
      * @description Get telemetry data, from the point of view of the cluster.
      * This includes peers info, collections info, shard transfers, and resharding status.
@@ -1919,6 +1412,37 @@ export class QdrantClient {
         args?: {with?: string; completed_limit?: number},
     ): Promise<Schemas['OptimizationsResponse']> {
         const response = await this._openApiClient.getOptimizations({collection_name, ...args});
+        return response.data.result ?? noResultError();
+    }
+
+    /**
+     * Get the cluster-wide quota configuration and how close each peer is to it
+     * @description The configuration is cluster-wide, the utilization is not: memory and disk are node-local,
+     * so one peer being under its limit says nothing about the others. `usage` describes the node that served
+     * the request, `peers` is what every peer that answered reports about itself.
+     * @returns Quota configuration in effect, and per-peer utilization
+     */
+    async getQuotas(): Promise<Schemas['QuotaStatus']> {
+        const response = await this._openApiClient.getQuotas({});
+        return response.data.result ?? noResultError();
+    }
+
+    /**
+     * Set the cluster-wide limits on node resources
+     * @description An unset limit means the corresponding resource is not capped. Limits are only enforced
+     * while `enabled` is true.
+     * @param {object} args
+     *     - enabled: Whether the limits are enforced
+     *     - max_resident_memory_percent: Reject memory-consuming updates once process resident memory reaches
+     *         this percentage of the memory available to it
+     *     - max_disk_usage_percent: Reject disk-consuming updates once the storage filesystem is filled to
+     *         this percentage of its capacity
+     *     - release_margin_percent: How far below its limit a resource has to fall before updates resume
+     *     - wait: Await for the configuration to be applied cluster-wide
+     * @returns Operation result
+     */
+    async updateQuotas({wait, ...config}: {wait?: boolean} & Schemas['QuotaConfig'] = {}): Promise<boolean> {
+        const response = await this._openApiClient.updateQuotas({wait, ...config});
         return response.data.result ?? noResultError();
     }
 

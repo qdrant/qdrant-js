@@ -8,6 +8,8 @@ describe('QdrantClient', () => {
         /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
     const client = new QdrantClient();
     const collectionName = 'test_collection';
+    const paramsCollectionName = 'test_collection_params';
+    const sparseCollectionName = 'test_collection_sparse';
     const bigInt = BigInt(String(Number.MAX_SAFE_INTEGER + 2)) as unknown as number;
     const maxSafeInteger = Number.MAX_SAFE_INTEGER;
     const supportsJSONBigInt = semver.satisfies(process.versions.node, '>=21');
@@ -134,12 +136,12 @@ describe('QdrantClient', () => {
         });
     });
 
-    test('search points', async () => {
-        const result = await client.search(collectionName, {
-            vector: [0.2, 0.1, 0.9, 0.7],
+    test('query points without a filter', async () => {
+        const result = await client.query(collectionName, {
+            query: {nearest: [0.2, 0.1, 0.9, 0.7]},
             limit: 3,
         });
-        expect(result).toHaveLength(3);
+        expect(result.points).toHaveLength(3);
     });
 
     test('upsert with timeout', async () => {
@@ -163,34 +165,16 @@ describe('QdrantClient', () => {
         expect(result).toMatchObject<typeof result>({operation_id: expect.any(Number) as number, status: 'completed'});
     });
 
-    test('search points filter', async () => {
-        const result = await client.search(collectionName, {
-            filter: {
-                should: [
-                    {
-                        key: 'city',
-                        match: {
-                            value: 'London',
-                        },
-                    },
-                ],
-            },
-            vector: [0.2, 0.1, 0.9, 0.7],
-            limit: 3,
-        });
-        expect(result).toHaveLength(2);
-    });
-
-    test('search points batch', async () => {
-        const result = await client.searchBatch(collectionName, {
+    test('query points batch', async () => {
+        const result = await client.queryBatch(collectionName, {
             searches: [
                 {
-                    vector: [0.2, 0.1, 0.9, 0.7],
+                    query: {nearest: [0.2, 0.1, 0.9, 0.7]},
                     limit: 3,
                     with_payload: true,
                 },
                 {
-                    vector: [0.2, 0.1, 0.9, 0.7],
+                    query: {nearest: [0.2, 0.1, 0.9, 0.7]},
                     limit: 3,
                     with_payload: true,
                 },
@@ -315,5 +299,129 @@ describe('QdrantClient', () => {
         });
         console.log(result);
         expect(result[0].points).toHaveLength(2);
+    });
+
+    test('create collection with memory placement and payload storage params', async () => {
+        await client.deleteCollection(paramsCollectionName);
+        expect(
+            await client.createCollection(paramsCollectionName, {
+                vectors: {size: 4, distance: 'Dot', memory: 'cached'},
+                hnsw_config: {memory: 'cold'},
+                payload: {memory: 'cold'},
+                metadata: {owner: 'integration-test'},
+                strict_mode_config: {enabled: false, max_resident_memory_percent: 95},
+            }),
+        ).toBe(true);
+
+        const {config} = await client.getCollection(paramsCollectionName);
+        expect(config.params.payload).toMatchObject({memory: 'cold'});
+        expect(config.metadata).toMatchObject({owner: 'integration-test'});
+    });
+
+    test('keyword index with prefix matching', async () => {
+        const result = await client.createPayloadIndex(paramsCollectionName, {
+            field_name: 'city',
+            field_schema: {type: 'keyword', prefix: true},
+            wait: true,
+        });
+        expect(result.status).toBe('completed');
+
+        await client.upsert(paramsCollectionName, {
+            wait: true,
+            points: [
+                {id: 1, vector: [0.05, 0.61, 0.76, 0.74], payload: {city: 'Berlin'}},
+                {id: 2, vector: [0.19, 0.81, 0.75, 0.11], payload: {city: 'Bergamo'}},
+                {id: 3, vector: [0.36, 0.55, 0.47, 0.94], payload: {city: 'Moscow'}},
+                {id: 4, vector: [0.18, 0.01, 0.85, 0.8], payload: {city: 'London'}},
+            ],
+        });
+
+        const {points} = await client.scroll(paramsCollectionName, {
+            filter: {must: [{key: 'city', match: {prefix: 'Ber'}}]},
+            limit: 10,
+        });
+        expect(points.map((point) => point.payload?.city).sort()).toEqual(['Bergamo', 'Berlin']);
+    });
+
+    test('slice condition splits the id space', async () => {
+        const slices = await Promise.all(
+            [0, 1].map((index) =>
+                client.scroll(paramsCollectionName, {filter: {must: [{slice: {total: 2, index}}]}, limit: 10}),
+            ),
+        );
+        const ids = slices.flatMap(({points}) => points.map((point) => point.id));
+
+        // Slices are disjoint and together cover every point.
+        expect(new Set(ids).size).toBe(ids.length);
+        expect(ids.sort()).toEqual([1, 2, 3, 4]);
+    });
+
+    test('text index with stemming explicitly disabled', async () => {
+        const result = await client.createPayloadIndex(paramsCollectionName, {
+            field_name: 'description',
+            field_schema: {type: 'text', stemmer: {type: 'none'}},
+            wait: true,
+        });
+        expect(result.status).toBe('completed');
+    });
+
+    test('per-request IDF corpus', async () => {
+        await client.deleteCollection(sparseCollectionName);
+        await client.createCollection(sparseCollectionName, {
+            vectors: {},
+            sparse_vectors: {text: {modifier: 'idf'}},
+        });
+        await client.upsert(sparseCollectionName, {
+            wait: true,
+            points: [
+                {id: 1, vector: {text: {indices: [1, 3], values: [1.0, 0.5]}}, payload: {city: 'Berlin'}},
+                {id: 2, vector: {text: {indices: [1, 5], values: [0.7, 0.9]}}, payload: {city: 'Moscow'}},
+            ],
+        });
+
+        const query = {indices: [1, 3], values: [1.0, 1.0]};
+        const global = await client.query(sparseCollectionName, {query, using: 'text', params: {idf: 'global'}});
+        const scoped = await client.query(sparseCollectionName, {
+            query,
+            using: 'text',
+            params: {idf: {corpus: {must: [{key: 'city', match: {value: 'Berlin'}}]}}},
+        });
+
+        expect(global.points).toHaveLength(2);
+        expect(scoped.points).toHaveLength(2);
+        // Narrowing the corpus changes the document frequencies, and with them the scores.
+        expect(scoped.points[0].score).not.toBe(global.points[0].score);
+    });
+
+    test('cluster-wide quotas', async () => {
+        const before = await client.getQuotas();
+        expect(before.config).toBeDefined();
+        expect(before.usage).toBeDefined();
+
+        expect(
+            await client.updateQuotas({
+                enabled: true,
+                max_resident_memory_percent: 95,
+                max_disk_usage_percent: 95,
+                release_margin_percent: 5,
+                wait: true,
+            }),
+        ).toBe(true);
+
+        const after = await client.getQuotas();
+        expect(after.config).toMatchObject({
+            enabled: true,
+            max_resident_memory_percent: 95,
+            max_disk_usage_percent: 95,
+            release_margin_percent: 5,
+        });
+
+        // Put it back so the rest of the suite is not run against an enforcing node.
+        expect(await client.updateQuotas({enabled: false, wait: true})).toBe(true);
+    });
+
+    test('cleanup', async () => {
+        expect(await client.deleteCollection(paramsCollectionName)).toBe(true);
+        expect(await client.deleteCollection(sparseCollectionName)).toBe(true);
     });
 });

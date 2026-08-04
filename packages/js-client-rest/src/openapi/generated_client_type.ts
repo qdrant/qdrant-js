@@ -189,7 +189,7 @@ export type ClientApi = {
   
   /**
        * Kubernetes healthz endpoint 
-       * @description An endpoint for health checking used in Kubernetes.
+       * @description Liveness-style health check. Returns 200 as soon as the HTTP API is serving requests. It does not inspect collections, shards or consensus state, and is identical to `/livez`. Use it only to detect whether the process is up and responsive.
        */
   healthz: TypedFetch<{
     responses: {
@@ -204,7 +204,7 @@ export type ClientApi = {
   
   /**
        * Kubernetes livez endpoint 
-       * @description An endpoint for health checking used in Kubernetes.
+       * @description Kubernetes liveness probe. Returns 200 as soon as the HTTP API is serving requests. It does not inspect collections, shards or consensus state, and is identical to `/healthz`. A failure indicates the process is unresponsive and should be restarted.
        */
   livez: TypedFetch<{
     responses: {
@@ -219,11 +219,16 @@ export type ClientApi = {
   
   /**
        * Kubernetes readyz endpoint 
-       * @description An endpoint for health checking used in Kubernetes.
+       * @description Kubernetes readiness probe. Checks the instance and waits out pending data operations to see when it can start accepting traffic. In a distributed deployment it returns 200 only once the node has caught up with the cluster consensus commit and its local shards are healthy; otherwise it returns 503. In a single-node deployment it always returns 200 once the API is up. Use it to decide when to route traffic to the instance.
        */
   readyz: TypedFetch<{
     responses: {
           200: {
+            content: {
+              "text/plain": string;
+            };
+          };
+          503: {
             content: {
               "text/plain": string;
             };
@@ -378,6 +383,76 @@ export type ClientApi = {
           };
           path: {
             peer_id: number;
+          };
+        };
+    responses: {
+          200: {
+            content: {
+              "application/json": {
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+                time?: number;
+                status?: string;
+                result?: boolean;
+              };
+            };
+          };
+          default: {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+          "4XX": {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+        };
+  }>;
+  
+  /**
+       * Get global quotas 
+       * @description Get the cluster-wide resource quota configuration, together with the current utilization it is measured against.
+       * The configuration is the same on every peer, but the reported utilization is for the node serving this request only -
+       * memory and disk are node-local, so query each peer to see where the whole cluster stands.
+       */
+  getQuotas: TypedFetch<{
+    responses: {
+          200: {
+            content: {
+              "application/json": {
+                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
+                time?: number;
+                status?: string;
+                result?: components["schemas"]["QuotaStatus"];
+              };
+            };
+          };
+          default: {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+          "4XX": {
+            content: {
+              "application/json": components["schemas"]["ErrorResponse"];
+            };
+          };
+        };
+  }>;
+  
+  /**
+       * Set global quotas 
+       * @description Replace the cluster-wide resource quota configuration. The new configuration is propagated to every peer through consensus and persisted, so it survives restarts
+       */
+  updateQuotas: TypedFetch<{
+    parameters: {
+          query?: {
+            wait?: boolean;
+          };
+        };
+    requestBody?: {
+          content: {
+            "application/json": components["schemas"]["QuotaConfig"];
           };
         };
     responses: {
@@ -2194,361 +2269,6 @@ export type ClientApi = {
                 time?: number;
                 status?: string;
                 result?: components["schemas"]["ScrollResult"];
-              };
-            };
-          };
-          default: {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-          "4XX": {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-        };
-  }>;
-  
-  /**
-       * Search points 
-       * @deprecated 
-       * @description Retrieve closest points based on vector similarity and given filtering conditions
-       */
-  searchPoints: TypedFetch<{
-    parameters: {
-          query?: {
-            consistency?: components["schemas"]["ReadConsistency"];
-            timeout?: number;
-          };
-          path: {
-            collection_name: string;
-          };
-        };
-    requestBody?: {
-          content: {
-            "application/json": components["schemas"]["SearchRequest"];
-          };
-        };
-    responses: {
-          200: {
-            content: {
-              "application/json": {
-                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
-                time?: number;
-                status?: string;
-                result?: (components["schemas"]["ScoredPoint"])[];
-              };
-            };
-          };
-          default: {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-          "4XX": {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-        };
-  }>;
-  
-  /**
-       * Search batch points 
-       * @deprecated 
-       * @description Retrieve by batch the closest points based on vector similarity and given filtering conditions
-       */
-  searchBatchPoints: TypedFetch<{
-    parameters: {
-          query?: {
-            consistency?: components["schemas"]["ReadConsistency"];
-            timeout?: number;
-          };
-          path: {
-            collection_name: string;
-          };
-        };
-    requestBody?: {
-          content: {
-            "application/json": components["schemas"]["SearchRequestBatch"];
-          };
-        };
-    responses: {
-          200: {
-            content: {
-              "application/json": {
-                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
-                time?: number;
-                status?: string;
-                result?: ((components["schemas"]["ScoredPoint"])[])[];
-              };
-            };
-          };
-          default: {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-          "4XX": {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-        };
-  }>;
-  
-  /**
-       * Search point groups 
-       * @deprecated 
-       * @description Retrieve closest points based on vector similarity and given filtering conditions, grouped by a given payload field
-       */
-  searchPointGroups: TypedFetch<{
-    parameters: {
-          query?: {
-            consistency?: components["schemas"]["ReadConsistency"];
-            timeout?: number;
-          };
-          path: {
-            collection_name: string;
-          };
-        };
-    requestBody?: {
-          content: {
-            "application/json": components["schemas"]["SearchGroupsRequest"];
-          };
-        };
-    responses: {
-          200: {
-            content: {
-              "application/json": {
-                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
-                time?: number;
-                status?: string;
-                result?: components["schemas"]["GroupsResult"];
-              };
-            };
-          };
-          default: {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-          "4XX": {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-        };
-  }>;
-  
-  /**
-       * Recommend points 
-       * @deprecated 
-       * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples.
-       */
-  recommendPoints: TypedFetch<{
-    parameters: {
-          query?: {
-            consistency?: components["schemas"]["ReadConsistency"];
-            timeout?: number;
-          };
-          path: {
-            collection_name: string;
-          };
-        };
-    requestBody?: {
-          content: {
-            "application/json": components["schemas"]["RecommendRequest"];
-          };
-        };
-    responses: {
-          200: {
-            content: {
-              "application/json": {
-                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
-                time?: number;
-                status?: string;
-                result?: (components["schemas"]["ScoredPoint"])[];
-              };
-            };
-          };
-          default: {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-          "4XX": {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-        };
-  }>;
-  
-  /**
-       * Recommend batch points 
-       * @deprecated 
-       * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples.
-       */
-  recommendBatchPoints: TypedFetch<{
-    parameters: {
-          query?: {
-            consistency?: components["schemas"]["ReadConsistency"];
-            timeout?: number;
-          };
-          path: {
-            collection_name: string;
-          };
-        };
-    requestBody?: {
-          content: {
-            "application/json": components["schemas"]["RecommendRequestBatch"];
-          };
-        };
-    responses: {
-          200: {
-            content: {
-              "application/json": {
-                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
-                time?: number;
-                status?: string;
-                result?: ((components["schemas"]["ScoredPoint"])[])[];
-              };
-            };
-          };
-          default: {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-          "4XX": {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-        };
-  }>;
-  
-  /**
-       * Recommend point groups 
-       * @deprecated 
-       * @description Look for the points which are closer to stored positive examples and at the same time further to negative examples, grouped by a given payload field.
-       */
-  recommendPointGroups: TypedFetch<{
-    parameters: {
-          query?: {
-            consistency?: components["schemas"]["ReadConsistency"];
-            timeout?: number;
-          };
-          path: {
-            collection_name: string;
-          };
-        };
-    requestBody?: {
-          content: {
-            "application/json": components["schemas"]["RecommendGroupsRequest"];
-          };
-        };
-    responses: {
-          200: {
-            content: {
-              "application/json": {
-                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
-                time?: number;
-                status?: string;
-                result?: components["schemas"]["GroupsResult"];
-              };
-            };
-          };
-          default: {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-          "4XX": {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-        };
-  }>;
-  
-  /**
-       * Discover points 
-       * @deprecated 
-       * @description Use context and a target to find the most similar points to the target, constrained by the context.
-       * When using only the context (without a target), a special search - called context search - is performed where pairs of points are used to generate a loss that guides the search towards the zone where most positive examples overlap. This means that the score minimizes the scenario of finding a point closer to a negative than to a positive part of a pair.
-       * Since the score of a context relates to loss, the maximum score a point can get is 0.0, and it becomes normal that many points can have a score of 0.0.
-       * When using target (with or without context), the score behaves a little different: The integer part of the score represents the rank with respect to the context, while the decimal part of the score relates to the distance to the target. The context part of the score for each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, and -1 otherwise.
-       */
-  discoverPoints: TypedFetch<{
-    parameters: {
-          query?: {
-            consistency?: components["schemas"]["ReadConsistency"];
-            timeout?: number;
-          };
-          path: {
-            collection_name: string;
-          };
-        };
-    requestBody?: {
-          content: {
-            "application/json": components["schemas"]["DiscoverRequest"];
-          };
-        };
-    responses: {
-          200: {
-            content: {
-              "application/json": {
-                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
-                time?: number;
-                status?: string;
-                result?: (components["schemas"]["ScoredPoint"])[];
-              };
-            };
-          };
-          default: {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-          "4XX": {
-            content: {
-              "application/json": components["schemas"]["ErrorResponse"];
-            };
-          };
-        };
-  }>;
-  
-  /**
-       * Discover batch points 
-       * @deprecated 
-       * @description Look for points based on target and/or positive and negative example pairs, in batch.
-       */
-  discoverBatchPoints: TypedFetch<{
-    parameters: {
-          query?: {
-            consistency?: components["schemas"]["ReadConsistency"];
-            timeout?: number;
-          };
-          path: {
-            collection_name: string;
-          };
-        };
-    requestBody?: {
-          content: {
-            "application/json": components["schemas"]["DiscoverRequestBatch"];
-          };
-        };
-    responses: {
-          200: {
-            content: {
-              "application/json": {
-                usage?: components["schemas"]["Usage"] | (Record<string, unknown> | null);
-                time?: number;
-                status?: string;
-                result?: ((components["schemas"]["ScoredPoint"])[])[];
               };
             };
           };
