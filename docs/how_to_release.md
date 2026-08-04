@@ -145,3 +145,45 @@ pnpm prettier -w .
 ### Make PR with the changes
 
 Like in other clients, new version is published by adding new tag.
+
+## Publishing to npm (trusted publishing)
+
+The `Release` workflow (`.github/workflows/release.yaml`) authenticates to npm with
+[trusted publishing](https://docs.npmjs.com/trusted-publishers/): GitHub Actions mints a
+short-lived OIDC token for the run, so there is no `NPM_TOKEN` secret involved. The
+provenance attestation is still requested explicitly through `--provenance`.
+
+Each package is configured separately on npmjs.com. For `@qdrant/js-client-rest`,
+`@qdrant/js-client-grpc` and `@qdrant/qdrant-js`, under
+_Settings → Trusted publishing → GitHub Actions_:
+
+| Field                | Value          |
+| -------------------- | -------------- |
+| Organization or user | `qdrant`       |
+| Repository           | `qdrant-js`    |
+| Workflow filename    | `release.yaml` |
+| Environment name     | _(empty)_      |
+| Allowed actions      | `npm publish`  |
+
+The values are case-sensitive, and the workflow filename is just the filename — not the
+path under `.github/workflows/`. Renaming or moving the release workflow means updating
+this configuration for all three packages, otherwise publishing fails with a `404`.
+
+Once trusted publishing works, publishing access for each package can be locked down under
+_Settings → Publishing access → Require two-factor authentication and disallow tokens_.
+
+### Requirements the workflow has to keep satisfying
+
+-   `permissions: id-token: write` on the release job — without it there is no OIDC token.
+-   pnpm >= 11.1.x. pnpm implements the OIDC exchange itself (it does not delegate to the
+    npm CLI), so the npm version on the runner is irrelevant. Earlier pnpm 11 releases had
+    a bug that broke the exchange; `pnpm/action-setup` must also be >= v6.0.6.
+-   No `_authToken` in `.npmrc`, and `registry-url` left unset on `actions/setup-node`
+    (it would write a token placeholder). If the OIDC exchange fails, pnpm only logs
+    `Skipped OIDC: ...` and falls back to whatever token it finds — with no token
+    configured the publish fails loudly instead of silently bypassing trusted publishing.
+-   The `repository.url` in each `package.json` must match this repository.
+
+Note that the token exchange is per package name, so a brand-new package cannot be
+published this way: its first version has to be published manually, after which trusted
+publishing can be configured for it.
