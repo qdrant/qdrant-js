@@ -66,7 +66,7 @@ try {
     // ...
 } catch (e) {
     // check which operation threw the exception
-    if (e instanceof client.getCollection.Error) {
+    if (e instanceof client.api('collections').getCollection.Error) {
         // get discriminated union error { status, data }
         const error = e.getActualType();
         // sort case's logic
