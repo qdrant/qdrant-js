@@ -60,12 +60,12 @@
         "@rollup/plugin-commonjs": "^29.0.3",
         "@rollup/plugin-replace": "^6.0.3",
         "@total-typescript/ts-reset": "^0.6.1",
-        "@types/semver": "7.7.1",
+        "@types/semver": "7.8.0",
         "openapi-typescript": "^6.2.6",
         "semver": "7.8.5",
-        "tsx": "^4.22.4",
+        "tsx": "^4.23.9",
         "typescript": "^5.9.3",
-        "vitest": "^4.1.9"
+        "vitest": "^4.1.10"
     },
     "knip": {
         "ignore": [
