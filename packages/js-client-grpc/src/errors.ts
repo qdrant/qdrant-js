@@ -13,9 +13,15 @@ export class QdrantClientConfigError extends CustomError {}
 export class QdrantClientResourceExhaustedError extends ConnectError {
     retry_after: number;
 
+    // ConnectError overrides `instanceof` to match any ConnectError, so restore the prototype chain check.
+    static override [Symbol.hasInstance](value: unknown): boolean {
+        return Function.prototype[Symbol.hasInstance].call(this, value);
+    }
+
     constructor(message: string, retryAfter: string) {
+        // Keep the `ConnectError` name set by the base class: connect only passes an error thrown
+        // in an interceptor through unchanged if it is recognized as a ConnectError.
         super(message, Code.ResourceExhausted);
-        this.name = this.constructor.name;
 
         const retryAfterNumber = Number(retryAfter);
         if (isNaN(retryAfterNumber)) {
