@@ -4,8 +4,8 @@ This package represents the JS SDK for the [Qdrant](https://github.com/qdrant/qd
 
 The next packages are re-exported from it:
 
--   [JS Client REST](../js-client-rest)
--   [JS Client gRPC](../js-client-grpc)
+- [JS Client REST](../js-client-rest)
+- [JS Client gRPC](../js-client-grpc)
 
 ## Installation
 
@@ -35,6 +35,6 @@ It is recommended to use the REST (OpenAPI-based) client initially, since REST t
 
 These are the most relevant scripts for development:
 
--   `pnpm build`: builds and bundles from TypeScript sources
--   `pnpm pre-check`: type-checks sources
--   `pnpm pre-commit`: same as pre-check, but for git hooks (husky)
+- `pnpm build`: builds and bundles from TypeScript sources
+- `pnpm pre-check`: type-checks sources
+- `pnpm pre-commit`: same as pre-check, but for git hooks (husky)

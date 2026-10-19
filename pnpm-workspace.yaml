@@ -6,3 +6,7 @@ packages:
 allowBuilds:
   "@bufbuild/buf": true
   "esbuild": true
+
+overrides:
+  # openapi-typescript@6.2.6 (codegen only) pins undici 5; it only calls `fetch`, which 7.x keeps.
+  "openapi-typescript>undici": "7.29.1"

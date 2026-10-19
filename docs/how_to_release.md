@@ -2,8 +2,8 @@
 
 ## Pre-requisites
 
--   Install Node.js 18 or higher
--   Install `pnpm` 10
+- Install Node.js 22.13 or higher
+- Install `pnpm` 11.9 or higher
 
 Install dependencies using `pnpm`:
 
@@ -59,13 +59,13 @@ src/openapi/genetated_api_client.ts
 
 ### Modify `packages/js-client-rest/src/qdrant-client.ts` according to generated changes
 
--   Inspect what changed in `src/openapi/generated_schema.ts` and modify `qdrant-client.ts` according to the changes:
+- Inspect what changed in `src/openapi/generated_schema.ts` and modify `qdrant-client.ts` according to the changes:
 
-    -   [ ] Make sure to add new API methods to `qdrant-client.ts`, if they are added in `src/openapi/generated_schema.ts`. This can be easily checked for by looking at the `operations` interface in `generated_schema.ts`.
-            If there is a new API function defined, we also need to create a corresponding API function inside `qdrant-client.ts`!
-    -   [ ] Make sure that top-level arguments in `qdrant-client.ts` are aligned with the `src/openapi/generated_schema.ts`. This is similar to the previous step, but here you need to adjust the existing API-functions' parameters inside `qdrant-client.ts`.
+    - [ ] Make sure to add new API methods to `qdrant-client.ts`, if they are added in `src/openapi/generated_schema.ts`. This can be easily checked for by looking at the `operations` interface in `generated_schema.ts`.
+          If there is a new API function defined, we also need to create a corresponding API function inside `qdrant-client.ts`!
+    - [ ] Make sure that top-level arguments in `qdrant-client.ts` are aligned with the `src/openapi/generated_schema.ts`. This is similar to the previous step, but here you need to adjust the existing API-functions' parameters inside `qdrant-client.ts`.
 
--   [ ] If needed, create tests for the new API methods
+- [ ] If needed, create tests for the new API methods
 
 To run the tests:
 
@@ -174,15 +174,15 @@ _Settings → Publishing access → Require two-factor authentication and disall
 
 ### Requirements the workflow has to keep satisfying
 
--   `permissions: id-token: write` on the release job — without it there is no OIDC token.
--   pnpm >= 11.1.x. pnpm implements the OIDC exchange itself (it does not delegate to the
-    npm CLI), so the npm version on the runner is irrelevant. Earlier pnpm 11 releases had
-    a bug that broke the exchange; `pnpm/action-setup` must also be >= v6.0.6.
--   No `_authToken` in `.npmrc`, and `registry-url` left unset on `actions/setup-node`
-    (it would write a token placeholder). If the OIDC exchange fails, pnpm only logs
-    `Skipped OIDC: ...` and falls back to whatever token it finds — with no token
-    configured the publish fails loudly instead of silently bypassing trusted publishing.
--   The `repository.url` in each `package.json` must match this repository.
+- `permissions: id-token: write` on the release job — without it there is no OIDC token.
+- pnpm >= 11.1.x. pnpm implements the OIDC exchange itself (it does not delegate to the
+  npm CLI), so the npm version on the runner is irrelevant. Earlier pnpm 11 releases had
+  a bug that broke the exchange; `pnpm/action-setup` must also be >= v6.0.6.
+- No `_authToken` in `.npmrc`, and `registry-url` left unset on `actions/setup-node`
+  (it would write a token placeholder). If the OIDC exchange fails, pnpm only logs
+  `Skipped OIDC: ...` and falls back to whatever token it finds — with no token
+  configured the publish fails loudly instead of silently bypassing trusted publishing.
+- The `repository.url` in each `package.json` must match this repository.
 
 Note that the token exchange is per package name, so a brand-new package cannot be
 published this way: its first version has to be published manually, after which trusted

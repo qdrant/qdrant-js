@@ -74,13 +74,9 @@ export function createClient(baseUrl: string, {headers, timeout, connections}: R
         baseUrl,
         init: {
             headers,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
             dispatcher:
-                typeof process !== 'undefined' &&
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                process.versions?.node
-                    ? createDispatcher(connections)
-                    : undefined,
+                typeof process !== 'undefined' && process.versions?.node ? createDispatcher(connections) : undefined,
         },
         use,
     });

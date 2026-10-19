@@ -94,9 +94,9 @@ Major and minor versions align with Qdrant's engine releases, whilst patch are r
 
 These are the most relevant scripts for development:
 
--   `pnpm build`: builds and bundles from TypeScript sources
--   `pnpm pre-check`: type-checks sources
--   `pnpm pre-commit`: same as pre-check, but for git hooks (husky)
--   `pnpm test`: run unit tests
--   `pnpm test:integration`: runs integration tests against a locally running Qdrant docker container
--   `pnpm codegen:openapi-typescript`: updates generated TS schema from the latest openapi.json remote
+- `pnpm build`: builds and bundles from TypeScript sources
+- `pnpm pre-check`: type-checks sources
+- `pnpm pre-commit`: same as pre-check, but for git hooks (husky)
+- `pnpm test`: run unit tests
+- `pnpm test:integration`: runs integration tests against a locally running Qdrant docker container
+- `pnpm codegen:openapi-typescript`: updates generated TS schema from the latest openapi.json remote
