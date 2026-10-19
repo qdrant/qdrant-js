@@ -515,6 +515,11 @@ export interface components {
       };
       /** @description Update queue info */
       update_queue?: components["schemas"]["UpdateQueueInfo"] | (Record<string, unknown> | null);
+      /**
+       * Format: date-time 
+       * @description Time of the collection creation. Absent for collections created before Qdrant started recording it.
+       */
+      created_at?: string | null;
     };
     /**
      * @description Current state of the collection. `Green` - all good. `Yellow` - optimization is running, 'Grey' - optimizations are possible but not triggered, `Red` - some operations failed and was not recovered 
@@ -583,6 +588,8 @@ export interface components {
       on_disk_payload?: boolean | null;
       /** @description Configuration of the payload storage */
       payload?: components["schemas"]["PayloadStorageParams"] | (Record<string, unknown> | null);
+      /** @description Configuration of the point id tracker */
+      id_tracker?: components["schemas"]["IdTrackerParams"] | (Record<string, unknown> | null);
       /** @description Configuration of the sparse vector storage */
       sparse_vectors?: ({
         [key: string]: components["schemas"]["SparseVectorParams"] | undefined;
@@ -622,7 +629,7 @@ export interface components {
       /**
        * @description Defines which datatype should be used to represent vectors in the storage. Choosing different datatypes allows to optimize memory usage and performance vs accuracy.
        * 
-       * - For `float32` datatype - vectors are stored as single-precision floating point numbers, 4 bytes. - For `float16` datatype - vectors are stored as half-precision floating point numbers, 2 bytes. - For `uint8` datatype - vectors are stored as unsigned 8-bit integers, 1 byte. It expects vector elements to be in range `[0, 255]`. - For `turbo4` datatype - vectors are quantized to 4 bits per element using the TurboQuant algorithm.
+       * - For `float32` datatype - vectors are stored as single-precision floating point numbers, 4 bytes. - For `float16` datatype - vectors are stored as half-precision floating point numbers, 2 bytes. - For `uint8` datatype - vectors are stored as unsigned 8-bit integers, 1 byte. It expects vector elements to be in range `[0, 255]`. - For `turbo4` datatype - vectors are quantized to 4 bits per element using the TurboQuant algorithm. - For `turbo8` datatype - vectors are quantized to 8 bits per element using the TurboQuant algorithm. - For `turbo16` datatype - vectors are quantized to 16 bits per element using the TurboQuant algorithm.
        */
       datatype?: components["schemas"]["Datatype"] | (Record<string, unknown> | null);
       multivector_config?: components["schemas"]["MultiVectorConfig"] | (Record<string, unknown> | null);
@@ -635,7 +642,7 @@ export interface components {
     HnswConfigDiff: {
       /**
        * Format: uint 
-       * @description Number of edges per node in the index graph. Larger the value - more accurate the search, more space required.
+       * @description Number of edges per node in the index graph. Larger the value - more accurate the search, more space required. Set to 0 to disable the main HNSW graph. Additional payload-aware links may still be built when the effective payload M is positive (see payload_m). This setting alone does not guarantee exact search.
        */
       m?: number | null;
       /**
@@ -662,7 +669,7 @@ export interface components {
       memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /**
        * Format: uint 
-       * @description Custom M param for additional payload-aware HNSW links. If not set, default M will be used.
+       * @description Number of additional payload-aware links per node. If unset, the value of m is used. An effective value of 0 disables these additional links. A positive value allows them for indexed payload fields with HNSW enabled, even when m is 0.
        */
       payload_m?: number | null;
       /** @description Store copies of original and quantized vectors within the HNSW index file. Default: false. Enabling this option will trade the search speed for disk usage by reducing amount of random seeks during the search. Requires quantized vectors to be enabled. Multi-vectors are not supported. */
@@ -752,9 +759,9 @@ export interface components {
       bits?: components["schemas"]["TurboQuantBitSize"] | (Record<string, unknown> | null);
     };
     /** @enum {string} */
-    TurboQuantBitSize: "bits1" | "bits1_5" | "bits2" | "bits4";
+    TurboQuantBitSize: "bits1" | "bits1_5" | "bits2" | "bits4" | "bits8";
     /** @enum {string} */
-    Datatype: "float32" | "uint8" | "float16" | "turbo4";
+    Datatype: "float32" | "uint8" | "float16" | "turbo4" | "turbo8" | "turbo16";
     MultiVectorConfig: {
       comparator: components["schemas"]["MultiVectorComparator"];
     };
@@ -765,6 +772,11 @@ export interface components {
     /** @description Params of the payload storage */
     PayloadStorageParams: {
       /** @description Memory placement of the payload storage. Overrides the deprecated `on_disk_payload` flag if both are set. `pinned` is not supported for payload storage. Default: `cold` (`cached` if `on_disk_payload` is set to false). */
+      memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
+    };
+    /** @description Params of the point id tracker */
+    IdTrackerParams: {
+      /** @description Memory placement of the point id mapping in indexed segments: `cold` keeps it on disk and reads it on demand, `cached` keeps it on disk but primes the page cache with it on load, `pinned` keeps it in RAM. Default: `pinned`. */
       memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
     };
     /** @description Params of single sparse vector data storage */
@@ -806,7 +818,7 @@ export interface components {
     HnswConfig: {
       /**
        * Format: uint 
-       * @description Number of edges per node in the index graph. Larger the value - more accurate the search, more space required.
+       * @description Number of edges per node in the index graph. Larger the value - more accurate the search, more space required. Set to 0 to disable the main HNSW graph. Additional payload-aware links may still be built when the effective payload M is positive (see payload_m). This setting alone does not guarantee exact search.
        */
       m: number;
       /**
@@ -834,7 +846,7 @@ export interface components {
       memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /**
        * Format: uint 
-       * @description Custom M param for hnsw graph built for payload index. If not set, default M will be used.
+       * @description Number of additional payload-aware links per node. If unset, the value of m is used. An effective value of 0 disables these additional links. A positive value allows them for indexed payload fields with HNSW enabled, even when m is 0.
        */
       payload_m?: number | null;
       /** @description Store copies of original and quantized vectors within the HNSW index file. Default: false. Enabling this option will trade the search speed for disk usage by reducing amount of random seeks during the search. Requires quantized vectors to be enabled. Multi-vectors are not supported. */
@@ -862,7 +874,7 @@ export interface components {
       default_segment_number: number;
       /**
        * Format: uint 
-       * @description Do not create segments larger this size (in kilobytes). Large segments might require disproportionately long indexation times, therefore it makes sense to limit the size of segments.
+       * @description Do not create segments larger than this size (in kilobytes). Large segments might require disproportionately long indexation times, therefore it makes sense to limit the size of segments.
        * 
        * If indexing speed is more important - make this parameter lower. If search speed is more important - make this parameter higher. Note: 1Kb = 1 vector of size 256 If not set, will be automatically selected considering the number of available CPUs. 
        * @default null
@@ -1079,6 +1091,8 @@ export interface components {
       enable_hnsw?: boolean | null;
       /** @description If true, enable prefix matching (`match: { "prefix": ... }`) on this field. Default: false. */
       prefix?: boolean | null;
+      /** @description Index every object of this array as a separate entry, e.g. `offers` for the field `offers[].price`. The field must be inside the array's elements. `is_empty` on the field matches a point when one of its elements lacks the field, and never a point without elements. Default: disabled. */
+      nested?: string | null;
     };
     /** @enum {string} */
     KeywordIndexType: "keyword";
@@ -1099,6 +1113,8 @@ export interface components {
       memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
       enable_hnsw?: boolean | null;
+      /** @description Index every object of this array as a separate entry, e.g. `offers` for the field `offers[].price`. The field must be inside the array's elements. `is_empty` on the field matches a point when one of its elements lacks the field, and never a point without elements. Default: disabled. */
+      nested?: string | null;
     };
     /** @enum {string} */
     IntegerIndexType: "integer";
@@ -1115,6 +1131,8 @@ export interface components {
       memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
       enable_hnsw?: boolean | null;
+      /** @description Index every object of this array as a separate entry, e.g. `offers` for the field `offers[].price`. The field must be inside the array's elements. `is_empty` on the field matches a point when one of its elements lacks the field, and never a point without elements. Default: disabled. */
+      nested?: string | null;
     };
     /** @enum {string} */
     FloatIndexType: "float";
@@ -1129,6 +1147,8 @@ export interface components {
       memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
       enable_hnsw?: boolean | null;
+      /** @description Index every object of this array as a separate entry, e.g. `offers` for the field `offers[].price`. The field must be inside the array's elements. `is_empty` on the field matches a point when one of its elements lacks the field, and never a point without elements. Default: disabled. */
+      nested?: string | null;
     };
     /** @enum {string} */
     GeoIndexType: "geo";
@@ -1164,6 +1184,10 @@ export interface components {
       stemmer?: components["schemas"]["StemmingAlgorithm"] | (Record<string, unknown> | null);
       /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
       enable_hnsw?: boolean | null;
+      /** @description Enable ranking points by BM25 over this field; `true` for the defaults. Changing it rebuilds the index. Default: disabled. */
+      scoring?: components["schemas"]["TextScoringInterface"] | (Record<string, unknown> | null);
+      /** @description Index every object of this array as a separate entry, e.g. `offers` for the field `offers[].title`. The field must be inside the array's elements. Every query on the field, not only nested filters, treats each element as its own document: a condition matches a point when a single element matches it, and BM25 scores elements separately. `is_empty` on the field matches a point when one of its elements lacks the field, and never a point without elements. Default: disabled. */
+      nested?: string | null;
     };
     /** @enum {string} */
     TextIndexType: "text";
@@ -1199,6 +1223,17 @@ export interface components {
      * @enum {string}
      */
     NoStemmer: "none";
+    /** @description BM25 scoring for a text index: `true` for the default parameters, `false` to disable it, or the parameters themselves. */
+    TextScoringInterface: boolean | components["schemas"]["TextScoringParams"];
+    /** @description Parameters of ranking over a text index. The index records the length of each document, which BM25 normalizes by. `k1` and `b` are set per query. */
+    TextScoringParams: {
+      type: components["schemas"]["TextScoringType"];
+    };
+    /**
+     * @description How a text index ranks documents. 
+     * @enum {string}
+     */
+    TextScoringType: "bm25";
     BoolIndexParams: {
       type: components["schemas"]["BoolIndexType"];
       /**
@@ -1210,6 +1245,8 @@ export interface components {
       memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
       enable_hnsw?: boolean | null;
+      /** @description Index every object of this array as a separate entry, e.g. `offers` for the field `offers[].price`. The field must be inside the array's elements. `is_empty` on the field matches a point when one of its elements lacks the field, and never a point without elements. Default: disabled. */
+      nested?: string | null;
     };
     /** @enum {string} */
     BoolIndexType: "bool";
@@ -1226,6 +1263,8 @@ export interface components {
       memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
       enable_hnsw?: boolean | null;
+      /** @description Index every object of this array as a separate entry, e.g. `offers` for the field `offers[].price`. The field must be inside the array's elements. `is_empty` on the field matches a point when one of its elements lacks the field, and never a point without elements. Default: disabled. */
+      nested?: string | null;
     };
     /** @enum {string} */
     DatetimeIndexType: "datetime";
@@ -1242,6 +1281,8 @@ export interface components {
       memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
       /** @description Enable HNSW graph building for this payload field. If true, builds additional HNSW links (Need payload_m > 0). Default: true. */
       enable_hnsw?: boolean | null;
+      /** @description Index every object of this array as a separate entry, e.g. `offers` for the field `offers[].price`. The field must be inside the array's elements. `is_empty` on the field matches a point when one of its elements lacks the field, and never a point without elements. Default: disabled. */
+      nested?: string | null;
     };
     /** @enum {string} */
     UuidIndexType: "uuid";
@@ -1402,7 +1443,7 @@ export interface components {
       is_null?: boolean | null;
     };
     /** @description Match filter request */
-    Match: components["schemas"]["MatchValue"] | components["schemas"]["MatchText"] | components["schemas"]["MatchTextAny"] | components["schemas"]["MatchPhrase"] | components["schemas"]["MatchPrefix"] | components["schemas"]["MatchAny"] | components["schemas"]["MatchExcept"];
+    Match: components["schemas"]["MatchValue"] | components["schemas"]["MatchText"] | components["schemas"]["MatchTextAny"] | components["schemas"]["MatchPhrase"] | components["schemas"]["MatchPrefix"] | components["schemas"]["MatchSubstring"] | components["schemas"]["MatchAny"] | components["schemas"]["MatchExcept"];
     /** @description Exact match of the given value */
     MatchValue: {
       value: components["schemas"]["ValueVariants"];
@@ -1427,6 +1468,14 @@ export interface components {
      */
     MatchPrefix: {
       prefix: string;
+    };
+    /**
+     * @description Match keyword values that contain the given string.
+     * 
+     * Byte-wise (hence, for valid UTF-8, character-wise) and case-sensitive, consistent with exact keyword and prefix matching. Served by a keyword index with the `prefix` option, through a scan of its key dictionary; without one, falls back to reading the payload.
+     */
+    MatchSubstring: {
+      substring: string;
     };
     /** @description Exact match on any of the given values */
     MatchAny: {
@@ -1697,6 +1746,11 @@ export interface components {
        * @default null
        */
       payload?: components["schemas"]["PayloadStorageParams"] | (Record<string, unknown> | null);
+      /**
+       * @description Configuration of the point id tracker 
+       * @default null
+       */
+      id_tracker?: components["schemas"]["IdTrackerParams"] | (Record<string, unknown> | null);
       /** @description Custom params for HNSW index. If none - values from service configuration file are used. */
       hnsw_config?: components["schemas"]["HnswConfigDiff"] | (Record<string, unknown> | null);
       /** @description Custom params for WAL. If none - values from service configuration file are used. */
@@ -1754,7 +1808,7 @@ export interface components {
       default_segment_number?: number | null;
       /**
        * Format: uint 
-       * @description Do not create segments larger this size (in kilobytes). Large segments might require disproportionately long indexation times, therefore it makes sense to limit the size of segments.
+       * @description Do not create segments larger than this size (in kilobytes). Large segments might require disproportionately long indexation times, therefore it makes sense to limit the size of segments.
        * 
        * If indexation speed have more priority for your - make this parameter lower. If search speed is more important - make this parameter higher. Note: 1Kb = 1 vector of size 256
        */
@@ -1986,6 +2040,8 @@ export interface components {
       on_disk_payload?: boolean | null;
       /** @description Update params of the payload storage. If none - it is left unchanged. */
       payload?: components["schemas"]["PayloadStorageParams"] | (Record<string, unknown> | null);
+      /** @description Update params of the point id tracker. If none - it is left unchanged. */
+      id_tracker?: components["schemas"]["IdTrackerParams"] | (Record<string, unknown> | null);
     };
     SparseVectorsConfig: {
       [key: string]: components["schemas"]["SparseVectorParams"] | undefined;
@@ -2402,7 +2458,7 @@ export interface components {
       /** @description If `true` transfer is a synchronization of a replicas If `false` transfer is a moving of a shard from one peer to another */
       sync: boolean;
       method?: components["schemas"]["ShardTransferMethod"] | (Record<string, unknown> | null);
-      /** @description A human-readable report of the transfer progress. Available only on the source peer. */
+      /** @description A human-readable report of the transfer progress. Available only on the source peer, and on the target peer during snapshot recovery. */
       comment?: string | null;
     };
     /**
@@ -2504,6 +2560,11 @@ export interface components {
        */
       async_payload_storage?: boolean;
       /**
+       * @description Allow the batched io_uring-based HNSW graph search. When disabled, the HNSW graph is *never* opened on io_uring. When enabled, the graph backend is decided based on `storage.performance.io_uring` option and links placement. 
+       * @default false
+       */
+      async_hnsw_graph?: boolean;
+      /**
        * @description Write a segment manifest (`segments_manifest.json`, next to the `segments/` directory) listing the shard's segments and their state, so out-of-process readers can discover segments without scanning the filesystem. 
        * @default false
        */
@@ -2519,7 +2580,45 @@ export interface components {
        */
       compact_bitmask?: boolean;
       /**
-       * @description Serverless-compatible deployment mode. Automatically enables [`Self::write_segment_manifest`], [`Self::append_only_mutations`] and [`Self::compact_bitmask`].
+       * @description Create Blobstore-backed storages (payload storage, appendable field indexes, sparse vectors) in the append-only Logstore mode. Gates creation only: an existing storage keeps its persisted mode, and both modes are always readable.
+       * 
+       * Implies [`Self::append_only_mutations`], enforced by [`init_feature_flags`]. 
+       * @default false
+       */
+      append_only_storages?: boolean;
+      /**
+       * @description In non-appendable segments built by the optimizer, store the tracker of an append-only payload storage in the compacted format: read into RAM whole on open instead of one lookup per value. Only has an effect together with [`Self::append_only_storages`]. Gates creation only: both formats are always readable. 
+       * @default false
+       */
+      compact_logstore_tracker?: boolean;
+      /**
+       * @description Transfer points as storage-native bytes (raw points), for every collection rather than only those whose vector storage would lose precision in a decode-encode round-trip (TurboQuant).
+       * 
+       * Read on the sending side only, where the transfer batch is prepared: nodes accept raw points regardless. 
+       * @default true
+       */
+      transfer_raw_points?: boolean;
+      /**
+       * @description Send the payload of a raw point as the byte blob it is stored as, so the sending node does not parse it and neither node builds a protobuf value tree for it. The receiving node still parses the blob, once, when the operation is applied. Only has an effect on points transferred raw, see [`Self::transfer_raw_points`].
+       * 
+       * Read on the sending side only: nodes accept raw payloads regardless. 
+       * @default true
+       */
+      transfer_raw_payloads?: boolean;
+      /**
+       * @description Persist proxy segment changes on disk. Prevents pinning the WAL while proxy segments are open. Replays the persisted changes on startup to guarantee data consistency. Required for serverless deployments where storage and compute is separated. 
+       * @default false
+       */
+      persist_proxy_segments?: boolean;
+      /**
+       * @description When `hnsw_config.inline_storage` enabled, use the `GraphInline` vector storage (aka inline-storage without standalone vector storage) for new segments.
+       * 
+       * Existing `GraphInline` segments are always readable, regardless of this flag. 
+       * @default true
+       */
+      combined_vector_storage?: boolean;
+      /**
+       * @description Serverless-compatible deployment mode. Implies [`Self::write_segment_manifest`], [`Self::append_only_mutations`], [`Self::compact_bitmask`], [`Self::append_only_storages`], [`Self::compact_logstore_tracker`] and [`Self::persist_proxy_segments`].
        * 
        * Note that this will only be applied when passed into [`init_feature_flags`]. 
        * @default false
@@ -2546,6 +2645,7 @@ export interface components {
       distribution?: string | null;
       distribution_version?: string | null;
       is_docker: boolean;
+      container_runtime: components["schemas"]["ContainerRuntime"];
       /** Format: uint */
       cores?: number | null;
       /**
@@ -2567,6 +2667,11 @@ export interface components {
       cpu_endian?: components["schemas"]["CpuEndian"] | (Record<string, unknown> | null);
       gpu_devices?: (components["schemas"]["GpuDeviceTelemetry"])[] | null;
     };
+    /**
+     * @description Container runtime Qdrant is running under (`none` if bare metal). 
+     * @enum {string}
+     */
+    ContainerRuntime: "none" | "docker" | "kubernetes" | "other";
     /** @enum {string} */
     CpuEndian: "little" | "big" | "other";
     GpuDeviceTelemetry: {
@@ -2579,6 +2684,7 @@ export interface components {
       max_log_files: number;
       trust_forwarded_headers: boolean;
       log_api: boolean;
+      output: string;
       /** Format: uint */
       dir_size_bytes?: number | null;
     };
@@ -2598,7 +2704,7 @@ export interface components {
       config?: components["schemas"]["CollectionConfigTelemetry"] | (Record<string, unknown> | null);
       shards?: (components["schemas"]["ReplicaSetTelemetry"])[] | null;
       transfers?: (components["schemas"]["ShardTransferInfo"])[] | null;
-      resharding?: (components["schemas"]["ReshardingInfo"])[] | null;
+      resharding?: (components["schemas"]["ReshardingTelemetry"])[] | null;
       shard_clean_tasks?: ({
         [key: string]: components["schemas"]["ShardCleanStatusTelemetry"] | undefined;
       }) | null;
@@ -2767,6 +2873,8 @@ export interface components {
         [key: string]: components["schemas"]["SparseVectorDataConfig"] | undefined;
       };
       payload_storage_type: components["schemas"]["PayloadStorageType"];
+      /** @description Memory placement of the id tracker in non-appendable segments. Unset means the deployment default: `cold` in serverless-compatible mode, `pinned` otherwise. */
+      id_tracker_memory?: components["schemas"]["Memory"] | (Record<string, unknown> | null);
     };
     /** @description Config of single vector data storage */
     VectorDataConfig: {
@@ -2786,7 +2894,7 @@ export interface components {
       datatype?: components["schemas"]["VectorStorageDatatype"] | (Record<string, unknown> | null);
     };
     /** @description Storage types for vectors */
-    VectorStorageType: "Memory" | "Mmap" | "ChunkedMmap" | "InRamChunkedMmap" | "InRamMmap" | "Empty";
+    VectorStorageType: "Memory" | "Mmap" | "ChunkedMmap" | "InRamChunkedMmap" | "InRamMmap" | "GraphInline";
     /** @description Vector index configuration */
     Indexes: OneOf<[{
       /** @enum {string} */
@@ -2801,7 +2909,7 @@ export interface components {
      * @description Storage types for vectors 
      * @enum {string}
      */
-    VectorStorageDatatype: "float32" | "float16" | "uint8" | "turbo4";
+    VectorStorageDatatype: "float32" | "float16" | "uint8" | "turbo4" | "turbo8" | "turbo16";
     /** @description Config of single sparse vector data storage */
     SparseVectorDataConfig: {
       index: components["schemas"]["SparseIndexConfig"];
@@ -2830,7 +2938,7 @@ export interface components {
     };
     /** @description Sparse index types */
     SparseIndexType: "MutableRam" | "ImmutableRam" | "Mmap";
-    SparseVectorStorageType: "mmap" | "empty";
+    SparseVectorStorageType: "mmap";
     /** @description Type of payload storage */
     PayloadStorageType: OneOf<[{
       /** @enum {string} */
@@ -2847,6 +2955,7 @@ export interface components {
       filtered_plain: components["schemas"]["OperationDurationStatistics"];
       filtered_small_cardinality: components["schemas"]["OperationDurationStatistics"];
       filtered_large_cardinality: components["schemas"]["OperationDurationStatistics"];
+      filtered_acorn?: components["schemas"]["OperationDurationStatistics"];
       filtered_exact: components["schemas"]["OperationDurationStatistics"];
       filtered_sparse: components["schemas"]["OperationDurationStatistics"];
       unfiltered_exact: components["schemas"]["OperationDurationStatistics"];
@@ -2963,6 +3072,22 @@ export interface components {
       /** Format: uint64 */
       recovery_timestamp: number;
     };
+    ReshardingTelemetry: {
+      stage: components["schemas"]["ReshardingStage"];
+      direction: components["schemas"]["ReshardingDirection"];
+      /** Format: uint32 */
+      shard_id: number;
+      /** Format: uint64 */
+      peer_id: number;
+      shard_key?: components["schemas"]["ShardKey"] | (Record<string, unknown> | null);
+      /** Format: uuid */
+      uuid: string;
+    };
+    /**
+     * @description Resharding stages 
+     * @enum {string}
+     */
+    ReshardingStage: "migrating_points" | "read_hash_ring_committed" | "write_hash_ring_committed";
     ShardCleanStatusTelemetry: OneOf<["started" | "done" | "cancelled", {
       progress: components["schemas"]["ShardCleanStatusProgressTelemetry"];
     }, {
@@ -3313,7 +3438,7 @@ export interface components {
        */
       location: string;
       /**
-       * @description Defines which data should be used as a source of truth if there are other replicas in the cluster. If set to `Snapshot`, the snapshot will be used as a source of truth, and the current state will be overwritten. If set to `Replica`, the current state will be used as a source of truth, and after recovery if will be synchronized with the snapshot. 
+       * @description Defines which data should be used as a source of truth if there are other replicas in the cluster. If set to `Snapshot`, the snapshot will be used as a source of truth, and the current state will be overwritten. If set to `Replica`, the current state will be used as a source of truth, and after recovery it will be synchronized from other replicas. 
        * @default null
        */
       priority?: components["schemas"]["SnapshotPriority"] | (Record<string, unknown> | null);
@@ -3477,7 +3602,7 @@ export interface components {
       prefetch?: components["schemas"]["Prefetch"] | (components["schemas"]["Prefetch"])[] | (Record<string, unknown> | null);
       /** @description Query to perform. If missing without prefetches, returns points ordered by their IDs. */
       query?: components["schemas"]["QueryInterface"] | (Record<string, unknown> | null);
-      /** @description Define which vector name to use for querying. If missing, the default vector is used. */
+      /** @description Define which vector name to use for querying. If missing, the default vector is used. For a `text` query, the payload field whose text index to search. */
       using?: string | null;
       /** @description Filter conditions - return only those points that satisfy the specified conditions. */
       filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
@@ -3516,7 +3641,7 @@ export interface components {
       prefetch?: components["schemas"]["Prefetch"] | (components["schemas"]["Prefetch"])[] | (Record<string, unknown> | null);
       /** @description Query to perform. If missing without prefetches, returns points ordered by their IDs. */
       query?: components["schemas"]["QueryInterface"] | (Record<string, unknown> | null);
-      /** @description Define which vector name to use for querying. If missing, the default vector is used. */
+      /** @description Define which vector name to use for querying. If missing, the default vector is used. For a `text` query, the payload field whose text index to search. */
       using?: string | null;
       /** @description Filter conditions - return only those points that satisfy the specified conditions. */
       filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
@@ -3540,7 +3665,7 @@ export interface components {
     };
     QueryInterface: components["schemas"]["VectorInput"] | components["schemas"]["Query"];
     VectorInput: (number)[] | components["schemas"]["SparseVector"] | ((number)[])[] | components["schemas"]["ExtendedPointId"] | components["schemas"]["Document"] | components["schemas"]["Image"] | components["schemas"]["InferenceObject"];
-    Query: components["schemas"]["NearestQuery"] | components["schemas"]["RecommendQuery"] | components["schemas"]["DiscoverQuery"] | components["schemas"]["ContextQuery"] | components["schemas"]["OrderByQuery"] | components["schemas"]["FusionQuery"] | components["schemas"]["RrfQuery"] | components["schemas"]["FormulaQuery"] | components["schemas"]["SampleQuery"] | components["schemas"]["RelevanceFeedbackQuery"];
+    Query: components["schemas"]["NearestQuery"] | components["schemas"]["RecommendQuery"] | components["schemas"]["DiscoverQuery"] | components["schemas"]["ContextQuery"] | components["schemas"]["OrderByQuery"] | components["schemas"]["FusionQuery"] | components["schemas"]["RrfQuery"] | components["schemas"]["FormulaQuery"] | components["schemas"]["SampleQuery"] | components["schemas"]["RelevanceFeedbackQuery"] | components["schemas"]["TextQuery"];
     NearestQuery: {
       nearest: components["schemas"]["VectorInput"];
       /** @description Perform MMR (Maximal Marginal Relevance) reranking after search, using the same vector in this query to calculate relevance. */
@@ -3639,7 +3764,7 @@ export interface components {
         [key: string]: unknown;
       };
     };
-    Expression: number | string | components["schemas"]["Condition"] | components["schemas"]["GeoDistance"] | components["schemas"]["DatetimeExpression"] | components["schemas"]["DatetimeKeyExpression"] | components["schemas"]["MultExpression"] | components["schemas"]["SumExpression"] | components["schemas"]["NegExpression"] | components["schemas"]["AbsExpression"] | components["schemas"]["DivExpression"] | components["schemas"]["SqrtExpression"] | components["schemas"]["PowExpression"] | components["schemas"]["ExpExpression"] | components["schemas"]["Log10Expression"] | components["schemas"]["LnExpression"] | components["schemas"]["LinDecayExpression"] | components["schemas"]["ExpDecayExpression"] | components["schemas"]["GaussDecayExpression"];
+    Expression: number | string | components["schemas"]["Condition"] | components["schemas"]["GeoDistance"] | components["schemas"]["DatetimeExpression"] | components["schemas"]["DatetimeKeyExpression"] | components["schemas"]["MultExpression"] | components["schemas"]["SumExpression"] | components["schemas"]["MaxExpression"] | components["schemas"]["MinExpression"] | components["schemas"]["NegExpression"] | components["schemas"]["AbsExpression"] | components["schemas"]["DivExpression"] | components["schemas"]["SqrtExpression"] | components["schemas"]["PowExpression"] | components["schemas"]["ExpExpression"] | components["schemas"]["Log10Expression"] | components["schemas"]["LnExpression"] | components["schemas"]["AcoshExpression"] | components["schemas"]["LinDecayExpression"] | components["schemas"]["ExpDecayExpression"] | components["schemas"]["GaussDecayExpression"];
     GeoDistance: {
       geo_distance: components["schemas"]["GeoDistanceParams"];
     };
@@ -3659,6 +3784,14 @@ export interface components {
     };
     SumExpression: {
       sum: (components["schemas"]["Expression"])[];
+    };
+    /** @description Largest of the given expressions. Requires at least one operand. */
+    MaxExpression: {
+      max: (components["schemas"]["Expression"])[];
+    };
+    /** @description Smallest of the given expressions. Requires at least one operand. */
+    MinExpression: {
+      min: (components["schemas"]["Expression"])[];
     };
     NegExpression: {
       neg: components["schemas"]["Expression"];
@@ -3693,6 +3826,9 @@ export interface components {
     };
     LnExpression: {
       ln: components["schemas"]["Expression"];
+    };
+    AcoshExpression: {
+      acosh: components["schemas"]["Expression"];
     };
     LinDecayExpression: {
       lin_decay: components["schemas"]["DecayParamsExpression"];
@@ -3748,6 +3884,35 @@ export interface components {
       /** Format: float */
       c: number;
     };
+    /** @description Rank by BM25 over the text index of the payload field named by `using`, which must have `scoring` set. A point scores when it holds any of the query's terms: required or excluded terms belong in the request's `filter`. */
+    TextQuery: {
+      text: components["schemas"]["TextInterface"];
+    };
+    /** @description The text to search for, or the text with scorer parameters. */
+    TextInterface: string | components["schemas"]["TextQueryInput"];
+    TextQueryInput: {
+      /** @description Text to search for, tokenized by the field's text index. */
+      query: string;
+      /** @description Parameters of the scorer, keyed by its name. They must match the `scoring` type of the field's text index. If absent, the scorer runs with its defaults. */
+      scoring?: components["schemas"]["TextQueryScoring"] | (Record<string, unknown> | null);
+    };
+    /** @description Parameters of one scorer, keyed by its name. */
+    TextQueryScoring: components["schemas"]["Bm25Scoring"];
+    Bm25Scoring: {
+      bm25: components["schemas"]["Bm25Params"];
+    };
+    Bm25Params: {
+      /**
+       * Format: float 
+       * @description Term frequency saturation. Default is 1.2.
+       */
+      k?: number | null;
+      /**
+       * Format: float 
+       * @description Document length normalization, from 0 (none) to 1 (full). Default is 0.75.
+       */
+      b?: number | null;
+    };
     /** @description Additional parameters of the search */
     SearchParams: {
       /**
@@ -3769,7 +3934,7 @@ export interface components {
       indexed_only?: boolean;
       /** @description ACORN search params */
       acorn?: components["schemas"]["AcornSearchParams"] | (Record<string, unknown> | null);
-      /** @description Which population sparse vector IDF statistics are computed over. By default (or with explicit `"global"`) statistics are collection-wide. Only applicable to sparse vectors with the IDF modifier enabled. */
+      /** @description Which population IDF statistics are computed over. By default (or with explicit `"global"`) statistics are collection-wide. Only applicable to sparse vectors with the IDF modifier enabled, and to BM25 over a text index. */
       idf?: components["schemas"]["IdfParams"] | (Record<string, unknown> | null);
     };
     /** @description Additional parameters of the search */
@@ -3809,9 +3974,9 @@ export interface components {
       max_selectivity?: number | null;
     };
     /**
-     * @description Population over which sparse vector IDF statistics are computed for scoring — the *IDF corpus*.
+     * @description Population over which IDF statistics are computed for scoring — the *IDF corpus*.
      * 
-     * - `"global"` — collection-wide statistics, same as omitting the parameter. - `{ "corpus": <filter> }` — document count and per-term document frequencies are computed over the points matching the corpus filter only. The corpus is independent of the retrieval filter and is usually broader than it.
+     * - `"global"` — collection-wide statistics, same as omitting the parameter. - `{ "corpus": <filter> }` — document count and per-term document frequencies (and, for BM25 over a text index, the average document length) are computed over the points matching the corpus filter only. The corpus is independent of the retrieval filter and is usually broader than it.
      */
     IdfParams: components["schemas"]["IdfScope"] | components["schemas"]["IdfCorpusParams"];
     /**
@@ -3850,7 +4015,7 @@ export interface components {
       prefetch?: components["schemas"]["Prefetch"] | (components["schemas"]["Prefetch"])[] | (Record<string, unknown> | null);
       /** @description Query to perform. If missing without prefetches, returns points ordered by their IDs. */
       query?: components["schemas"]["QueryInterface"] | (Record<string, unknown> | null);
-      /** @description Define which vector name to use for querying. If missing, the default vector is used. */
+      /** @description Define which vector name to use for querying. If missing, the default vector is used. For a `text` query, the payload field whose text index to search. */
       using?: string | null;
       /** @description Filter conditions - return only those points that satisfy the specified conditions. */
       filter?: components["schemas"]["Filter"] | (Record<string, unknown> | null);
@@ -4223,7 +4388,7 @@ export interface components {
       distance: components["schemas"]["Distance"];
       /** @description Configuration for multi-vector points (e.g., ColBERT) */
       multivector_config?: components["schemas"]["MultiVectorConfig"] | (Record<string, unknown> | null);
-      /** @description Element storage type (Float32, Float16, Uint8, Turbo4) */
+      /** @description Element storage type (Float32, Float16, Uint8, Turbo4, Turbo8, Turbo16) */
       datatype?: components["schemas"]["VectorStorageDatatype"] | (Record<string, unknown> | null);
     };
     /** @description Wrapper for sparse vector creation config. */
@@ -6628,6 +6793,8 @@ export interface operations {
       query?: {
         /** @description Define read consistency guarantees for the operation */
         consistency?: components["schemas"]["ReadConsistency"];
+        /** @description If set, overrides global timeout for this request. Unit is seconds. */
+        timeout?: number;
       };
       path: {
         /** @description Name of the collection to retrieve from */
