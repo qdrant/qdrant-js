@@ -4,7 +4,7 @@
 
 ### Minor Changes
 
-- Qdrant v1.20.0 API
+- Qdrant v1.20.0 API (including `code` tokenizer for text indexes)
 - Updated dependencies
     - @qdrant/js-client-grpc@1.20.0
     - @qdrant/js-client-rest@1.20.0

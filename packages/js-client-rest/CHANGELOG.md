@@ -11,6 +11,7 @@
 - `max`, `min` and `acosh` formula expressions
 - `turbo8` and `turbo16` vector datatypes, `bits8` TurboQuant bit size
 - Added `id_tracker` (point id tracker params) to `createCollection` and `recreateCollection`; collection info now reports `created_at`
+- `code` tokenizer for text indexes (source-code identifier splitting)
 
 ## v1.19.0
 

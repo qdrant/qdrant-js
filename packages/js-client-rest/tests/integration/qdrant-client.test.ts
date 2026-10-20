@@ -476,6 +476,26 @@ describe('QdrantClient', () => {
         expect(points.map((point) => point.id)).toEqual([1]);
     });
 
+    test('code tokenizer matches across naming conventions', async () => {
+        await client.createPayloadIndex(textCollectionName, {
+            field_name: 'source',
+            field_schema: {type: 'text', tokenizer: 'code'},
+            wait: true,
+        });
+        await client.upsert(textCollectionName, {
+            wait: true,
+            points: [
+                {id: 10, vector: [0.1, 0.2, 0.3, 0.4], payload: {source: 'fn getUserName() {}'}},
+                {id: 11, vector: [0.5, 0.6, 0.7, 0.8], payload: {source: 'fn deleteFile() {}'}},
+            ],
+        });
+
+        const {points} = await client.scroll(textCollectionName, {
+            filter: {must: [{key: 'source', match: {text: 'get_user_name'}}]},
+        });
+        expect(points.map((point) => point.id)).toEqual([10]);
+    });
+
     test('nested payload index', async () => {
         expect(
             (

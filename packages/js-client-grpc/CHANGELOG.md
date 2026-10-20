@@ -5,7 +5,7 @@
 ### Minor Changes
 
 - Qdrant v1.20.0 API: BM25 `TextQuery` and `TextScoringParams`, `Match.substring`, `nested` index params, `max`/`min`/`acosh` expressions,
-  `Datatype.Turbo8`/`Turbo16`, `TurboQuantBitSize.Bits8`, `IdTrackerParams`, `CollectionInfo.created_at`
+  `Datatype.Turbo8`/`Turbo16`, `TurboQuantBitSize.Bits8`, `IdTrackerParams`, `CollectionInfo.created_at`, `TokenizerType.Code`
 
 ## 1.19.0
 

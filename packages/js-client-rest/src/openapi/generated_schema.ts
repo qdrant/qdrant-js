@@ -1192,7 +1192,7 @@ export interface components {
     /** @enum {string} */
     TextIndexType: "text";
     /** @enum {string} */
-    TokenizerType: "prefix" | "whitespace" | "word" | "multilingual";
+    TokenizerType: "prefix" | "whitespace" | "word" | "multilingual" | "code";
     StopwordsInterface: components["schemas"]["Language"] | components["schemas"]["StopwordsSet"];
     /** @enum {string} */
     Language: "arabic" | "azerbaijani" | "basque" | "bengali" | "catalan" | "chinese" | "danish" | "dutch" | "english" | "finnish" | "french" | "german" | "greek" | "hebrew" | "hinglish" | "hungarian" | "indonesian" | "italian" | "japanese" | "kazakh" | "nepali" | "norwegian" | "portuguese" | "romanian" | "russian" | "slovene" | "spanish" | "swedish" | "tajik" | "turkish";

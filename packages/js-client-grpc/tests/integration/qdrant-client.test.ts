@@ -525,4 +525,64 @@ describe('QdrantClient', () => {
 
         await client.api('collections').delete({collectionName: textCollectionName});
     });
+
+    test('code tokenizer matches across naming conventions', async () => {
+        const codeCollectionName = 'test_collection_code';
+        await client.api('collections').delete({collectionName: codeCollectionName});
+        await client.api('collections').create({
+            collectionName: codeCollectionName,
+            vectorsConfig: {
+                config: {case: 'params', value: {size: 4n, distance: Distance.Dot}},
+            },
+        });
+
+        await client.api('points').createFieldIndex({
+            collectionName: codeCollectionName,
+            fieldName: 'source',
+            fieldType: FieldType.FieldTypeText,
+            fieldIndexParams: {
+                indexParams: {
+                    case: 'textIndexParams',
+                    value: {tokenizer: TokenizerType.Code},
+                },
+            },
+            wait: true,
+        });
+        await client.api('points').upsert({
+            collectionName: codeCollectionName,
+            wait: true,
+            points: [
+                {
+                    id: {pointIdOptions: {case: 'num', value: 1n}},
+                    vectors: {vectorsOptions: {case: 'vector', value: {data: [0.1, 0.2, 0.3, 0.4]}}},
+                    payload: {source: {kind: {case: 'stringValue', value: 'fn getUserName() {}'}}},
+                },
+                {
+                    id: {pointIdOptions: {case: 'num', value: 2n}},
+                    vectors: {vectorsOptions: {case: 'vector', value: {data: [0.5, 0.6, 0.7, 0.8]}}},
+                    payload: {source: {kind: {case: 'stringValue', value: 'fn deleteFile() {}'}}},
+                },
+            ],
+        });
+
+        const {result} = await client.api('points').scroll({
+            collectionName: codeCollectionName,
+            filter: {
+                must: [
+                    {
+                        conditionOneOf: {
+                            case: 'field',
+                            value: {
+                                key: 'source',
+                                match: {matchValue: {case: 'text', value: 'get_user_name'}},
+                            },
+                        },
+                    },
+                ],
+            },
+        });
+        expect(result?.map((point) => point.id?.pointIdOptions.value)).toEqual([1n]);
+
+        await client.api('collections').delete({collectionName: codeCollectionName});
+    });
 });
