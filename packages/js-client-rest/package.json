@@ -54,7 +54,7 @@
     },
     "dependencies": {
         "@qdrant/openapi-typescript-fetch": "1.2.6",
-        "undici": "7.29.0"
+        "undici": "7.29.1"
     },
     "devDependencies": {
         "@rollup/plugin-commonjs": "^29.0.3",
@@ -65,7 +65,7 @@
         "semver": "7.8.5",
         "tsx": "^4.22.4",
         "typescript": "^5.9.3",
-        "vitest": "^4.1.9"
+        "vitest": "^5.0.5"
     },
     "knip": {
         "ignore": [
