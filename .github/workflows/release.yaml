@@ -11,6 +11,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: release
     permissions:
       contents: read
       id-token: write # Required for npm trusted publishing (OIDC) and provenance
@@ -49,8 +50,6 @@ jobs:
       # No token is configured anywhere: pnpm exchanges the GitHub OIDC id token for a
       # short-lived registry token, per package, via npm trusted publishing.
       - run: pnpm publish --provenance --no-git-checks --filter '!monorepo'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Archive npm failure logs
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
