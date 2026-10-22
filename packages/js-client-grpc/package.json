@@ -52,7 +52,7 @@
         "@connectrpc/connect-node": "^2.2.0"
     },
     "devDependencies": {
-        "@bufbuild/buf": "1.72.0",
+        "@bufbuild/buf": "1.74.0",
         "@bufbuild/protoc-gen-es": "^2.16.0",
         "typescript": "^5.9.3",
         "vitest": "^4.1.12"
