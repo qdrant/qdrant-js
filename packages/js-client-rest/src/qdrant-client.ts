@@ -33,6 +33,7 @@ export type QdrantClientParams = {
      * Check compatibility with the server version. Default: `true`
      */
     checkCompatibility?: boolean;
+    allowUnsecureConnection?: boolean;
 };
 
 export class QdrantClient {
@@ -53,6 +54,7 @@ export class QdrantClient {
         port = 6333,
         timeout = 300_000,
         checkCompatibility = true,
+        allowUnsecureConnection = false,
         ...args
     }: QdrantClientParams = {}) {
         this._https = https ?? typeof apiKey === 'string';
@@ -105,7 +107,7 @@ export class QdrantClient {
         });
 
         if (typeof apiKey === 'string') {
-            if (this._scheme === 'http') {
+            if (this._scheme === 'http' && !allowUnsecureConnection) {
                 console.warn('Api key is used with unsecure connection.');
             }
             headers.set('api-key', apiKey);
