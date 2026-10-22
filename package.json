@@ -34,6 +34,6 @@
         "rollup": "^4.64.10",
         "ts-node": "^10.9.2",
         "typescript": "^5.9.3",
-        "typescript-eslint": "8.70.0"
+        "typescript-eslint": "8.71.2"
     }
 }
