@@ -10,6 +10,7 @@ describe('QdrantClient', () => {
     const collectionName = 'test_collection';
     const paramsCollectionName = 'test_collection_params';
     const sparseCollectionName = 'test_collection_sparse';
+    const textCollectionName = 'test_collection_text';
     const bigInt = BigInt(String(Number.MAX_SAFE_INTEGER + 2)) as unknown as number;
     const maxSafeInteger = Number.MAX_SAFE_INTEGER;
     const supportsJSONBigInt = semver.satisfies(process.versions.node, '>=21');
@@ -420,8 +421,106 @@ describe('QdrantClient', () => {
         expect(await client.updateQuotas({enabled: false, wait: true})).toBe(true);
     });
 
+    test('create collection with id tracker params and turbo8 vectors', async () => {
+        await client.deleteCollection(textCollectionName);
+        expect(
+            await client.createCollection(textCollectionName, {
+                vectors: {size: 4, distance: 'Dot', datatype: 'turbo8'},
+                id_tracker: {memory: 'cached'},
+            }),
+        ).toBe(true);
+
+        const info = await client.getCollection(textCollectionName);
+        expect(info.config.params.id_tracker).toMatchObject({memory: 'cached'});
+        expect(info.created_at).toEqual(expect.any(String));
+    });
+
+    test('BM25 text query', async () => {
+        await client.createPayloadIndex(textCollectionName, {
+            field_name: 'title',
+            field_schema: {type: 'text', scoring: true},
+            wait: true,
+        });
+        await client.upsert(textCollectionName, {
+            wait: true,
+            points: [
+                {id: 1, vector: [0.05, 0.61, 0.76, 0.74], payload: {title: 'vector search engine'}},
+                {id: 2, vector: [0.19, 0.81, 0.75, 0.11], payload: {title: 'search search search'}},
+                {id: 3, vector: [0.36, 0.55, 0.47, 0.94], payload: {title: 'relational database'}},
+            ],
+        });
+
+        const {points} = await client.query(textCollectionName, {query: {text: 'vector search'}, using: 'title'});
+        expect(points.map((point) => point.id)).toEqual([1, 2]);
+
+        const tuned = await client.query(textCollectionName, {
+            query: {text: {query: 'vector search', scoring: {bm25: {k: 2.0, b: 0.5}}}},
+            using: 'title',
+        });
+        expect(tuned.points).toHaveLength(2);
+        expect(tuned.points[0].score).not.toBe(points[0].score);
+    });
+
+    test('keyword index with substring matching', async () => {
+        await client.createPayloadIndex(textCollectionName, {
+            field_name: 'sku',
+            field_schema: 'keyword',
+            wait: true,
+        });
+        await client.setPayload(textCollectionName, {points: [1], payload: {sku: 'AB-1234-XY'}, wait: true});
+        await client.setPayload(textCollectionName, {points: [2], payload: {sku: 'CD-5678-XY'}, wait: true});
+
+        const {points} = await client.scroll(textCollectionName, {
+            filter: {must: [{key: 'sku', match: {substring: '1234'}}]},
+        });
+        expect(points.map((point) => point.id)).toEqual([1]);
+    });
+
+    test('code tokenizer matches across naming conventions', async () => {
+        await client.createPayloadIndex(textCollectionName, {
+            field_name: 'source',
+            field_schema: {type: 'text', tokenizer: 'code'},
+            wait: true,
+        });
+        await client.upsert(textCollectionName, {
+            wait: true,
+            points: [
+                {id: 10, vector: [0.1, 0.2, 0.3, 0.4], payload: {source: 'fn getUserName() {}'}},
+                {id: 11, vector: [0.5, 0.6, 0.7, 0.8], payload: {source: 'fn deleteFile() {}'}},
+            ],
+        });
+
+        const {points} = await client.scroll(textCollectionName, {
+            filter: {must: [{key: 'source', match: {text: 'get_user_name'}}]},
+        });
+        expect(points.map((point) => point.id)).toEqual([10]);
+    });
+
+    test('nested payload index', async () => {
+        expect(
+            (
+                await client.createPayloadIndex(textCollectionName, {
+                    field_name: 'offers[].price',
+                    field_schema: {type: 'float', nested: 'offers'},
+                    wait: true,
+                })
+            ).status,
+        ).toBe('completed');
+    });
+
+    test('max, min and acosh formula expressions', async () => {
+        const {points} = await client.query(textCollectionName, {
+            prefetch: {query: [0.2, 0.1, 0.9, 0.7], limit: 3},
+            query: {formula: {sum: [{max: ['$score', 0.5]}, {min: ['$score', 0.0]}, {acosh: 1.0}]}},
+        });
+        expect(points).toHaveLength(3);
+        // acosh(1) = 0 and min(score, 0) = 0 for positive scores, so the score is max(score, 0.5).
+        points.forEach((point) => expect(point.score).toBeGreaterThanOrEqual(0.5));
+    });
+
     test('cleanup', async () => {
         expect(await client.deleteCollection(paramsCollectionName)).toBe(true);
         expect(await client.deleteCollection(sparseCollectionName)).toBe(true);
+        expect(await client.deleteCollection(textCollectionName)).toBe(true);
     });
 });

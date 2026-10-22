@@ -923,6 +923,7 @@ export class QdrantClient {
             strict_mode_config,
             payload,
             metadata,
+            id_tracker,
         }: {timeout?: number} & Schemas['CreateCollection'],
     ): Promise<boolean> {
         const response = await this._openApiClient.createCollection({
@@ -942,6 +943,7 @@ export class QdrantClient {
             strict_mode_config,
             payload,
             metadata,
+            id_tracker,
         });
 
         return response.data.result ?? noResultError();
@@ -1003,6 +1005,7 @@ export class QdrantClient {
             strict_mode_config,
             payload,
             metadata,
+            id_tracker,
         }: {timeout?: number} & Schemas['CreateCollection'],
     ): Promise<boolean> {
         const deleteResponse = await this._openApiClient.deleteCollection({
@@ -1031,6 +1034,7 @@ export class QdrantClient {
             strict_mode_config,
             payload,
             metadata,
+            id_tracker,
         });
 
         return response.data.result ?? noResultError();

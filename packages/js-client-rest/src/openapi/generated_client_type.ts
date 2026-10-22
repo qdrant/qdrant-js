@@ -1773,6 +1773,7 @@ export type ClientApi = {
     parameters: {
           query?: {
             consistency?: components["schemas"]["ReadConsistency"];
+            timeout?: number;
           };
           path: {
             collection_name: string;
