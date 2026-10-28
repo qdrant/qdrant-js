@@ -17,4 +17,6 @@ export const createDispatcher = (connections = 25) =>
         connections,
         // will be overriden by header Keep-Alive, just as sensible default
         keepAliveTimeout: 10_000,
+        // explicitly disable HTTP/2 to prevent ALPN negotiation hang on inference endpoints
+        allowH2: false,
     });
