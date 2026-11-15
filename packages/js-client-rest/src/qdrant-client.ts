@@ -99,7 +99,7 @@ export class QdrantClient {
 
         const metadata = args.headers ?? {};
         Object.keys(metadata).forEach((field) => {
-            if (metadata[field]) {
+            if (metadata[field] !== undefined) {
                 headers.set(field, String(metadata[field]));
             }
         });
