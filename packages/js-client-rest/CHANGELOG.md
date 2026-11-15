@@ -1,5 +1,11 @@
 # @qdrant/js-client-rest
 
+## v1.20.1
+
+### Patch Changes
+
+- Preserve numeric zero and empty-string values in custom HTTP headers.
+
 ## v1.20.0
 
 ### Minor Changes

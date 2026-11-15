@@ -125,7 +125,7 @@ importers:
         specifier: workspace:1.20.0
         version: link:../js-client-grpc
       '@qdrant/js-client-rest':
-        specifier: workspace:1.20.0
+        specifier: workspace:1.20.1
         version: link:../js-client-rest
     devDependencies:
       typescript:

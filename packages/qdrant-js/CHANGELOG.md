@@ -1,5 +1,11 @@
 # @qdrant/qdrant-js
 
+## v1.20.1
+
+### Patch Changes
+
+- Updated dependency: @qdrant/js-client-rest@1.20.1.
+
 ## v1.20.0
 
 ### Minor Changes
