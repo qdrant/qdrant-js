@@ -26,9 +26,9 @@ This repository contains packages of the JS SDK for the [Qdrant](https://github.
 
 There are published 3 packages:
 
--   [`@qdrant/qdrant-js`](https://www.npmjs.com/package/@qdrant/qdrant-js) [Code](./packages/qdrant-js/)- the main package with the SDK itself.
--   [`@qdrant/js-client-rest`](https://www.npmjs.com/package/@qdrant/js-client-rest) [Code](./packages/qdrant-js/) - lightweight REST client for Qdrant.
--   [`@qdrant/js-client-grpc`](https://www.npmjs.com/package/@qdrant/js-client-grpc) [Code](./packages/qdrant-js/) - gRPC client for Qdrant.
+- [`@qdrant/qdrant-js`](https://www.npmjs.com/package/@qdrant/qdrant-js) [Code](./packages/qdrant-js/)- the main package with the SDK itself.
+- [`@qdrant/js-client-rest`](https://www.npmjs.com/package/@qdrant/js-client-rest) [Code](./packages/qdrant-js/) - lightweight REST client for Qdrant.
+- [`@qdrant/js-client-grpc`](https://www.npmjs.com/package/@qdrant/js-client-grpc) [Code](./packages/qdrant-js/) - gRPC client for Qdrant.
 
 ## JS/TS Examples
 
@@ -80,10 +80,10 @@ More examples can be found in the [`examples`](./examples) folder.
 
 TypeScript types are provided alongside JavaScript sources to be used in:
 
--   Node.js (ESM and CJS) - `>= 18.0.0`
--   Deno
--   Browser (fetch API)
--   Cloudflare Workers (OpenAPI only)
+- Node.js (ESM and CJS) - `>= 18.0.0`
+- Deno
+- Browser (fetch API)
+- Cloudflare Workers (OpenAPI only)
 
 ## Releases
 

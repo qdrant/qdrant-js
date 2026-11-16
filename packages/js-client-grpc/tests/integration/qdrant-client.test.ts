@@ -12,6 +12,10 @@ import {
     SearchPointsSchema,
     CollectionInfoSchema,
     RetrievedPointSchema,
+    Datatype,
+    Memory,
+    TextScoringType,
+    TokenizerType,
 } from '../../src/index.js';
 import {create, toJson} from '@bufbuild/protobuf';
 
@@ -473,5 +477,112 @@ describe('QdrantClient', () => {
             })
         ).result;
         expect(result).toHaveLength(2);
+    });
+
+    test('BM25 text query on a collection with id tracker params', async () => {
+        const textCollectionName = 'test_collection_text';
+        await client.api('collections').delete({collectionName: textCollectionName});
+        await client.api('collections').create({
+            collectionName: textCollectionName,
+            vectorsConfig: {
+                config: {case: 'params', value: {size: 4n, distance: Distance.Dot, datatype: Datatype.Turbo8}},
+            },
+            idTracker: {memory: Memory.Cached},
+        });
+
+        const info = (await client.api('collections').get({collectionName: textCollectionName})).result;
+        expect(info?.config?.params?.idTracker?.memory).toBe(Memory.Cached);
+        expect(info?.createdAt).toBeDefined();
+
+        await client.api('points').createFieldIndex({
+            collectionName: textCollectionName,
+            fieldName: 'title',
+            fieldType: FieldType.FieldTypeText,
+            fieldIndexParams: {
+                indexParams: {
+                    case: 'textIndexParams',
+                    value: {tokenizer: TokenizerType.Word, scoring: {type: TextScoringType.Bm25}},
+                },
+            },
+            wait: true,
+        });
+        await client.api('points').upsert({
+            collectionName: textCollectionName,
+            wait: true,
+            points: ['vector search engine', 'relational database'].map((title, i) => ({
+                id: {pointIdOptions: {case: 'num', value: BigInt(i + 1)}},
+                vectors: {vectorsOptions: {case: 'vector', value: {data: [0.1, 0.2, 0.3, 0.4]}}},
+                payload: {title: {kind: {case: 'stringValue', value: title}}},
+            })),
+        });
+
+        const {result} = await client.api('points').query({
+            collectionName: textCollectionName,
+            using: 'title',
+            query: {variant: {case: 'text', value: {query: 'vector search', scoring: {case: 'bm25', value: {k: 1.5}}}}},
+        });
+        expect(result.map((point) => point.id?.pointIdOptions.value)).toEqual([1n]);
+
+        await client.api('collections').delete({collectionName: textCollectionName});
+    });
+
+    test('code tokenizer matches across naming conventions', async () => {
+        const codeCollectionName = 'test_collection_code';
+        await client.api('collections').delete({collectionName: codeCollectionName});
+        await client.api('collections').create({
+            collectionName: codeCollectionName,
+            vectorsConfig: {
+                config: {case: 'params', value: {size: 4n, distance: Distance.Dot}},
+            },
+        });
+
+        await client.api('points').createFieldIndex({
+            collectionName: codeCollectionName,
+            fieldName: 'source',
+            fieldType: FieldType.FieldTypeText,
+            fieldIndexParams: {
+                indexParams: {
+                    case: 'textIndexParams',
+                    value: {tokenizer: TokenizerType.Code},
+                },
+            },
+            wait: true,
+        });
+        await client.api('points').upsert({
+            collectionName: codeCollectionName,
+            wait: true,
+            points: [
+                {
+                    id: {pointIdOptions: {case: 'num', value: 1n}},
+                    vectors: {vectorsOptions: {case: 'vector', value: {data: [0.1, 0.2, 0.3, 0.4]}}},
+                    payload: {source: {kind: {case: 'stringValue', value: 'fn getUserName() {}'}}},
+                },
+                {
+                    id: {pointIdOptions: {case: 'num', value: 2n}},
+                    vectors: {vectorsOptions: {case: 'vector', value: {data: [0.5, 0.6, 0.7, 0.8]}}},
+                    payload: {source: {kind: {case: 'stringValue', value: 'fn deleteFile() {}'}}},
+                },
+            ],
+        });
+
+        const {result} = await client.api('points').scroll({
+            collectionName: codeCollectionName,
+            filter: {
+                must: [
+                    {
+                        conditionOneOf: {
+                            case: 'field',
+                            value: {
+                                key: 'source',
+                                match: {matchValue: {case: 'text', value: 'get_user_name'}},
+                            },
+                        },
+                    },
+                ],
+            },
+        });
+        expect(result?.map((point) => point.id?.pointIdOptions.value)).toEqual([1n]);
+
+        await client.api('collections').delete({collectionName: codeCollectionName});
     });
 });
