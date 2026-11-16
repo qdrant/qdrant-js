@@ -80,7 +80,7 @@ export function createApis(baseUrl: string, {timeout, apiKey, compression, heade
         (next) => (req) =>
             next(req).catch((error) => {
                 if (error instanceof ConnectError && error.code === Code.ResourceExhausted) {
-                    const retryAfterHeader = error.metadata.get('retry-after')?.[0];
+                    const retryAfterHeader = error.metadata.get('retry-after');
                     if (retryAfterHeader) {
                         throw new QdrantClientResourceExhaustedError(error.rawMessage, retryAfterHeader);
                     }
